@@ -81,6 +81,7 @@ import '../../widgets/track_selector_dialog.dart';
 import '../../widgets/playback/player_loading_overlay.dart';
 import '../../widgets/playback/loading_animation_widget.dart';
 import '../../widgets/playback/chapter_marker_track.dart';
+import '../../widgets/playback/enhancement_chip.dart';
 import '../../widgets/playback/skip_segment_overlay.dart';
 import '../../widgets/playback/next_up_overlay.dart';
 import '../../widgets/playback/still_watching_dialog.dart';
@@ -406,6 +407,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   );
   final _tvSecondaryLastFocus = FocusNode(
     debugLabel: 'video_player_tv_secondary_last',
+  );
+  final _tvEnhancementFocus = FocusNode(
+    debugLabel: 'video_player_tv_enhancement',
   );
   bool _seekbarFocused = false;
   bool _isDesktopFullscreen = false;
@@ -1077,6 +1081,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _tvSecondaryFocus.dispose();
     _tvTransportLastFocus.dispose();
     _tvSecondaryLastFocus.dispose();
+    _tvEnhancementFocus.dispose();
     if (!_isMinimizing) unawaited(_autoHdrSwitcher.restore());
     if (!_isMinimizing) TrackPicker.resetDelays();
     _themeMusicService.setExternalAudioActive(false);
@@ -3924,11 +3929,34 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                       if (_controlsVisible &&
                           !_isOsdLocked &&
                           !hideOsdForPreroll) ...[
-                        const Positioned.fill(
-                          child: IgnorePointer(
-                            child: ColoredBox(color: Color(0x4D000000)),
+                        if (_useTvGlassOverlay)
+                          // Glass lays a light fade over the top and bottom
+                          // edges instead of dimming the whole picture.
+                          const Positioned.fill(
+                            child: IgnorePointer(
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0x80000000),
+                                      Color(0x00000000),
+                                      Color(0x00000000),
+                                      Color(0x8C000000),
+                                    ],
+                                    stops: [0.0, 0.22, 0.62, 1.0],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          const Positioned.fill(
+                            child: IgnorePointer(
+                              child: ColoredBox(color: Color(0x4D000000)),
+                            ),
                           ),
-                        ),
                         // The chrome stays in the tree while mpv owns its own
                         // window: both native windows are WS_EX_TRANSPARENT, so
                         // these widgets are still what gets hit-tested - only
@@ -4563,20 +4591,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       child: Container(
         key: _topOverlayKey,
         padding: EdgeInsets.only(
-          top: padding.top + AppSpacing.spaceSm,
-          left: AppSpacing.spaceLg,
+          top: padding.top +
+              (_useTvGlassOverlay ? AppSpacing.spaceXl : AppSpacing.spaceSm),
+          left: _useTvGlassOverlay ? AppSpacing.spaceXl : AppSpacing.spaceLg,
           right: AppSpacing.spaceLg,
           bottom: AppSpacing.spaceMd,
         ),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.black87, Colors.transparent],
-          ),
-        ),
+        // The glass overlay's fade is drawn screen-wide by the player stack.
+        decoration: _useTvGlassOverlay
+            ? null
+            : const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black87, Colors.transparent],
+                ),
+              ),
         child: Row(
           children: [
+            if (_useTvGlassOverlay) _buildTvGlassBackButton(),
             if (!PlatformDetection.useLeanbackUi && !PlatformDetection.isTV)
               IconButton(
                 onPressed: _exitPlayback,
@@ -4589,8 +4622,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                   size: 24 * _osdButtonScale,
                 ),
               ),
-            const SizedBox(width: AppSpacing.spaceSm),
-            Expanded(child: _buildTitleInfo()),
+            SizedBox(
+              width: _useTvGlassOverlay
+                  ? AppSpacing.spaceLg
+                  : AppSpacing.spaceSm,
+            ),
+            Expanded(
+              child: _useTvGlassOverlay
+                  ? _buildTvGlassTitleInfo()
+                  : _buildTitleInfo(),
+            ),
             if (_canMinimize)
               IconButton(
                 onPressed: _minimizePlayer,
@@ -4620,6 +4661,123 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           ],
         ),
       ),
+    );
+  }
+
+  /// The glass theme on a TV swaps the black fades and plain title for the
+  /// mockup's: a light screen-wide fade, a round back button and a two-line
+  /// title block.
+  bool get _useTvGlassOverlay =>
+      AppColorScheme.isGlass && PlatformDetection.isTV;
+
+  /// Round glass "<" ahead of the title. Decoration only for the D-pad: it is
+  /// not focusable, so it adds no stop to the controls and leaves traversal
+  /// alone. The remote's Back key still leaves the player; a tap (touch or
+  /// mouse on a TV box) runs the same exit.
+  Widget _buildTvGlassBackButton() {
+    const extent = 48.0;
+    return GestureDetector(
+      onTap: _exitPlayback,
+      child: Container(
+        width: extent,
+        height: extent,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0x8C101218),
+          border: Border.all(color: const Color(0x2EFFFFFF), width: 1.5),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x59000000),
+              blurRadius: 22,
+              offset: Offset(0, 9),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Icon(Icons.chevron_left_rounded, color: Color(0xFFF4F5F7), size: 32),
+        ),
+      ),
+    );
+  }
+
+  /// Title and a "year · Ends at 10:52" line, from the same data
+  /// [_buildTitleInfo] reads. An episode shows its series in place of the year.
+  Widget _buildTvGlassTitleInfo() {
+    final item = _queue.currentItem;
+    if (item == null) return const SizedBox.shrink();
+
+    String title;
+    String? seriesName;
+    String? episodeInfo;
+    int? year;
+    if (item is AggregatedItem) {
+      title = item.name;
+      seriesName = item.seriesName;
+      episodeInfo = item.indexNumber != null
+          ? 'S${item.parentIndexNumber ?? '?'}:E${item.indexNumber}'
+          : null;
+      year = item.productionYear;
+    } else if (item is Map) {
+      title = (item['Name'] ?? '') as String;
+      seriesName = item['SeriesName'] as String?;
+      episodeInfo = item['IndexNumber'] != null
+          ? 'S${item['ParentIndexNumber'] ?? '?'}:E${item['IndexNumber']}'
+          : null;
+      year = item['ProductionYear'] as int?;
+    } else if (item is String) {
+      final meta = _manager.currentOfflineMetadata;
+      title = (meta?['Name'] as String?) ?? item.split('/').last;
+      seriesName = meta?['SeriesName'] as String?;
+      final idx = meta?['IndexNumber'] as int?;
+      final parentIdx = meta?['ParentIndexNumber'] as int?;
+      episodeInfo = idx != null ? 'S${parentIdx ?? '?'}:E$idx' : null;
+      year = meta?['ProductionYear'] as int?;
+    } else {
+      title = item.toString();
+      episodeInfo = null;
+    }
+
+    final titleText = [
+      ?episodeInfo,
+      title,
+    ].where((s) => s.isNotEmpty).join(' - ');
+    final endsAt = formatPlaybackEndsAt(
+      context,
+      position: _state.position,
+      duration: _state.duration,
+      use24Hour: _prefs.get(UserPreferences.use24HourClock),
+      playbackSpeed: _state.playbackSpeed,
+    );
+    final subtitle = [
+      if (seriesName != null && seriesName.isNotEmpty)
+        seriesName
+      else if (year != null && year > 0)
+        '$year',
+      if (endsAt.isNotEmpty) endsAt,
+    ].join(' \u00B7 ');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          titleText,
+          style: const TextStyle(
+            color: Color(0xFFF4F5F7),
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (subtitle.isNotEmpty)
+          Text(
+            subtitle,
+            style: const TextStyle(color: Color(0xC7F4F5F7), fontSize: 15),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+      ],
     );
   }
 
@@ -5200,13 +5358,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }) {
     return SliderTheme(
       data: SliderThemeData(
-        trackHeight: 4,
+        trackHeight: AppColorScheme.isGlass ? 8 : 4,
         thumbShape: const RoundSliderThumbShape(
           enabledThumbRadius:
               TrickplayPreviewLayout.seekThumbRadius,
         ),
-        overlayShape: const RoundSliderOverlayShape(
-          overlayRadius: 14,
+        overlayShape: RoundSliderOverlayShape(
+          overlayRadius: AppColorScheme.isGlass ? 22 : 14,
         ),
         activeTrackColor:
             AppColorScheme.rangeProgress,
@@ -5656,10 +5814,35 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           _buildDockedTransportRow(),
           const SizedBox(width: AppSpacing.spaceXs),
           Expanded(child: _buildSecondaryControlsRow()),
+          if (_enhancementChipLabel != null) ...[
+            const SizedBox(width: AppSpacing.spaceSm),
+            EnhancementChip(
+              label: _enhancementChipLabel!,
+              height: 56.0 * _osdButtonScale,
+              accent: AppColorScheme.accent,
+              fontSize: AppTypography.fontSizeMd,
+              focusNode: _tvEnhancementFocus,
+              onPressed: _showStreamInfo,
+              onLeft: () {
+                if (_tvSecondaryLastFocus.context != null) {
+                  _tvSecondaryLastFocus.requestFocus();
+                } else if (_tvTransportLastFocus.context != null) {
+                  _tvTransportLastFocus.requestFocus();
+                }
+              },
+            ),
+          ],
         ],
       ),
     );
   }
+
+  /// "4K HDR" and the like for a Lambent Server enhanced stream, otherwise
+  /// null: the chip shows only on the glass TV bar, and only when the server
+  /// says the stream is enhanced.
+  String? get _enhancementChipLabel => _useTvGlassOverlay
+      ? lambentEnhancementLabel(_manager.currentResolution?.streamUrl)
+      : null;
 
   /// The ends of the secondary row carry the TV focus nodes, so they follow
   /// whatever order the buttons are in. Without a stop on the last one, right
@@ -5680,7 +5863,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     wired[last] = _withTvFocusNode(
       wired[last] as _TvFocusButton,
       _tvSecondaryLastFocus,
-      onRightBoundary: () {},
+      // The enhancement chip, when there is one, is the next stop to the
+      // right; otherwise Right stops here.
+      onRightBoundary: () {
+        if (_enhancementChipLabel != null &&
+            _tvEnhancementFocus.context != null) {
+          _tvEnhancementFocus.requestFocus();
+        }
+      },
     );
     return wired;
   }
@@ -8182,30 +8372,42 @@ class _TvFocusButtonState extends State<_TvFocusButton> {
       child: AnimatedScale(
         duration: const Duration(milliseconds: 150),
         scale: _focused && AppColorScheme.isGlass ? 1.1 : 1.0,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+        child: SizedBox(
           width: widget.extent,
           height: widget.extent,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _focused
-                ? Colors.white.withValues(
-                    alpha: AppColorScheme.isGlass ? 0.32 : 0.22,
-                  )
-                : Colors.transparent,
-            border: _focused
-                ? Border.fromBorderSide(
-                    ThemeRegistry.active.borders.focusBorder.copyWith(
-                      color: Colors.white,
-                      width: AppColorScheme.isGlass ? 3 : 2,
-                    ),
-                  )
-                : null,
-            boxShadow: _focused && AppColorScheme.isGlass
-                ? const [BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24)]
-                : null,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              // Resting glass circles sit a little inside the slot so
+              // neighbours don't touch; focus fills the slot.
+              width: widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
+              height: widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _focused
+                    ? Colors.white.withValues(
+                        alpha: AppColorScheme.isGlass ? 0.32 : 0.22,
+                      )
+                    : AppColorScheme.isGlass
+                    ? const Color(0x1AFFFFFF)
+                    : Colors.transparent,
+                border: _focused
+                    ? Border.fromBorderSide(
+                        ThemeRegistry.active.borders.focusBorder.copyWith(
+                          color: Colors.white,
+                          width: AppColorScheme.isGlass ? 3 : 2,
+                        ),
+                      )
+                    : AppColorScheme.isGlass
+                    ? Border.all(color: const Color(0x24FFFFFF), width: 1.5)
+                    : null,
+                boxShadow: _focused && AppColorScheme.isGlass
+                    ? const [BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24)]
+                    : null,
+              ),
+              child: Center(child: widget.child),
+            ),
           ),
-          child: Center(child: widget.child),
         ),
       ),
     );
