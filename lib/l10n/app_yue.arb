@@ -1,6 +1,6 @@
 {
     "@@locale": "yue",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin 版本 {version}",
+    "appVersionFooter": "Lambent 版本 {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。",
+    "secureStorageUnavailableMessage": "Lambent 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "在 Moonfin 和 Neon Pulse 之間切換，無需重新啟動應用程式",
+    "settingsAppearanceThemeSubtitle": "在 Lambent 和 Neon Pulse 之間切換，無需重新啟動應用程式",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "退出Moonfin？",
+    "exitApp": "退出Lambent？",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "未設定。 Moonfin 將嘗試應用程式/資料資料夾中的預設 mpv.conf。",
+    "notSetMpvConf": "未設定。 Lambent 將嘗試應用程式/資料資料夾中的預設 mpv.conf。",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。",
+    "libraryVisibilityDescription": "切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "在 Moonfin、MakD 之間進行選擇，或關閉媒體列",
+    "mediaBarModeDescription": "在 Lambent、MakD 之間進行選擇，或關閉媒體列",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "玩 Moonfin",
+    "playInMoonfin": "玩 Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "在您的 Moonfin 庫中找不到項目",
+    "itemNotFoundInLibrary": "在您的 Lambent 庫中找不到項目",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "伺服器正在重啟",
-    "adminServerRebootMessage": "伺服器正在重新啟動，請重新啟動 Moonfin",
+    "adminServerRebootMessage": "伺服器正在重新啟動，請重新啟動 Lambent",
     "adminActiveSessions": "活躍會話",
     "adminSessionsLoadFailed": "無法載入會話",
     "adminNoActiveSessions": "沒有活動會話",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "在導覽列中顯示流派按鈕",
     "settingsShowFavoritesButtonInNavigation": "在導覽列中顯示收藏夾按鈕",
     "settingsShowLibrariesButtonInNavigation": "在導覽列中顯示庫按鈕",
-    "settingsLibraryVisibilitySubtitle": "切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。",
+    "settingsLibraryVisibilitySubtitle": "切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。",
     "settingsMediaBarAndLocalPreviews": "媒體欄和本地預覽",
     "settingsVisualOverlays": "視覺疊加",
     "settingsSeasonalSurprise": "季節性驚喜",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "許可證",
     "settingsOpenSourceLicenseNotices": "開源授權聲明",
     "settingsPrivacyPolicy": "隱私權政策",
-    "settingsPrivacyPolicySubtitle": "Moonfin 如何處理您的數據",
+    "settingsPrivacyPolicySubtitle": "Lambent 如何處理您的數據",
     "settingsCheckForUpdates": "檢查更新",
-    "settingsCheckForUpdatesSubtitle": "檢查最新的 Moonfin 版本",
+    "settingsCheckForUpdatesSubtitle": "檢查最新的 Lambent 版本",
     "settingsPoweredByFlutter": "由顫動提供支持",
     "settingsLicenseNoticesCount": "{count, plural, one {# 則授權聲明} other {# 則授權聲明}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "優先用 SDH 字幕",
     "preferSdhSubtitlesSubtitle": "自動揀字幕嗰陣優先揀 SDH/CC 字幕軌。",
     "webDiagnostics": "網頁診斷",
-    "webDiagnosticsTitle": "Moonfin 網頁診斷",
+    "webDiagnosticsTitle": "Lambent 網頁診斷",
     "webDiagnosticsIntro": "用呢版嚟診斷瀏覽器嘅連線問題（CORS、混合內容同探索設定）。",
     "webDiagnosticsDetectedMixedContentFailure": "偵測到混合內容失敗",
     "webDiagnosticsDetectedCorsPreflightFailure": "偵測到 CORS／預檢失敗",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin 偵測到有 HTTPS 網頁想呼叫 HTTP 嘅伺服器 URL。瀏覽器會喺要求去到你部伺服器之前就封鎖咗佢。",
-    "webDiagnosticsCorsFailureBody": "Moonfin 偵測到瀏覽器層面嘅要求失敗，通常係因為媒體伺服器度缺少咗 CORS 或者預檢標頭。",
+    "webDiagnosticsMixedContentFailureBody": "Lambent 偵測到有 HTTPS 網頁想呼叫 HTTP 嘅伺服器 URL。瀏覽器會喺要求去到你部伺服器之前就封鎖咗佢。",
+    "webDiagnosticsCorsFailureBody": "Lambent 偵測到瀏覽器層面嘅要求失敗，通常係因為媒體伺服器度缺少咗 CORS 或者預檢標頭。",
     "webDiagnosticsTargetUrl": "目標 URL：{url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "未設定",
     "webDiagnosticsMixedContent": "混合內容",
     "webDiagnosticsMixedContentDetected": "呢版係經 HTTPS 載入，但係有一個或者多個設定咗嘅 URL 係 HTTP。瀏覽器會封鎖 HTTPS 網頁呼叫 HTTP API。",
-    "webDiagnosticsMixedContentFix": "解決方法：用 HTTPS 提供你嘅媒體伺服器或者代理端點，又或者淨係喺可信嘅本地網路度用 HTTP 載入 Moonfin。",
+    "webDiagnosticsMixedContentFix": "解決方法：用 HTTPS 提供你嘅媒體伺服器或者代理端點，又或者淨係喺可信嘅本地網路度用 HTTP 載入 Lambent。",
     "webDiagnosticsNoMixedContentDetected": "喺目前嘅執行階段設定度，冇偵測到明顯嘅混合內容問題。",
     "webDiagnosticsCorsChecklist": "CORS 檢查清單",
     "webDiagnosticsCorsChecklistItem1": "• 喺 Access-Control-Allow-Origin 度允許瀏覽器嘅來源。",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "「經典」係 Moonfin 原本嘅置中版面。「現代」係自適應嘅電影感版面。",
+    "detailScreenStyleSubtitle": "「經典」係 Lambent 原本嘅置中版面。「現代」係自適應嘅電影感版面。",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "用 Moonfin Recommends 嘅本機媒體庫演算法，或者網上 TMDb 嘅相似度指標。注意：網上推薦需要整合 Seerr。",
+    "recommendationSystemSubtitle": "用 Lambent Recommends 嘅本機媒體庫演算法，或者網上 TMDb 嘅相似度指標。注意：網上推薦需要整合 Seerr。",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "根據目標媒體嘅家長分級嚟限制 Moonfin Recommends 嘅建議",
+    "recommendationsApplyParentalRatingCapSubtitle": "根據目標媒體嘅家長分級嚟限制 Lambent Recommends 嘅建議",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "自訂主題會改變成個 Moonfin 嘅視覺元素。揀一個啱你風格嘅選項啦。",
+    "customThemeSubtitle": "自訂主題會改變成個 Lambent 嘅視覺元素。揀一個啱你風格嘅選項啦。",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "用你部電話登入 Moonfin",
+    "carSignInPrompt": "用你部電話登入 Lambent",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller 係 Flutter 新一代嘅 GPU 算圖器，動畫會順啲、少啲窒。喺部分電視盒同舊 GPU 上面可能會有花屏或者黑畫面；如果你見到咁就閂咗佢。「自動」會為你部裝置揀最啱嘅預設值。要重新啟動 Moonfin 先生效。",
+    "impellerRenderingSubtitle": "Impeller 係 Flutter 新一代嘅 GPU 算圖器，動畫會順啲、少啲窒。喺部分電視盒同舊 GPU 上面可能會有花屏或者黑畫面；如果你見到咁就閂咗佢。「自動」會為你部裝置揀最啱嘅預設值。要重新啟動 Lambent 先生效。",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin 要重新啟動先可以更改算圖引擎。而家閂咗個應用程式，再開返就會生效。",
+    "impellerRestartMessage": "Lambent 要重新啟動先可以更改算圖引擎。而家閂咗個應用程式，再開返就會生效。",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

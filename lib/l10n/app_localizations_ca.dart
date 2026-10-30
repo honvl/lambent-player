@@ -10,7 +10,7 @@ class AppLocalizationsCa extends AppLocalizations {
   AppLocalizationsCa([String locale = 'ca']) : super(locale);
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get animeMarkerFiller => 'Filler';
@@ -147,7 +147,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'Moonfin versió $version';
+    return 'Lambent versió $version';
   }
 
   @override
@@ -199,7 +199,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no ha pogut accedir al teu gestor de claus del sistema. L\'inici de sessió pot continuar, però és possible que l\'emmagatzematge de testimoni segur no estigui disponible fins que no es desbloquegi el gestor de claus.';
+      'Lambent no ha pogut accedir al teu gestor de claus del sistema. L\'inici de sessió pot continuar, però és possible que l\'emmagatzematge de testimoni segur no estigui disponible fins que no es desbloquegi el gestor de claus.';
 
   @override
   String get ok => 'D\'acord';
@@ -452,10 +452,10 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Fes servir l\'algorisme de biblioteca local Recomanacions Moonfin, el motor del servidor Recomanacions Jellyfin o les mètriques de similitud en línia de TMDb. Nota: les recomanacions en línia requereixen la integració amb Seerr.';
+      'Fes servir l\'algorisme de biblioteca local Recomanacions Lambent, el motor del servidor Recomanacions Jellyfin o les mètriques de similitud en línia de TMDb. Nota: les recomanacions en línia requereixen la integració amb Seerr.';
 
   @override
-  String get recommendationSystemMoonfin => 'Recomanacions Moonfin';
+  String get recommendationSystemMoonfin => 'Recomanacions Lambent';
 
   @override
   String get recommendationSystemJellyfin => 'Recomanacions Jellyfin';
@@ -469,7 +469,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      'Limita els suggeriments de Recomanacions Moonfin segons la classificació per edats del contingut de destinació';
+      'Limita els suggeriments de Recomanacions Lambent segons la classificació per edats del contingut de destinació';
 
   @override
   String get interfaceStyle => 'Estil de l\'interfaç';
@@ -492,7 +492,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Canvia el tipus de disposicó detectada si el teu dispositiu no es reconeix correctament. Reinicia Moonfin per aplicar els canvis.';
+      'Canvia el tipus de disposicó detectada si el teu dispositiu no es reconeix correctament. Reinicia Lambent per aplicar els canvis.';
 
   @override
   String get interfaceLayoutAutomatic => 'Automàtic';
@@ -577,14 +577,14 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get customThemeSubtitle =>
-      'Els temes personalitzats modifiquen els elements visuals de tot Moonfin. Tria una d\'aquestes opcions segons el teu estil.';
+      'Els temes personalitzats modifiquen els elements visuals de tot Lambent. Tria una d\'aquestes opcions segons el teu estil.';
 
   @override
   String get keyboardStyle => 'Estil del teclat';
 
   @override
   String get keyboardStyleDescription =>
-      '«Natiu» fa servir el teclat de la teva TV. «Clàssic» és el teclat original de Moonfin. «Glass» és un panell esmerilat amb tecles més grans. «Acoblat» ocupa la part inferior de la pantalla i mostra el que escrius a sobre de les tecles.';
+      '«Natiu» fa servir el teclat de la teva TV. «Clàssic» és el teclat original de Lambent. «Glass» és un panell esmerilat amb tecles més grans. «Acoblat» ocupa la part inferior de la pantalla i mostra el que escrius a sobre de les tecles.';
 
   @override
   String get keyboardStyleNative => 'Natiu';
@@ -722,7 +722,7 @@ class AppLocalizationsCa extends AppLocalizations {
   }
 
   @override
-  String get exitApp => 'Sortir de Moonfin?';
+  String get exitApp => 'Sortir de Lambent?';
 
   @override
   String get exitAppConfirmation => 'Esteu segur que voleu sortir?';
@@ -1887,7 +1887,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get shuffleAllMusic => 'Barreja tota la música';
 
   @override
-  String get carSignInPrompt => 'Inicia la sessió a Moonfin al teu telèfon';
+  String get carSignInPrompt => 'Inicia la sessió a Lambent al teu telèfon';
 
   @override
   String get carServerUnreachable => 'No es pot connectar amb el teu servidor';
@@ -2171,7 +2171,7 @@ class AppLocalizationsCa extends AppLocalizations {
       'Activa o desactiva la pantalla completa';
 
   @override
-  String get shortcutQuit => 'Surt de Moonfin';
+  String get shortcutQuit => 'Surt de Lambent';
 
   @override
   String get shortcutPlayPause => 'Reprodueix o posa en pausa';
@@ -2346,7 +2346,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Obre\'l al Moonfin en un telèfon, una tauleta o un ordinador per llegir-lo. Els audiollibres sí que es poden reproduir aquí.';
+      'Obre\'l al Lambent en un telèfon, una tauleta o un ordinador per llegir-lo. Els audiollibres sí que es poden reproduir aquí.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -3186,7 +3186,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'Personalitza les animacions de càrrega que utilitza Moonfin';
+      'Personalitza les animacions de càrrega que utilitza Lambent';
 
   @override
   String get loadingAnimationConfiguration =>
@@ -3196,7 +3196,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get loadingAnimationImage => 'Imatge';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Logotip de Moonfin';
+  String get loadingAnimationImageMoonfinLogo => 'Logotip de Lambent';
 
   @override
   String get loadingAnimationImageSpinner => 'Roda de càrrega';
@@ -3208,7 +3208,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Fases lunars';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Fases de Moonfin';
+  String get loadingAnimationImageMoonfinPhases => 'Fases de Lambent';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Fases de Neonfin';
@@ -4234,7 +4234,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get notSetMpvConf =>
-      'No configurat. Moonfin provarà un mpv.conf predeterminat a les carpetes d\'aplicacions/dades.';
+      'No configurat. Lambent provarà un mpv.conf predeterminat a les carpetes d\'aplicacions/dades.';
 
   @override
   String get selectMpvConf => 'Seleccioneu mpv.conf';
@@ -4536,7 +4536,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android només permet que Moonfin escrigui a les carpetes que posseeix, i aquest dispositiu no té emmagatzematge extraïble. Activa la carpeta «Desar a Baixades» anterior per guardar les baixades en un lloc al qual les altres aplicacions puguin accedir.';
+      'Android només permet que Lambent escrigui a les carpetes que posseeix, i aquest dispositiu no té emmagatzematge extraïble. Activa la carpeta «Desar a Baixades» anterior per guardar les baixades en un lloc al qual les altres aplicacions puguin accedir.';
 
   @override
   String get saveToDownloadsFolder => 'Desa a la carpeta Baixades';
@@ -4831,7 +4831,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get libraryVisibilityDescription =>
-      'Commuta la visibilitat de la pàgina d\'inici per biblioteca. Reinicieu Moonfin perquè els canvis tinguin efecte.';
+      'Commuta la visibilitat de la pàgina d\'inici per biblioteca. Reinicieu Lambent perquè els canvis tinguin efecte.';
 
   @override
   String get showInNavigation => 'Mostra a la navegació';
@@ -4892,7 +4892,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get mediaBarModeDescription =>
-      'Trieu entre Moonfin, MakD o desactiva la barra multimèdia';
+      'Trieu entre Lambent, MakD o desactiva la barra multimèdia';
 
   @override
   String get peekHomeRows => 'Avançament de les files d\'inici';
@@ -5268,7 +5268,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get screensaverBackdropBlack => 'Negre';
 
   @override
-  String get screensaverBackdropMoonfin => 'Moonfin';
+  String get screensaverBackdropMoonfin => 'Lambent';
 
   @override
   String get screensaverBackdropCalm => 'Calma';
@@ -5283,7 +5283,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Component addicional';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Logotip de Moonfin';
+  String get screensaverComponentMoonfinLogo => 'Logotip de Lambent';
 
   @override
   String get screensaverComponentRunner => 'Corredor';
@@ -5753,7 +5753,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get cancelRequest4k => 'Cancel·la la sol·licitud de 4K';
 
   @override
-  String get playInMoonfin => 'Reprodueix a Moonfin';
+  String get playInMoonfin => 'Reprodueix a Lambent';
 
   @override
   String get requestedByLabel => 'Sol·licitat per';
@@ -5799,7 +5799,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get itemNotFoundInLibrary =>
-      'No s\'ha trobat l\'element a la vostra biblioteca de Moonfin';
+      'No s\'ha trobat l\'element a la vostra biblioteca de Lambent';
 
   @override
   String get errorSearchingLibrary =>
@@ -7848,7 +7848,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get adminServerRebootMessage =>
-      'S\'està reiniciant el servidor, reinicieu Moonfin';
+      'S\'està reiniciant el servidor, reinicieu Lambent';
 
   @override
   String get adminActiveSessions => 'Sessions actives';
@@ -11664,7 +11664,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Commuta la visibilitat de la pàgina d\'inici per biblioteca. Reinicieu Moonfin perquè els canvis tinguin efecte.';
+      'Commuta la visibilitat de la pàgina d\'inici per biblioteca. Reinicieu Lambent perquè els canvis tinguin efecte.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -11809,14 +11809,14 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get settingsPrivacyPolicySubtitle =>
-      'Com Moonfin gestiona les vostres dades';
+      'Com Lambent gestiona les vostres dades';
 
   @override
   String get settingsCheckForUpdates => 'Comproveu si hi ha actualitzacions';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Comproveu l\'últim llançament de Moonfin';
+      'Comproveu l\'últim llançament de Lambent';
 
   @override
   String get settingsBoth => 'Tots dos';
@@ -12697,7 +12697,7 @@ class AppLocalizationsCa extends AppLocalizations {
   String get webDiagnostics => 'Diagnòstic web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnòstic web';
+  String get webDiagnosticsTitle => 'Lambent Diagnòstic web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -12713,11 +12713,11 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin ha detectat una pàgina HTTPS que intentava trucar a un URL de servidor HTTP. Els navegadors bloquegen aquesta sol·licitud abans que arribi al vostre servidor.';
+      'Lambent ha detectat una pàgina HTTPS que intentava trucar a un URL de servidor HTTP. Els navegadors bloquegen aquesta sol·licitud abans que arribi al vostre servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin ha detectat un error de sol·licitud a nivell de navegador que sol ser causat per la falta de capçaleres CORS o de comprovació prèvia al servidor multimèdia.';
+      'Lambent ha detectat un error de sol·licitud a nivell de navegador que sol ser causat per la falta de capçaleres CORS o de comprovació prèvia al servidor multimèdia.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12767,7 +12767,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solució: doneu servei al vostre servidor multimèdia o punt final del servidor intermediari mitjançant HTTPS o carregueu Moonfin mitjançant HTTP només a xarxes locals de confiança.';
+      'Solució: doneu servei al vostre servidor multimèdia o punt final del servidor intermediari mitjançant HTTPS o carregueu Lambent mitjançant HTTP només a xarxes locals de confiança.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -14487,7 +14487,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Impeller és el renderitzador de GPU modern de Flutter, per a animacions més fluides i menys interrupcions. En alguns descodificadors de TV i GPU antigues pot provocar defectes visuals o vídeo en negre; desactiva\'l si en detectes. Automàtic tria el millor valor predeterminat per al teu dispositiu. Reinicia Moonfin per aplicar-ho.';
+      'Impeller és el renderitzador de GPU modern de Flutter, per a animacions més fluides i menys interrupcions. En alguns descodificadors de TV i GPU antigues pot provocar defectes visuals o vídeo en negre; desactiva\'l si en detectes. Automàtic tria el millor valor predeterminat per al teu dispositiu. Reinicia Lambent per aplicar-ho.';
 
   @override
   String get impellerAuto => 'Automàtic';
@@ -14503,7 +14503,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'Moonfin s\'ha de reiniciar per canviar el motor de renderització. Tanca l\'aplicació ara i torna a obrir-la per aplicar-ho.';
+      'Lambent s\'ha de reiniciar per canviar el motor de renderització. Tanca l\'aplicació ara i torna a obrir-la per aplicar-ho.';
 
   @override
   String get impellerCloseNow => 'Tanca l\'aplicació ara';
@@ -15061,7 +15061,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Les qualitats transcodificades només es baixen mentre Moonfin està obert. La qualitat original també es baixa en segon pla.';
+      'Les qualitats transcodificades només es baixen mentre Lambent està obert. La qualitat original també es baixa en segon pla.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -15069,7 +15069,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Només es baixa mentre Moonfin està obert';
+      'Només es baixa mentre Lambent està obert';
 
   @override
   String get autoDownloadQualityTitle => 'Qualitat de la baixada automàtica';
@@ -15092,7 +15092,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'Quan acabes un episodi en qualsevol dispositiu, Moonfin baixa els següents. Els episodis que baixa s\'eliminen un cop vistos.';
+      'Quan acabes un episodi en qualsevol dispositiu, Lambent baixa els següents. Els episodis que baixa s\'eliminen un cop vistos.';
 
   @override
   String get smartDownloadsKeepReady => 'Episodis que es mantenen baixats';
@@ -15166,15 +15166,15 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Permet que el sistema comprovi periòdicament si hi ha episodis nous mentre Moonfin està tancat';
+      'Permet que el sistema comprovi periòdicament si hi ha episodis nous mentre Lambent està tancat';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'Background App Refresh està desactivat per a Moonfin. Activa\'l a iOS Settings.';
+      'Background App Refresh està desactivat per a Lambent. Activa\'l a iOS Settings.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'L\'ús en segon pla està restringit per a Moonfin a Android Settings.';
+      'L\'ús en segon pla està restringit per a Lambent a Android Settings.';
 
   @override
   String get autoDownloadCheckNow => 'Comprova ara';
@@ -15394,13 +15394,13 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'El que mostra la pantalla d\'inici de l\'Apple TV a sobre de la icona de Moonfin quan està seleccionada. Aquesta configuració només es desa en aquest dispositiu.';
+      'El que mostra la pantalla d\'inici de l\'Apple TV a sobre de la icona de Lambent quan està seleccionada. Aquesta configuració només es desa en aquest dispositiu.';
 
   @override
   String get topShelfLatestMedia => 'Contingut més recent';
 
   @override
-  String get topShelfAppBanner => 'Bàner de Moonfin';
+  String get topShelfAppBanner => 'Bàner de Lambent';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -16118,7 +16118,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'En desenllaçar-lo, Moonfin deixa de fer servir la teva clau de RomM. La clau es manté a RomM fins que l\'eliminis dels testimonis de l\'API de RomM.';
+      'En desenllaçar-lo, Lambent deixa de fer servir la teva clau de RomM. La clau es manté a RomM fins que l\'eliminis dels testimonis de l\'API de RomM.';
 
   @override
   String get rommUnlink => 'Desenllaça';
@@ -16132,7 +16132,7 @@ class AppLocalizationsCa extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Moonfin no ha pogut connectar amb RomM. Torna-ho a provar d\'aquí a un moment.';
+      'Lambent no ha pogut connectar amb RomM. Torna-ho a provar d\'aquí a un moment.';
 
   @override
   String get rommNotAvailable =>

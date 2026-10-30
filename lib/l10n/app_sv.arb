@@ -1,6 +1,6 @@
 {
     "@@locale": "sv",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin version {version}",
+    "appVersionFooter": "Lambent version {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin kunde inte komma åt din systemnyckelring. Inloggningen kan fortsätta, men säker tokenlagring kan vara otillgänglig förrän nyckelringen är upplåst.",
+    "secureStorageUnavailableMessage": "Lambent kunde inte komma åt din systemnyckelring. Inloggningen kan fortsätta, men säker tokenlagring kan vara otillgänglig förrän nyckelringen är upplåst.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Växla mellan Moonfin och Neon Pulse utan att starta om appen",
+    "settingsAppearanceThemeSubtitle": "Växla mellan Lambent och Neon Pulse utan att starta om appen",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Vill du avsluta Moonfin?",
+    "exitApp": "Vill du avsluta Lambent?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3046,7 +3046,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Inte inställt. Moonfin kommer att prova en standard mpv.conf i app-/datamappar.",
+    "notSetMpvConf": "Inte inställt. Lambent kommer att prova en standard mpv.conf i app-/datamappar.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -4165,7 +4165,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Spela i Moonfin",
+    "playInMoonfin": "Spela i Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4219,7 +4219,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Objektet hittades inte i ditt Moonfin-bibliotek",
+    "itemNotFoundInLibrary": "Objektet hittades inte i ditt Lambent-bibliotek",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4475,7 +4475,7 @@
         }
     },
     "adminServerRebootInProgress": "Serverns omstart pågår",
-    "adminServerRebootMessage": "Serverns omstart pågår, starta om Moonfin",
+    "adminServerRebootMessage": "Serverns omstart pågår, starta om Lambent",
     "adminActiveSessions": "Aktiva sessioner",
     "adminSessionsLoadFailed": "Det gick inte att läsa in sessioner",
     "adminNoActiveSessions": "Inga aktiva sessioner",
@@ -6266,7 +6266,7 @@
     "@subtitlePreviewText": {
         "description": "Sample text shown in the subtitle live preview"
     },
-    "libraryVisibilityDescription": "Växla hemsidans synlighet per bibliotek. Starta om Moonfin för att ändringarna ska träda i kraft.",
+    "libraryVisibilityDescription": "Växla hemsidans synlighet per bibliotek. Starta om Lambent för att ändringarna ska träda i kraft.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -6511,7 +6511,7 @@
     "settingsShowGenresButtonInNavigation": "Visa genreknappen i navigeringsfältet",
     "settingsShowFavoritesButtonInNavigation": "Visa favoritknappen i navigeringsfältet",
     "settingsShowLibrariesButtonInNavigation": "Visa biblioteksknappen i navigeringsfältet",
-    "settingsLibraryVisibilitySubtitle": "Växla hemsidans synlighet per bibliotek. Starta om Moonfin för att ändringarna ska träda i kraft.",
+    "settingsLibraryVisibilitySubtitle": "Växla hemsidans synlighet per bibliotek. Starta om Lambent för att ändringarna ska träda i kraft.",
     "settingsMediaBarAndLocalPreviews": "Mediabar och lokala förhandsvisningar",
     "settingsVisualOverlays": "Visuella överlägg",
     "settingsSeasonalSurprise": "Säsongsbetonad överraskning",
@@ -6535,9 +6535,9 @@
     "settingsLicenses": "Licenser",
     "settingsOpenSourceLicenseNotices": "Licensmeddelanden med öppen källkod",
     "settingsPrivacyPolicy": "Sekretesspolicy",
-    "settingsPrivacyPolicySubtitle": "Hur Moonfin hanterar dina data",
+    "settingsPrivacyPolicySubtitle": "Hur Lambent hanterar dina data",
     "settingsCheckForUpdates": "Sök efter uppdateringar",
-    "settingsCheckForUpdatesSubtitle": "Sök efter den senaste versionen av Moonfin",
+    "settingsCheckForUpdatesSubtitle": "Sök efter den senaste versionen av Lambent",
     "settingsPoweredByFlutter": "Drivs av Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# licensmeddelande} other {# licensmeddelanden}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Föredra SDH-undertexter",
     "preferSdhSubtitlesSubtitle": "Prioritera SDH-/CC-undertextspår vid automatiskt val.",
     "webDiagnostics": "Webbdiagnostik",
-    "webDiagnosticsTitle": "Moonfin webbdiagnostik",
+    "webDiagnosticsTitle": "Lambent webbdiagnostik",
     "webDiagnosticsIntro": "Använd den här sidan för att felsöka anslutningsproblem i webbläsaren (CORS, blandat innehåll och identifieringsinställningar).",
     "webDiagnosticsDetectedMixedContentFailure": "Fel med blandat innehåll upptäckt",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS-/preflight-fel upptäckt",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin upptäckte att en HTTPS-sida försöker anropa en server-URL över HTTP. Webbläsare blockerar sådana anrop innan de når din server.",
-    "webDiagnosticsCorsFailureBody": "Moonfin upptäckte ett anropsfel på webbläsarnivå som vanligtvis beror på att CORS- eller preflight-huvuden saknas på mediaservern.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent upptäckte att en HTTPS-sida försöker anropa en server-URL över HTTP. Webbläsare blockerar sådana anrop innan de når din server.",
+    "webDiagnosticsCorsFailureBody": "Lambent upptäckte ett anropsfel på webbläsarnivå som vanligtvis beror på att CORS- eller preflight-huvuden saknas på mediaservern.",
     "webDiagnosticsTargetUrl": "Mål-URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "inte konfigurerad",
     "webDiagnosticsMixedContent": "Blandat innehåll",
     "webDiagnosticsMixedContentDetected": "Den här sidan läses in över HTTPS, men en eller flera konfigurerade URL:er använder HTTP. Webbläsare blockerar HTTPS-sidor från att anropa HTTP-API:er.",
-    "webDiagnosticsMixedContentFix": "Åtgärd: publicera din mediaserver eller proxyslutpunkt via HTTPS, eller läs in Moonfin över HTTP endast på betrodda lokala nätverk.",
+    "webDiagnosticsMixedContentFix": "Åtgärd: publicera din mediaserver eller proxyslutpunkt via HTTPS, eller läs in Lambent över HTTP endast på betrodda lokala nätverk.",
     "webDiagnosticsNoMixedContentDetected": "Ingen uppenbar konfiguration med blandat innehåll upptäcktes utifrån de aktuella körtidsinställningarna.",
     "webDiagnosticsCorsChecklist": "CORS-checklista",
     "webDiagnosticsCorsChecklistItem1": "• Tillåt webbläsarens ursprung i Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klassisk är Moonfins ursprungliga centrerade layout. Modern är en responsiv, filmisk layout.",
+    "detailScreenStyleSubtitle": "Klassisk är Lambents ursprungliga centrerade layout. Modern är en responsiv, filmisk layout.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Använd Moonfin Recommends lokala biblioteksalgoritm eller TMDb:s likhetsmått online. Obs: Onlinerekommendationer kräver Seerr-integration.",
+    "recommendationSystemSubtitle": "Använd Lambent Recommends lokala biblioteksalgoritm eller TMDb:s likhetsmått online. Obs: Onlinerekommendationer kräver Seerr-integration.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Begränsa förslag från Moonfin Recommends efter målmediets åldersgräns",
+    "recommendationsApplyParentalRatingCapSubtitle": "Begränsa förslag från Lambent Recommends efter målmediets åldersgräns",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Anpassade teman ändrar visuella element i hela Moonfin. Välj ett av alternativen som passar din stil.",
+    "customThemeSubtitle": "Anpassade teman ändrar visuella element i hela Lambent. Välj ett av alternativen som passar din stil.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Logga in på Moonfin i din telefon",
+    "carSignInPrompt": "Logga in på Lambent i din telefon",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller är Flutters moderna GPU-renderare som ger mjukare animationer och mindre hackande. På vissa TV-boxar och äldre GPU:er kan den orsaka grafikfel eller svart video – stäng av den om du ser sådant. Automatiskt väljer det bästa standardvärdet för din enhet. Starta om Moonfin för att tillämpa ändringen.",
+    "impellerRenderingSubtitle": "Impeller är Flutters moderna GPU-renderare som ger mjukare animationer och mindre hackande. På vissa TV-boxar och äldre GPU:er kan den orsaka grafikfel eller svart video – stäng av den om du ser sådant. Automatiskt väljer det bästa standardvärdet för din enhet. Starta om Lambent för att tillämpa ändringen.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin måste startas om för att byta renderingsmotor. Stäng appen nu och öppna den igen för att tillämpa ändringen.",
+    "impellerRestartMessage": "Lambent måste startas om för att byta renderingsmotor. Stäng appen nu och öppna den igen för att tillämpa ändringen.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

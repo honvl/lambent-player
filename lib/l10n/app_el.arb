@@ -1,6 +1,6 @@
 {
     "@@locale": "el",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin έκδοση {version}",
+    "appVersionFooter": "Lambent έκδοση {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Ο Moonfin δεν μπόρεσε να αποκτήσει πρόσβαση στο μπρελόκ του συστήματός σας. Η σύνδεση μπορεί να συνεχιστεί, αλλά η ασφαλής αποθήκευση διακριτικών ενδέχεται να μην είναι διαθέσιμη μέχρι να ξεκλειδωθεί το μπρελόκ.",
+    "secureStorageUnavailableMessage": "Ο Lambent δεν μπόρεσε να αποκτήσει πρόσβαση στο μπρελόκ του συστήματός σας. Η σύνδεση μπορεί να συνεχιστεί, αλλά η ασφαλής αποθήκευση διακριτικών ενδέχεται να μην είναι διαθέσιμη μέχρι να ξεκλειδωθεί το μπρελόκ.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Έξοδος από Moonfin;",
+    "exitApp": "Έξοδος από Lambent;",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Δεν έχει οριστεί. Το Moonfin θα δοκιμάσει ένα προεπιλεγμένο mpv.conf στους φακέλους εφαρμογής/δεδομένων.",
+    "notSetMpvConf": "Δεν έχει οριστεί. Το Lambent θα δοκιμάσει ένα προεπιλεγμένο mpv.conf στους φακέλους εφαρμογής/δεδομένων.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Εναλλαγή ορατότητας αρχικής σελίδας ανά βιβλιοθήκη. Επανεκκινήστε το Moonfin για να τεθούν σε ισχύ οι αλλαγές.",
+    "libraryVisibilityDescription": "Εναλλαγή ορατότητας αρχικής σελίδας ανά βιβλιοθήκη. Επανεκκινήστε το Lambent για να τεθούν σε ισχύ οι αλλαγές.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Αναπαραγωγή στο Moonfin",
+    "playInMoonfin": "Αναπαραγωγή στο Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Το αντικείμενο δεν βρέθηκε στη βιβλιοθήκη σας Moonfin",
+    "itemNotFoundInLibrary": "Το αντικείμενο δεν βρέθηκε στη βιβλιοθήκη σας Lambent",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Επανεκκίνηση διακομιστή σε εξέλιξη",
-    "adminServerRebootMessage": "Επανεκκίνηση διακομιστή σε εξέλιξη, κάντε επανεκκίνηση Moonfin",
+    "adminServerRebootMessage": "Επανεκκίνηση διακομιστή σε εξέλιξη, κάντε επανεκκίνηση Lambent",
     "adminActiveSessions": "Ενεργές συνεδρίες",
     "adminSessionsLoadFailed": "Αποτυχία φόρτωσης συνεδριών",
     "adminNoActiveSessions": "Δεν υπάρχουν ενεργές συνεδρίες",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Εμφάνιση του κουμπιού ειδών στη γραμμή πλοήγησης",
     "settingsShowFavoritesButtonInNavigation": "Εμφάνιση του κουμπιού αγαπημένων στη γραμμή πλοήγησης",
     "settingsShowLibrariesButtonInNavigation": "Εμφάνιση του κουμπιού βιβλιοθήκες στη γραμμή πλοήγησης",
-    "settingsLibraryVisibilitySubtitle": "Εναλλαγή ορατότητας αρχικής σελίδας ανά βιβλιοθήκη. Επανεκκινήστε το Moonfin για να τεθούν σε ισχύ οι αλλαγές.",
+    "settingsLibraryVisibilitySubtitle": "Εναλλαγή ορατότητας αρχικής σελίδας ανά βιβλιοθήκη. Επανεκκινήστε το Lambent για να τεθούν σε ισχύ οι αλλαγές.",
     "settingsMediaBarAndLocalPreviews": "Γραμμή πολυμέσων και τοπικές προεπισκοπήσεις",
     "settingsVisualOverlays": "Οπτικές επικαλύψεις",
     "settingsSeasonalSurprise": "Εποχιακή Έκπληξη",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Άδειες",
     "settingsOpenSourceLicenseNotices": "Ειδοποιήσεις άδειας ανοιχτού κώδικα",
     "settingsPrivacyPolicy": "Πολιτική Απορρήτου",
-    "settingsPrivacyPolicySubtitle": "Πώς χειρίζεται ο Moonfin τα δεδομένα σας",
+    "settingsPrivacyPolicySubtitle": "Πώς χειρίζεται ο Lambent τα δεδομένα σας",
     "settingsCheckForUpdates": "Ελέγξτε για Ενημερώσεις",
-    "settingsCheckForUpdatesSubtitle": "Ελέγξτε για την πιο πρόσφατη έκδοση Moonfin",
+    "settingsCheckForUpdatesSubtitle": "Ελέγξτε για την πιο πρόσφατη έκδοση Lambent",
     "settingsPoweredByFlutter": "Με την υποστήριξη του Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# ειδοποίηση άδειας} other {# ειδοποιήσεις άδειας}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Προτιμήστε υπότιτλους SDH",
     "preferSdhSubtitlesSubtitle": "Δώστε προτεραιότητα στα κομμάτια υποτίτλων SDH/CC κατά την αυτόματη επιλογή.",
     "webDiagnostics": "Διαγνωστικά Web",
-    "webDiagnosticsTitle": "Moonfin Διαγνωστικά Ιστού",
+    "webDiagnosticsTitle": "Lambent Διαγνωστικά Ιστού",
     "webDiagnosticsIntro": "Χρησιμοποιήστε αυτήν τη σελίδα για να διαγνώσετε προβλήματα συνδεσιμότητας του προγράμματος περιήγησης (CORS, μικτό περιεχόμενο και ρυθμίσεις εντοπισμού).",
     "webDiagnosticsDetectedMixedContentFailure": "Εντοπίστηκε αποτυχία μικτού περιεχομένου",
     "webDiagnosticsDetectedCorsPreflightFailure": "Εντοπίστηκε αποτυχία CORS/Προκαταρκτικής πτήσης",
-    "webDiagnosticsMixedContentFailureBody": "Ο Moonfin εντόπισε μια σελίδα HTTPS που προσπαθεί να καλέσει μια διεύθυνση URL διακομιστή HTTP. Τα προγράμματα περιήγησης αποκλείουν αυτό το αίτημα πριν φτάσει στον διακομιστή σας.",
-    "webDiagnosticsCorsFailureBody": "Ο Moonfin εντόπισε μια αποτυχία αιτήματος σε επίπεδο προγράμματος περιήγησης που συνήθως προκαλείται από έλλειψη κεφαλίδων CORS ή προκαταρκτικής πτήσης στον διακομιστή πολυμέσων.",
+    "webDiagnosticsMixedContentFailureBody": "Ο Lambent εντόπισε μια σελίδα HTTPS που προσπαθεί να καλέσει μια διεύθυνση URL διακομιστή HTTP. Τα προγράμματα περιήγησης αποκλείουν αυτό το αίτημα πριν φτάσει στον διακομιστή σας.",
+    "webDiagnosticsCorsFailureBody": "Ο Lambent εντόπισε μια αποτυχία αιτήματος σε επίπεδο προγράμματος περιήγησης που συνήθως προκαλείται από έλλειψη κεφαλίδων CORS ή προκαταρκτικής πτήσης στον διακομιστή πολυμέσων.",
     "webDiagnosticsTargetUrl": "Διεύθυνση URL στόχου: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "δεν έχει ρυθμιστεί",
     "webDiagnosticsMixedContent": "Μικτό Περιεχόμενο",
     "webDiagnosticsMixedContentDetected": "Αυτή η σελίδα φορτώνεται μέσω HTTPS, αλλά μία ή περισσότερες διαμορφωμένες διευθύνσεις URL είναι HTTP. Τα προγράμματα περιήγησης εμποδίζουν τις σελίδες HTTPS να καλούν HTTP API.",
-    "webDiagnosticsMixedContentFix": "Διόρθωση: εξυπηρετήστε τον διακομιστή πολυμέσων ή το τελικό σημείο του διακομιστή μεσολάβησης μέσω HTTPS ή φορτώστε το Moonfin μέσω HTTP μόνο σε αξιόπιστα τοπικά δίκτυα.",
+    "webDiagnosticsMixedContentFix": "Διόρθωση: εξυπηρετήστε τον διακομιστή πολυμέσων ή το τελικό σημείο του διακομιστή μεσολάβησης μέσω HTTPS ή φορτώστε το Lambent μέσω HTTP μόνο σε αξιόπιστα τοπικά δίκτυα.",
     "webDiagnosticsNoMixedContentDetected": "Δεν εντοπίστηκε προφανής διαμόρφωση μικτού περιεχομένου από τις τρέχουσες ρυθμίσεις χρόνου εκτέλεσης.",
     "webDiagnosticsCorsChecklist": "Λίστα ελέγχου CORS",
     "webDiagnosticsCorsChecklistItem1": "• Να επιτρέπεται η προέλευση του προγράμματος περιήγησης στο Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Το Κλασικό είναι η αρχική, κεντραρισμένη διάταξη του Moonfin. Το Μοντέρνο είναι μια προσαρμοστική, κινηματογραφική διάταξη.",
+    "detailScreenStyleSubtitle": "Το Κλασικό είναι η αρχική, κεντραρισμένη διάταξη του Lambent. Το Μοντέρνο είναι μια προσαρμοστική, κινηματογραφική διάταξη.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Χρησιμοποιήστε τον αλγόριθμο τοπικής βιβλιοθήκης «Προτάσεις Moonfin» ή τις διαδικτυακές μετρήσεις ομοιότητας του TMDb. Σημείωση: οι διαδικτυακές προτάσεις απαιτούν ενσωμάτωση με το Seerr.",
+    "recommendationSystemSubtitle": "Χρησιμοποιήστε τον αλγόριθμο τοπικής βιβλιοθήκης «Προτάσεις Lambent» ή τις διαδικτυακές μετρήσεις ομοιότητας του TMDb. Σημείωση: οι διαδικτυακές προτάσεις απαιτούν ενσωμάτωση με το Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Προτάσεις Moonfin",
+    "recommendationSystemMoonfin": "Προτάσεις Lambent",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Περιορισμός των προτάσεων του Moonfin με βάση τη γονική διαβάθμιση του επιλεγμένου περιεχομένου",
+    "recommendationsApplyParentalRatingCapSubtitle": "Περιορισμός των προτάσεων του Lambent με βάση τη γονική διαβάθμιση του επιλεγμένου περιεχομένου",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Τα προσαρμοσμένα θέματα αλλάζουν τα οπτικά στοιχεία σε όλο το Moonfin. Επιλέξτε μία από αυτές τις επιλογές που ταιριάζει στο στυλ σας.",
+    "customThemeSubtitle": "Τα προσαρμοσμένα θέματα αλλάζουν τα οπτικά στοιχεία σε όλο το Lambent. Επιλέξτε μία από αυτές τις επιλογές που ταιριάζει στο στυλ σας.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Συνδεθείτε στο Moonfin από το τηλέφωνό σας",
+    "carSignInPrompt": "Συνδεθείτε στο Lambent από το τηλέφωνό σας",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Το Impeller είναι ο σύγχρονος επεξεργαστής απόδοσης GPU του Flutter, για πιο ομαλά κινούμενα γραφικά και λιγότερα κολλήματα. Σε ορισμένα TV box και παλαιότερες GPU μπορεί να προκαλέσει προβλήματα εμφάνισης ή μαύρο βίντεο· απενεργοποιήστε το αν παρατηρήσετε κάτι τέτοιο. Το Αυτόματο επιλέγει την καλύτερη προεπιλογή για τη συσκευή σας. Επανεκκινήστε το Moonfin για να εφαρμοστεί.",
+    "impellerRenderingSubtitle": "Το Impeller είναι ο σύγχρονος επεξεργαστής απόδοσης GPU του Flutter, για πιο ομαλά κινούμενα γραφικά και λιγότερα κολλήματα. Σε ορισμένα TV box και παλαιότερες GPU μπορεί να προκαλέσει προβλήματα εμφάνισης ή μαύρο βίντεο· απενεργοποιήστε το αν παρατηρήσετε κάτι τέτοιο. Το Αυτόματο επιλέγει την καλύτερη προεπιλογή για τη συσκευή σας. Επανεκκινήστε το Lambent για να εφαρμοστεί.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Το Moonfin πρέπει να επανεκκινήσει για να αλλάξει η μηχανή απόδοσης. Κλείστε την εφαρμογή τώρα και ανοίξτε την ξανά για να εφαρμοστεί.",
+    "impellerRestartMessage": "Το Lambent πρέπει να επανεκκινήσει για να αλλάξει η μηχανή απόδοσης. Κλείστε την εφαρμογή τώρα και ανοίξτε την ξανά για να εφαρμοστεί.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

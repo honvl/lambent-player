@@ -56,7 +56,7 @@ class _AnimatedGradientBackdropState extends State<AnimatedGradientBackdrop>
 Color _getAccentColor(ScreensaverBackdrop backdrop, [double pulse = 0.0]) {
   switch (backdrop) {
     case ScreensaverBackdrop.moonfin:
-      return const Color(0xFF00C6FF);
+      return const Color(0xFFF2B35B);
     case ScreensaverBackdrop.calm:
       return const Color(0xFF68D388);
     case ScreensaverBackdrop.neonPulse:
@@ -76,16 +76,16 @@ Color _getAccentColor(ScreensaverBackdrop backdrop, [double pulse = 0.0]) {
 List<Color> _getColors(ScreensaverBackdrop backdrop, [double pulse = 0.0]) {
   switch (backdrop) {
     case ScreensaverBackdrop.moonfin:
-      // Moonfin logo brand palette: Royal purple to Electric Cyan
+      // Lambent brand palette: deep charcoal to warm amber
       return const [
-        Color(0xFF1A0526), // Midnight plum
-        Color(0xFF6B2087), // Royal violet
-        Color(0xFFAA5CC3), // Vivid magenta
-        Color(0xFF9C62C5), // Moonfin violet
-        Color(0xFF7672CB), // Lavender blue
-        Color(0xFF3A8CD4), // Sky cerulean
-        Color(0xFF00C6FF), // Electric cyan
-        Color(0xFF091426), // Deep oceanic midnight
+        Color(0xFF101114), // Lambent charcoal
+        Color(0xFF2A1A0C), // Ember brown
+        Color(0xFF5C3A12), // Burnt amber
+        Color(0xFF9A5F1A), // Deep amber
+        Color(0xFFF2B35B), // Lambent amber
+        Color(0xFFFFA028), // Orb amber
+        Color(0xFFFFD682), // Orb highlight
+        Color(0xFF14110C), // Warm midnight
       ];
     case ScreensaverBackdrop.calm:
       // Vibrant, luminous nature scene: lush emeralds, bamboo lime, spring foliage

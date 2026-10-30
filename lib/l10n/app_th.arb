@@ -1,6 +1,6 @@
 {
     "@@locale": "th",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin เวอร์ชั่น {version}",
+    "appVersionFooter": "Lambent เวอร์ชั่น {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin ไม่สามารถเข้าถึงพวงกุญแจระบบของคุณได้ การเข้าสู่ระบบสามารถดำเนินการต่อได้ แต่พื้นที่เก็บข้อมูลโทเค็นที่ปลอดภัยอาจไม่พร้อมใช้งานจนกว่าจะปลดล็อคพวงกุญแจ",
+    "secureStorageUnavailableMessage": "Lambent ไม่สามารถเข้าถึงพวงกุญแจระบบของคุณได้ การเข้าสู่ระบบสามารถดำเนินการต่อได้ แต่พื้นที่เก็บข้อมูลโทเค็นที่ปลอดภัยอาจไม่พร้อมใช้งานจนกว่าจะปลดล็อคพวงกุญแจ",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "สลับระหว่าง Moonfin และ Neon Pulse โดยไม่ต้องรีสตาร์ทแอป",
+    "settingsAppearanceThemeSubtitle": "สลับระหว่าง Lambent และ Neon Pulse โดยไม่ต้องรีสตาร์ทแอป",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "ออกจาก Moonfin?",
+    "exitApp": "ออกจาก Lambent?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "ไม่ได้ตั้งค่า Moonfin จะลองใช้ค่าเริ่มต้น mpv.conf ในโฟลเดอร์ app/data",
+    "notSetMpvConf": "ไม่ได้ตั้งค่า Lambent จะลองใช้ค่าเริ่มต้น mpv.conf ในโฟลเดอร์ app/data",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "สลับการเปิดเผยหน้าแรกต่อห้องสมุด รีสตาร์ท Moonfin เพื่อให้การเปลี่ยนแปลงมีผล",
+    "libraryVisibilityDescription": "สลับการเปิดเผยหน้าแรกต่อห้องสมุด รีสตาร์ท Lambent เพื่อให้การเปลี่ยนแปลงมีผล",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "เลือกระหว่าง Moonfin, MakD หรือปิดแถบสื่อ",
+    "mediaBarModeDescription": "เลือกระหว่าง Lambent, MakD หรือปิดแถบสื่อ",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "เล่นใน Moonfin",
+    "playInMoonfin": "เล่นใน Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "ไม่พบรายการในไลบรารี Moonfin ของคุณ",
+    "itemNotFoundInLibrary": "ไม่พบรายการในไลบรารี Lambent ของคุณ",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "เซิร์ฟเวอร์กำลังรีบูต",
-    "adminServerRebootMessage": "เซิร์ฟเวอร์กำลังรีบูต โปรดรีสตาร์ท Moonfin",
+    "adminServerRebootMessage": "เซิร์ฟเวอร์กำลังรีบูต โปรดรีสตาร์ท Lambent",
     "adminActiveSessions": "เซสชันที่ใช้งานอยู่",
     "adminSessionsLoadFailed": "โหลดเซสชั่นไม่สำเร็จ",
     "adminNoActiveSessions": "ไม่มีเซสชันที่ใช้งานอยู่",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "แสดงปุ่มประเภทในแถบนำทาง",
     "settingsShowFavoritesButtonInNavigation": "แสดงปุ่มรายการโปรดในแถบนำทาง",
     "settingsShowLibrariesButtonInNavigation": "แสดงปุ่มไลบรารีในแถบนำทาง",
-    "settingsLibraryVisibilitySubtitle": "สลับการเปิดเผยหน้าแรกต่อห้องสมุด รีสตาร์ท Moonfin เพื่อให้การเปลี่ยนแปลงมีผล",
+    "settingsLibraryVisibilitySubtitle": "สลับการเปิดเผยหน้าแรกต่อห้องสมุด รีสตาร์ท Lambent เพื่อให้การเปลี่ยนแปลงมีผล",
     "settingsMediaBarAndLocalPreviews": "แถบสื่อและการแสดงตัวอย่างในท้องถิ่น",
     "settingsVisualOverlays": "ภาพซ้อนทับ",
     "settingsSeasonalSurprise": "ความประหลาดใจตามฤดูกาล",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "ใบอนุญาต",
     "settingsOpenSourceLicenseNotices": "ประกาศเกี่ยวกับใบอนุญาตโอเพ่นซอร์ส",
     "settingsPrivacyPolicy": "นโยบายความเป็นส่วนตัว",
-    "settingsPrivacyPolicySubtitle": "Moonfin จัดการข้อมูลของคุณอย่างไร",
+    "settingsPrivacyPolicySubtitle": "Lambent จัดการข้อมูลของคุณอย่างไร",
     "settingsCheckForUpdates": "ตรวจสอบการอัปเดต",
-    "settingsCheckForUpdatesSubtitle": "ตรวจสอบ Moonfin รุ่นล่าสุด",
+    "settingsCheckForUpdatesSubtitle": "ตรวจสอบ Lambent รุ่นล่าสุด",
     "settingsPoweredByFlutter": "ขับเคลื่อนโดยกระพือ",
     "settingsLicenseNoticesCount": "{count, plural, one {ประกาศลิขสิทธิ์ # รายการ} other {ประกาศลิขสิทธิ์ # รายการ}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "ชอบคำบรรยาย SDH",
     "preferSdhSubtitlesSubtitle": "จัดลำดับความสำคัญของแทร็กคำบรรยาย SDH/CC เมื่อเลือกอัตโนมัติ",
     "webDiagnostics": "การวินิจฉัยเว็บ",
-    "webDiagnosticsTitle": "Moonfin การวินิจฉัยเว็บ",
+    "webDiagnosticsTitle": "Lambent การวินิจฉัยเว็บ",
     "webDiagnosticsIntro": "ใช้หน้านี้เพื่อวินิจฉัยปัญหาการเชื่อมต่อเบราว์เซอร์ (CORS, เนื้อหาผสม และการตั้งค่าการค้นพบ)",
     "webDiagnosticsDetectedMixedContentFailure": "ตรวจพบความล้มเหลวของเนื้อหาผสม",
     "webDiagnosticsDetectedCorsPreflightFailure": "ตรวจพบความล้มเหลวของ CORS/Preflight",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin ตรวจพบหน้า HTTPS ที่พยายามเรียก URL ของเซิร์ฟเวอร์ HTTP เบราว์เซอร์บล็อกคำขอนี้ก่อนที่จะเข้าถึงเซิร์ฟเวอร์ของคุณ",
-    "webDiagnosticsCorsFailureBody": "Moonfin ตรวจพบความล้มเหลวของคำขอระดับเบราว์เซอร์ซึ่งโดยทั่วไปมีสาเหตุมาจาก CORS หรือส่วนหัว preflight บนเซิร์ฟเวอร์สื่อหายไป",
+    "webDiagnosticsMixedContentFailureBody": "Lambent ตรวจพบหน้า HTTPS ที่พยายามเรียก URL ของเซิร์ฟเวอร์ HTTP เบราว์เซอร์บล็อกคำขอนี้ก่อนที่จะเข้าถึงเซิร์ฟเวอร์ของคุณ",
+    "webDiagnosticsCorsFailureBody": "Lambent ตรวจพบความล้มเหลวของคำขอระดับเบราว์เซอร์ซึ่งโดยทั่วไปมีสาเหตุมาจาก CORS หรือส่วนหัว preflight บนเซิร์ฟเวอร์สื่อหายไป",
     "webDiagnosticsTargetUrl": "URL เป้าหมาย: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "ไม่ได้กำหนดค่า",
     "webDiagnosticsMixedContent": "เนื้อหาผสม",
     "webDiagnosticsMixedContentDetected": "หน้านี้โหลดผ่าน HTTPS แต่ URL ที่กำหนดค่าอย่างน้อยหนึ่งรายการเป็น HTTP เบราว์เซอร์บล็อกหน้า HTTPS ไม่ให้เรียก HTTP API",
-    "webDiagnosticsMixedContentFix": "แก้ไข: ให้บริการเซิร์ฟเวอร์สื่อหรือจุดสิ้นสุดพร็อกซีของคุณผ่าน HTTPS หรือโหลด Moonfin ผ่าน HTTP บนเครือข่ายท้องถิ่นที่เชื่อถือได้เท่านั้น",
+    "webDiagnosticsMixedContentFix": "แก้ไข: ให้บริการเซิร์ฟเวอร์สื่อหรือจุดสิ้นสุดพร็อกซีของคุณผ่าน HTTPS หรือโหลด Lambent ผ่าน HTTP บนเครือข่ายท้องถิ่นที่เชื่อถือได้เท่านั้น",
     "webDiagnosticsNoMixedContentDetected": "ไม่พบการกำหนดค่าเนื้อหาผสมที่ชัดเจนจากการตั้งค่ารันไทม์ปัจจุบัน",
     "webDiagnosticsCorsChecklist": "รายการตรวจสอบ CORS",
     "webDiagnosticsCorsChecklistItem1": "• อนุญาตต้นกำเนิดเบราว์เซอร์ใน Access-Control-Allow-Origin",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "คลาสสิกคือเลย์เอาต์ Moonfin ดั้งเดิมที่จัดกึ่งกลาง โมเดิร์นคือเลย์เอาต์แนวภาพยนตร์ที่ปรับตามขนาดหน้าจอ",
+    "detailScreenStyleSubtitle": "คลาสสิกคือเลย์เอาต์ Lambent ดั้งเดิมที่จัดกึ่งกลาง โมเดิร์นคือเลย์เอาต์แนวภาพยนตร์ที่ปรับตามขนาดหน้าจอ",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "ใช้อัลกอริทึม Moonfin แนะนำ ที่ทำงานกับคลังสื่อในเครื่อง หรือใช้ค่าความคล้ายคลึงออนไลน์ของ TMDb หมายเหตุ: การแนะนำแบบออนไลน์ต้องเชื่อมต่อกับ Seerr",
+    "recommendationSystemSubtitle": "ใช้อัลกอริทึม Lambent แนะนำ ที่ทำงานกับคลังสื่อในเครื่อง หรือใช้ค่าความคล้ายคลึงออนไลน์ของ TMDb หมายเหตุ: การแนะนำแบบออนไลน์ต้องเชื่อมต่อกับ Seerr",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin แนะนำ",
+    "recommendationSystemMoonfin": "Lambent แนะนำ",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "จำกัดคำแนะนำของ Moonfin แนะนำ ตามเรตผู้ปกครองของสื่อเป้าหมาย",
+    "recommendationsApplyParentalRatingCapSubtitle": "จำกัดคำแนะนำของ Lambent แนะนำ ตามเรตผู้ปกครองของสื่อเป้าหมาย",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "ธีมกำหนดเองจะเปลี่ยนองค์ประกอบภาพทั่วทั้ง Moonfin เลือกหนึ่งตัวเลือกให้เข้ากับสไตล์ของคุณ",
+    "customThemeSubtitle": "ธีมกำหนดเองจะเปลี่ยนองค์ประกอบภาพทั่วทั้ง Lambent เลือกหนึ่งตัวเลือกให้เข้ากับสไตล์ของคุณ",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "ลงชื่อเข้าใช้ Moonfin บนโทรศัพท์ของคุณ",
+    "carSignInPrompt": "ลงชื่อเข้าใช้ Lambent บนโทรศัพท์ของคุณ",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller คือตัวเรนเดอร์ GPU สมัยใหม่ของ Flutter ที่ให้ภาพเคลื่อนไหวลื่นไหลและกระตุกน้อยลง บนกล่องทีวีบางรุ่นและ GPU รุ่นเก่าอาจทำให้ภาพผิดเพี้ยนหรือวิดีโอเป็นสีดำ หากพบปัญหาให้ปิดไว้ อัตโนมัติจะเลือกค่าที่ดีที่สุดสำหรับอุปกรณ์ของคุณ รีสตาร์ท Moonfin เพื่อใช้งาน",
+    "impellerRenderingSubtitle": "Impeller คือตัวเรนเดอร์ GPU สมัยใหม่ของ Flutter ที่ให้ภาพเคลื่อนไหวลื่นไหลและกระตุกน้อยลง บนกล่องทีวีบางรุ่นและ GPU รุ่นเก่าอาจทำให้ภาพผิดเพี้ยนหรือวิดีโอเป็นสีดำ หากพบปัญหาให้ปิดไว้ อัตโนมัติจะเลือกค่าที่ดีที่สุดสำหรับอุปกรณ์ของคุณ รีสตาร์ท Lambent เพื่อใช้งาน",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin ต้องรีสตาร์ทเพื่อเปลี่ยนเอนจินการเรนเดอร์ ปิดแอปตอนนี้ แล้วเปิดใหม่เพื่อใช้งาน",
+    "impellerRestartMessage": "Lambent ต้องรีสตาร์ทเพื่อเปลี่ยนเอนจินการเรนเดอร์ ปิดแอปตอนนี้ แล้วเปิดใหม่เพื่อใช้งาน",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

@@ -1,6 +1,6 @@
 {
     "@@locale": "hi",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin वर्शन {version}",
+    "appVersionFooter": "Lambent वर्शन {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin आपके सिस्टम कीरिंग तक नहीं पहुंच सका। लॉगिन जारी रह सकता है, लेकिन कीरिंग अनलॉक होने तक सुरक्षित टोकन संग्रहण अनुपलब्ध हो सकता है।",
+    "secureStorageUnavailableMessage": "Lambent आपके सिस्टम कीरिंग तक नहीं पहुंच सका। लॉगिन जारी रह सकता है, लेकिन कीरिंग अनलॉक होने तक सुरक्षित टोकन संग्रहण अनुपलब्ध हो सकता है।",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "ऐप को पुनरारंभ किए बिना Moonfin और Neon Pulse के बीच स्विच करें",
+    "settingsAppearanceThemeSubtitle": "ऐप को पुनरारंभ किए बिना Lambent और Neon Pulse के बीच स्विच करें",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin से बाहर निकलें?",
+    "exitApp": "Lambent से बाहर निकलें?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "सेट नहीं। Moonfin ऐप/डेटा फ़ोल्डर में एक डिफ़ॉल्ट mpv.conf आज़माएगा।",
+    "notSetMpvConf": "सेट नहीं। Lambent ऐप/डेटा फ़ोल्डर में एक डिफ़ॉल्ट mpv.conf आज़माएगा।",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "प्रति लाइब्रेरी होम पेज दृश्यता टॉगल करें। परिवर्तनों को प्रभावी करने के लिए Moonfin को पुनः आरंभ करें।",
+    "libraryVisibilityDescription": "प्रति लाइब्रेरी होम पेज दृश्यता टॉगल करें। परिवर्तनों को प्रभावी करने के लिए Lambent को पुनः आरंभ करें।",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Moonfin में खेलें",
+    "playInMoonfin": "Lambent में खेलें",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "आपकी Moonfin लाइब्रेरी में आइटम नहीं मिला",
+    "itemNotFoundInLibrary": "आपकी Lambent लाइब्रेरी में आइटम नहीं मिला",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "सर्वर रीबूट प्रगति पर है",
-    "adminServerRebootMessage": "सर्वर रीबूट प्रगति पर है, कृपया पुनः आरंभ करें Moonfin",
+    "adminServerRebootMessage": "सर्वर रीबूट प्रगति पर है, कृपया पुनः आरंभ करें Lambent",
     "adminActiveSessions": "सक्रिय सत्र",
     "adminSessionsLoadFailed": "सत्र लोड करने में विफल",
     "adminNoActiveSessions": "कोई सक्रिय सत्र नहीं",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "नेविगेशन बार में शैलियाँ बटन दिखाएँ",
     "settingsShowFavoritesButtonInNavigation": "नेविगेशन बार में पसंदीदा बटन दिखाएँ",
     "settingsShowLibrariesButtonInNavigation": "नेविगेशन बार में लाइब्रेरीज़ बटन दिखाएँ",
-    "settingsLibraryVisibilitySubtitle": "प्रति लाइब्रेरी होम पेज दृश्यता टॉगल करें। परिवर्तनों को प्रभावी करने के लिए Moonfin को पुनः आरंभ करें।",
+    "settingsLibraryVisibilitySubtitle": "प्रति लाइब्रेरी होम पेज दृश्यता टॉगल करें। परिवर्तनों को प्रभावी करने के लिए Lambent को पुनः आरंभ करें।",
     "settingsMediaBarAndLocalPreviews": "मीडिया बार एवं स्थानीय पूर्वावलोकन",
     "settingsVisualOverlays": "दृश्य ओवरले",
     "settingsSeasonalSurprise": "मौसमी आश्चर्य",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "लाइसेंस",
     "settingsOpenSourceLicenseNotices": "ओपन-सोर्स लाइसेंस नोटिस",
     "settingsPrivacyPolicy": "गोपनीयता नीति",
-    "settingsPrivacyPolicySubtitle": "Moonfin आपके डेटा को कैसे संभालता है",
+    "settingsPrivacyPolicySubtitle": "Lambent आपके डेटा को कैसे संभालता है",
     "settingsCheckForUpdates": "अद्यतन के लिए जाँच",
-    "settingsCheckForUpdatesSubtitle": "नवीनतम Moonfin रिलीज़ की जाँच करें",
+    "settingsCheckForUpdatesSubtitle": "नवीनतम Lambent रिलीज़ की जाँच करें",
     "settingsPoweredByFlutter": "स्पंदन द्वारा संचालित",
     "settingsLicenseNoticesCount": "{count, plural, one {# लाइसेंस सूचना} other {# लाइसेंस सूचनाएँ}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH सबटाइटल को प्राथमिकता दें",
     "preferSdhSubtitlesSubtitle": "अपने आप चुनते समय SDH/CC सबटाइटल ट्रैक को प्राथमिकता दें।",
     "webDiagnostics": "वेब डायग्नोस्टिक्स",
-    "webDiagnosticsTitle": "Moonfin वेब डायग्नोस्टिक्स",
+    "webDiagnosticsTitle": "Lambent वेब डायग्नोस्टिक्स",
     "webDiagnosticsIntro": "ब्राउज़र कनेक्टिविटी समस्याओं (CORS, मिक्स्ड कंटेंट और डिस्कवरी सेटिंग्स) की जाँच के लिए इस पेज का उपयोग करें।",
     "webDiagnosticsDetectedMixedContentFailure": "मिक्स्ड-कंटेंट विफलता मिली",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/प्रीफ़्लाइट विफलता मिली",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin ने पाया कि कोई HTTPS पेज किसी HTTP सर्वर URL को कॉल करने की कोशिश कर रहा है। ब्राउज़र यह अनुरोध आपके सर्वर तक पहुँचने से पहले ही रोक देते हैं।",
-    "webDiagnosticsCorsFailureBody": "Moonfin ने ब्राउज़र-स्तर की अनुरोध विफलता पाई, जो आमतौर पर मीडिया सर्वर पर CORS या प्रीफ़्लाइट हेडर न होने से होती है।",
+    "webDiagnosticsMixedContentFailureBody": "Lambent ने पाया कि कोई HTTPS पेज किसी HTTP सर्वर URL को कॉल करने की कोशिश कर रहा है। ब्राउज़र यह अनुरोध आपके सर्वर तक पहुँचने से पहले ही रोक देते हैं।",
+    "webDiagnosticsCorsFailureBody": "Lambent ने ब्राउज़र-स्तर की अनुरोध विफलता पाई, जो आमतौर पर मीडिया सर्वर पर CORS या प्रीफ़्लाइट हेडर न होने से होती है।",
     "webDiagnosticsTargetUrl": "लक्ष्य URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "कॉन्फ़िगर नहीं है",
     "webDiagnosticsMixedContent": "मिक्स्ड कंटेंट",
     "webDiagnosticsMixedContentDetected": "यह पेज HTTPS पर लोड हुआ है, लेकिन एक या अधिक कॉन्फ़िगर किए गए URL HTTP हैं। ब्राउज़र HTTPS पेजों को HTTP API कॉल करने से रोकते हैं।",
-    "webDiagnosticsMixedContentFix": "समाधान: अपने मीडिया सर्वर या प्रॉक्सी एंडपॉइंट को HTTPS पर चलाएँ, या Moonfin को HTTP पर सिर्फ़ भरोसेमंद लोकल नेटवर्क पर ही लोड करें।",
+    "webDiagnosticsMixedContentFix": "समाधान: अपने मीडिया सर्वर या प्रॉक्सी एंडपॉइंट को HTTPS पर चलाएँ, या Lambent को HTTP पर सिर्फ़ भरोसेमंद लोकल नेटवर्क पर ही लोड करें।",
     "webDiagnosticsNoMixedContentDetected": "मौजूदा रनटाइम सेटिंग्स में मिक्स्ड-कंटेंट से जुड़ी कोई स्पष्ट गड़बड़ी नहीं मिली।",
     "webDiagnosticsCorsChecklist": "CORS चेकलिस्ट",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin में ब्राउज़र ऑरिजिन को अनुमति दें।",
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Moonfin Recommends का लोकल-लाइब्रेरी एल्गोरिदम या ऑनलाइन TMDb की समानता मेट्रिक्स इस्तेमाल करें। ध्यान दें: ऑनलाइन अनुशंसाओं के लिए Seerr इंटीग्रेशन ज़रूरी है।",
+    "recommendationSystemSubtitle": "Lambent Recommends का लोकल-लाइब्रेरी एल्गोरिदम या ऑनलाइन TMDb की समानता मेट्रिक्स इस्तेमाल करें। ध्यान दें: ऑनलाइन अनुशंसाओं के लिए Seerr इंटीग्रेशन ज़रूरी है।",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Moonfin Recommends के सुझावों को लक्षित मीडिया की पैरेंटल रेटिंग के अनुसार सीमित करें",
+    "recommendationsApplyParentalRatingCapSubtitle": "Lambent Recommends के सुझावों को लक्षित मीडिया की पैरेंटल रेटिंग के अनुसार सीमित करें",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "कस्टम थीम पूरे Moonfin में विज़ुअल एलिमेंट बदल देती हैं। अपनी पसंद के अनुसार इनमें से कोई विकल्प चुनें।",
+    "customThemeSubtitle": "कस्टम थीम पूरे Lambent में विज़ुअल एलिमेंट बदल देती हैं। अपनी पसंद के अनुसार इनमें से कोई विकल्प चुनें।",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "अपने फ़ोन पर Moonfin में साइन इन करें",
+    "carSignInPrompt": "अपने फ़ोन पर Lambent में साइन इन करें",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller, Flutter का आधुनिक GPU रेंडरर है जो एनिमेशन को स्मूद बनाता है और अटकन कम करता है। कुछ TV बॉक्स और पुराने GPU पर यह ग्लिच या ब्लैक वीडियो दे सकता है; ऐसा दिखे तो इसे बंद कर दें। स्वचालित आपके डिवाइस के लिए सबसे अच्छा डिफ़ॉल्ट चुनता है। लागू करने के लिए Moonfin को फिर से शुरू करें।",
+    "impellerRenderingSubtitle": "Impeller, Flutter का आधुनिक GPU रेंडरर है जो एनिमेशन को स्मूद बनाता है और अटकन कम करता है। कुछ TV बॉक्स और पुराने GPU पर यह ग्लिच या ब्लैक वीडियो दे सकता है; ऐसा दिखे तो इसे बंद कर दें। स्वचालित आपके डिवाइस के लिए सबसे अच्छा डिफ़ॉल्ट चुनता है। लागू करने के लिए Lambent को फिर से शुरू करें।",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "रेंडरिंग इंजन बदलने के लिए Moonfin को फिर से शुरू करना होगा। ऐप अभी बंद करें, फिर लागू करने के लिए उसे दोबारा खोलें।",
+    "impellerRestartMessage": "रेंडरिंग इंजन बदलने के लिए Lambent को फिर से शुरू करना होगा। ऐप अभी बंद करें, फिर लागू करने के लिए उसे दोबारा खोलें।",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

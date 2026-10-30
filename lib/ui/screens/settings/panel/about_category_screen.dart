@@ -47,6 +47,7 @@ class _AboutCategoryScreen extends StatelessWidget {
                   title: l10n.sourceCode,
                 ),
               ),
+              if (LambentBrand.showMoonfinDeveloperLinks)
               _TvSettingsListTile(
                 leading: const Icon(Icons.bug_report),
                 title: Text(l10n.settingsReportAnIssue),
@@ -87,6 +88,7 @@ class _AboutCategoryScreen extends StatelessWidget {
                   context.navigateTopLevel(Destinations.setup);
                 },
               ),
+              if (LambentBrand.showMoonfinDeveloperLinks)
               _TvSettingsListTile(
                 leading: const Icon(Icons.forum),
                 title: Text(l10n.settingsJoinDiscord),
@@ -97,6 +99,7 @@ class _AboutCategoryScreen extends StatelessWidget {
                   title: l10n.settingsJoinTheDiscord,
                 ),
               ),
+              if (LambentBrand.showMoonfinDeveloperLinks)
               _TvSettingsListTile(
                 leading: const Icon(Icons.favorite),
                 title: Text(l10n.settingsSupportMoonfin),
@@ -119,6 +122,7 @@ class _AboutCategoryScreen extends StatelessWidget {
                   title: l10n.settingsLicenses,
                 ),
               ),
+              if (LambentBrand.showMoonfinDeveloperLinks)
               _TvSettingsListTile(
                 leading: const Icon(Icons.privacy_tip),
                 title: Text(l10n.settingsPrivacyPolicy),

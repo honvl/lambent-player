@@ -10,7 +10,7 @@ class AppLocalizationsCy extends AppLocalizations {
   AppLocalizationsCy([String locale = 'cy']) : super(locale);
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get animeMarkerFiller => 'Filler';
@@ -147,7 +147,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'fersiwn Moonfin $version';
+    return 'fersiwn Lambent $version';
   }
 
   @override
@@ -199,7 +199,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Ni allai Moonfin gyrchu cylch allweddi eich system. Gall mewngofnodi barhau, ond mae\'n bosibl na fydd storfa docynnau ddiogel ar gael nes bod y cylch allweddi wedi\'i ddatgloi.';
+      'Ni allai Lambent gyrchu cylch allweddi eich system. Gall mewngofnodi barhau, ond mae\'n bosibl na fydd storfa docynnau ddiogel ar gael nes bod y cylch allweddi wedi\'i ddatgloi.';
 
   @override
   String get ok => 'iawn';
@@ -212,7 +212,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get detailScreenStyleSubtitle =>
-      'Clasurol yw cynllun canolog gwreiddiol Moonfin. Modern yw cynllun sinematig ymatebol.';
+      'Clasurol yw cynllun canolog gwreiddiol Lambent. Modern yw cynllun sinematig ymatebol.';
 
   @override
   String get detailScreenStyleMoonfin => 'Clasurol';
@@ -452,10 +452,10 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Defnyddiwch algorithm llyfrgell leol Moonfin Recommends neu Fetrigau Tebygrwydd ar-lein TMDb. Sylwer: mae angen integreiddio Seerr ar gyfer argymhellion ar-lein.';
+      'Defnyddiwch algorithm llyfrgell leol Lambent Recommends neu Fetrigau Tebygrwydd ar-lein TMDb. Sylwer: mae angen integreiddio Seerr ar gyfer argymhellion ar-lein.';
 
   @override
-  String get recommendationSystemMoonfin => 'Moonfin Recommends';
+  String get recommendationSystemMoonfin => 'Lambent Recommends';
 
   @override
   String get recommendationSystemJellyfin => 'Jellyfin Recommends';
@@ -469,7 +469,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      'Cyfyngu awgrymiadau Moonfin Recommends yn ôl dosbarthiad oedran y cyfrwng targed';
+      'Cyfyngu awgrymiadau Lambent Recommends yn ôl dosbarthiad oedran y cyfrwng targed';
 
   @override
   String get interfaceStyle => 'Arddull y Rhyngwyneb';
@@ -492,7 +492,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Override the detected layout when this device is read wrong. Restart Moonfin for changes to take effect.';
+      'Override the detected layout when this device is read wrong. Restart Lambent for changes to take effect.';
 
   @override
   String get interfaceLayoutAutomatic => 'Automatic';
@@ -570,21 +570,21 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Newid rhwng Moonfin a Neon Pulse heb ailgychwyn yr app';
+      'Newid rhwng Lambent a Neon Pulse heb ailgychwyn yr app';
 
   @override
   String get customThemeTitle => 'Thema Bersonol';
 
   @override
   String get customThemeSubtitle =>
-      'Mae themâu personol yn newid elfennau gweledol ar draws Moonfin. Dewiswch un o\'r opsiynau hyn i weddu i\'ch arddull.';
+      'Mae themâu personol yn newid elfennau gweledol ar draws Lambent. Dewiswch un o\'r opsiynau hyn i weddu i\'ch arddull.';
 
   @override
   String get keyboardStyle => 'Keyboard Style';
 
   @override
   String get keyboardStyleDescription =>
-      'Native uses your TV\'s own keyboard. Classic is the original Moonfin keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
+      'Native uses your TV\'s own keyboard. Classic is the original Lambent keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
 
   @override
   String get keyboardStyleNative => 'Native';
@@ -719,7 +719,7 @@ class AppLocalizationsCy extends AppLocalizations {
   }
 
   @override
-  String get exitApp => 'Gadael Moonfin?';
+  String get exitApp => 'Gadael Lambent?';
 
   @override
   String get exitAppConfirmation => 'Ydych chi\'n siŵr eich bod am adael?';
@@ -1894,7 +1894,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get shuffleAllMusic => 'Hapchwarae\'r holl gerddoriaeth';
 
   @override
-  String get carSignInPrompt => 'Mewngofnodwch i Moonfin ar eich ffôn';
+  String get carSignInPrompt => 'Mewngofnodwch i Lambent ar eich ffôn';
 
   @override
   String get carServerUnreachable => 'Methu cyrraedd eich gweinydd';
@@ -2176,7 +2176,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get shortcutToggleFullscreen => 'Fullscreen on or off';
 
   @override
-  String get shortcutQuit => 'Quit Moonfin';
+  String get shortcutQuit => 'Quit Lambent';
 
   @override
   String get shortcutPlayPause => 'Play or pause';
@@ -2347,7 +2347,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Open it in Moonfin on a phone, tablet or computer to read it. Audiobooks still play here.';
+      'Open it in Lambent on a phone, tablet or computer to read it. Audiobooks still play here.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -3179,7 +3179,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'Customize the loading animations used throughout Moonfin';
+      'Customize the loading animations used throughout Lambent';
 
   @override
   String get loadingAnimationConfiguration => 'Loading Animation Configuration';
@@ -3188,7 +3188,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get loadingAnimationImage => 'Image';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Moonfin Logo';
+  String get loadingAnimationImageMoonfinLogo => 'Lambent Logo';
 
   @override
   String get loadingAnimationImageSpinner => 'Spinner';
@@ -3200,7 +3200,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Moon Phases';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Moonfin Phases';
+  String get loadingAnimationImageMoonfinPhases => 'Lambent Phases';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Neonfin Phases';
@@ -4217,7 +4217,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get notSetMpvConf =>
-      'Heb ei osod. Bydd Moonfin yn ceisio mpv.conf rhagosodedig mewn ffolderi app/data.';
+      'Heb ei osod. Bydd Lambent yn ceisio mpv.conf rhagosodedig mewn ffolderi app/data.';
 
   @override
   String get selectMpvConf => 'Dewiswch mpv.conf';
@@ -4517,7 +4517,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android only lets Moonfin write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
+      'Android only lets Lambent write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
 
   @override
   String get saveToDownloadsFolder => 'Cadw i ffolder Lawrlwythiadau';
@@ -4809,7 +4809,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get libraryVisibilityDescription =>
-      'Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Moonfin i newidiadau ddod i rym.';
+      'Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Lambent i newidiadau ddod i rym.';
 
   @override
   String get showInNavigation => 'Dangos yn llywio';
@@ -5237,7 +5237,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get screensaverBackdropBlack => 'Black';
 
   @override
-  String get screensaverBackdropMoonfin => 'Moonfin';
+  String get screensaverBackdropMoonfin => 'Lambent';
 
   @override
   String get screensaverBackdropCalm => 'Calm';
@@ -5252,7 +5252,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Additional Component';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Moonfin Logo';
+  String get screensaverComponentMoonfinLogo => 'Lambent Logo';
 
   @override
   String get screensaverComponentRunner => 'Runner';
@@ -5713,7 +5713,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get cancelRequest4k => 'Cancel 4K Request';
 
   @override
-  String get playInMoonfin => 'Chwarae yn Moonfin';
+  String get playInMoonfin => 'Chwarae yn Lambent';
 
   @override
   String get requestedByLabel => 'Requested by';
@@ -5759,7 +5759,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Ni chanfuwyd yr eitem yn eich llyfrgell Moonfin';
+      'Ni chanfuwyd yr eitem yn eich llyfrgell Lambent';
 
   @override
   String get errorSearchingLibrary => 'Gwall wrth chwilio\'r llyfrgell';
@@ -7757,7 +7757,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get adminServerRebootMessage =>
-      'Ailgychwyn gweinydd ar y gweill, ailgychwynwch Moonfin';
+      'Ailgychwyn gweinydd ar y gweill, ailgychwynwch Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiynau Gweithredol';
@@ -11512,7 +11512,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Moonfin i newidiadau ddod i rym.';
+      'Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Lambent i newidiadau ddod i rym.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -11654,14 +11654,14 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get settingsPrivacyPolicySubtitle =>
-      'Sut mae Moonfin yn trin eich data';
+      'Sut mae Lambent yn trin eich data';
 
   @override
   String get settingsCheckForUpdates => 'Gwiriwch am Ddiweddariadau';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Gwiriwch am y datganiad Moonfin diweddaraf';
+      'Gwiriwch am y datganiad Lambent diweddaraf';
 
   @override
   String get settingsBoth => 'Y ddau';
@@ -12529,7 +12529,7 @@ class AppLocalizationsCy extends AppLocalizations {
   String get webDiagnostics => 'Diagnosteg gwe';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnosteg Gwe';
+  String get webDiagnosticsTitle => 'Lambent Diagnosteg Gwe';
 
   @override
   String get webDiagnosticsIntro =>
@@ -12545,11 +12545,11 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Canfu Moonfin dudalen HTTPS yn ceisio galw URL gweinydd HTTP. Mae porwyr yn rhwystro\'r cais hwn cyn iddo gyrraedd eich gweinydd.';
+      'Canfu Lambent dudalen HTTPS yn ceisio galw URL gweinydd HTTP. Mae porwyr yn rhwystro\'r cais hwn cyn iddo gyrraedd eich gweinydd.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Canfu Moonfin fethiant cais ar lefel porwr a achosir yn aml gan fod penawdau CORS neu rag-hedfan ar goll ar y gweinydd cyfryngau.';
+      'Canfu Lambent fethiant cais ar lefel porwr a achosir yn aml gan fod penawdau CORS neu rag-hedfan ar goll ar y gweinydd cyfryngau.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12598,7 +12598,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Trwsio: gwasanaethwch eich gweinydd cyfryngau neu bwynt terfyn dirprwy trwy HTTPS, neu llwythwch Moonfin dros HTTP ar rwydweithiau lleol dibynadwy yn unig.';
+      'Trwsio: gwasanaethwch eich gweinydd cyfryngau neu bwynt terfyn dirprwy trwy HTTPS, neu llwythwch Lambent dros HTTP ar rwydweithiau lleol dibynadwy yn unig.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -14308,7 +14308,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Impeller yw rendrwr GPU modern Flutter, ar gyfer animeiddiadau llyfnach a llai o hercian. Ar rai bocsys teledu a GPUau hŷn gall achosi namau neu fideo du; diffoddwch ef os gwelwch chi\'r rheini. Mae Awtomatig yn dewis y rhagosodiad gorau ar gyfer eich dyfais. Ailgychwynnwch Moonfin i\'w osod.';
+      'Impeller yw rendrwr GPU modern Flutter, ar gyfer animeiddiadau llyfnach a llai o hercian. Ar rai bocsys teledu a GPUau hŷn gall achosi namau neu fideo du; diffoddwch ef os gwelwch chi\'r rheini. Mae Awtomatig yn dewis y rhagosodiad gorau ar gyfer eich dyfais. Ailgychwynnwch Lambent i\'w osod.';
 
   @override
   String get impellerAuto => 'Awtomatig';
@@ -14324,7 +14324,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'Mae angen i Moonfin ailgychwyn i newid yr injan rendro. Caewch yr ap nawr, yna ei ailagor i osod y newid.';
+      'Mae angen i Lambent ailgychwyn i newid yr injan rendro. Caewch yr ap nawr, yna ei ailagor i osod y newid.';
 
   @override
   String get impellerCloseNow => 'Cau\'r ap nawr';
@@ -14872,7 +14872,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Transcoded qualities only download while Moonfin is open. Original quality also downloads in the background.';
+      'Transcoded qualities only download while Lambent is open. Original quality also downloads in the background.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -14880,7 +14880,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Downloads only while Moonfin is open';
+      'Downloads only while Lambent is open';
 
   @override
   String get autoDownloadQualityTitle => 'Auto-download quality';
@@ -14903,7 +14903,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'When you finish an episode on any device, Moonfin downloads the next ones. Episodes it downloads are deleted once watched.';
+      'When you finish an episode on any device, Lambent downloads the next ones. Episodes it downloads are deleted once watched.';
 
   @override
   String get smartDownloadsKeepReady => 'Episodes to Keep Downloaded';
@@ -14977,15 +14977,15 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Allow the system to check for new episodes periodically while Moonfin is closed';
+      'Allow the system to check for new episodes periodically while Lambent is closed';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'Background App Refresh is disabled for Moonfin. Enable it in iOS Settings.';
+      'Background App Refresh is disabled for Lambent. Enable it in iOS Settings.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'Background usage is restricted for Moonfin in Android Settings.';
+      'Background usage is restricted for Lambent in Android Settings.';
 
   @override
   String get autoDownloadCheckNow => 'Check Now';
@@ -15203,13 +15203,13 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'What the Apple TV home screen shows above the Moonfin icon when it is selected. This setting stays on this device.';
+      'What the Apple TV home screen shows above the Lambent icon when it is selected. This setting stays on this device.';
 
   @override
   String get topShelfLatestMedia => 'Latest media';
 
   @override
-  String get topShelfAppBanner => 'Moonfin banner';
+  String get topShelfAppBanner => 'Lambent banner';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -15921,7 +15921,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'Unlinking stops Moonfin from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
+      'Unlinking stops Lambent from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
 
   @override
   String get rommUnlink => 'Unlink';
@@ -15935,7 +15935,7 @@ class AppLocalizationsCy extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Moonfin couldn\'t reach RomM. Try again in a moment.';
+      'Lambent couldn\'t reach RomM. Try again in a moment.';
 
   @override
   String get rommNotAvailable => 'This server has no RomM library.';

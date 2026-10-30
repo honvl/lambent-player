@@ -10,7 +10,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get animeMarkerFiller => 'Filler';
@@ -148,7 +148,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'Moonfin version $version';
+    return 'Lambent version $version';
   }
 
   @override
@@ -200,7 +200,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin n\'a pas pu accéder au trousseau de votre système. La connexion peut continuer, mais le stockage sécurisé des jetons peut rester indisponible tant que le trousseau n\'est pas déverrouillé.';
+      'Lambent n\'a pas pu accéder au trousseau de votre système. La connexion peut continuer, mais le stockage sécurisé des jetons peut rester indisponible tant que le trousseau n\'est pas déverrouillé.';
 
   @override
   String get ok => 'OK';
@@ -213,7 +213,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get detailScreenStyleSubtitle =>
-      'Classique correspond à la mise en page centrée d\'origine de Moonfin. Moderne propose une mise en page cinématographique et adaptative. Spotlight met en avant un grand visuel, avec des fenêtres surgissantes pour le contenu. Nouveau occupe tout l\'écran, avec des sections empilées les unes sous les autres. Minimaliste se résume au visuel, à un bouton de lecture et aux épisodes.';
+      'Classique correspond à la mise en page centrée d\'origine de Lambent. Moderne propose une mise en page cinématographique et adaptative. Spotlight met en avant un grand visuel, avec des fenêtres surgissantes pour le contenu. Nouveau occupe tout l\'écran, avec des sections empilées les unes sous les autres. Minimaliste se résume au visuel, à un bouton de lecture et aux épisodes.';
 
   @override
   String get detailScreenStyleMoonfin => 'Classique';
@@ -455,10 +455,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Utilisez l\'algorithme local « Moonfin recommande », le serveur « Jellyfin recommande » ou les mesures de similarité TMDb en ligne. Remarque : les recommandations en ligne nécessitent l\'intégration Seerr.';
+      'Utilisez l\'algorithme local « Lambent recommande », le serveur « Jellyfin recommande » ou les mesures de similarité TMDb en ligne. Remarque : les recommandations en ligne nécessitent l\'intégration Seerr.';
 
   @override
-  String get recommendationSystemMoonfin => 'Moonfin recommande';
+  String get recommendationSystemMoonfin => 'Lambent recommande';
 
   @override
   String get recommendationSystemJellyfin => 'Recommandé par Jellyfin';
@@ -472,7 +472,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      'Limiter les suggestions de « Moonfin recommande » selon la classification parentale du média ciblé';
+      'Limiter les suggestions de « Lambent recommande » selon la classification parentale du média ciblé';
 
   @override
   String get interfaceStyle => 'Style de l\'interface';
@@ -495,7 +495,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Remplacer le type détecté si votre appareil n\'est pas reconnu correctement. Redémarrez Moonfin pour appliquer les modifications.';
+      'Remplacer le type détecté si votre appareil n\'est pas reconnu correctement. Redémarrez Lambent pour appliquer les modifications.';
 
   @override
   String get interfaceLayoutAutomatic => 'Automatique';
@@ -580,14 +580,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get customThemeSubtitle =>
-      'Les thèmes personnalisés modifient les éléments visuels dans tout Moonfin. Choisissez l\'une de ces options selon votre style.';
+      'Les thèmes personnalisés modifient les éléments visuels dans tout Lambent. Choisissez l\'une de ces options selon votre style.';
 
   @override
   String get keyboardStyle => 'Keyboard Style';
 
   @override
   String get keyboardStyleDescription =>
-      'Native uses your TV\'s own keyboard. Classic is the original Moonfin keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
+      'Native uses your TV\'s own keyboard. Classic is the original Lambent keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
 
   @override
   String get keyboardStyleNative => 'Native';
@@ -721,7 +721,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get exitApp => 'Quitter Moonfin ?';
+  String get exitApp => 'Quitter Lambent ?';
 
   @override
   String get exitAppConfirmation => 'Voulez-vous vraiment quitter ?';
@@ -1891,7 +1891,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shuffleAllMusic => 'Lire toute la musique en aléatoire';
 
   @override
-  String get carSignInPrompt => 'Connectez-vous à Moonfin sur votre téléphone';
+  String get carSignInPrompt => 'Connectez-vous à Lambent sur votre téléphone';
 
   @override
   String get carServerUnreachable => 'Impossible de joindre votre serveur';
@@ -2175,7 +2175,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get shortcutToggleFullscreen => 'Activer ou quitter le plein écran';
 
   @override
-  String get shortcutQuit => 'Quitter Moonfin';
+  String get shortcutQuit => 'Quitter Lambent';
 
   @override
   String get shortcutPlayPause => 'Lecture ou pause';
@@ -2350,7 +2350,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Open it in Moonfin on a phone, tablet or computer to read it. Audiobooks still play here.';
+      'Open it in Lambent on a phone, tablet or computer to read it. Audiobooks still play here.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -3185,7 +3185,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'Personnalisez les animations de chargement utilisées dans Moonfin';
+      'Personnalisez les animations de chargement utilisées dans Lambent';
 
   @override
   String get loadingAnimationConfiguration =>
@@ -3195,7 +3195,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loadingAnimationImage => 'Image';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Logo Moonfin';
+  String get loadingAnimationImageMoonfinLogo => 'Logo Lambent';
 
   @override
   String get loadingAnimationImageSpinner => 'Roue de chargement';
@@ -3207,7 +3207,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Phases Moon';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Phases Moonfin';
+  String get loadingAnimationImageMoonfinPhases => 'Phases Lambent';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Phases Neonfin';
@@ -4233,7 +4233,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notSetMpvConf =>
-      'Non défini. Moonfin tentera d’utiliser un mpv.conf par défaut dans les dossiers app/data.';
+      'Non défini. Lambent tentera d’utiliser un mpv.conf par défaut dans les dossiers app/data.';
 
   @override
   String get selectMpvConf => 'Sélectionner mpv.conf';
@@ -4536,7 +4536,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android autorise Moonfin à écrire uniquement dans ses propres dossiers, et cet appareil n\'a pas de stockage amovible. Activez « Enregistrer dans le dossier Téléchargements » ci-dessus pour que vos téléchargements soient accessibles.';
+      'Android autorise Lambent à écrire uniquement dans ses propres dossiers, et cet appareil n\'a pas de stockage amovible. Activez « Enregistrer dans le dossier Téléchargements » ci-dessus pour que vos téléchargements soient accessibles.';
 
   @override
   String get saveToDownloadsFolder =>
@@ -4833,7 +4833,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get libraryVisibilityDescription =>
-      'Affichez ou masquez chaque bibliothèque sur la page d\'accueil. Redémarrez Moonfin pour appliquer les modifications.';
+      'Affichez ou masquez chaque bibliothèque sur la page d\'accueil. Redémarrez Lambent pour appliquer les modifications.';
 
   @override
   String get showInNavigation => 'Afficher dans la navigation';
@@ -5270,7 +5270,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get screensaverBackdropBlack => 'Noir';
 
   @override
-  String get screensaverBackdropMoonfin => 'Moonfin';
+  String get screensaverBackdropMoonfin => 'Lambent';
 
   @override
   String get screensaverBackdropCalm => 'Apaisé';
@@ -5285,7 +5285,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Composant supplémentaire';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Logo Moonfin';
+  String get screensaverComponentMoonfinLogo => 'Logo Lambent';
 
   @override
   String get screensaverComponentRunner => 'Runner';
@@ -5751,7 +5751,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancelRequest4k => 'Annuler la demande 4K';
 
   @override
-  String get playInMoonfin => 'Lire dans Moonfin';
+  String get playInMoonfin => 'Lire dans Lambent';
 
   @override
   String get requestedByLabel => 'Demandé par';
@@ -5797,7 +5797,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Élément introuvable dans votre bibliothèque Moonfin';
+      'Élément introuvable dans votre bibliothèque Lambent';
 
   @override
   String get errorSearchingLibrary =>
@@ -7841,7 +7841,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get adminServerRebootMessage =>
-      'Redémarrage du serveur en cours, veuillez redémarrer Moonfin';
+      'Redémarrage du serveur en cours, veuillez redémarrer Lambent';
 
   @override
   String get adminActiveSessions => 'Sessions actives';
@@ -11634,7 +11634,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Affichez ou masquez chaque bibliothèque sur la page d\'accueil. Redémarrez Moonfin pour appliquer les modifications.';
+      'Affichez ou masquez chaque bibliothèque sur la page d\'accueil. Redémarrez Lambent pour appliquer les modifications.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -11778,14 +11778,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsPrivacyPolicySubtitle =>
-      'Comment Moonfin gère vos données';
+      'Comment Lambent gère vos données';
 
   @override
   String get settingsCheckForUpdates => 'Vérifier les mises à jour';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Recherchez la dernière version de Moonfin';
+      'Recherchez la dernière version de Lambent';
 
   @override
   String get settingsBoth => 'Les deux';
@@ -12660,7 +12660,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get webDiagnostics => 'Diagnostic Web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnostic Web';
+  String get webDiagnosticsTitle => 'Lambent Diagnostic Web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -12676,11 +12676,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin a détecté une page HTTPS essayant d\'appeler une URL de serveur HTTP. Les navigateurs bloquent cette demande avant qu\'elle n\'atteigne votre serveur.';
+      'Lambent a détecté une page HTTPS essayant d\'appeler une URL de serveur HTTP. Les navigateurs bloquent cette demande avant qu\'elle n\'atteigne votre serveur.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin a détecté un échec de requête au niveau du navigateur, généralement provoqué par l\'absence d\'en-têtes CORS ou de contrôle en amont sur le serveur multimédia.';
+      'Lambent a détecté un échec de requête au niveau du navigateur, généralement provoqué par l\'absence d\'en-têtes CORS ou de contrôle en amont sur le serveur multimédia.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12729,7 +12729,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Correctif : servez votre serveur multimédia ou point de terminaison proxy via HTTPS, ou chargez Moonfin via HTTP sur les réseaux locaux de confiance uniquement.';
+      'Correctif : servez votre serveur multimédia ou point de terminaison proxy via HTTPS, ou chargez Lambent via HTTP sur les réseaux locaux de confiance uniquement.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -14443,7 +14443,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Impeller est le moteur de rendu GPU moderne de Flutter : animations plus fluides et moins de saccades. Sur certains boîtiers TV et GPU anciens, il peut provoquer des artefacts ou une image noire ; désactivez-le si vous constatez ces problèmes. Automatique choisit le meilleur réglage pour votre appareil. Redémarrez Moonfin pour appliquer.';
+      'Impeller est le moteur de rendu GPU moderne de Flutter : animations plus fluides et moins de saccades. Sur certains boîtiers TV et GPU anciens, il peut provoquer des artefacts ou une image noire ; désactivez-le si vous constatez ces problèmes. Automatique choisit le meilleur réglage pour votre appareil. Redémarrez Lambent pour appliquer.';
 
   @override
   String get impellerAuto => 'Automatique';
@@ -14459,7 +14459,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'Moonfin doit redémarrer pour changer de moteur de rendu. Fermez l\'application maintenant, puis rouvrez-la pour appliquer le changement.';
+      'Lambent doit redémarrer pour changer de moteur de rendu. Fermez l\'application maintenant, puis rouvrez-la pour appliquer le changement.';
 
   @override
   String get impellerCloseNow => 'Fermer l\'application immédiatement';
@@ -15021,7 +15021,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Les qualités transcodées ne se téléchargent que lorsque Moonfin est ouvert. La qualité d\'origine se télécharge aussi en arrière-plan.';
+      'Les qualités transcodées ne se téléchargent que lorsque Lambent est ouvert. La qualité d\'origine se télécharge aussi en arrière-plan.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -15029,7 +15029,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Télécharge uniquement lorsque Moonfin est ouvert';
+      'Télécharge uniquement lorsque Lambent est ouvert';
 
   @override
   String get autoDownloadQualityTitle =>
@@ -15053,7 +15053,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'Lorsque vous terminez un épisode sur n\'importe quel appareil, Moonfin télécharge les suivants. Les épisodes qu\'il télécharge sont supprimés une fois vus.';
+      'Lorsque vous terminez un épisode sur n\'importe quel appareil, Lambent télécharge les suivants. Les épisodes qu\'il télécharge sont supprimés une fois vus.';
 
   @override
   String get smartDownloadsKeepReady => 'Épisodes à garder téléchargés';
@@ -15127,15 +15127,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Autorise le système à rechercher périodiquement de nouveaux épisodes lorsque Moonfin est fermé';
+      'Autorise le système à rechercher périodiquement de nouveaux épisodes lorsque Lambent est fermé';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'L\'actualisation en arrière-plan est désactivée pour Moonfin. Activez-la dans les réglages iOS.';
+      'L\'actualisation en arrière-plan est désactivée pour Lambent. Activez-la dans les réglages iOS.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'L\'utilisation en arrière-plan est restreinte pour Moonfin dans les paramètres Android.';
+      'L\'utilisation en arrière-plan est restreinte pour Lambent dans les paramètres Android.';
 
   @override
   String get autoDownloadCheckNow => 'Vérifier maintenant';
@@ -15355,13 +15355,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'Ce que l\'écran d\'accueil de l\'Apple TV affiche au-dessus de l\'icône Moonfin lorsqu\'elle est sélectionnée. Ce paramètre ne s\'applique qu\'à cet appareil.';
+      'Ce que l\'écran d\'accueil de l\'Apple TV affiche au-dessus de l\'icône Lambent lorsqu\'elle est sélectionnée. Ce paramètre ne s\'applique qu\'à cet appareil.';
 
   @override
   String get topShelfLatestMedia => 'Médias récemment ajoutés';
 
   @override
-  String get topShelfAppBanner => 'Bannière Moonfin';
+  String get topShelfAppBanner => 'Bannière Lambent';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -16075,7 +16075,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'Unlinking stops Moonfin from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
+      'Unlinking stops Lambent from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
 
   @override
   String get rommUnlink => 'Unlink';
@@ -16089,7 +16089,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Moonfin couldn\'t reach RomM. Try again in a moment.';
+      'Lambent couldn\'t reach RomM. Try again in a moment.';
 
   @override
   String get rommNotAvailable => 'This server has no RomM library.';

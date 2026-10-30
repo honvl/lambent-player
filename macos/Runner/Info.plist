@@ -47,7 +47,7 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Moonfin uses your local network to discover Jellyfin and Emby servers.</string>
+	<string>Lambent uses your local network to discover Jellyfin and Emby servers.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_jellyfin._tcp</string>

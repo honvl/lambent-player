@@ -409,7 +409,7 @@ class _SpinnerPainter extends CustomPainter {
     final gradient = SweepGradient(
       startAngle: 0.0,
       endAngle: sweepAngle,
-      colors: const [Color(0x00AA5CC3), Color(0xFFAA5CC3), Color(0xFF00A4DC)],
+      colors: const [Color(0x00FFD682), Color(0xFFFFD682), Color(0xFFFFA028)],
       stops: const [0.0, 0.45, 1.0],
       transform: GradientRotation(startAngle),
     );
@@ -522,8 +522,8 @@ class _RunnerPainter extends CustomPainter {
     final strokeW = (6.5 * scale).clamp(3.0, 9.5);
 
     // Moonfin signature brand colors: Cyan lead limbs & torso, Purple trail limbs, White head
-    const moonfinCyan = Color(0xFF00A4DC);
-    const moonfinPurple = Color(0xFFAA5CC3);
+    const moonfinCyan = Color(0xFFFFA028);
+    const moonfinPurple = Color(0xFFFFD682);
     const headColor = Colors.white;
 
     final leadLimbPaint = Paint()
@@ -762,7 +762,7 @@ class _MoonBackdropPainter extends CustomPainter {
     // Celestial ambient glow behind the moon
     final glowColor = switch (palette) {
       MoonPhasesPalette.natural => const Color(0xFF38BDF8),
-      MoonPhasesPalette.moonfin => const Color(0xFF00A4DC),
+      MoonPhasesPalette.moonfin => const Color(0xFFFFA028),
       MoonPhasesPalette.neonfin => const Color(0xFFFF2E92),
     };
     final glowPaint = Paint()
@@ -998,11 +998,11 @@ class _MoonPhasesPainter extends CustomPainter {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: const [
-              Color(0xFFAA5CC3),
-              Color(0xFF9C62C5),
-              Color(0xFF7672CB),
-              Color(0xFF3A8CD4),
-              Color(0xFF00A4DC),
+              Color(0xFFFFD682),
+              Color(0xFFFFC26A),
+              Color(0xFFFFB255),
+              Color(0xFFFFA83F),
+              Color(0xFFFFA028),
             ],
             stops: const [0.10, 0.20, 0.40, 0.66, 0.90],
           ).createShader(Rect.fromCircle(center: center, radius: radius)),
@@ -1032,7 +1032,7 @@ class _MoonPhasesPainter extends CustomPainter {
     // Crisp outer rim highlight
     final rimColor = switch (palette) {
       MoonPhasesPalette.natural => Colors.white.withAlpha(45),
-      MoonPhasesPalette.moonfin => const Color(0xFF00A4DC).withAlpha(40),
+      MoonPhasesPalette.moonfin => const Color(0xFFFFA028).withAlpha(40),
       MoonPhasesPalette.neonfin => const Color(0xFF00E5FF).withAlpha(50),
     };
     final rimPaint = Paint()

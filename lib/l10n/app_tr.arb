@@ -1,6 +1,6 @@
 {
     "@@locale": "tr",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin sürümü {version}",
+    "appVersionFooter": "Lambent sürümü {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin sistem anahtarlığınıza erişemedi. Giriş işlemine devam edilebilir, ancak anahtarlık kilidi açılana kadar güvenli jeton depolama özelliği kullanılamayabilir.",
+    "secureStorageUnavailableMessage": "Lambent sistem anahtarlığınıza erişemedi. Giriş işlemine devam edilebilir, ancak anahtarlık kilidi açılana kadar güvenli jeton depolama özelliği kullanılamayabilir.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin'den çıkılsın mı?",
+    "exitApp": "Lambent'den çıkılsın mı?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3046,7 +3046,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Ayarlanmadı. Moonfin, uygulama/veri klasörlerinde varsayılan bir mpv.conf dosyasını deneyecektir.",
+    "notSetMpvConf": "Ayarlanmadı. Lambent, uygulama/veri klasörlerinde varsayılan bir mpv.conf dosyasını deneyecektir.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -4165,7 +4165,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Moonfin'da oynat",
+    "playInMoonfin": "Lambent'da oynat",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4219,7 +4219,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Öğe Moonfin kitaplığınızda bulunamadı",
+    "itemNotFoundInLibrary": "Öğe Lambent kitaplığınızda bulunamadı",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4475,7 +4475,7 @@
         }
     },
     "adminServerRebootInProgress": "Sunucu yeniden başlatma işlemi devam ediyor",
-    "adminServerRebootMessage": "Sunucu yeniden başlatılıyor, lütfen Moonfin'i yeniden başlatın",
+    "adminServerRebootMessage": "Sunucu yeniden başlatılıyor, lütfen Lambent'i yeniden başlatın",
     "adminActiveSessions": "Aktif Oturumlar",
     "adminSessionsLoadFailed": "Oturumlar yüklenemedi",
     "adminNoActiveSessions": "Aktif oturum yok",
@@ -6266,7 +6266,7 @@
     "@subtitlePreviewText": {
         "description": "Sample text shown in the subtitle live preview"
     },
-    "libraryVisibilityDescription": "Kitaplık başına ana sayfa görünürlüğünü değiştirin. Değişikliklerin etkili olması için Moonfin yeniden başlatın.",
+    "libraryVisibilityDescription": "Kitaplık başına ana sayfa görünürlüğünü değiştirin. Değişikliklerin etkili olması için Lambent yeniden başlatın.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -6511,7 +6511,7 @@
     "settingsShowGenresButtonInNavigation": "Gezinme çubuğunda türler butonunu göster",
     "settingsShowFavoritesButtonInNavigation": "Gezinme çubuğunda favoriler butonunu göster",
     "settingsShowLibrariesButtonInNavigation": "Gezinti çubuğunda kütüphaneler butonunu göster",
-    "settingsLibraryVisibilitySubtitle": "Kitaplık başına ana sayfa görünürlüğünü değiştirin. Değişikliklerin etkili olması için Moonfin yeniden başlatın.",
+    "settingsLibraryVisibilitySubtitle": "Kitaplık başına ana sayfa görünürlüğünü değiştirin. Değişikliklerin etkili olması için Lambent yeniden başlatın.",
     "settingsMediaBarAndLocalPreviews": "Medya Çubuğu ve Yerel Önizlemeler",
     "settingsVisualOverlays": "Görsel Kaplamalar",
     "settingsSeasonalSurprise": "Sezonluk Sürpriz",
@@ -6535,9 +6535,9 @@
     "settingsLicenses": "Lisanslar",
     "settingsOpenSourceLicenseNotices": "Açık kaynak lisans bildirimleri",
     "settingsPrivacyPolicy": "Gizlilik Politikası",
-    "settingsPrivacyPolicySubtitle": "Moonfin verilerinizi nasıl işler",
+    "settingsPrivacyPolicySubtitle": "Lambent verilerinizi nasıl işler",
     "settingsCheckForUpdates": "Güncellemeleri Kontrol Et",
-    "settingsCheckForUpdatesSubtitle": "En son Moonfin sürümünü kontrol edin",
+    "settingsCheckForUpdatesSubtitle": "En son Lambent sürümünü kontrol edin",
     "settingsPoweredByFlutter": "Flutter tarafından desteklenmektedir",
     "settingsLicenseNoticesCount": "{count, plural, one {# lisans bildirimi} other {# lisans bildirimi}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH altyazıları tercih et",
     "preferSdhSubtitlesSubtitle": "Otomatik seçim yaparken SDH/CC altyazı parçalarına öncelik ver.",
     "webDiagnostics": "Web Tanılama",
-    "webDiagnosticsTitle": "Moonfin Web Tanılama",
+    "webDiagnosticsTitle": "Lambent Web Tanılama",
     "webDiagnosticsIntro": "Tarayıcı bağlantı sorunlarını (CORS, karma içerik ve keşif ayarları) tanılamak için bu sayfayı kullanın.",
     "webDiagnosticsDetectedMixedContentFailure": "Karma İçerik Hatası Tespit Edildi",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/Ön Kontrol Hatası Tespit Edildi",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin, bir HTTPS sayfasının HTTP sunucu URL'sini çağırmaya çalıştığını tespit etti. Tarayıcılar, bu isteği henüz sunucunuza ulaşmadan engeller.",
-    "webDiagnosticsCorsFailureBody": "Moonfin, genellikle medya sunucusundaki eksik CORS veya ön kontrol (preflight) üst bilgilerinden kaynaklanan, tarayıcı düzeyinde bir istek hatası tespit etti.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent, bir HTTPS sayfasının HTTP sunucu URL'sini çağırmaya çalıştığını tespit etti. Tarayıcılar, bu isteği henüz sunucunuza ulaşmadan engeller.",
+    "webDiagnosticsCorsFailureBody": "Lambent, genellikle medya sunucusundaki eksik CORS veya ön kontrol (preflight) üst bilgilerinden kaynaklanan, tarayıcı düzeyinde bir istek hatası tespit etti.",
     "webDiagnosticsTargetUrl": "Hedef URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "Yapılandırılmadı",
     "webDiagnosticsMixedContent": "Karma İçerik",
     "webDiagnosticsMixedContentDetected": "Bu sayfa HTTPS üzerinden yüklendi, ancak yapılandırılan URL'lerden biri veya daha fazlası HTTP. Tarayıcılar, HTTPS sayfalarının HTTP API'lerini çağırmasını engeller.",
-    "webDiagnosticsMixedContentFix": "Çözüm: Medya sunucunuzu veya vekil sunucu (proxy) uç noktanızı HTTPS üzerinden sunun ya da Moonfin'i yalnızca güvenilir yerel ağlarda HTTP üzerinden yükleyin.",
+    "webDiagnosticsMixedContentFix": "Çözüm: Medya sunucunuzu veya vekil sunucu (proxy) uç noktanızı HTTPS üzerinden sunun ya da Lambent'i yalnızca güvenilir yerel ağlarda HTTP üzerinden yükleyin.",
     "webDiagnosticsNoMixedContentDetected": "Mevcut çalışma zamanı ayarlarında bariz bir karma içerik yapılandırması tespit edilmedi.",
     "webDiagnosticsCorsChecklist": "CORS Kontrol Listesi",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin üst bilgisinde tarayıcı kaynağına izin verin.",
@@ -8103,7 +8103,7 @@
     "@contextMenuHideFromNextUp": {
         "description": "Context menu action to hide a show from the Next Up section"
     },
-    "carSignInPrompt": "Moonfin'e telefon üzerinden giriş yap",
+    "carSignInPrompt": "Lambent'e telefon üzerinden giriş yap",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8119,7 +8119,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Moonfin Önerileri'ni hedef medyanın ebeveyn yaş sınırına göre kısıtla",
+    "recommendationsApplyParentalRatingCapSubtitle": "Lambent Önerileri'ni hedef medyanın ebeveyn yaş sınırına göre kısıtla",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -8230,7 +8230,7 @@
     "@glassQualityReduced": {
         "description": "Glass quality option: lightweight zero-blur glass"
     },
-    "customThemeSubtitle": "Özel temalar, Moonfin genelindeki görsel ögeleri değiştirir. Tarzınıza uygun seçeneklerden birini belirleyin.",
+    "customThemeSubtitle": "Özel temalar, Lambent genelindeki görsel ögeleri değiştirir. Tarzınıza uygun seçeneklerden birini belirleyin.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -8459,7 +8459,7 @@
     },
     "rewatchPlaylist": "Oynatma Listesini Yeniden İzle",
     "noSubtitlesFound": "Altyazı bulunamadı.",
-    "impellerRenderingSubtitle": "Impeller, daha akıcı animasyonlar ve daha az takılma sağlayan Flutter'ın modern GPU işleme motorudur. Bazı TV kutularında (TV Box) ve eski grafik işlemcilerde (GPU) ekran bozulmalarına veya siyah ekrana neden olabilir; bu gibi durumlarla karşılaşırsanız özelliği Kapatın. Otomatik seçeneği, cihazınız için en iyi varsayılanı belirler. Değişiklikleri uygulamak için Moonfin'i yeniden başlatın.",
+    "impellerRenderingSubtitle": "Impeller, daha akıcı animasyonlar ve daha az takılma sağlayan Flutter'ın modern GPU işleme motorudur. Bazı TV kutularında (TV Box) ve eski grafik işlemcilerde (GPU) ekran bozulmalarına veya siyah ekrana neden olabilir; bu gibi durumlarla karşılaşırsanız özelliği Kapatın. Otomatik seçeneği, cihazınız için en iyi varsayılanı belirler. Değişiklikleri uygulamak için Lambent'i yeniden başlatın.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8504,11 +8504,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Önerileri",
+    "recommendationSystemMoonfin": "Lambent Önerileri",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
-    "recommendationSystemSubtitle": "Moonfin Önerileri yerel kütüphane algoritmasını, Jellyfin Önerileri sunucu motorunu veya çevrimiçi TMDb Benzerlik Metriklerini kullanın. Not: Çevrimiçi öneriler Seerr entegrasyonu gerektirir.",
+    "recommendationSystemSubtitle": "Lambent Önerileri yerel kütüphane algoritmasını, Jellyfin Önerileri sunucu motorunu veya çevrimiçi TMDb Benzerlik Metriklerini kullanın. Not: Çevrimiçi öneriler Seerr entegrasyonu gerektirir.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
@@ -8529,7 +8529,7 @@
     "@detailScreenStyleModern": {
         "description": "Detail screen style option: the responsive cinematic layout"
     },
-    "detailScreenStyleSubtitle": "Klasik, orijinal ortalanmış Moonfin düzenidir. Modern, duyarlı sinematik bir düzendir. Spotlight, açılır içerik kartlarına sahip, ana görsel odaklı bir düzendir. Nouveau, bölümlerin sayfa boyunca alt alta sıralandığı tam ekran bir düzendir. Minimalist ise sadece kapak görselinden, tek bir oynatma butonundan ve bölümlerden oluşur.",
+    "detailScreenStyleSubtitle": "Klasik, orijinal ortalanmış Lambent düzenidir. Modern, duyarlı sinematik bir düzendir. Spotlight, açılır içerik kartlarına sahip, ana görsel odaklı bir düzendir. Nouveau, bölümlerin sayfa boyunca alt alta sıralandığı tam ekran bir düzendir. Minimalist ise sadece kapak görselinden, tek bir oynatma butonundan ve bölümlerden oluşur.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -8598,7 +8598,7 @@
     },
     "forced": "Zorunlu",
     "transcodeAudioCodecNotSupported": "Ses kodeki desteklenmiyor.",
-    "impellerRestartMessage": "İşleme motorunu değiştirmek için Moonfin'in yeniden başlatılması gerekiyor. Değişiklikleri uygulamak için uygulamayı şimdi kapatın ve ardından tekrar açın.",
+    "impellerRestartMessage": "İşleme motorunu değiştirmek için Lambent'in yeniden başlatılması gerekiyor. Değişiklikleri uygulamak için uygulamayı şimdi kapatın ve ardından tekrar açın.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9474,7 +9474,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android, Moonfin uygulamasının yalnızca kendi sahip olduğu klasörlere yazmasına izin veriyor ve bu cihazda çıkarılabilir depolama alanı yok. İndirmelerin diğer uygulamaların erişebileceği bir yere kaydedilmesi için yukarıdaki 'İndirilenler klasörüne kaydet' seçeneğini açın.",
+    "downloadLocationLimitedByAndroid": "Android, Lambent uygulamasının yalnızca kendi sahip olduğu klasörlere yazmasına izin veriyor ve bu cihazda çıkarılabilir depolama alanı yok. İndirmelerin diğer uygulamaların erişebileceği bir yere kaydedilmesi için yukarıdaki 'İndirilenler klasörüne kaydet' seçeneğini açın.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9628,7 +9628,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Bu cihaz için algılanan düzen yanlış okunduğunda geçersiz kılın. Değişikliklerin etkili olması için Moonfin'i yeniden başlatın.",
+    "interfaceLayoutSubtitle": "Bu cihaz için algılanan düzen yanlış okunduğunda geçersiz kılın. Değişikliklerin etkili olması için Lambent'i yeniden başlatın.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10686,7 +10686,7 @@
     "@shortcutToggleFullscreen": {
         "description": "F11 and Alt+Enter anywhere, F in the player"
     },
-    "shortcutQuit": "Moonfin'den çık",
+    "shortcutQuit": "Lambent'den çık",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },
@@ -10909,7 +10909,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "Moonfin genelinde kullanılan yükleme animasyonlarını özelleştir",
+    "loadingAnimationDescription": "Lambent genelinde kullanılan yükleme animasyonlarını özelleştir",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10921,7 +10921,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Moonfin Logo",
+    "loadingAnimationImageMoonfinLogo": "Lambent Logo",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10937,7 +10937,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Moonfin Evreleri",
+    "loadingAnimationImageMoonfinPhases": "Lambent Evreleri",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -11212,7 +11212,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Moonfin",
+    "screensaverBackdropMoonfin": "Lambent",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -11232,7 +11232,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Moonfin Logo",
+    "screensaverComponentMoonfinLogo": "Lambent Logo",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },

@@ -1,6 +1,6 @@
 {
     "@@locale": "tl",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin bersyon {version}",
+    "appVersionFooter": "Lambent bersyon {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Hindi ma-access ng Moonfin ang keyring ng iyong system. Maaaring magpatuloy ang pag-log in, ngunit maaaring hindi available ang secure na imbakan ng token hanggang sa ma-unlock ang keyring.",
+    "secureStorageUnavailableMessage": "Hindi ma-access ng Lambent ang keyring ng iyong system. Maaaring magpatuloy ang pag-log in, ngunit maaaring hindi available ang secure na imbakan ng token hanggang sa ma-unlock ang keyring.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Lumipat sa pagitan ng Moonfin at Neon Pulse nang hindi nire-restart ang app",
+    "settingsAppearanceThemeSubtitle": "Lumipat sa pagitan ng Lambent at Neon Pulse nang hindi nire-restart ang app",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Lumabas sa Moonfin?",
+    "exitApp": "Lumabas sa Lambent?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Hindi nakatakda. Susubukan ng Moonfin ang isang default na mpv.conf sa mga folder ng app/data.",
+    "notSetMpvConf": "Hindi nakatakda. Susubukan ng Lambent ang isang default na mpv.conf sa mga folder ng app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "I-toggle ang visibility ng home page sa bawat library. I-restart ang Moonfin para magkabisa ang mga pagbabago.",
+    "libraryVisibilityDescription": "I-toggle ang visibility ng home page sa bawat library. I-restart ang Lambent para magkabisa ang mga pagbabago.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "Pumili sa pagitan ng Moonfin, MakD, o i-off ang media bar",
+    "mediaBarModeDescription": "Pumili sa pagitan ng Lambent, MakD, o i-off ang media bar",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Maglaro sa Moonfin",
+    "playInMoonfin": "Maglaro sa Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Hindi nakita ang item sa iyong Moonfin library",
+    "itemNotFoundInLibrary": "Hindi nakita ang item sa iyong Lambent library",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Kasalukuyang nag-reboot ang server",
-    "adminServerRebootMessage": "Kasalukuyang nag-reboot ang server, mangyaring i-restart ang Moonfin",
+    "adminServerRebootMessage": "Kasalukuyang nag-reboot ang server, mangyaring i-restart ang Lambent",
     "adminActiveSessions": "Mga Aktibong Sesyon",
     "adminSessionsLoadFailed": "Nabigong i-load ang mga session",
     "adminNoActiveSessions": "Walang aktibong session",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Ipakita ang pindutan ng genre sa navigation bar",
     "settingsShowFavoritesButtonInNavigation": "Ipakita ang pindutan ng mga paborito sa navigation bar",
     "settingsShowLibrariesButtonInNavigation": "Ipakita ang pindutan ng mga aklatan sa navigation bar",
-    "settingsLibraryVisibilitySubtitle": "I-toggle ang visibility ng home page sa bawat library. I-restart ang Moonfin para magkabisa ang mga pagbabago.",
+    "settingsLibraryVisibilitySubtitle": "I-toggle ang visibility ng home page sa bawat library. I-restart ang Lambent para magkabisa ang mga pagbabago.",
     "settingsMediaBarAndLocalPreviews": "Media Bar at Local Previews",
     "settingsVisualOverlays": "Mga Visual na Overlay",
     "settingsSeasonalSurprise": "Pana-panahong Sorpresa",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Mga lisensya",
     "settingsOpenSourceLicenseNotices": "Open-source na mga paunawa sa lisensya",
     "settingsPrivacyPolicy": "Patakaran sa Privacy",
-    "settingsPrivacyPolicySubtitle": "Paano pinangangasiwaan ng Moonfin ang iyong data",
+    "settingsPrivacyPolicySubtitle": "Paano pinangangasiwaan ng Lambent ang iyong data",
     "settingsCheckForUpdates": "Tingnan ang Mga Update",
-    "settingsCheckForUpdatesSubtitle": "Tingnan ang pinakabagong release ng Moonfin",
+    "settingsCheckForUpdatesSubtitle": "Tingnan ang pinakabagong release ng Lambent",
     "settingsPoweredByFlutter": "Pinapatakbo ng Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# license notice} other {# na license notice}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Piliin ang mga SDH subtitle",
     "preferSdhSubtitlesSubtitle": "Unahin ang mga SDH/CC subtitle track kapag awtomatikong pumipili.",
     "webDiagnostics": "Web diagnostics",
-    "webDiagnosticsTitle": "Moonfin Web Diagnostics",
+    "webDiagnosticsTitle": "Lambent Web Diagnostics",
     "webDiagnosticsIntro": "Gamitin ang page na ito para i-diagnose ang mga isyu sa connectivity ng browser (CORS, mixed content, at mga discovery setting).",
     "webDiagnosticsDetectedMixedContentFailure": "Natukoy na Mixed-Content Failure",
     "webDiagnosticsDetectedCorsPreflightFailure": "Natukoy na CORS/Preflight Failure",
-    "webDiagnosticsMixedContentFailureBody": "Nakakita ang Moonfin ng HTTPS page na sumusubok tumawag sa isang HTTP server URL. Bina-block ng mga browser ang request na ito bago ito umabot sa iyong server.",
-    "webDiagnosticsCorsFailureBody": "Nakakita ang Moonfin ng browser-level na request failure na karaniwang sanhi ng kulang na CORS o preflight header sa media server.",
+    "webDiagnosticsMixedContentFailureBody": "Nakakita ang Lambent ng HTTPS page na sumusubok tumawag sa isang HTTP server URL. Bina-block ng mga browser ang request na ito bago ito umabot sa iyong server.",
+    "webDiagnosticsCorsFailureBody": "Nakakita ang Lambent ng browser-level na request failure na karaniwang sanhi ng kulang na CORS o preflight header sa media server.",
     "webDiagnosticsTargetUrl": "Target na URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "hindi naka-configure",
     "webDiagnosticsMixedContent": "Mixed Content",
     "webDiagnosticsMixedContentDetected": "Nilo-load ang page na ito sa HTTPS, ngunit isa o higit pang naka-configure na URL ang HTTP. Bina-block ng mga browser ang mga HTTPS page sa pagtawag sa mga HTTP API.",
-    "webDiagnosticsMixedContentFix": "Ayos: ihatid ang iyong media server o proxy endpoint sa pamamagitan ng HTTPS, o i-load ang Moonfin sa HTTP sa mga pinagkakatiwalaang lokal na network lamang.",
+    "webDiagnosticsMixedContentFix": "Ayos: ihatid ang iyong media server o proxy endpoint sa pamamagitan ng HTTPS, o i-load ang Lambent sa HTTP sa mga pinagkakatiwalaang lokal na network lamang.",
     "webDiagnosticsNoMixedContentDetected": "Walang malinaw na mixed-content na configuration na natukoy mula sa kasalukuyang mga runtime setting.",
     "webDiagnosticsCorsChecklist": "CORS Checklist",
     "webDiagnosticsCorsChecklistItem1": "• Payagan ang browser origin sa Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Ang Classic ay ang orihinal na nakasentrong layout ng Moonfin. Ang Modern ay isang responsive na cinematic na layout.",
+    "detailScreenStyleSubtitle": "Ang Classic ay ang orihinal na nakasentrong layout ng Lambent. Ang Modern ay isang responsive na cinematic na layout.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Gamitin ang local-library na algorithm ng Moonfin Recommends o ang online na Similarity Metrics ng TMDb. Tandaan: Kailangan ng Seerr integration para sa mga online na rekomendasyon.",
+    "recommendationSystemSubtitle": "Gamitin ang local-library na algorithm ng Lambent Recommends o ang online na Similarity Metrics ng TMDb. Tandaan: Kailangan ng Seerr integration para sa mga online na rekomendasyon.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Limitahan ang mga suhestiyon ng Moonfin Recommends ayon sa parental rating ng target na media",
+    "recommendationsApplyParentalRatingCapSubtitle": "Limitahan ang mga suhestiyon ng Lambent Recommends ayon sa parental rating ng target na media",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Binabago ng mga custom na theme ang mga visual na elemento sa buong Moonfin. Pumili ng isa sa mga opsyong ito para tumugma sa iyong istilo.",
+    "customThemeSubtitle": "Binabago ng mga custom na theme ang mga visual na elemento sa buong Lambent. Pumili ng isa sa mga opsyong ito para tumugma sa iyong istilo.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Mag-sign in sa Moonfin sa iyong telepono",
+    "carSignInPrompt": "Mag-sign in sa Lambent sa iyong telepono",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Ang Impeller ay ang modernong GPU renderer ng Flutter para sa mas maayos na animation at mas kaunting stutter. Sa ilang TV box at mas lumang GPU, maaari itong magdulot ng glitch o itim na video; i-off ito kung nakikita mo ang mga iyon. Pinipili ng Automatic ang pinakamahusay na default para sa iyong device. I-restart ang Moonfin para ilapat.",
+    "impellerRenderingSubtitle": "Ang Impeller ay ang modernong GPU renderer ng Flutter para sa mas maayos na animation at mas kaunting stutter. Sa ilang TV box at mas lumang GPU, maaari itong magdulot ng glitch o itim na video; i-off ito kung nakikita mo ang mga iyon. Pinipili ng Automatic ang pinakamahusay na default para sa iyong device. I-restart ang Lambent para ilapat.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Kailangang mag-restart ang Moonfin para baguhin ang rendering engine. Isara ang app ngayon, pagkatapos ay buksang muli ito para ilapat.",
+    "impellerRestartMessage": "Kailangang mag-restart ang Lambent para baguhin ang rendering engine. Isara ang app ngayon, pagkatapos ay buksang muli ito para ilapat.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
