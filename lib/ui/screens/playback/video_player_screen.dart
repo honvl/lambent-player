@@ -82,6 +82,7 @@ import '../../widgets/playback/player_loading_overlay.dart';
 import '../../widgets/playback/loading_animation_widget.dart';
 import '../../widgets/playback/chapter_marker_track.dart';
 import '../../widgets/playback/enhancement_chip.dart';
+import '../../widgets/playback/enhancement_panel.dart';
 import '../../widgets/playback/skip_segment_overlay.dart';
 import '../../widgets/playback/next_up_overlay.dart';
 import '../../widgets/playback/still_watching_dialog.dart';
@@ -5822,7 +5823,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
               accent: AppColorScheme.accent,
               fontSize: AppTypography.fontSizeMd,
               focusNode: _tvEnhancementFocus,
-              onPressed: _showStreamInfo,
+              onPressed: _showEnhancementPanel,
               onLeft: () {
                 if (_tvSecondaryLastFocus.context != null) {
                   _tvSecondaryLastFocus.requestFocus();
@@ -8186,6 +8187,37 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       };
       _showThrottledCastError(l10n.castActionFailed(label, describeError(e, l10n)));
     }
+  }
+
+  /// The 4K HDR chip's panel: what Lambent Server's PC enhancer does to the
+  /// stream. A stream that is not enhanced has nothing to adjust, so it falls
+  /// back to the stream info.
+  void _showEnhancementPanel() {
+    final url = _manager.currentResolution?.streamUrl;
+    if (!LambentEnhancement.isEnhancedUrl(url)) {
+      _showStreamInfo();
+      return;
+    }
+    final current = LambentEnhancement.fromUrl(url!);
+    unawaited(
+      showEnhancementPanel(
+        context,
+        current: current,
+        onApply: (chosen) {
+          // Pin only what changed; everything else keeps following the server.
+          LambentEnhancement.overrides = LambentEnhancement.overrides.merge(
+            chosen.changesFrom(current),
+          );
+          unawaited(_manager.reopenAtCurrentPosition());
+        },
+        onReset: () {
+          LambentEnhancement.overrides = LambentEnhancement.none;
+          unawaited(_manager.reopenAtCurrentPosition());
+        },
+        onShowStreamInfo: _showStreamInfo,
+      ),
+    );
+    _showControls();
   }
 
   void _showStreamInfo() {

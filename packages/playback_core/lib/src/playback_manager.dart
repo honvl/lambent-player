@@ -4070,6 +4070,12 @@ class PlaybackManager implements AudioOwnable {
     await _reResolveAtCurrentPosition(forceTranscode: mbps != null);
   }
 
+  /// Reopens the current stream at the current position. The enhancement
+  /// panel uses it after changing [LambentEnhancement.overrides], which the
+  /// resolver reads when it builds the URL.
+  Future<void> reopenAtCurrentPosition() =>
+      _reResolveAtCurrentPosition(reason: 'enhancement-change');
+
   /// Serializes re-resolves so rapid track switches can't tear down the same
   /// session twice or race two restarts.
   Future<void> _reResolveAtCurrentPosition({

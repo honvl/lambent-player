@@ -4875,10 +4875,13 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
     final isNeon = ThemeRegistry.active.id == ThemeRegistry.neonPulseId;
     if (AppColorScheme.isGlass) {
       // A glass capsule: 40px tall on a 1920 canvas, 10% white with a hairline.
+      // No alignment or fixed height: either makes the capsule fill the
+      // width a Wrap offers it. Padding alone sizes it to its text.
       return Container(
-        height: tvPx(40),
-        padding: EdgeInsets.symmetric(horizontal: tvPx(18)),
-        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(
+          horizontal: tvPx(18),
+          vertical: tvPx(9),
+        ),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.10),
           borderRadius: BorderRadius.circular(999),

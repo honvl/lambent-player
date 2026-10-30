@@ -444,6 +444,9 @@ class JellyfinMediaStreamResolver implements MediaStreamResolver {
         if (source.liveStreamId != null) {
           tcUrl = '$tcUrl${tcUrl.contains('?') ? '&' : '?'}LiveStreamId=${Uri.encodeComponent(source.liveStreamId!)}';
         }
+        // A Lambent enhanced stream carries its settings in the URL; what the
+        // viewer picked in the player overrides the server's offer.
+        tcUrl = LambentEnhancement.applyOverrides(tcUrl);
         return (tcUrl, StreamPlayMethod.transcode);
     }
   }

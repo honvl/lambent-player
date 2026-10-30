@@ -184,9 +184,11 @@ class HomeSectionConfig {
   bool get isPluginDynamic => kind == HomeSectionKind.pluginDynamic;
 
   static List<HomeSectionConfig> defaults() => const [
+    // Lambent lists the libraries in the nav pill, so the My Media tiles stay
+    // off and Continue Watching leads the home screen.
     HomeSectionConfig(
       type: HomeSectionType.libraryTilesSmall,
-      enabled: true,
+      enabled: false,
       order: 0,
     ),
     HomeSectionConfig(type: HomeSectionType.resume, enabled: true, order: 1),
