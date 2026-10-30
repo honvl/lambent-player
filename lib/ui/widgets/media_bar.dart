@@ -37,6 +37,7 @@ import '../../util/language_matching.dart';
 import '../../util/overlay_color_palette.dart';
 import '../../util/overview_text.dart';
 import '../../util/platform_detection.dart';
+import '../../util/tv_ui_scale.dart';
 import '../../l10n/app_localizations.dart';
 import '../util/error_message.dart';
 import '../../playback/appletv_preview_player.dart';
@@ -2197,6 +2198,43 @@ class _MediaBarState extends State<MediaBar>
     );
   }
 
+  /// The glass hero's scrim, from the mockup: a left-to-right fade (0.8, 0.4,
+  /// 0 of near-black over 0, 45 and 75% of the width) and a bottom fade (0.92
+  /// at the bottom edge, gone 58% of the way up). [shown] scales both.
+  Widget _glassHeroScrim(double shown) {
+    const ink = Color(0xFF08090C);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            ink.withValues(alpha: 0.8 * shown),
+            ink.withValues(alpha: 0.4 * shown),
+            ink.withValues(alpha: 0.0),
+            ink.withValues(alpha: 0.0),
+          ],
+          stops: const [0.0, 0.45, 0.75, 1.0],
+        ),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              ink.withValues(alpha: 0.0),
+              ink.withValues(alpha: 0.0),
+              ink.withValues(alpha: 0.92 * shown),
+            ],
+            stops: const [0.0, 0.42, 1.0],
+          ),
+        ),
+        child: const SizedBox.expand(),
+      ),
+    );
+  }
+
   Widget _buildMakdSlideshow(
     BuildContext context,
     List<MediaBarSlideItem> items,
@@ -2218,10 +2256,12 @@ class _MediaBarState extends State<MediaBar>
     final effectiveTopInset = isMobile ? 0.0 : toolbarInset;
     final visibleFraction =
         1 - widget.rowPeek / (widget.height - effectiveTopInset);
-    final contentWidth = (MediaQuery.of(context).size.width * 0.42).clamp(
-      280.0,
-      560.0,
-    );
+    // Lambent glass: the title joins the info block instead of floating high
+    // above it, and the block is as wide as the mockup's (900px of 1920).
+    final glassHero = AppColorScheme.isGlass && !isMobile;
+    final contentWidth = glassHero
+        ? tvPx(900)
+        : (MediaQuery.of(context).size.width * 0.42).clamp(280.0, 560.0);
     final hasVisibleTrailerVideo =
         (_activeYouTubeVideoId != null ||
             _activeWebTrailerUrl != null ||
@@ -2286,6 +2326,8 @@ class _MediaBarState extends State<MediaBar>
                         duration: const Duration(milliseconds: 250),
                         builder: (_, shown, _) => shown <= 0.0
                             ? const SizedBox.shrink()
+                            : glassHero
+                            ? _glassHeroScrim(shown * (overlayOpacity / 0.5).clamp(0.0, 1.0))
                             : DecoratedBox(
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
@@ -2337,7 +2379,7 @@ class _MediaBarState extends State<MediaBar>
                               ),
                       ),
                     ),
-                  if (currentItem != null)
+                  if (currentItem != null && !glassHero)
                     Builder(
                       builder: (context) {
                         final contentHeight =
@@ -2420,7 +2462,9 @@ class _MediaBarState extends State<MediaBar>
                     Positioned(
                       left: isMobile ? 0 : 50,
                       right: isMobile ? 0 : null,
-                      bottom: isMobile ? 24 : 20 + widget.rowPeek,
+                      bottom: isMobile
+                          ? 24
+                          : (glassHero ? tvPx(64) : 20) + widget.rowPeek,
                       child: AnimatedOpacity(
                         opacity: _isTrailerPlaying ? 0 : 1,
                         duration: const Duration(milliseconds: 250),
@@ -2453,6 +2497,17 @@ class _MediaBarState extends State<MediaBar>
                                     UserPreferences.mediaBarShowRatingBadges,
                                   ),
                                   isMobile: isMobile,
+                                  heroTitle: glassHero
+                                      ? SizedBox(
+                                          width: contentWidth,
+                                          height: tvPx(224),
+                                          child: _buildLogoWithShadow(
+                                            currentItem.logoUrl,
+                                            currentItem.title,
+                                            hero: true,
+                                          ),
+                                        )
+                                      : null,
                                   onPlay: () =>
                                       _navigateToItemAndPlay(context, items),
                                   onInfo: () => _navigateToItem(context, items),
@@ -3097,20 +3152,21 @@ class _MediaBarState extends State<MediaBar>
     }
   }
 
-  Widget _buildLogoFallback(String title) => Align(
-    alignment: Alignment.centerLeft,
-    child: MediaBarTitle(title: title, shadows: _textShadows),
+  Widget _buildLogoFallback(String title, {bool hero = false}) => Align(
+    // A hero title sits at the bottom of its box, just above the info line.
+    alignment: hero ? Alignment.bottomLeft : Alignment.centerLeft,
+    child: MediaBarTitle(title: title, shadows: _textShadows, hero: hero),
   );
 
-  Widget _buildLogoWithShadow(String? url, String title) {
-    if (url == null) return _buildLogoFallback(title);
+  Widget _buildLogoWithShadow(String? url, String title, {bool hero = false}) {
+    if (url == null) return _buildLogoFallback(title, hero: hero);
     Widget image() => OfflineAwareImage(
       imageUrl: url,
       fit: BoxFit.contain,
-      alignment: Alignment.centerLeft,
+      alignment: hero ? Alignment.bottomLeft : Alignment.centerLeft,
       fadeInDuration: Duration.zero,
       priority: ImageFetchPriority.high,
-      errorWidget: (_, _, _) => _buildLogoFallback(title),
+      errorWidget: (_, _, _) => _buildLogoFallback(title, hero: hero),
     );
     return Stack(
       fit: StackFit.expand,
@@ -3388,10 +3444,45 @@ class _SlideInfo extends StatelessWidget {
 class _MetadataRow extends StatelessWidget {
   final MediaBarSlideItem item;
 
-  const _MetadataRow({required this.item});
+  /// The Lambent glass hero's info line: "1927 · 2h 33m · Science fiction" in
+  /// plain text, with the content rating as a glass chip after it.
+  final bool glass;
+
+  const _MetadataRow({required this.item, this.glass = false});
+
+  Widget _glassRow() {
+    final facts = <String>[
+      if (item.year != null) item.year.toString(),
+      if (item.itemType != 'Series' && item.runtime != null)
+        item.runtime!.inHours > 0
+            ? '${item.runtime!.inHours}h ${item.runtime!.inMinutes.remainder(60)}m'
+            : '${item.runtime!.inMinutes}m',
+      if (item.genres.isNotEmpty) item.genres.take(3).join(', '),
+    ];
+    final rating = item.officialRating;
+    if (facts.isEmpty && rating == null) return const SizedBox.shrink();
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: tvPx(12),
+      runSpacing: tvPx(8),
+      children: [
+        if (facts.isNotEmpty)
+          Text(
+            facts.join(' \u00B7 '),
+            style: TextStyle(
+              color: AppColorScheme.onSurface.withValues(alpha: 0.82),
+              fontSize: tvPx(26),
+              shadows: _textShadows,
+            ),
+          ),
+        if (rating != null) _GlassChip(label: rating),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (glass) return _glassRow();
     final theme = Theme.of(context);
     final parts = <Widget>[];
 
@@ -3466,6 +3557,40 @@ class _MetadataRow extends StatelessWidget {
         style: theme.textTheme.labelSmall?.copyWith(
           color: AppColorScheme.onSurface.withValues(alpha: 0.9),
           shadows: _textShadows,
+        ),
+      ),
+    );
+  }
+}
+
+/// A mockup chip: a capsule 40px tall (on a 1920 canvas) with a 10% white fill
+/// and a hairline white border, its label 20px semibold.
+class _GlassChip extends StatelessWidget {
+  final String label;
+
+  const _GlassChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: tvPx(40),
+      padding: EdgeInsets.symmetric(horizontal: tvPx(18)),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.16),
+          width: 1,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: AppColorScheme.onSurface,
+          fontSize: tvPx(20),
+          fontWeight: FontWeight.w600,
+          height: 1.0,
         ),
       ),
     );
@@ -3555,6 +3680,10 @@ class _MakdContent extends StatelessWidget {
   final bool showLabels;
   final bool showBadges;
   final bool isMobile;
+
+  /// The Lambent glass hero title (logo or big text), drawn above the info
+  /// line. Null leaves the title to the layout, as in the other themes.
+  final Widget? heroTitle;
   final VoidCallback onPlay;
   final VoidCallback onInfo;
 
@@ -3567,6 +3696,7 @@ class _MakdContent extends StatelessWidget {
     required this.showLabels,
     required this.showBadges,
     required this.isMobile,
+    this.heroTitle,
     required this.onPlay,
     required this.onInfo,
   });
@@ -3574,6 +3704,7 @@ class _MakdContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final glass = heroTitle != null;
     final crossAxis = isMobile
         ? CrossAxisAlignment.center
         : CrossAxisAlignment.start;
@@ -3581,7 +3712,11 @@ class _MakdContent extends StatelessWidget {
       crossAxisAlignment: crossAxis,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _MetadataRow(item: item),
+        if (heroTitle != null) ...[
+          heroTitle!,
+          SizedBox(height: tvPx(22)),
+        ],
+        _MetadataRow(item: item, glass: glass),
         if (ratings.isNotEmpty ||
             item.communityRating != null ||
             item.criticRating != null) ...[
@@ -3597,19 +3732,27 @@ class _MakdContent extends StatelessWidget {
           ),
         ],
         if (!isMobile && (item.overview?.isNotEmpty ?? false)) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: glass ? tvPx(22) : 10),
           Text(
             cleanOverview(item.overview),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColorScheme.onSurface.withValues(alpha: 0.88),
-              height: 1.38,
-              shadows: _textShadows,
-            ),
+            style: glass
+                // 25px on a 1920 canvas, 1.45 leading, 80% white.
+                ? TextStyle(
+                    color: AppColorScheme.onSurface.withValues(alpha: 0.8),
+                    fontSize: tvPx(25),
+                    height: 1.45,
+                    shadows: _textShadows,
+                  )
+                : theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColorScheme.onSurface.withValues(alpha: 0.88),
+                    height: 1.38,
+                    shadows: _textShadows,
+                  ),
           ),
         ],
-        const SizedBox(height: 14),
+        SizedBox(height: glass ? 0 : 14),
         if (!PlatformDetection.isTV)
           _MakdActionButtons(
             onPlay: item.isExternal ? null : onPlay,
