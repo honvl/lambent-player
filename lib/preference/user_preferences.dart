@@ -1699,9 +1699,8 @@ class UserPreferences extends ChangeNotifier {
 
   static final visualTheme = EnumPreference(
     key: 'app_theme_id',
-    defaultValue: PlatformDetection.isApple || PlatformDetection.isAppleTV
-        ? VisualThemeId.glass
-        : VisualThemeId.moonfin,
+    // Lambent ships the glass skin on every platform.
+    defaultValue: VisualThemeId.glass,
     values: VisualThemeId.values,
   );
 

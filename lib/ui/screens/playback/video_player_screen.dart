@@ -4914,19 +4914,69 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             ),
             child: _buildTrickplaySeekPreview(),
           ),
-          Container(
-            key: _bottomOverlayKey,
-            padding: EdgeInsets.only(
-              bottom: padding.bottom + AppSpacing.spaceSm,
-              left: AppSpacing.spaceLg,
-              right: AppSpacing.spaceLg,
-            ),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [Colors.black87, Colors.transparent],
+          if (AppColorScheme.isGlass)
+            _buildTvGlassControlsBar(padding)
+          else
+            Container(
+              key: _bottomOverlayKey,
+              padding: EdgeInsets.only(
+                bottom: padding.bottom + AppSpacing.spaceSm,
+                left: AppSpacing.spaceLg,
+                right: AppSpacing.spaceLg,
               ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Colors.black87, Colors.transparent],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildSeekbar(),
+                  const SizedBox(height: AppSpacing.spaceXs),
+                  _buildTvBottomControlsRow(),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// The glass theme's TV controls: the seekbar and buttons on a floating
+  /// rounded bar instead of a black fade along the bottom edge. Video can't be
+  /// blurred under it, so a dark tint and a bright rim carry the glass look.
+  Widget _buildTvGlassControlsBar(EdgeInsets padding) {
+    const radius = 40.0;
+    return Padding(
+      key: _bottomOverlayKey,
+      padding: EdgeInsets.only(
+        bottom: padding.bottom + AppSpacing.spaceLg,
+        left: AppSpacing.spaceXl,
+        right: AppSpacing.spaceXl,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0x8C101218),
+          borderRadius: AppRadius.circular(radius),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x73000000),
+              blurRadius: 60,
+              offset: Offset(0, 24),
+            ),
+          ],
+        ),
+        child: CustomPaint(
+          foregroundPainter: const GlassHairlinePainter(radius: radius),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.spaceLg,
+              AppSpacing.spaceMd,
+              AppSpacing.spaceLg,
+              AppSpacing.spaceMd,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -4937,7 +4987,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -8129,25 +8179,34 @@ class _TvFocusButtonState extends State<_TvFocusButton> {
         }
         return KeyEventResult.ignored;
       },
-      child: AnimatedContainer(
+      child: AnimatedScale(
         duration: const Duration(milliseconds: 150),
-        width: widget.extent,
-        height: widget.extent,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: _focused
-              ? Colors.white.withValues(alpha: 0.22)
-              : Colors.transparent,
-          border: _focused
-              ? Border.fromBorderSide(
-                  ThemeRegistry.active.borders.focusBorder.copyWith(
-                    color: Colors.white,
-                    width: 2,
-                  ),
-                )
-              : null,
+        scale: _focused && AppColorScheme.isGlass ? 1.1 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: widget.extent,
+          height: widget.extent,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _focused
+                ? Colors.white.withValues(
+                    alpha: AppColorScheme.isGlass ? 0.32 : 0.22,
+                  )
+                : Colors.transparent,
+            border: _focused
+                ? Border.fromBorderSide(
+                    ThemeRegistry.active.borders.focusBorder.copyWith(
+                      color: Colors.white,
+                      width: AppColorScheme.isGlass ? 3 : 2,
+                    ),
+                  )
+                : null,
+            boxShadow: _focused && AppColorScheme.isGlass
+                ? const [BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24)]
+                : null,
+          ),
+          child: Center(child: widget.child),
         ),
-        child: Center(child: widget.child),
       ),
     );
     final button = widget.onPressed != null
