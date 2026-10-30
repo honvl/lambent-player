@@ -60,8 +60,8 @@ class LambentEnhancement {
   static const qualityRange = (min: 1, max: 4);
   static const saturationRange = (min: 0, max: 200);
   static const contrastRange = (min: 0, max: 200);
-  static const middleGrayRange = (min: 20, max: 100);
-  static const peakRange = (min: 200, max: 1000);
+  static const middleGrayRange = (min: 10, max: 100);
+  static const peakRange = (min: 400, max: 2000);
   static const hueRange = (min: -30, max: 30);
 
   static bool isEnhancedUrl(String? url) {
