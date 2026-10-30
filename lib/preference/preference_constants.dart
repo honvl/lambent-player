@@ -981,6 +981,7 @@ enum ScreensaverBackdrop {
   calm,
   neonPulse,
   aurora,
+  nightLandscape,
 }
 
 enum ScreensaverPosition {

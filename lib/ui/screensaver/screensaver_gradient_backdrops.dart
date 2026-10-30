@@ -69,6 +69,7 @@ Color _getAccentColor(ScreensaverBackdrop backdrop, [double pulse = 0.0]) {
       return const Color(0xFF00CEC9);
     case ScreensaverBackdrop.library:
     case ScreensaverBackdrop.black:
+    case ScreensaverBackdrop.nightLandscape:
       return Colors.transparent;
   }
 }
@@ -137,6 +138,7 @@ List<Color> _getColors(ScreensaverBackdrop backdrop, [double pulse = 0.0]) {
       ];
     case ScreensaverBackdrop.library:
     case ScreensaverBackdrop.black:
+    case ScreensaverBackdrop.nightLandscape:
       return const [Colors.black, Colors.black];
   }
 }

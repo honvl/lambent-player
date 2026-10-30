@@ -2218,13 +2218,14 @@ class UserPreferences extends ChangeNotifier {
 
   static final screensaverBackdrop = EnumPreference(
     key: 'pref_screensaver_backdrop',
-    defaultValue: ScreensaverBackdrop.library,
+    // Lambent: a dark, drifting night scene that suits an OLED panel.
+    defaultValue: ScreensaverBackdrop.nightLandscape,
     values: ScreensaverBackdrop.values,
   );
 
   static final screensaverComponent = EnumPreference(
     key: 'pref_screensaver_component',
-    defaultValue: ScreensaverComponent.moonfinLogo,
+    defaultValue: ScreensaverComponent.none,
     values: ScreensaverComponent.values,
   );
 
@@ -2280,7 +2281,8 @@ class UserPreferences extends ChangeNotifier {
 
   static final screensaverDimming = Preference(
     key: 'pref_screensaver_dimming',
-    defaultValue: 30,
+    // The night scene is already near black; dimming would only hide it.
+    defaultValue: 0,
   );
 
   static final screensaverClockMode = EnumPreference(

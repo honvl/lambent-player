@@ -15,6 +15,7 @@ import '../../widgets/settings/preference_tiles.dart';
 import '../../widgets/settings/settings_section_header.dart';
 import '../../screensaver/bouncing_box.dart';
 import '../../screensaver/screensaver_gradient_backdrops.dart';
+import '../../screensaver/screensaver_night_landscape.dart';
 import '../../screensaver/screensaver_view.dart';
 import '../../widgets/playback/loading_animation_widget.dart';
 import 'settings_app_bar.dart';
@@ -269,6 +270,7 @@ class _ScreensaverSettingsScreenState extends State<ScreensaverSettingsScreen> {
                         l10n.screensaverBackdropNeonPulse,
                       ScreensaverBackdrop.aurora =>
                         l10n.screensaverBackdropAurora,
+                      ScreensaverBackdrop.nightLandscape => 'Night landscape',
                     },
                   ),
                   EnumPreferenceTile<ScreensaverComponent>(
@@ -482,6 +484,8 @@ class _ScreensaverSettingsScreenState extends State<ScreensaverSettingsScreen> {
       case ScreensaverBackdrop.neonPulse:
       case ScreensaverBackdrop.aurora:
         backdropLayer = AnimatedGradientBackdrop(backdrop: backdrop);
+      case ScreensaverBackdrop.nightLandscape:
+        backdropLayer = const NightLandscapeBackdrop();
     }
 
     final position = _prefs.get(UserPreferences.screensaverPosition);

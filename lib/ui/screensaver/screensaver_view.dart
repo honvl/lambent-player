@@ -12,6 +12,7 @@ import '../widgets/playback/loading_animation_widget.dart';
 import 'bouncing_box.dart';
 import 'screensaver_content_service.dart';
 import 'screensaver_gradient_backdrops.dart';
+import 'screensaver_night_landscape.dart';
 
 class ScreensaverView extends StatefulWidget {
   const ScreensaverView({super.key});
@@ -131,6 +132,8 @@ class _ScreensaverViewState extends State<ScreensaverView> {
               backdrop == ScreensaverBackdrop.neonPulse ||
               backdrop == ScreensaverBackdrop.aurora)
             AnimatedGradientBackdrop(backdrop: backdrop)
+          else if (backdrop == ScreensaverBackdrop.nightLandscape)
+            const NightLandscapeBackdrop()
           else
             const ColoredBox(color: Colors.black),
 
