@@ -10,7 +10,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get animeMarkerFiller =>
@@ -29,28 +29,28 @@ class AppLocalizationsEs extends AppLocalizations {
       'Insignia en un episodio de anime adaptado del manga original';
 
   @override
-  String get animeMarkerSubbed => 'Subbed';
+  String get animeMarkerSubbed => 'Subtitulado';
 
   @override
-  String get animeMarkerDubbed => 'Dubbed';
+  String get animeMarkerDubbed => 'Doblado';
 
   @override
-  String get animeMarkerSubbedAndDubbed => 'Subbed/Dubbed';
+  String get animeMarkerSubbedAndDubbed => 'Subtitulado/Doblado';
 
   @override
   String get animeMarkerSubbedShort => 'Sub';
 
   @override
-  String get animeMarkerDubbedShort => 'Dub';
+  String get animeMarkerDubbedShort => 'Dob';
 
   @override
-  String get animeMarkerSubbedAndDubbedShort => 'Sub/Dub';
+  String get animeMarkerSubbedAndDubbedShort => 'Sub/Dob';
 
   @override
-  String get animeMarkerPending => 'Pending';
+  String get animeMarkerPending => 'Pendiente';
 
   @override
-  String get animeMarkerRecap => 'Recap';
+  String get animeMarkerRecap => 'Recapitulación';
 
   @override
   String get interfaceLanguage => 'Idioma de la interfaz';
@@ -87,31 +87,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get quickConnectScanHint =>
-      'Or scan this with a phone that\'s signed in to your server';
+      'O escanea esto con un teléfono que esté identificado en tu servidor';
 
   @override
   String get quickConnectTapOrScanHint =>
-      'Tap to approve in your browser, or scan this with another device';
+      'Toca para aprobar en tu navegador, o escanea esto con otro dispositivo';
 
   @override
-  String get timesUpTitle => 'Time\'s up';
+  String get timesUpTitle => 'Se acabó el tiempo';
 
   @override
-  String get timesUpMessage => 'This account isn\'t available right now.';
+  String get timesUpMessage => 'Esta cuenta no está disponible ahora mismo.';
 
   @override
   String timesUpResumesToday(String time) {
-    return 'You can use it again today at $time.';
+    return 'Puedes usar esto hoy otra vez a las $time.';
   }
 
   @override
   String timesUpResumesTomorrow(String time) {
-    return 'You can use it again tomorrow at $time.';
+    return 'Puedes usar esto otra vez mañana a las $time.';
   }
 
   @override
   String timesUpResumesOn(String day, String time) {
-    return 'You can use it again on $day at $time.';
+    return 'Puedes usar esto otra vez el día $day a las $time.';
   }
 
   @override
@@ -128,7 +128,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginForbidden =>
-      'This account can\'t sign in right now. It may be outside its allowed hours, locked or disabled. Try again later or ask an administrator.';
+      'Esta cuenta no puede ser registrada ahora mismo. Puede que sea una hora no permitida, esté bloqueada o deshabilitada. Inténtalo otra vez después o pregúntale a un administrador.';
 
   @override
   String quickConnectUnavailable(String detail) {
@@ -151,7 +151,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'Versión Moonfin $version';
+    return 'Versión Lambent $version';
   }
 
   @override
@@ -203,7 +203,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no pudo acceder al llavero del sistema. El inicio de sesión puede continuar, pero el almacenamiento seguro de tokens podría no estar disponible hasta que se desbloquee el llavero.';
+      'Lambent no pudo acceder al llavero del sistema. El inicio de sesión puede continuar, pero el almacenamiento seguro de tokens podría no estar disponible hasta que se desbloquee el llavero.';
 
   @override
   String get ok => 'DE ACUERDO';
@@ -216,7 +216,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get detailScreenStyleSubtitle =>
-      'Clásico es el diseño centrado original de moonfin. Moderno es un diseño cinematográfico adaptable.';
+      'Clásico es el diseño centrado original de moonfin. Moderno es un diseño cinematográfico adaptable. Foco es un diseño que pone la imagen principal en el primer plano, con tarjetas de contenido emergentes. Nuevo es un diseño a pantalla completa, con secciones apiladas verticalmente a lo largo de la página. Minimalista muestra la ilustración, un botón de reproducción y los episodios.';
 
   @override
   String get detailScreenStyleMoonfin => 'Clásico';
@@ -225,46 +225,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String get detailScreenStyleModern => 'Moderno';
 
   @override
-  String get detailScreenStyleSpotlight => 'Spotlight';
+  String get detailScreenStyleSpotlight => 'Foco';
 
   @override
-  String get spotlightMoreActions => 'More Actions';
+  String get spotlightMoreActions => 'Más acciones';
 
   @override
-  String get spotlightCastCrewStudios => 'Cast, Crew, and Studios';
+  String get spotlightCastCrewStudios => 'Reparto, equipo y estudios';
 
   @override
-  String get spotlightChaptersExtras => 'Chapters and Extras';
+  String get spotlightChaptersExtras => 'Capítulos y extras';
 
   @override
-  String get spotlightFileDetails => 'File Details';
+  String get spotlightFileDetails => 'Detalles del archivo';
 
   @override
-  String get spotlightSimilarRecommendations => 'Similar and Recommendations';
+  String get spotlightSimilarRecommendations => 'Similares y recomendaciones';
 
   @override
-  String get spotlightSeasonsEpisodes => 'Seasons and Episodes';
+  String get spotlightSeasonsEpisodes => 'Temporadas y episodios';
 
   @override
-  String get spotlightMoreEpisodes => 'More Episodes';
+  String get spotlightMoreEpisodes => 'Más episodios';
 
   @override
-  String get spotlightFilmography => 'Filmography';
+  String get spotlightFilmography => 'Filmografía';
 
   @override
-  String get spotlightCollectionsCard => 'Collections';
+  String get spotlightCollectionsCard => 'Collecciones';
 
   @override
-  String get spotlightPlaylistOrder => 'Playlist Order';
+  String get spotlightPlaylistOrder => 'Orden de reproducción';
 
   @override
-  String get spotlightMoviesAndShows => 'Movies & Shows';
+  String get spotlightMoviesAndShows => 'Películas & series';
 
   @override
-  String get spotlightSimilarSeerr => 'Similar (Seerr)';
+  String get spotlightSimilarSeerr => 'Parecido (Seerr)';
 
   @override
-  String get spotlightRecommendationsSeerr => 'Recommendations (Seerr)';
+  String get spotlightRecommendationsSeerr => 'Recomendaciones (Seerr)';
 
   @override
   String spotlightPeopleCount(int count) {
@@ -432,10 +432,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get detailScreenStyleNouveau => 'Nouveau';
+  String get detailScreenStyleNouveau => 'Nuevo';
 
   @override
-  String get detailScreenStyleMinimalist => 'Minimalist';
+  String get detailScreenStyleMinimalist => 'Minimalista';
 
   @override
   String get expandedTabs => 'Pestañas expandidas';
@@ -445,7 +445,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Muestra automáticamente el contenido de las pestañas al navegar por ellas. Desactívalo para abrir y cerrar cada pestaña manualmente.';
 
   @override
-  String get showTechnicalDetails => '¿Mostrar detalles técnicos?';
+  String get showTechnicalDetails => 'Mostrar detalles técnicos';
 
   @override
   String get showTechnicalDetailsSubtitle =>
@@ -456,10 +456,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Usa el algoritmo local de la biblioteca Moonfin Recommends o las métricas de similitud en línea de TMDb. Nota: las recomendaciones en línea requieren la integración con Seerr.';
+      'Usa el algoritmo local de la biblioteca Lambent Recommends, el motor de servidor Jellyfin Recommends, o las métricas de similitud en línea de TMDb. Nota: las recomendaciones en línea requieren la integración con Seerr.';
 
   @override
-  String get recommendationSystemMoonfin => 'Moonfin Recommends';
+  String get recommendationSystemMoonfin => 'Lambent Recommends';
 
   @override
   String get recommendationSystemJellyfin => 'Jellyfin Recommends';
@@ -469,11 +469,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCap =>
-      '¿Aplicar límite de clasificación parental?';
+      'Activar límite de clasificación parental para Recomendados';
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      'Limita las sugerencias de Moonfin Recommends según la clasificación parental del contenido de referencia';
+      'Limita las sugerencias de Lambent Recommends según la clasificación parental del contenido de referencia';
 
   @override
   String get interfaceStyle => 'Estilo de la interfaz';
@@ -492,39 +492,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get interfaceStyleMaterial => 'Material';
 
   @override
-  String get interfaceLayout => 'Interface Layout';
+  String get interfaceLayout => 'Diseño de interfaz';
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Override the detected layout when this device is read wrong. Restart Moonfin for changes to take effect.';
+      'Sobreescribe el diseño de la interfaz cuando este dispositivo lo lea mal. Vuelve a encender Lambent para que los cambios se lleven a cabo.';
 
   @override
-  String get interfaceLayoutAutomatic => 'Automatic';
+  String get interfaceLayoutAutomatic => 'Automático';
 
   @override
   String get interfaceLayoutTv => 'TV';
 
   @override
-  String get interfaceLayoutDesktop => 'Desktop';
+  String get interfaceLayoutDesktop => 'Escritorio';
 
   @override
-  String get interfaceLayoutPhone => 'Phone';
+  String get interfaceLayoutPhone => 'Teléfono';
 
   @override
   String get glassQuality => 'Calidad del cristal';
 
   @override
-  String get oledMode => 'OLED Mode';
+  String get oledMode => 'Modo OLED';
 
   @override
   String get oledModeSubtitle =>
-      'Deepen blacks and enrich artwork. Best on OLED displays.';
+      'Acentúa los negros y enriquece las ilustraciones. Funciona mejor en pantallas OLED.';
 
   @override
-  String get oledModeSubtle => 'Subtle';
+  String get oledModeSubtle => 'Sutil';
 
   @override
-  String get oledModeVivid => 'Vivid';
+  String get oledModeVivid => 'Vívido';
 
   @override
   String get glassQualitySubtitle =>
@@ -540,93 +540,93 @@ class AppLocalizationsEs extends AppLocalizations {
   String get glassQualityReduced => 'Reducido';
 
   @override
-  String get performanceMode => 'Performance';
+  String get performanceMode => 'Rendimiento';
 
   @override
   String get performanceModeSubtitle =>
-      'Auto measures this device and holds back on the ones short on memory, which keeps fewer images in memory and leaves trailers as still images. Takes full effect on the next launch.';
+      'Mide automáticamente este dispositivo y usa menos recursos en aquellos con poca memoria, lo que hace que se queden menos imágenes en la memoria y los tráilers se quedan como imágenes estáticas. Se activará por completo la próxima vez que enciendas la aplicación.';
 
   @override
-  String get performanceModeAuto => 'Auto';
+  String get performanceModeAuto => 'Automático';
 
   @override
-  String get performanceModeStandard => 'Standard';
+  String get performanceModeStandard => 'Estándar';
 
   @override
-  String get performanceModeReduced => 'Reduced';
+  String get performanceModeReduced => 'Reducido';
 
   @override
-  String get rendererMode => 'Renderer';
+  String get rendererMode => 'Renderizado';
 
   @override
   String get rendererModeSubtitle =>
-      'Auto uses Impeller on boxes whose graphics run it smoothly and Skia everywhere else. Pick Skia if animations or video look wrong. Takes effect on the next launch.';
+      'Automático usa Impeller en los dispositivos cuya gráfica lo ejecuta con fluidez y Skia en el resto. Selecciona Skia si las animaciones o el vídeo se ven mal. Se aplica en el próximo inicio.';
 
   @override
-  String get rendererModeAuto => 'Auto';
+  String get rendererModeAuto => 'Automático';
 
   @override
   String get rendererModeSkia => 'Skia';
 
   @override
   String get trailerPreviewHeldBack =>
-      'Off because Performance is set to Reduced for this device';
+      'Apagado porque la opción de Rendimiento elegida en este dispositivo es Reducido';
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación';
+      'Usa un tema completamente personalizado y cambia entre interfaces de usuario inspiradas en Apple o Material';
 
   @override
   String get customThemeTitle => 'Tema personalizado';
 
   @override
   String get customThemeSubtitle =>
-      'Los temas personalizados modifican los elementos visuales de todo Moonfin. Elige una de estas opciones según tu estilo.';
+      'Los temas personalizados modifican los elementos visuales de todo Lambent. Elige una de estas opciones según tu estilo.';
 
   @override
-  String get keyboardStyle => 'Keyboard Style';
+  String get keyboardStyle => 'Estilo de teclado';
 
   @override
   String get keyboardStyleDescription =>
-      'Native uses your TV\'s own keyboard. Classic is the original Moonfin keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
+      'Nativo utiliza el teclado por defecto de la televisión. Clásico es el teclado original de Lambent. Vidrio es un panel esmerilado con teclas más grandes. Acoplado ocupa la parte inferior de la pantalla y muestra lo que escribes encima de las teclas.';
 
   @override
-  String get keyboardStyleNative => 'Native';
+  String get keyboardStyleNative => 'Nativo';
 
   @override
-  String get keyboardStyleClassic => 'Classic';
+  String get keyboardStyleClassic => 'Clásico';
 
   @override
-  String get keyboardStyleGlass => 'Glass';
+  String get keyboardStyleGlass => 'Vidrio';
 
   @override
-  String get keyboardStyleDocked => 'Docked';
+  String get keyboardStyleDocked => 'Acoplado';
 
   @override
-  String get keyboardSpace => 'space';
+  String get keyboardSpace => 'espacio';
 
   @override
-  String get keyboardHoldForAccents => 'hold for accents';
+  String get keyboardHoldForAccents => 'mantener pulsado para acentos';
 
   @override
-  String get keyboardClose => 'close';
+  String get keyboardClose => 'cerrar';
 
   @override
-  String get controller => 'Controller';
+  String get controller => 'Mando';
 
   @override
-  String get gamepadNavigation => 'Gamepad Navigation';
+  String get gamepadNavigation => 'Navegación de mando';
 
   @override
   String get gamepadNavigationDescription =>
-      'Let a connected game controller move focus and select items';
+      'Permite a un mando mover el foco y seleccionar cosas';
 
   @override
   String get themeMoonfin => 'Moonfin';
 
   @override
   String get themeMoonfinSubtitle =>
-      'Aspecto actual de Moonfin que a todos les encanta';
+      'El aspecto limpio original de Moonfin por defecto.';
 
   @override
   String get themeNeonPulse => 'Pulso de neón';
@@ -683,26 +683,27 @@ class AppLocalizationsEs extends AppLocalizations {
       'Error de red al contactar con Emby Connect o el servidor seleccionado';
 
   @override
-  String get signInWithPlex => 'Sign in with Plex';
+  String get signInWithPlex => 'Identificarse con Plex';
 
   @override
   String get plexLinkInstructions =>
-      'Go to plex.tv/link on any device and enter this code';
+      'Ve a plex.tv/link en cualquier dispositivo e introduce este código';
 
   @override
-  String get plexOpenLink => 'Open plex.tv/link';
+  String get plexOpenLink => 'Abre plex.tv/link';
 
   @override
-  String get plexWaitingForApproval => 'Waiting for you to approve the code...';
+  String get plexWaitingForApproval => 'Esperando a que apruebes el código...';
 
   @override
-  String get plexSignInWithPassword => 'Sign in with a password';
+  String get plexSignInWithPassword => 'Identifícate con una contraseña';
 
   @override
-  String get plexVerificationCode => 'Verification code';
+  String get plexVerificationCode => 'Código de verificación';
 
   @override
-  String get plexNoServers => 'No Plex servers found on this account';
+  String get plexNoServers =>
+      'No se han encontrado servidores Plex en esta cuenta';
 
   @override
   String get loadingLinkedServers => 'Cargando servidores vinculados...';
@@ -723,7 +724,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get exitApp => '¿Salir de Moonfin?';
+  String get exitApp => '¿Salir de Lambent?';
 
   @override
   String get exitAppConfirmation => '¿Estás seguro de que quieres salir?';
@@ -750,17 +751,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gameFastForward => 'Avance rápido';
 
   @override
-  String get gameOrientation => 'Game orientation';
+  String get gameOrientation => 'Orientación de juego';
 
   @override
   String get gameOrientationSubtitle =>
-      'Screen orientation while playing games';
+      'Orientación de pantalla mientras se esté jugando a juegos';
 
   @override
-  String get landscape => 'Landscape';
+  String get landscape => 'Apaisado';
 
   @override
-  String get portrait => 'Portrait';
+  String get portrait => 'Retrato';
 
   @override
   String get gameEmulatorSettings => 'Ajustes del emulador';
@@ -772,20 +773,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gameHoldToOpenMenu => 'Mantén pulsado para abrir el menú';
 
   @override
-  String get gameKeepPlaying => 'Keep playing';
+  String get gameKeepPlaying => 'Seguir jugando';
 
   @override
-  String get gameSaveAndExit => 'Save & exit';
+  String get gameSaveAndExit => 'Guardar & salir';
 
   @override
-  String get gameExitGame => 'Exit game';
+  String get gameExitGame => 'Salir del juego';
 
   @override
-  String get gameSavingBeforeExit => 'Saving…';
+  String get gameSavingBeforeExit => 'Guardando…';
 
   @override
   String get gameSaveFailedStillPlaying =>
-      'Could not save state. Still playing.';
+      'No se ha podido guardar la partida. Sigues jugando.';
 
   @override
   String get gamePlaybackUnsupported =>
@@ -928,13 +929,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get extraLarge => 'Muy grande';
 
   @override
-  String get uiScaleGrandparents => 'Grandparents';
+  String get uiScaleGrandparents => 'Abuelos';
 
   @override
-  String get uiScaleGreatGrandparents => 'Great-Grandparents';
+  String get uiScaleGreatGrandparents => 'Bisabuelos';
 
   @override
-  String get scrollDirection => 'Scroll Direction';
+  String get scrollDirection => 'Dirección de desplazamiento';
 
   @override
   String get scrollDirectionVertical => 'Vertical';
@@ -1018,7 +1019,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scrollRight => 'Desplazar a la derecha';
 
   @override
-  String get scrollToTop => 'Scroll to top';
+  String get scrollToTop => 'Desplazarse a la cima';
 
   @override
   String get couldNotLoadGenre =>
@@ -1202,10 +1203,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get latestAudiobooks => 'Últimos audiolibros';
 
   @override
-  String get latestComics => 'Latest Comics';
+  String get latestComics => 'Últimos cómics';
 
   @override
-  String get comics => 'Comics';
+  String get comics => 'Cómics';
 
   @override
   String bookSeriesItemCount(int count) {
@@ -1225,14 +1226,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookFormatAudiobook => 'Audiolibro';
 
   @override
-  String get bookFormatComic => 'Comic';
+  String get bookFormatComic => 'Cómic';
 
   @override
   String get noBooksFound => 'No se encontraron libros para este autor.';
 
   @override
   String get noBooksFoundDescription =>
-      'This library does not contain any books, audiobooks, or comics yet.';
+      'Esta biblioteca aún no contiene libros, audiolibros o cómics.';
 
   @override
   String bookPercentRead(int percent) {
@@ -1446,7 +1447,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get extras => 'Extras';
 
   @override
-  String get additionalParts => 'Additional Parts';
+  String get additionalParts => 'Partes adicionales';
 
   @override
   String get behindTheScenes => 'Tras las cámaras';
@@ -1521,7 +1522,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cast => 'Transmitir';
 
   @override
-  String get castMembers => 'Cast';
+  String get castMembers => 'Reparto';
 
   @override
   String get trailer => 'Tráiler';
@@ -1542,10 +1543,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get downloaded => 'Descargado';
 
   @override
-  String get finalizingDownload => 'Finalizing…';
+  String get finalizingDownload => 'Terminando…';
 
   @override
-  String get queuedDownload => 'Queued';
+  String get queuedDownload => 'En cola';
 
   @override
   String queuedMoreCount(int count) {
@@ -1668,20 +1669,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get downloadSubtitlesLabel => 'Descargar subtítulos...';
 
   @override
-  String get searchOpenSubtitlesPlugin =>
-      'Buscar usando el plugin de OpenSubtitles';
+  String get searchOpenSubtitlesPlugin => 'Buscar usando OpenSubtitles';
 
   @override
   String get downloadSubtitles => 'Descargar subtítulos';
 
   @override
-  String get searchingSubtitles => 'Searching for subtitles…';
+  String get searchingSubtitles => 'Buscando subtítulos…';
 
   @override
-  String get fetchingSubtitles => 'Fetching subtitles';
+  String get fetchingSubtitles => 'Buscando subtítulos';
 
   @override
-  String get downloadingSubtitle => 'Downloading subtitle…';
+  String get downloadingSubtitle => 'Descargando subtítulos…';
 
   @override
   String get selectedSubtitleInvalid =>
@@ -1726,34 +1726,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noEpisodesLoaded => 'No hay episodios cargados';
 
   @override
-  String get downloadScopeTitle => 'What to download';
+  String get downloadScopeTitle => 'Qué descargar';
 
   @override
-  String get downloadAllEpisodes => 'All episodes';
+  String get downloadAllEpisodes => 'Todos los episodios';
 
   @override
-  String get downloadUnwatchedEpisodes => 'All unwatched episodes';
+  String get downloadUnwatchedEpisodes => 'Todos los episodios sin ver';
 
   @override
-  String get downloadAllMovies => 'All movies';
+  String get downloadAllMovies => 'Todas las películas';
 
   @override
-  String get downloadUnwatchedMovies => 'All unwatched movies';
+  String get downloadUnwatchedMovies => 'Todas las películas sin ver';
 
   @override
-  String get downloadScopeLoading => 'Loading items...';
+  String get downloadScopeLoading => 'Cargando elementos...';
 
   @override
-  String get downloadScopeLoadFailed => 'Could not load items to download';
+  String get downloadScopeLoadFailed =>
+      'No se pudo cargar los elementos para descargar';
 
   @override
   String downloadEstimateTotal(String size) {
-    return '~$size total';
+    return '~$size en total';
   }
 
   @override
   String downloadBytesOfTotal(String received, String total) {
-    return '$received of $total';
+    return '$received de $total';
   }
 
   @override
@@ -1763,12 +1764,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String downloadSizeTotal(String size) {
-    return '$size total';
+    return '$size en total';
   }
 
   @override
   String downloadEstimateUnknownCount(int count) {
-    return '$count unknown';
+    return '$count desconocido';
   }
 
   @override
@@ -1797,7 +1798,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get director => 'DIRECTOR';
 
   @override
-  String get starring => 'STARRING';
+  String get starring => 'Protagoniza';
 
   @override
   String get directors => 'DIRECTORES';
@@ -1883,13 +1884,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shuffle => 'Aleatorio';
 
   @override
-  String get shuffleAll => 'Shuffle All';
+  String get shuffleAll => 'Mezclar';
 
   @override
   String get shuffleAllMusic => 'Reproducir toda la música en aleatorio';
 
   @override
-  String get carSignInPrompt => 'Inicia sesión en Moonfin desde tu teléfono';
+  String get carSignInPrompt => 'Inicia sesión en Lambent desde tu teléfono';
 
   @override
   String get carServerUnreachable => 'No se puede conectar con tu servidor';
@@ -1903,10 +1904,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get perfectMatch => 'Coincidencia perfecta';
 
   @override
-  String get aiTranslated => 'AI Translated';
+  String get aiTranslated => 'Traducido con IA';
 
   @override
-  String get machineTranslated => 'Machine Translated';
+  String get machineTranslated => 'Traducido con máquina';
 
   @override
   String get hearingImpaired => 'SDH';
@@ -2082,47 +2083,47 @@ class AppLocalizationsEs extends AppLocalizations {
   String get playbackInformation => 'Información de reproducción';
 
   @override
-  String get showMpvStats => 'Show mpv Statistics (Shift+I)';
+  String get showMpvStats => 'Mostrar estadísticas mpv (Shift+I)';
 
   @override
-  String get hideMpvStats => 'Hide mpv Statistics (Shift+I)';
+  String get hideMpvStats => 'Esconder estadísticas mpv (Shift+I)';
 
   @override
-  String get keyboardShortcutsTitle => 'Keyboard shortcuts';
+  String get keyboardShortcutsTitle => 'Atajos de teclado';
 
   @override
   String get keyboardShortcutsSubtitle =>
-      'Keys for the app, video player and reader';
+      'Teclas para la aplicación, el reproductor y el lector de libros';
 
   @override
   String get keyboardShortcutsPlayerHint =>
-      'Press ? or F1 while a video plays to see this list without leaving the player.';
+      'Pulsa ? o F1 mientras se reproduce un vídeo para ver esta lista sin salirte del reproductor.';
 
   @override
-  String get keyboardShortcutsSectionApp => 'Everywhere';
+  String get keyboardShortcutsSectionApp => 'Todas partes';
 
   @override
-  String get keyboardShortcutsSectionAppScope => 'On any screen';
+  String get keyboardShortcutsSectionAppScope => 'En cualquier pantalla';
 
   @override
-  String get keyboardShortcutsSectionPlayer => 'Video player';
+  String get keyboardShortcutsSectionPlayer => 'Reproductor';
 
   @override
   String get keyboardShortcutsSectionPlayerScope =>
-      'While a video is open, playing or paused';
+      'Mientras un vídeo esté abierto, reproduciéndose o pausado';
 
   @override
-  String get keyboardShortcutsSectionReader => 'Book and comic reader';
+  String get keyboardShortcutsSectionReader => 'Lector de libros y cómics';
 
   @override
   String get keyboardShortcutsSectionReaderScope =>
-      'While reading a book or comic';
+      'Mientras se esté leyendo un libro o un cómic';
 
   @override
-  String get keyNameArrowKeys => 'Arrow keys';
+  String get keyNameArrowKeys => 'Flechas del teclado';
 
   @override
-  String get keyNameSpace => 'Space';
+  String get keyNameSpace => 'Espacio';
 
   @override
   String get keyNameEnter => 'Enter';
@@ -2131,132 +2132,136 @@ class AppLocalizationsEs extends AppLocalizations {
   String get keyNameEsc => 'Esc';
 
   @override
-  String get keyNameBackspace => 'Backspace';
+  String get keyNameBackspace => 'Borrar';
 
   @override
-  String get keyNameDelete => 'Delete';
+  String get keyNameDelete => 'Suprimir';
 
   @override
-  String get keyNamePageUp => 'Page Up';
+  String get keyNamePageUp => 'Pág. Arriba';
 
   @override
-  String get keyNamePageDown => 'Page Down';
+  String get keyNamePageDown => 'Pág. Abajo';
 
   @override
-  String get keyNameHome => 'Home';
+  String get keyNameHome => 'Home/Casa';
 
   @override
-  String get keyNameEnd => 'End';
+  String get keyNameEnd => 'Fin';
 
   @override
-  String get keyNameShift => 'Shift';
+  String get keyNameShift => 'Mayus';
 
   @override
-  String get keyNameCtrl => 'Ctrl';
+  String get keyNameCtrl => 'Control';
 
   @override
   String get keyNameAlt => 'Alt';
 
   @override
-  String get keyNameScrollWheel => 'Scroll wheel';
+  String get keyNameScrollWheel => 'Rueda de ratón';
 
   @override
-  String get shortcutMoveFocus => 'Move between items';
+  String get shortcutMoveFocus => 'Moverse entre elementos';
 
   @override
-  String get shortcutActivate => 'Open the selected item';
+  String get shortcutActivate => 'Abrir el elemento seleccionado';
 
   @override
-  String get shortcutGoBack => 'Go back';
+  String get shortcutGoBack => 'Volver atrás';
 
   @override
-  String get shortcutToggleFullscreen => 'Fullscreen on or off';
+  String get shortcutToggleFullscreen =>
+      'Activar o desactivar pantalla completa';
 
   @override
-  String get shortcutQuit => 'Quit Moonfin';
+  String get shortcutQuit => 'Cerrar Lambent';
 
   @override
-  String get shortcutPlayPause => 'Play or pause';
+  String get shortcutPlayPause => 'Reproducir o pausar';
 
   @override
   String get shortcutShowControlsOrPlayPause =>
-      'Show controls, or play/pause if shown';
+      'Mostrar controles, o reproducir/pausar si los controles son visibles';
 
   @override
-  String get shortcutSeekBack => 'Seek back (hold for bigger jumps)';
+  String get shortcutSeekBack =>
+      'Rebobinar (mantener pulsado para saltos más grandes)';
 
   @override
-  String get shortcutSeekForward => 'Seek forward (hold for bigger jumps)';
+  String get shortcutSeekForward =>
+      'Adelantar (mantener pulsado para saltos más grandes)';
 
   @override
-  String get shortcutVolumeUp => 'Volume up';
+  String get shortcutVolumeUp => 'Subir volumen';
 
   @override
-  String get shortcutVolumeDown => 'Volume down';
+  String get shortcutVolumeDown => 'Bajar volumen';
 
   @override
-  String get shortcutMute => 'Mute or unmute';
+  String get shortcutMute => 'Silenciar/activar sonido';
 
   @override
-  String get shortcutToggleSubtitles => 'Subtitles on or off';
+  String get shortcutToggleSubtitles => 'Encender/apagar subtítulos';
 
   @override
-  String get shortcutSlower => 'Slow down';
+  String get shortcutSlower => 'Decelerar';
 
   @override
-  String get shortcutFaster => 'Speed up';
+  String get shortcutFaster => 'Acelerar';
 
   @override
-  String get shortcutPlaybackInfo => 'Show playback information';
+  String get shortcutPlaybackInfo => 'Mostrar información de reproducción';
 
   @override
-  String get shortcutMpvStats => 'mpv statistics on or off';
+  String get shortcutMpvStats => 'Mostrar/ocultar estadísticas mpv';
 
   @override
-  String get shortcutRecropBlackBars => 'Recrop black bars';
+  String get shortcutRecropBlackBars => 'Recortar barras negras';
 
   @override
   String get shortcutLeaveFullscreenOrStop =>
-      'Exit fullscreen, or stop if not fullscreen';
+      'Salir de pantalla completa, o parar si no hay pantalla completa';
 
   @override
-  String get shortcutHideControls => 'Hide controls';
+  String get shortcutHideControls => 'Ocultar controles';
 
   @override
-  String get shortcutStopPlayback => 'Stop playback';
+  String get shortcutStopPlayback => 'Parar reproducción';
 
   @override
-  String get shortcutNextItem => 'Next item';
+  String get shortcutNextItem => 'Siguiente elemento';
 
   @override
-  String get shortcutPreviousItem => 'Previous item';
+  String get shortcutPreviousItem => 'Elemento previo';
 
   @override
-  String get shortcutSkipSegment => 'Skip intro or credits when offered';
+  String get shortcutSkipSegment =>
+      'Saltarse intro o créditos cuando se ofrezca';
 
   @override
-  String get shortcutShowShortcuts => 'Show this list';
+  String get shortcutShowShortcuts => 'Mostrar esta lista';
 
   @override
-  String get shortcutNextPage => 'Next page';
+  String get shortcutNextPage => 'Siguiente página';
 
   @override
-  String get shortcutPreviousPage => 'Previous page';
+  String get shortcutPreviousPage => 'Página previa';
 
   @override
-  String get shortcutScrollPage => 'Scroll the page (ebooks)';
+  String get shortcutScrollPage => 'Pasar página (ebooks/libros electrónicos)';
 
   @override
-  String get shortcutFirstPage => 'First page, or start of chapter';
+  String get shortcutFirstPage => 'Primera página, o comienzo de capítulo';
 
   @override
-  String get shortcutLastPage => 'Last page, or end of chapter';
+  String get shortcutLastPage => 'Última página o final de capítulo';
 
   @override
-  String get shortcutZoom => 'Zoom in or out (comics)';
+  String get shortcutZoom => 'Acercar/alejar (cómics)';
 
   @override
-  String get shortcutResetZoom => 'Reset zoom (comics)';
+  String get shortcutResetZoom => 'Reiniciar zoom (cómics)';
 
   @override
   String get playback => 'Reproducción';
@@ -2295,20 +2300,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String get hdr => 'HDR';
 
   @override
-  String get videoRenderer => 'Video Renderer';
+  String get videoRenderer => 'Renderizado de vídeo';
 
   @override
   String get videoRendererDescription =>
-      'Native window gives the smoothest motion and sends HDR to the display untouched. Try another option if video misbehaves.';
+      'Ventana nativa que ofrece el movimiento más suave y manda el HDR a la pantalla sin tocar. Prueba otra opción si el vídeo da problemas.';
 
   @override
-  String get videoRendererNativeWindow => 'Native window (recommended)';
+  String get videoRendererNativeWindow => 'Ventana nativa (recomendado)';
 
   @override
-  String get videoRendererNativeHdrOnly => 'Native window for HDR only';
+  String get videoRendererNativeHdrOnly => 'Ventana nativa sólo para HDR';
 
   @override
-  String get videoRendererInApp => 'In-app (legacy)';
+  String get videoRendererInApp => 'En la aplicación (antiguo)';
 
   @override
   String get track => 'Pista';
@@ -2340,11 +2345,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'La visualización de EPUB en la app aún no está disponible en esta plataforma.';
 
   @override
-  String get bookReadingUnavailableTitle => 'Books can\'t be read on Apple TV';
+  String get bookReadingUnavailableTitle =>
+      'No se puede leer libros en Apple TV';
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Open it in Moonfin on a phone, tablet or computer to read it. Audiobooks still play here.';
+      'Abre esto en la aplicación de Lambent en un teléfono, tablet u ordenador para leerlo. Los audiolibros sí se pueden reproducir aquí.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -2512,7 +2518,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get premiere => 'Estreno';
 
   @override
-  String get guideRepeatBadge => 'Repeat';
+  String get guideRepeatBadge => 'Repetir';
 
   @override
   String get guideTimeline => 'Línea temporal de la guía';
@@ -2526,13 +2532,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noChannelsFound => 'No se encontraron canales';
 
   @override
-  String get noProgramData => 'No program data';
+  String get noProgramData => 'Sin datos de programa';
 
   @override
   String get liveBadge => 'EN VIVO';
 
   @override
-  String get liveTvJumpToLive => 'Jump to Live';
+  String get liveTvJumpToLive => 'Reproducir en vivo';
 
   @override
   String guideNextProgram(String time, String title) {
@@ -2578,38 +2584,38 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String nextSeriesRecording(String dateTime) {
-    return 'Next series recording: $dateTime';
+    return 'Fecha de rodaje de la siguiente temporada: $dateTime';
   }
 
   @override
   String get noUpcomingSeriesRecording =>
-      'Series recording is scheduled, but the guide has no upcoming episodes';
+      'El rodaje de la temporada ha sido especificado, pero la guía no tiene los siguientes episodios';
 
   @override
   String get seriesRecordingSkipsShowing =>
-      'The series recording will skip this showing';
+      'La grabación de la temporada se saltará este episodio, puede que esté repetido o ya exista en la biblioteca';
 
   @override
   String get seriesRecordingEpisodesQuestion =>
-      'Which episodes should be recorded?';
+      '¿Qué episodios deberían de ser grabados?';
 
   @override
-  String get seriesRecordingAllEpisodes => 'All Episodes';
+  String get seriesRecordingAllEpisodes => 'Todos los episodios';
 
   @override
   String get seriesRecordingAllEpisodesDescription =>
-      'Every showing, including repeats';
+      'Todas las transmisiones, incluyendo episodios repetidos';
 
   @override
   String get seriesRecordingNotRecordedEpisodes =>
-      'Episodes Not Already Recorded';
+      'Episodios no grabados anteriormente';
 
   @override
   String get seriesRecordingNotRecordedEpisodesDescription =>
-      'Skips episodes already in your library and records each episode once';
+      'Salta episodios que ya están en tu biblioteca y graba cada episodio una vez';
 
   @override
-  String get seriesRecordingNewEpisodesOnly => 'New Episodes Only';
+  String get seriesRecordingNewEpisodesOnly => 'Sólo nuevos episodios';
 
   @override
   String get seriesRecordingNewEpisodesOnlyDescription =>
@@ -3174,7 +3180,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'Customize the loading animations used throughout Moonfin';
+      'Customize the loading animations used throughout Lambent';
 
   @override
   String get loadingAnimationConfiguration => 'Loading Animation Configuration';
@@ -3183,7 +3189,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadingAnimationImage => 'Image';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Moonfin Logo';
+  String get loadingAnimationImageMoonfinLogo => 'Lambent Logo';
 
   @override
   String get loadingAnimationImageSpinner => 'Spinner';
@@ -3195,7 +3201,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Moon Phases';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Moonfin Phases';
+  String get loadingAnimationImageMoonfinPhases => 'Lambent Phases';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Neonfin Phases';
@@ -4214,7 +4220,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get notSetMpvConf =>
-      'No establecido. Moonfin intentará usar un mpv.conf predeterminado en las carpetas de la app/datos.';
+      'No establecido. Lambent intentará usar un mpv.conf predeterminado en las carpetas de la app/datos.';
 
   @override
   String get selectMpvConf => 'Seleccionar mpv.conf';
@@ -4514,7 +4520,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android only lets Moonfin write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
+      'Android only lets Lambent write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
 
   @override
   String get saveToDownloadsFolder => 'Guardar en la carpeta de Descargas';
@@ -4808,7 +4814,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get libraryVisibilityDescription =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get showInNavigation => 'Mostrar en la navegación';
@@ -5241,7 +5247,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensaverBackdropBlack => 'Black';
 
   @override
-  String get screensaverBackdropMoonfin => 'Moonfin';
+  String get screensaverBackdropMoonfin => 'Lambent';
 
   @override
   String get screensaverBackdropCalm => 'Calm';
@@ -5256,7 +5262,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Additional Component';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Moonfin Logo';
+  String get screensaverComponentMoonfinLogo => 'Lambent Logo';
 
   @override
   String get screensaverComponentRunner => 'Runner';
@@ -5723,7 +5729,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get cancelRequest4k => 'Cancel 4K Request';
 
   @override
-  String get playInMoonfin => 'Reproducir en Moonfin';
+  String get playInMoonfin => 'Reproducir en Lambent';
 
   @override
   String get requestedByLabel => 'Requested by';
@@ -5769,7 +5775,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Elemento no encontrado en tu biblioteca de Moonfin';
+      'Elemento no encontrado en tu biblioteca de Lambent';
 
   @override
   String get errorSearchingLibrary => 'Error al buscar en la biblioteca';
@@ -7766,7 +7772,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get adminServerRebootMessage =>
-      'Reinicio del servidor en curso, por favor reinicia Moonfin';
+      'Reinicio del servidor en curso, por favor reinicia Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiones activas';
@@ -11563,7 +11569,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -11704,14 +11710,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsPrivacyPolicy => 'política de privacidad';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Moonfin tus datos';
+  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Lambent tus datos';
 
   @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Busque la última versión de Moonfin';
+      'Busque la última versión de Lambent';
 
   @override
   String get settingsBoth => 'Ambos';
@@ -12583,7 +12589,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get webDiagnostics => 'Diagnóstico web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnóstico web';
+  String get webDiagnosticsTitle => 'Lambent Diagnóstico web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -12599,11 +12605,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
+      'Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
+      'Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12654,7 +12660,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.';
+      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -14368,7 +14374,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Impeller es el renderizador de GPU moderno de Flutter, que ofrece animaciones más fluidas y menos tirones. En algunos TV box y GPU antiguas puede provocar fallos gráficos o vídeo en negro; desactívalo si te ocurre. Automático elige la mejor opción para tu dispositivo. Reinicia Moonfin para aplicar los cambios.';
+      'Impeller es el renderizador de GPU moderno de Flutter, que ofrece animaciones más fluidas y menos tirones. En algunos TV box y GPU antiguas puede provocar fallos gráficos o vídeo en negro; desactívalo si te ocurre. Automático elige la mejor opción para tu dispositivo. Reinicia Lambent para aplicar los cambios.';
 
   @override
   String get impellerAuto => 'Automático';
@@ -14384,7 +14390,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'Moonfin debe reiniciarse para cambiar el motor de renderizado. Cierra la aplicación ahora y vuelve a abrirla para aplicar los cambios.';
+      'Lambent debe reiniciarse para cambiar el motor de renderizado. Cierra la aplicación ahora y vuelve a abrirla para aplicar los cambios.';
 
   @override
   String get impellerCloseNow => 'Cerrar la aplicación ahora';
@@ -14933,7 +14939,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Transcoded qualities only download while Moonfin is open. Original quality also downloads in the background.';
+      'Transcoded qualities only download while Lambent is open. Original quality also downloads in the background.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -14941,7 +14947,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Downloads only while Moonfin is open';
+      'Downloads only while Lambent is open';
 
   @override
   String get autoDownloadQualityTitle => 'Auto-download quality';
@@ -14964,7 +14970,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'When you finish an episode on any device, Moonfin downloads the next ones. Episodes it downloads are deleted once watched.';
+      'When you finish an episode on any device, Lambent downloads the next ones. Episodes it downloads are deleted once watched.';
 
   @override
   String get smartDownloadsKeepReady => 'Episodes to Keep Downloaded';
@@ -15038,15 +15044,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Allow the system to check for new episodes periodically while Moonfin is closed';
+      'Allow the system to check for new episodes periodically while Lambent is closed';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'Background App Refresh is disabled for Moonfin. Enable it in iOS Settings.';
+      'Background App Refresh is disabled for Lambent. Enable it in iOS Settings.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'Background usage is restricted for Moonfin in Android Settings.';
+      'Background usage is restricted for Lambent in Android Settings.';
 
   @override
   String get autoDownloadCheckNow => 'Check Now';
@@ -15264,13 +15270,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'What the Apple TV home screen shows above the Moonfin icon when it is selected. This setting stays on this device.';
+      'What the Apple TV home screen shows above the Lambent icon when it is selected. This setting stays on this device.';
 
   @override
   String get topShelfLatestMedia => 'Latest media';
 
   @override
-  String get topShelfAppBanner => 'Moonfin banner';
+  String get topShelfAppBanner => 'Lambent banner';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -15982,7 +15988,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'Unlinking stops Moonfin from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
+      'Unlinking stops Lambent from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
 
   @override
   String get rommUnlink => 'Unlink';
@@ -15996,7 +16002,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Moonfin couldn\'t reach RomM. Try again in a moment.';
+      'Lambent couldn\'t reach RomM. Try again in a moment.';
 
   @override
   String get rommNotAvailable => 'This server has no RomM library.';
@@ -16218,7 +16224,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   AppLocalizationsEs419() : super('es_419');
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get interfaceLanguage => 'Idioma de la interfaz';
@@ -16286,7 +16292,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String appVersionFooter(String version) {
-    return 'Versión Moonfin $version';
+    return 'Versión Lambent $version';
   }
 
   @override
@@ -16338,7 +16344,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no pudo acceder al llavero del sistema. El inicio de sesión puede continuar, pero el almacenamiento seguro de tokens podría no estar disponible hasta que se desbloquee el llavero.';
+      'Lambent no pudo acceder al llavero del sistema. El inicio de sesión puede continuar, pero el almacenamiento seguro de tokens podría no estar disponible hasta que se desbloquee el llavero.';
 
   @override
   String get ok => 'DE ACUERDO';
@@ -16378,10 +16384,10 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Usa el algoritmo local de la biblioteca Moonfin Recommends o las métricas de similitud en línea de TMDb. Nota: las recomendaciones en línea requieren la integración con Seerr.';
+      'Usa el algoritmo local de la biblioteca Lambent Recommends o las métricas de similitud en línea de TMDb. Nota: las recomendaciones en línea requieren la integración con Seerr.';
 
   @override
-  String get recommendationSystemMoonfin => 'Moonfin Recommends';
+  String get recommendationSystemMoonfin => 'Lambent Recommends';
 
   @override
   String get recommendationSystemTmdb => 'Similitud de TMDb';
@@ -16392,7 +16398,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación';
+      'Cambia entre Lambent y Neon Pulse sin reiniciar la aplicación';
 
   @override
   String get themeMoonfinSubtitle =>
@@ -16465,7 +16471,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   }
 
   @override
-  String get exitApp => '¿Salir de Moonfin?';
+  String get exitApp => '¿Salir de Lambent?';
 
   @override
   String get exitAppConfirmation => '¿Estás seguro de que quieres salir?';
@@ -18652,7 +18658,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get notSetMpvConf =>
-      'No establecido. Moonfin probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
+      'No establecido. Lambent probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
 
   @override
   String get selectMpvConf => 'Seleccione mpv.conf';
@@ -18951,7 +18957,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get libraryVisibilityDescription =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get showInNavigation => 'Mostrar en navegación';
@@ -19505,7 +19511,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get cancelRequest => 'Cancelar solicitud';
 
   @override
-  String get playInMoonfin => 'Jugar en Moonfin';
+  String get playInMoonfin => 'Jugar en Lambent';
 
   @override
   String requestedByName(String name) {
@@ -19539,7 +19545,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Artículo no encontrado en tu biblioteca Moonfin';
+      'Artículo no encontrado en tu biblioteca Lambent';
 
   @override
   String get errorSearchingLibrary => 'Error al buscar biblioteca';
@@ -19961,7 +19967,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get adminServerRebootMessage =>
-      'Reinicio del servidor en progreso, reinicie Moonfin';
+      'Reinicio del servidor en progreso, reinicie Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiones activas';
@@ -22597,7 +22603,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -22668,14 +22674,14 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get settingsPrivacyPolicy => 'política de privacidad';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Moonfin tus datos';
+  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Lambent tus datos';
 
   @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Busque la última versión de Moonfin';
+      'Busque la última versión de Lambent';
 
   @override
   String get settingsBoth => 'Ambos';
@@ -23175,7 +23181,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
   String get webDiagnostics => 'Diagnóstico web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnóstico web';
+  String get webDiagnosticsTitle => 'Lambent Diagnóstico web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -23191,11 +23197,11 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
+      'Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
+      'Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -23246,7 +23252,7 @@ class AppLocalizationsEs419 extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.';
+      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -23638,7 +23644,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String appVersionFooter(String version) {
-    return 'Versión Moonfin $version';
+    return 'Versión Lambent $version';
   }
 
   @override
@@ -23690,7 +23696,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
+      'Lambent no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
 
   @override
   String get ok => 'DE ACUERDO';
@@ -23700,7 +23706,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación';
+      'Cambia entre Lambent y Neon Pulse sin reiniciar la aplicación';
 
   @override
   String get themeMoonfinSubtitle =>
@@ -23766,7 +23772,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
   }
 
   @override
-  String get exitApp => '¿Salir de Moonfin?';
+  String get exitApp => '¿Salir de Lambent?';
 
   @override
   String get exitAppConfirmation => '¿Estás seguro de que quieres salir?';
@@ -25862,7 +25868,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get notSetMpvConf =>
-      'No establecido. Moonfin probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
+      'No establecido. Lambent probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
 
   @override
   String get selectMpvConf => 'Seleccione mpv.conf';
@@ -26158,7 +26164,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get libraryVisibilityDescription =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get showInNavigation => 'Mostrar en navegación';
@@ -26696,7 +26702,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
   String get cancelRequest => 'Cancelar solicitud';
 
   @override
-  String get playInMoonfin => 'Jugar en Moonfin';
+  String get playInMoonfin => 'Jugar en Lambent';
 
   @override
   String requestedByName(String name) {
@@ -26730,7 +26736,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Artículo no encontrado en tu biblioteca Moonfin';
+      'Artículo no encontrado en tu biblioteca Lambent';
 
   @override
   String get errorSearchingLibrary => 'Error al buscar biblioteca';
@@ -27149,7 +27155,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get adminServerRebootMessage =>
-      'Reinicio del servidor en progreso, reinicie Moonfin';
+      'Reinicio del servidor en progreso, reinicie Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiones activas';
@@ -29785,7 +29791,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -29856,14 +29862,14 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
   String get settingsPrivacyPolicy => 'política de privacidad';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Moonfin tus datos';
+  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Lambent tus datos';
 
   @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Busque la última versión de Moonfin';
+      'Busque la última versión de Lambent';
 
   @override
   String get settingsBoth => 'Ambos';
@@ -30363,7 +30369,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
   String get webDiagnostics => 'Diagnóstico web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnóstico web';
+  String get webDiagnosticsTitle => 'Lambent Diagnóstico web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -30379,11 +30385,11 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
+      'Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
+      'Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -30434,7 +30440,7 @@ class AppLocalizationsEsAr extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.';
+      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -30826,7 +30832,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String appVersionFooter(String version) {
-    return 'Versión Moonfin $version';
+    return 'Versión Lambent $version';
   }
 
   @override
@@ -30878,7 +30884,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
+      'Lambent no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
 
   @override
   String get ok => 'DE ACUERDO';
@@ -30888,7 +30894,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación';
+      'Cambia entre Lambent y Neon Pulse sin reiniciar la aplicación';
 
   @override
   String get themeMoonfinSubtitle =>
@@ -30954,7 +30960,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
   }
 
   @override
-  String get exitApp => '¿Salir de Moonfin?';
+  String get exitApp => '¿Salir de Lambent?';
 
   @override
   String get exitAppConfirmation => '¿Estás seguro de que quieres salir?';
@@ -33050,7 +33056,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get notSetMpvConf =>
-      'No establecido. Moonfin probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
+      'No establecido. Lambent probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
 
   @override
   String get selectMpvConf => 'Seleccione mpv.conf';
@@ -33346,7 +33352,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get libraryVisibilityDescription =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get showInNavigation => 'Mostrar en navegación';
@@ -33884,7 +33890,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
   String get cancelRequest => 'Cancelar solicitud';
 
   @override
-  String get playInMoonfin => 'Jugar en Moonfin';
+  String get playInMoonfin => 'Jugar en Lambent';
 
   @override
   String requestedByName(String name) {
@@ -33918,7 +33924,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Artículo no encontrado en tu biblioteca Moonfin';
+      'Artículo no encontrado en tu biblioteca Lambent';
 
   @override
   String get errorSearchingLibrary => 'Error al buscar biblioteca';
@@ -34337,7 +34343,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get adminServerRebootMessage =>
-      'Reinicio del servidor en progreso, reinicie Moonfin';
+      'Reinicio del servidor en progreso, reinicie Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiones activas';
@@ -36973,7 +36979,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -37044,14 +37050,14 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
   String get settingsPrivacyPolicy => 'política de privacidad';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Moonfin tus datos';
+  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Lambent tus datos';
 
   @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Busque la última versión de Moonfin';
+      'Busque la última versión de Lambent';
 
   @override
   String get settingsBoth => 'Ambos';
@@ -37551,7 +37557,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
   String get webDiagnostics => 'Diagnóstico web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnóstico web';
+  String get webDiagnosticsTitle => 'Lambent Diagnóstico web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -37567,11 +37573,11 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
+      'Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
+      'Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -37622,7 +37628,7 @@ class AppLocalizationsEsDo extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.';
+      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -37966,7 +37972,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
   AppLocalizationsEsMx() : super('es_MX');
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get interfaceLanguage => 'Idioma de la Intefaz';
@@ -38034,7 +38040,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String appVersionFooter(String version) {
-    return 'Versión Moonfin $version';
+    return 'Versión Lambent $version';
   }
 
   @override
@@ -38086,7 +38092,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Moonfin no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
+      'Lambent no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.';
 
   @override
   String get ok => 'DE ACUERDO';
@@ -38126,7 +38132,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      'Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación';
+      'Cambia entre Lambent y Neon Pulse sin reiniciar la aplicación';
 
   @override
   String get themeMoonfinSubtitle =>
@@ -38192,7 +38198,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
   }
 
   @override
-  String get exitApp => '¿Salir de Moonfin?';
+  String get exitApp => '¿Salir de Lambent?';
 
   @override
   String get exitAppConfirmation => '¿Estás seguro de que quieres salir?';
@@ -40288,7 +40294,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get notSetMpvConf =>
-      'No establecido. Moonfin probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
+      'No establecido. Lambent probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.';
 
   @override
   String get selectMpvConf => 'Seleccione mpv.conf';
@@ -40584,7 +40590,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get libraryVisibilityDescription =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get showInNavigation => 'Mostrar en navegación';
@@ -41122,7 +41128,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
   String get cancelRequest => 'Cancelar solicitud';
 
   @override
-  String get playInMoonfin => 'Reproducir en Moonfin';
+  String get playInMoonfin => 'Reproducir en Lambent';
 
   @override
   String requestedByName(String name) {
@@ -41156,7 +41162,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Artículo no encontrado en tu biblioteca Moonfin';
+      'Artículo no encontrado en tu biblioteca Lambent';
 
   @override
   String get errorSearchingLibrary => 'Error al buscar biblioteca';
@@ -41575,7 +41581,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get adminServerRebootMessage =>
-      'Reinicio del servidor en progreso, reinicie Moonfin';
+      'Reinicio del servidor en progreso, reinicie Lambent';
 
   @override
   String get adminActiveSessions => 'Sesiones activas';
@@ -44211,7 +44217,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.';
+      'Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.';
 
   @override
   String get settingsMediaBarAndLocalPreviews =>
@@ -44282,14 +44288,14 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
   String get settingsPrivacyPolicy => 'política de privacidad';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Moonfin tus datos';
+  String get settingsPrivacyPolicySubtitle => 'Cómo maneja Lambent tus datos';
 
   @override
   String get settingsCheckForUpdates => 'Buscar actualizaciones';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'Busque la última versión de Moonfin';
+      'Busque la última versión de Lambent';
 
   @override
   String get settingsBoth => 'Ambos';
@@ -44789,7 +44795,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
   String get webDiagnostics => 'Diagnóstico web';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin Diagnóstico web';
+  String get webDiagnosticsTitle => 'Lambent Diagnóstico web';
 
   @override
   String get webDiagnosticsIntro =>
@@ -44805,11 +44811,11 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
+      'Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
+      'Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -44860,7 +44866,7 @@ class AppLocalizationsEsMx extends AppLocalizationsEs {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.';
+      'Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>

@@ -2066,6 +2066,7 @@ List<_SettingsSearchEntry> _buildSettingsSearchIndex({
         l10n.settingsCheckForUpdates,
         subtitle: l10n.settingsCheckForUpdatesSubtitle,
       ),
+    if (LambentBrand.showMoonfinDeveloperLinks)
     about.leaf(
       'report_issue',
       l10n.settingsReportAnIssue,

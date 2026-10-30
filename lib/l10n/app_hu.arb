@@ -1,6 +1,6 @@
 {
     "@@locale": "hu",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin verzió {version}",
+    "appVersionFooter": "Lambent verzió {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "A Moonfin nem tudott hozzáférni a rendszer kulcstartójához. A bejelentkezés folytatódhat, de előfordulhat, hogy a biztonságos tokentároló nem érhető el, amíg a kulcstartót fel nem oldják.",
+    "secureStorageUnavailableMessage": "A Lambent nem tudott hozzáférni a rendszer kulcstartójához. A bejelentkezés folytatódhat, de előfordulhat, hogy a biztonságos tokentároló nem érhető el, amíg a kulcstartót fel nem oldják.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Kilépsz a Moonfinből?",
+    "exitApp": "Kilépsz a Lambentből?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Nincs beállítva. A Moonfin megpróbálja az alapértelmezett mpv.conf fájlt az alkalmazás/adat mappákban.",
+    "notSetMpvConf": "Nincs beállítva. A Lambent megpróbálja az alapértelmezett mpv.conf fájlt az alkalmazás/adat mappákban.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "A kezdőlap láthatóságának váltása könyvtáronként. A módosítások életbe lépéséhez indítsd újra a Moonfin alkalmazást.",
+    "libraryVisibilityDescription": "A kezdőlap láthatóságának váltása könyvtáronként. A módosítások életbe lépéséhez indítsd újra a Lambent alkalmazást.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Lejátszás a Moonfinben",
+    "playInMoonfin": "Lejátszás a Lambentben",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Az elem nem található a Moonfin-könyvtáradban",
+    "itemNotFoundInLibrary": "Az elem nem található a Lambent-könyvtáradban",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "A szerver újraindítása folyamatban van",
-    "adminServerRebootMessage": "A szerver újraindítása folyamatban van, kérlek, indítsd újra a Moonfint",
+    "adminServerRebootMessage": "A szerver újraindítása folyamatban van, kérlek, indítsd újra a Lambentt",
     "adminActiveSessions": "Aktív munkamenetek",
     "adminSessionsLoadFailed": "Nem sikerült betölteni a munkameneteket",
     "adminNoActiveSessions": "Nincsenek aktív munkamenetek",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Műfajok gomb megjelenítése a navigációs sávban",
     "settingsShowFavoritesButtonInNavigation": "Kedvencek gomb megjelenítése a navigációs sávban",
     "settingsShowLibrariesButtonInNavigation": "Könyvtárak gomb megjelenítése a navigációs sávban",
-    "settingsLibraryVisibilitySubtitle": "A kezdőlap láthatóságának váltása könyvtáronként. Indítsd újra a Moonfin alkalmazást, hogy a változtatások életbe lépjenek.",
+    "settingsLibraryVisibilitySubtitle": "A kezdőlap láthatóságának váltása könyvtáronként. Indítsd újra a Lambent alkalmazást, hogy a változtatások életbe lépjenek.",
     "settingsMediaBarAndLocalPreviews": "Médiasáv és helyi előnézetek",
     "settingsVisualOverlays": "Vizuális fedvények",
     "settingsSeasonalSurprise": "Szezonális meglepetés",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licencek",
     "settingsOpenSourceLicenseNotices": "Nyílt forráskódú licencnyilatkozatok",
     "settingsPrivacyPolicy": "Adatvédelmi szabályzat",
-    "settingsPrivacyPolicySubtitle": "Hogyan kezeli a Moonfin az adataidat",
+    "settingsPrivacyPolicySubtitle": "Hogyan kezeli a Lambent az adataidat",
     "settingsCheckForUpdates": "Frissítések ellenőrzése",
-    "settingsCheckForUpdatesSubtitle": "A legújabb Moonfin kiadás ellenőrzése",
+    "settingsCheckForUpdatesSubtitle": "A legújabb Lambent kiadás ellenőrzése",
     "settingsPoweredByFlutter": "Flutterrel készült",
     "settingsLicenseNoticesCount": "{count, plural, one {# licencnyilatkozat} other {# licencnyilatkozat}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH feliratok előnyben részesítése",
     "preferSdhSubtitlesSubtitle": "Sorold előre az SDH/CC feliratsávokat az automatikus kiválasztás során.",
     "webDiagnostics": "Webes diagnosztika",
-    "webDiagnosticsTitle": "Moonfin webes diagnosztika",
+    "webDiagnosticsTitle": "Lambent webes diagnosztika",
     "webDiagnosticsIntro": "Használd ezt az oldalt a böngésző csatlakozási problémáinak diagnosztizálására (CORS, vegyes tartalom és felderítési beállítások).",
     "webDiagnosticsDetectedMixedContentFailure": "Vegyes tartalom miatti hiba észlelve",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/Preflight hiba észlelve",
-    "webDiagnosticsMixedContentFailureBody": "A Moonfin észlelte, hogy egy HTTPS-oldal próbál hívni egy HTTP-szerver URL-t. A böngészők blokkolják ezt a kérést, mielőtt az elérné a szerveredet.",
-    "webDiagnosticsCorsFailureBody": "A Moonfin böngészőszintű kéréshibát észlelt, amelyet általában a CORS- vagy preflight-fejlécek hiánya okoz a médiaszerveren.",
+    "webDiagnosticsMixedContentFailureBody": "A Lambent észlelte, hogy egy HTTPS-oldal próbál hívni egy HTTP-szerver URL-t. A böngészők blokkolják ezt a kérést, mielőtt az elérné a szerveredet.",
+    "webDiagnosticsCorsFailureBody": "A Lambent böngészőszintű kéréshibát észlelt, amelyet általában a CORS- vagy preflight-fejlécek hiánya okoz a médiaszerveren.",
     "webDiagnosticsTargetUrl": "Cél-URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "nincs beállítva",
     "webDiagnosticsMixedContent": "Vegyes tartalom",
     "webDiagnosticsMixedContentDetected": "Ez az oldal HTTPS-en keresztül van betöltve, de egy vagy több beállított URL HTTP-s. A böngészők blokkolják a HTTPS-oldalakról indított HTTP API-hívásokat.",
-    "webDiagnosticsMixedContentFix": "Megoldás: szolgáld ki a médiaszerveredet vagy a proxyvégpontodat HTTPS-en keresztül, vagy a Moonfint csak megbízható helyi hálózatokon töltsd be HTTP-n.",
+    "webDiagnosticsMixedContentFix": "Megoldás: szolgáld ki a médiaszerveredet vagy a proxyvégpontodat HTTPS-en keresztül, vagy a Lambentt csak megbízható helyi hálózatokon töltsd be HTTP-n.",
     "webDiagnosticsNoMixedContentDetected": "A jelenlegi futási beállítások alapján nem észlelhető egyértelmű vegyes tartalmú konfiguráció.",
     "webDiagnosticsCorsChecklist": "CORS-ellenőrzőlista",
     "webDiagnosticsCorsChecklistItem1": "• Engedélyezd a böngésző eredetét (origin) az Access-Control-Allow-Origin fejlécben.",
@@ -7841,7 +7841,7 @@
         }
     },
     "adminMetadataIdentify": "Azonosítás",
-    "detailScreenStyleSubtitle": "A Klasszikus az eredeti, középre igazított Moonfin elrendezés. A Modern egy reszponzív, moziszerű elrendezés. A Kiemelt egy tartalomközpontú elrendezés felugró tartalomkártyákkal. Az Újszerű egy teljesképernyős elrendezés, egymás alá rendezett szekciókkal. A Minimalista csak a borítóképet, lejátszási gombot és epizódlistát tartalmaz.",
+    "detailScreenStyleSubtitle": "A Klasszikus az eredeti, középre igazított Lambent elrendezés. A Modern egy reszponzív, moziszerű elrendezés. A Kiemelt egy tartalomközpontú elrendezés felugró tartalomkártyákkal. Az Újszerű egy teljesképernyős elrendezés, egymás alá rendezett szekciókkal. A Minimalista csak a borítóképet, lejátszási gombot és epizódlistát tartalmaz.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7878,7 +7878,7 @@
     "adminBlockedTagsHint": "Az ilyen címkékkel rendelkező tartalmak el lesznek rejtve a felhasználó elől.",
     "adminLoginAttemptsHint": "Állítsd 0-ra az alapértelmezetthez, vagy -1-re a kizárás letiltásához.",
     "adminSyncPlayAccess": "SyncPlay-hozzáférés",
-    "recommendationsApplyParentalRatingCapSubtitle": "Korlátozd a „Moonfin ajánlásai” javaslatait a célmédia szülői korhatár-besorolása alapján",
+    "recommendationsApplyParentalRatingCapSubtitle": "Korlátozd a „Lambent ajánlásai” javaslatait a célmédia szülői korhatár-besorolása alapján",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -8209,7 +8209,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "A Moonfinnek újra kell indulnia a megjelenítő motor megváltoztatásához. Zárd be most az alkalmazást, majd nyisd meg újra a beállítások érvényesítéséhez.",
+    "impellerRestartMessage": "A Lambentnek újra kell indulnia a megjelenítő motor megváltoztatásához. Zárd be most az alkalmazást, majd nyisd meg újra a beállítások érvényesítéséhez.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -8242,7 +8242,7 @@
     "@adminLibChapterImageResolutionMatchSource": {
         "description": "Chapter image resolution option that matches the source resolution"
     },
-    "recommendationSystemMoonfin": "Moonfin ajánlásai",
+    "recommendationSystemMoonfin": "Lambent ajánlásai",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -8276,7 +8276,7 @@
     "@impellerCloseNow": {
         "description": "Button that closes the app so the new rendering engine takes effect on next launch."
     },
-    "recommendationSystemSubtitle": "Használd a Moonfin helyi könyvtárhoz készült ajánlóalgoritmusát, a Jellyfin ajánlóalgoritmusát vagy a TMDb online hasonlósági mutatóit. Megjegyzés: Az online ajánlásokhoz Seerr-integráció szükséges.",
+    "recommendationSystemSubtitle": "Használd a Lambent helyi könyvtárhoz készült ajánlóalgoritmusát, a Jellyfin ajánlóalgoritmusát vagy a TMDb online hasonlósági mutatóit. Megjegyzés: Az online ajánlásokhoz Seerr-integráció szükséges.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
@@ -8298,7 +8298,7 @@
     "@glassQualityFull": {
         "description": "Glass quality option: force real blur"
     },
-    "customThemeSubtitle": "Az egyedi témák módosítják a Moonfin vizuális elemeit. Válassz egyet a stílusodhoz illő lehetőségek közül.",
+    "customThemeSubtitle": "Az egyedi témák módosítják a Lambent vizuális elemeit. Válassz egyet a stílusodhoz illő lehetőségek közül.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -8380,7 +8380,7 @@
         }
     },
     "noSubtitlesFound": "Nem találhatók feliratok.",
-    "impellerRenderingSubtitle": "Az Impeller a Flutter modern GPU-megjelenítője a simább animációkért és a kevesebb akadozásért. Néhány TV-boxon és régebbi GPU-n képhibákat vagy fekete videót okozhat; ha ezeket tapasztalod, kapcsold ki. Az Automatikus a legmegfelelőbb alapértelmezést választja ki az eszközödhöz. Indítsd újra a Moonfint a beállítások érvényesítéséhez.",
+    "impellerRenderingSubtitle": "Az Impeller a Flutter modern GPU-megjelenítője a simább animációkért és a kevesebb akadozásért. Néhány TV-boxon és régebbi GPU-n képhibákat vagy fekete videót okozhat; ha ezeket tapasztalod, kapcsold ki. Az Automatikus a legmegfelelőbb alapértelmezést választja ki az eszközödhöz. Indítsd újra a Lambentt a beállítások érvényesítéséhez.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8543,7 +8543,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Jelentkezz be a Moonfinbe a telefonodon",
+    "carSignInPrompt": "Jelentkezz be a Lambentbe a telefonodon",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -9198,7 +9198,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Írd felül az észlelt elrendezést, ha az eszközt a rendszer hibásan ismeri fel. A módosítások érvénybe lépéséhez indítsd újra a Moonfint.",
+    "interfaceLayoutSubtitle": "Írd felül az észlelt elrendezést, ha az eszközt a rendszer hibásan ismeri fel. A módosítások érvénybe lépéséhez indítsd újra a Lambentt.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -9582,7 +9582,7 @@
     "@shortcutToggleFullscreen": {
         "description": "F11 and Alt+Enter anywhere, F in the player"
     },
-    "shortcutQuit": "Kilépés a Moonfinből",
+    "shortcutQuit": "Kilépés a Lambentből",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },
@@ -9988,7 +9988,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "A Moonfin alkalmazásban használt betöltési animációk testreszabása",
+    "loadingAnimationDescription": "A Lambent alkalmazásban használt betöltési animációk testreszabása",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10000,7 +10000,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Moonfin logo",
+    "loadingAnimationImageMoonfinLogo": "Lambent logo",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10016,7 +10016,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Moonfin fázisok",
+    "loadingAnimationImageMoonfinPhases": "Lambent fázisok",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },

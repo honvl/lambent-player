@@ -36,7 +36,7 @@ class _PlayerLoadingOverlayState extends State<PlayerLoadingOverlay>
   static const _labelGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [Color(0xFFAA5CC3), Color(0xFF00A4DC)],
+    colors: [Color(0xFFFFD682), Color(0xFFFFA028)],
   );
 
   late final AnimationController _labelController;

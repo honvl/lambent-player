@@ -1,6 +1,6 @@
 {
     "@@locale": "mn",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin хувилбар {version}",
+    "appVersionFooter": "Lambent хувилбар {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin таны системийн түлхүүрт нэвтэрч чадсангүй. Нэвтрэхийг үргэлжлүүлж болох ч түлхүүрийн оосорыг нээх хүртэл аюулгүй жетон хадгалах боломжгүй байж магадгүй.",
+    "secureStorageUnavailableMessage": "Lambent таны системийн түлхүүрт нэвтэрч чадсангүй. Нэвтрэхийг үргэлжлүүлж болох ч түлхүүрийн оосорыг нээх хүртэл аюулгүй жетон хадгалах боломжгүй байж магадгүй.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Програмыг дахин эхлүүлэхгүйгээр Moonfin болон Neon Pulse хооронд сэлгэнэ үү",
+    "settingsAppearanceThemeSubtitle": "Програмыг дахин эхлүүлэхгүйгээр Lambent болон Neon Pulse хооронд сэлгэнэ үү",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin гарах уу?",
+    "exitApp": "Lambent гарах уу?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Тохируулаагүй. Moonfin апп/өгөгдлийн хавтсанд өгөгдмөл mpv.conf-г оролдох болно.",
+    "notSetMpvConf": "Тохируулаагүй. Lambent апп/өгөгдлийн хавтсанд өгөгдмөл mpv.conf-г оролдох болно.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Номын сан бүрийн нүүр хуудасны харагдах байдлыг асаах/унтраах. Өөрчлөлтүүд хүчин төгөлдөр болохын тулд Moonfin-г дахин эхлүүлнэ үү.",
+    "libraryVisibilityDescription": "Номын сан бүрийн нүүр хуудасны харагдах байдлыг асаах/унтраах. Өөрчлөлтүүд хүчин төгөлдөр болохын тулд Lambent-г дахин эхлүүлнэ үү.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Moonfin дээр тоглох",
+    "playInMoonfin": "Lambent дээр тоглох",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Таны Moonfin номын сангаас зүйл олдсонгүй",
+    "itemNotFoundInLibrary": "Таны Lambent номын сангаас зүйл олдсонгүй",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Серверийг дахин ачаалж байна",
-    "adminServerRebootMessage": "Серверийг дахин ачаалж байна, дахин эхлүүлнэ үү Moonfin",
+    "adminServerRebootMessage": "Серверийг дахин ачаалж байна, дахин эхлүүлнэ үү Lambent",
     "adminActiveSessions": "Идэвхтэй сессүүд",
     "adminSessionsLoadFailed": "Сешнүүдийг ачаалж чадсангүй",
     "adminNoActiveSessions": "Идэвхтэй сесс байхгүй",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Навигацийн талбарт жанрын товчлуурыг харуул",
     "settingsShowFavoritesButtonInNavigation": "Навигацийн талбарт дуртай товчлууруудыг харуул",
     "settingsShowLibrariesButtonInNavigation": "Навигацийн талбар дахь номын сангийн товчийг харуул",
-    "settingsLibraryVisibilitySubtitle": "Номын сан бүрийн нүүр хуудасны харагдах байдлыг асаах/унтраах. Өөрчлөлтүүд хүчин төгөлдөр болохын тулд Moonfin-г дахин эхлүүлнэ үү.",
+    "settingsLibraryVisibilitySubtitle": "Номын сан бүрийн нүүр хуудасны харагдах байдлыг асаах/унтраах. Өөрчлөлтүүд хүчин төгөлдөр болохын тулд Lambent-г дахин эхлүүлнэ үү.",
     "settingsMediaBarAndLocalPreviews": "Медиа талбар ба орон нутгийн урьдчилан үзэх",
     "settingsVisualOverlays": "Визуал давхаргууд",
     "settingsSeasonalSurprise": "Улирлын гэнэтийн бэлэг",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Лицензүүд",
     "settingsOpenSourceLicenseNotices": "Нээлттэй эхийн лицензийн мэдэгдэл",
     "settingsPrivacyPolicy": "Нууцлалын бодлого",
-    "settingsPrivacyPolicySubtitle": "Moonfin таны өгөгдлийг хэрхэн зохицуулдаг вэ",
+    "settingsPrivacyPolicySubtitle": "Lambent таны өгөгдлийг хэрхэн зохицуулдаг вэ",
     "settingsCheckForUpdates": "Шинэчлэлтүүдийг шалгана уу",
-    "settingsCheckForUpdatesSubtitle": "Хамгийн сүүлийн үеийн Moonfin хувилбарыг шалгана уу",
+    "settingsCheckForUpdatesSubtitle": "Хамгийн сүүлийн үеийн Lambent хувилбарыг шалгана уу",
     "settingsPoweredByFlutter": "Flutter-ээр дэмжигдсэн",
     "settingsLicenseNoticesCount": "{count, plural, one {# лицензийн мэдэгдэл} other {# лицензийн мэдэгдэл}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH хадмал орчуулгыг илүүд үзнэ үү",
     "preferSdhSubtitlesSubtitle": "Автоматаар сонгохдоо SDH/CC хадмал орчуулгыг эрэмбэлэх.",
     "webDiagnostics": "Вэб оношлогоо",
-    "webDiagnosticsTitle": "Moonfin Вэб оношилгоо",
+    "webDiagnosticsTitle": "Lambent Вэб оношилгоо",
     "webDiagnosticsIntro": "Энэ хуудсыг хөтчийн холболтын асуудлыг оношлоход ашиглана уу (CORS, холимог контент болон нээлтийн тохиргоо).",
     "webDiagnosticsDetectedMixedContentFailure": "Холимог агуулгын алдаа илэрсэн",
     "webDiagnosticsDetectedCorsPreflightFailure": "Илэрсэн CORS/Нислэгийн өмнөх алдаа",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin HTTP серверийн URL руу залгахыг оролдож буй HTTPS хуудсыг илрүүллээ. Хөтөчүүд энэ хүсэлтийг таны серверт хүрэхээс өмнө блоклодог.",
-    "webDiagnosticsCorsFailureBody": "Moonfin хөтчийн түвшний хүсэлтийн алдаа илрүүллээ. Энэ нь ихэвчлэн медиа сервер дээр CORS эсвэл preflight толгой дутуугаас үүсдэг.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent HTTP серверийн URL руу залгахыг оролдож буй HTTPS хуудсыг илрүүллээ. Хөтөчүүд энэ хүсэлтийг таны серверт хүрэхээс өмнө блоклодог.",
+    "webDiagnosticsCorsFailureBody": "Lambent хөтчийн түвшний хүсэлтийн алдаа илрүүллээ. Энэ нь ихэвчлэн медиа сервер дээр CORS эсвэл preflight толгой дутуугаас үүсдэг.",
     "webDiagnosticsTargetUrl": "Зорилтот URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "тохируулаагүй",
     "webDiagnosticsMixedContent": "Холимог контент",
     "webDiagnosticsMixedContentDetected": "Энэ хуудсыг HTTPS-ээр ачаалсан боловч тохируулсан нэг буюу хэд хэдэн URL нь HTTP байна. Хөтчүүд HTTPS хуудсыг HTTP API дуудахыг хориглодог.",
-    "webDiagnosticsMixedContentFix": "Засвар: медиа сервер эсвэл прокси цэгээ HTTPS-ээр нийлүүлнэ үү, эсвэл Moonfin-ийг зөвхөн итгэмжлэгдсэн дотоод сүлжээнд HTTP-ээр ачаална уу.",
+    "webDiagnosticsMixedContentFix": "Засвар: медиа сервер эсвэл прокси цэгээ HTTPS-ээр нийлүүлнэ үү, эсвэл Lambent-ийг зөвхөн итгэмжлэгдсэн дотоод сүлжээнд HTTP-ээр ачаална уу.",
     "webDiagnosticsNoMixedContentDetected": "Одоогийн ажиллах тохиргооноос холимог контентын илэрхий тохиргоо илрээгүй.",
     "webDiagnosticsCorsChecklist": "CORS шалгах жагсаалт",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin-д хөтчийн origin-ыг зөвшөөрнө үү.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Сонгодог нь Moonfin-ий анхны төвлөрсөн байрлал. Орчин үеийн нь дэлгэцэд зохицдог кино маягийн байрлал.",
+    "detailScreenStyleSubtitle": "Сонгодог нь Lambent-ий анхны төвлөрсөн байрлал. Орчин үеийн нь дэлгэцэд зохицдог кино маягийн байрлал.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Moonfin Recommends дотоод сангийн алгоритм эсвэл онлайн TMDb-ийн ижил төстэй байдлын хэмжүүрийг ашиглана. Тэмдэглэл: Онлайн зөвлөмжид Seerr холболт шаардлагатай.",
+    "recommendationSystemSubtitle": "Lambent Recommends дотоод сангийн алгоритм эсвэл онлайн TMDb-ийн ижил төстэй байдлын хэмжүүрийг ашиглана. Тэмдэглэл: Онлайн зөвлөмжид Seerr холболт шаардлагатай.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Moonfin Recommends-ийн саналыг сонгосон медиагийн насны ангиллаар хязгаарлана",
+    "recommendationsApplyParentalRatingCapSubtitle": "Lambent Recommends-ийн саналыг сонгосон медиагийн насны ангиллаар хязгаарлана",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Захиалгат загвар нь Moonfin даяарх харагдах байдлыг өөрчилнө. Өөрийн хэв маягт тохирох нэгийг сонгоно уу.",
+    "customThemeSubtitle": "Захиалгат загвар нь Lambent даяарх харагдах байдлыг өөрчилнө. Өөрийн хэв маягт тохирох нэгийг сонгоно уу.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Утсан дээрээ Moonfin-д нэвтэрнэ үү",
+    "carSignInPrompt": "Утсан дээрээ Lambent-д нэвтэрнэ үү",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller бол илүү жигд хөдөлгөөн, бага доголдолтой байхад зориулсан Flutter-ийн орчин үеийн GPU дүрслэгч юм. Зарим ТВ хайрцаг болон хуучин GPU дээр гажилт эсвэл хар дэлгэц үүсгэж болзошгүй; тийм зүйл харвал Унтраах болгоно уу. Автомат нь таны төхөөрөмжид тохирох үндсэн утгыг сонгоно. Хэрэглэхийн тулд Moonfin-ийг дахин эхлүүлнэ үү.",
+    "impellerRenderingSubtitle": "Impeller бол илүү жигд хөдөлгөөн, бага доголдолтой байхад зориулсан Flutter-ийн орчин үеийн GPU дүрслэгч юм. Зарим ТВ хайрцаг болон хуучин GPU дээр гажилт эсвэл хар дэлгэц үүсгэж болзошгүй; тийм зүйл харвал Унтраах болгоно уу. Автомат нь таны төхөөрөмжид тохирох үндсэн утгыг сонгоно. Хэрэглэхийн тулд Lambent-ийг дахин эхлүүлнэ үү.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Дүрслэлийн хөдөлгүүрийг солихын тулд Moonfin дахин эхлэх шаардлагатай. Аппыг одоо хаагаад дахин нээж хэрэглэнэ үү.",
+    "impellerRestartMessage": "Дүрслэлийн хөдөлгүүрийг солихын тулд Lambent дахин эхлэх шаардлагатай. Аппыг одоо хаагаад дахин нээж хэрэглэнэ үү.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

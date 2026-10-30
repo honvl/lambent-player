@@ -10,7 +10,7 @@ class AppLocalizationsHu extends AppLocalizations {
   AppLocalizationsHu([String locale = 'hu']) : super(locale);
 
   @override
-  String get appTitle => 'Moonfin';
+  String get appTitle => 'Lambent';
 
   @override
   String get animeMarkerFiller => 'Filler';
@@ -147,7 +147,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'Moonfin verzió $version';
+    return 'Lambent verzió $version';
   }
 
   @override
@@ -199,7 +199,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'A Moonfin nem tudott hozzáférni a rendszer kulcstartójához. A bejelentkezés folytatódhat, de előfordulhat, hogy a biztonságos tokentároló nem érhető el, amíg a kulcstartót fel nem oldják.';
+      'A Lambent nem tudott hozzáférni a rendszer kulcstartójához. A bejelentkezés folytatódhat, de előfordulhat, hogy a biztonságos tokentároló nem érhető el, amíg a kulcstartót fel nem oldják.';
 
   @override
   String get ok => 'OK';
@@ -212,7 +212,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get detailScreenStyleSubtitle =>
-      'A Klasszikus az eredeti, középre igazított Moonfin elrendezés. A Modern egy reszponzív, moziszerű elrendezés. A Kiemelt egy tartalomközpontú elrendezés felugró tartalomkártyákkal. Az Újszerű egy teljesképernyős elrendezés, egymás alá rendezett szekciókkal. A Minimalista csak a borítóképet, lejátszási gombot és epizódlistát tartalmaz.';
+      'A Klasszikus az eredeti, középre igazított Lambent elrendezés. A Modern egy reszponzív, moziszerű elrendezés. A Kiemelt egy tartalomközpontú elrendezés felugró tartalomkártyákkal. Az Újszerű egy teljesképernyős elrendezés, egymás alá rendezett szekciókkal. A Minimalista csak a borítóképet, lejátszási gombot és epizódlistát tartalmaz.';
 
   @override
   String get detailScreenStyleMoonfin => 'Klasszikus';
@@ -452,10 +452,10 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      'Használd a Moonfin helyi könyvtárhoz készült ajánlóalgoritmusát, a Jellyfin ajánlóalgoritmusát vagy a TMDb online hasonlósági mutatóit. Megjegyzés: Az online ajánlásokhoz Seerr-integráció szükséges.';
+      'Használd a Lambent helyi könyvtárhoz készült ajánlóalgoritmusát, a Jellyfin ajánlóalgoritmusát vagy a TMDb online hasonlósági mutatóit. Megjegyzés: Az online ajánlásokhoz Seerr-integráció szükséges.';
 
   @override
-  String get recommendationSystemMoonfin => 'Moonfin ajánlásai';
+  String get recommendationSystemMoonfin => 'Lambent ajánlásai';
 
   @override
   String get recommendationSystemJellyfin => 'Jellyfin Ajánlások';
@@ -469,7 +469,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      'Korlátozd a „Moonfin ajánlásai” javaslatait a célmédia szülői korhatár-besorolása alapján';
+      'Korlátozd a „Lambent ajánlásai” javaslatait a célmédia szülői korhatár-besorolása alapján';
 
   @override
   String get interfaceStyle => 'Felület stílusa';
@@ -492,7 +492,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Írd felül az észlelt elrendezést, ha az eszközt a rendszer hibásan ismeri fel. A módosítások érvénybe lépéséhez indítsd újra a Moonfint.';
+      'Írd felül az észlelt elrendezést, ha az eszközt a rendszer hibásan ismeri fel. A módosítások érvénybe lépéséhez indítsd újra a Lambentt.';
 
   @override
   String get interfaceLayoutAutomatic => 'Automatikus';
@@ -577,14 +577,14 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get customThemeSubtitle =>
-      'Az egyedi témák módosítják a Moonfin vizuális elemeit. Válassz egyet a stílusodhoz illő lehetőségek közül.';
+      'Az egyedi témák módosítják a Lambent vizuális elemeit. Válassz egyet a stílusodhoz illő lehetőségek közül.';
 
   @override
   String get keyboardStyle => 'Keyboard Style';
 
   @override
   String get keyboardStyleDescription =>
-      'Native uses your TV\'s own keyboard. Classic is the original Moonfin keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
+      'Native uses your TV\'s own keyboard. Classic is the original Lambent keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
 
   @override
   String get keyboardStyleNative => 'Native';
@@ -719,7 +719,7 @@ class AppLocalizationsHu extends AppLocalizations {
   }
 
   @override
-  String get exitApp => 'Kilépsz a Moonfinből?';
+  String get exitApp => 'Kilépsz a Lambentből?';
 
   @override
   String get exitAppConfirmation => 'Biztosan ki szeretnél lépni?';
@@ -1880,7 +1880,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get shuffleAllMusic => 'Összes zene keverése';
 
   @override
-  String get carSignInPrompt => 'Jelentkezz be a Moonfinbe a telefonodon';
+  String get carSignInPrompt => 'Jelentkezz be a Lambentbe a telefonodon';
 
   @override
   String get carServerUnreachable => 'A szervered nem érhető el';
@@ -2163,7 +2163,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get shortcutToggleFullscreen => 'Teljesképernyő be- vagy kikapcsolása';
 
   @override
-  String get shortcutQuit => 'Kilépés a Moonfinből';
+  String get shortcutQuit => 'Kilépés a Lambentből';
 
   @override
   String get shortcutPlayPause => 'Lejátszás vagy szüneteltetés';
@@ -2338,7 +2338,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Open it in Moonfin on a phone, tablet or computer to read it. Audiobooks still play here.';
+      'Open it in Lambent on a phone, tablet or computer to read it. Audiobooks still play here.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -3170,7 +3170,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'A Moonfin alkalmazásban használt betöltési animációk testreszabása';
+      'A Lambent alkalmazásban használt betöltési animációk testreszabása';
 
   @override
   String get loadingAnimationConfiguration => 'Betöltési animáció beállítások';
@@ -3179,7 +3179,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get loadingAnimationImage => 'Kép';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Moonfin logo';
+  String get loadingAnimationImageMoonfinLogo => 'Lambent logo';
 
   @override
   String get loadingAnimationImageSpinner => 'Forgó betöltésjelző';
@@ -3191,7 +3191,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Holdfázisok';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Moonfin fázisok';
+  String get loadingAnimationImageMoonfinPhases => 'Lambent fázisok';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Neonfin fázisok';
@@ -4218,7 +4218,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get notSetMpvConf =>
-      'Nincs beállítva. A Moonfin megpróbálja az alapértelmezett mpv.conf fájlt az alkalmazás/adat mappákban.';
+      'Nincs beállítva. A Lambent megpróbálja az alapértelmezett mpv.conf fájlt az alkalmazás/adat mappákban.';
 
   @override
   String get selectMpvConf => 'mpv.conf kiválasztása';
@@ -4518,7 +4518,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android only lets Moonfin write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
+      'Android only lets Lambent write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
 
   @override
   String get saveToDownloadsFolder => 'Mentés a Letöltések mappába';
@@ -4813,7 +4813,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get libraryVisibilityDescription =>
-      'A kezdőlap láthatóságának váltása könyvtáronként. A módosítások életbe lépéséhez indítsd újra a Moonfin alkalmazást.';
+      'A kezdőlap láthatóságának váltása könyvtáronként. A módosítások életbe lépéséhez indítsd újra a Lambent alkalmazást.';
 
   @override
   String get showInNavigation => 'Megjelenítés a navigációban';
@@ -5246,7 +5246,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get screensaverBackdropBlack => 'Black';
 
   @override
-  String get screensaverBackdropMoonfin => 'Moonfin';
+  String get screensaverBackdropMoonfin => 'Lambent';
 
   @override
   String get screensaverBackdropCalm => 'Calm';
@@ -5261,7 +5261,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Additional Component';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Moonfin Logo';
+  String get screensaverComponentMoonfinLogo => 'Lambent Logo';
 
   @override
   String get screensaverComponentRunner => 'Runner';
@@ -5727,7 +5727,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get cancelRequest4k => 'Cancel 4K Request';
 
   @override
-  String get playInMoonfin => 'Lejátszás a Moonfinben';
+  String get playInMoonfin => 'Lejátszás a Lambentben';
 
   @override
   String get requestedByLabel => 'Requested by';
@@ -5773,7 +5773,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get itemNotFoundInLibrary =>
-      'Az elem nem található a Moonfin-könyvtáradban';
+      'Az elem nem található a Lambent-könyvtáradban';
 
   @override
   String get errorSearchingLibrary => 'Hiba a könyvtár keresése közben';
@@ -7771,7 +7771,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get adminServerRebootMessage =>
-      'A szerver újraindítása folyamatban van, kérlek, indítsd újra a Moonfint';
+      'A szerver újraindítása folyamatban van, kérlek, indítsd újra a Lambentt';
 
   @override
   String get adminActiveSessions => 'Aktív munkamenetek';
@@ -11554,7 +11554,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      'A kezdőlap láthatóságának váltása könyvtáronként. Indítsd újra a Moonfin alkalmazást, hogy a változtatások életbe lépjenek.';
+      'A kezdőlap láthatóságának váltása könyvtáronként. Indítsd újra a Lambent alkalmazást, hogy a változtatások életbe lépjenek.';
 
   @override
   String get settingsMediaBarAndLocalPreviews => 'Médiasáv és helyi előnézetek';
@@ -11696,14 +11696,14 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get settingsPrivacyPolicySubtitle =>
-      'Hogyan kezeli a Moonfin az adataidat';
+      'Hogyan kezeli a Lambent az adataidat';
 
   @override
   String get settingsCheckForUpdates => 'Frissítések ellenőrzése';
 
   @override
   String get settingsCheckForUpdatesSubtitle =>
-      'A legújabb Moonfin kiadás ellenőrzése';
+      'A legújabb Lambent kiadás ellenőrzése';
 
   @override
   String get settingsBoth => 'Mindkettő';
@@ -12577,7 +12577,7 @@ class AppLocalizationsHu extends AppLocalizations {
   String get webDiagnostics => 'Webes diagnosztika';
 
   @override
-  String get webDiagnosticsTitle => 'Moonfin webes diagnosztika';
+  String get webDiagnosticsTitle => 'Lambent webes diagnosztika';
 
   @override
   String get webDiagnosticsIntro =>
@@ -12593,11 +12593,11 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'A Moonfin észlelte, hogy egy HTTPS-oldal próbál hívni egy HTTP-szerver URL-t. A böngészők blokkolják ezt a kérést, mielőtt az elérné a szerveredet.';
+      'A Lambent észlelte, hogy egy HTTPS-oldal próbál hívni egy HTTP-szerver URL-t. A böngészők blokkolják ezt a kérést, mielőtt az elérné a szerveredet.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'A Moonfin böngészőszintű kéréshibát észlelt, amelyet általában a CORS- vagy preflight-fejlécek hiánya okoz a médiaszerveren.';
+      'A Lambent böngészőszintű kéréshibát észlelt, amelyet általában a CORS- vagy preflight-fejlécek hiánya okoz a médiaszerveren.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12646,7 +12646,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Megoldás: szolgáld ki a médiaszerveredet vagy a proxyvégpontodat HTTPS-en keresztül, vagy a Moonfint csak megbízható helyi hálózatokon töltsd be HTTP-n.';
+      'Megoldás: szolgáld ki a médiaszerveredet vagy a proxyvégpontodat HTTPS-en keresztül, vagy a Lambentt csak megbízható helyi hálózatokon töltsd be HTTP-n.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -14356,7 +14356,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Az Impeller a Flutter modern GPU-megjelenítője a simább animációkért és a kevesebb akadozásért. Néhány TV-boxon és régebbi GPU-n képhibákat vagy fekete videót okozhat; ha ezeket tapasztalod, kapcsold ki. Az Automatikus a legmegfelelőbb alapértelmezést választja ki az eszközödhöz. Indítsd újra a Moonfint a beállítások érvényesítéséhez.';
+      'Az Impeller a Flutter modern GPU-megjelenítője a simább animációkért és a kevesebb akadozásért. Néhány TV-boxon és régebbi GPU-n képhibákat vagy fekete videót okozhat; ha ezeket tapasztalod, kapcsold ki. Az Automatikus a legmegfelelőbb alapértelmezést választja ki az eszközödhöz. Indítsd újra a Lambentt a beállítások érvényesítéséhez.';
 
   @override
   String get impellerAuto => 'Automatikus';
@@ -14372,7 +14372,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'A Moonfinnek újra kell indulnia a megjelenítő motor megváltoztatásához. Zárd be most az alkalmazást, majd nyisd meg újra a beállítások érvényesítéséhez.';
+      'A Lambentnek újra kell indulnia a megjelenítő motor megváltoztatásához. Zárd be most az alkalmazást, majd nyisd meg újra a beállítások érvényesítéséhez.';
 
   @override
   String get impellerCloseNow => 'Alkalmazás bezárása most';
@@ -14919,7 +14919,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Transcoded qualities only download while Moonfin is open. Original quality also downloads in the background.';
+      'Transcoded qualities only download while Lambent is open. Original quality also downloads in the background.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -14927,7 +14927,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Downloads only while Moonfin is open';
+      'Downloads only while Lambent is open';
 
   @override
   String get autoDownloadQualityTitle => 'Auto-download quality';
@@ -14950,7 +14950,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'When you finish an episode on any device, Moonfin downloads the next ones. Episodes it downloads are deleted once watched.';
+      'When you finish an episode on any device, Lambent downloads the next ones. Episodes it downloads are deleted once watched.';
 
   @override
   String get smartDownloadsKeepReady => 'Episodes to Keep Downloaded';
@@ -15024,15 +15024,15 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Allow the system to check for new episodes periodically while Moonfin is closed';
+      'Allow the system to check for new episodes periodically while Lambent is closed';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'Background App Refresh is disabled for Moonfin. Enable it in iOS Settings.';
+      'Background App Refresh is disabled for Lambent. Enable it in iOS Settings.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'Background usage is restricted for Moonfin in Android Settings.';
+      'Background usage is restricted for Lambent in Android Settings.';
 
   @override
   String get autoDownloadCheckNow => 'Check Now';
@@ -15250,13 +15250,13 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'What the Apple TV home screen shows above the Moonfin icon when it is selected. This setting stays on this device.';
+      'What the Apple TV home screen shows above the Lambent icon when it is selected. This setting stays on this device.';
 
   @override
   String get topShelfLatestMedia => 'Latest media';
 
   @override
-  String get topShelfAppBanner => 'Moonfin banner';
+  String get topShelfAppBanner => 'Lambent banner';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -15968,7 +15968,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'Unlinking stops Moonfin from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
+      'Unlinking stops Lambent from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
 
   @override
   String get rommUnlink => 'Unlink';
@@ -15982,7 +15982,7 @@ class AppLocalizationsHu extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Moonfin couldn\'t reach RomM. Try again in a moment.';
+      'Lambent couldn\'t reach RomM. Try again in a moment.';
 
   @override
   String get rommNotAvailable => 'This server has no RomM library.';

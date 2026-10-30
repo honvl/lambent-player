@@ -1,6 +1,6 @@
 {
     "@@locale": "zh",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin 版本 {version}",
+    "appVersionFooter": "Lambent 版本 {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin 无法访问系统密钥环。仍可继续登录，但在密钥环解锁前，安全令牌存储可能不可用。",
+    "secureStorageUnavailableMessage": "Lambent 无法访问系统密钥环。仍可继续登录，但在密钥环解锁前，安全令牌存储可能不可用。",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "可在 Moonfin 与 Neon Pulse 之间切换，无需重启应用。",
+    "settingsAppearanceThemeSubtitle": "可在 Lambent 与 Neon Pulse 之间切换，无需重启应用。",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "退出 Moonfin？",
+    "exitApp": "退出 Lambent？",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "未设置。Moonfin 将尝试使用应用/数据文件夹中的默认 mpv.conf。",
+    "notSetMpvConf": "未设置。Lambent 将尝试使用应用/数据文件夹中的默认 mpv.conf。",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "切换每个媒体库的主页可见性。重启 Moonfin 以使更改生效。",
+    "libraryVisibilityDescription": "切换每个媒体库的主页可见性。重启 Lambent 以使更改生效。",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "在 Moonfin 中播放",
+    "playInMoonfin": "在 Lambent 中播放",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "在你的 Moonfin 媒体库中未找到此媒体项",
+    "itemNotFoundInLibrary": "在你的 Lambent 媒体库中未找到此媒体项",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "服务器正在重启",
-    "adminServerRebootMessage": "服务器正在重启，请重启 Moonfin",
+    "adminServerRebootMessage": "服务器正在重启，请重启 Lambent",
     "adminActiveSessions": "活跃会话",
     "adminSessionsLoadFailed": "无法加载会话",
     "adminNoActiveSessions": "暂无活跃会话",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "在导航栏中显示类型按钮",
     "settingsShowFavoritesButtonInNavigation": "在导航栏中显示收藏按钮",
     "settingsShowLibrariesButtonInNavigation": "在导航栏中显示媒体库按钮",
-    "settingsLibraryVisibilitySubtitle": "切换每个媒体库的主页可见性。重启 Moonfin 以使更改生效。",
+    "settingsLibraryVisibilitySubtitle": "切换每个媒体库的主页可见性。重启 Lambent 以使更改生效。",
     "settingsMediaBarAndLocalPreviews": "媒体栏和本地预览",
     "settingsVisualOverlays": "视觉叠加",
     "settingsSeasonalSurprise": "季节性惊喜",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "许可证",
     "settingsOpenSourceLicenseNotices": "开源许可声明",
     "settingsPrivacyPolicy": "隐私政策",
-    "settingsPrivacyPolicySubtitle": "Moonfin 如何处理你的数据",
+    "settingsPrivacyPolicySubtitle": "Lambent 如何处理你的数据",
     "settingsCheckForUpdates": "检查更新",
-    "settingsCheckForUpdatesSubtitle": "检查最新的 Moonfin 版本",
+    "settingsCheckForUpdatesSubtitle": "检查最新的 Lambent 版本",
     "settingsPoweredByFlutter": "由 Flutter 提供支持",
     "settingsLicenseNoticesCount": "{count, plural, one {# 条许可证声明} other {# 条许可证声明}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "优先使用 SDH 字幕",
     "preferSdhSubtitlesSubtitle": "自动选择时优先选择 SDH/CC 字幕轨道。",
     "webDiagnostics": "Web 诊断",
-    "webDiagnosticsTitle": "Moonfin Web 诊断",
+    "webDiagnosticsTitle": "Lambent Web 诊断",
     "webDiagnosticsIntro": "使用此页面可以诊断浏览器连接问题（CORS、混合内容和发现设置）。",
     "webDiagnosticsDetectedMixedContentFailure": "检测到混合内容失败",
     "webDiagnosticsDetectedCorsPreflightFailure": "检测到 CORS/预检失败",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin 检测到一个 HTTPS 页面试图调用 HTTP 服务器 URL。浏览器会在请求到达你的服务器之前阻止该请求。",
-    "webDiagnosticsCorsFailureBody": "Moonfin 检测到浏览器请求失败，常见原因是媒体服务器缺少 CORS 或预检请求标头。",
+    "webDiagnosticsMixedContentFailureBody": "Lambent 检测到一个 HTTPS 页面试图调用 HTTP 服务器 URL。浏览器会在请求到达你的服务器之前阻止该请求。",
+    "webDiagnosticsCorsFailureBody": "Lambent 检测到浏览器请求失败，常见原因是媒体服务器缺少 CORS 或预检请求标头。",
     "webDiagnosticsTargetUrl": "目标 URL：{url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "未配置",
     "webDiagnosticsMixedContent": "混合内容",
     "webDiagnosticsMixedContentDetected": "此页面通过 HTTPS 加载，但有一个或多个配置的 URL 使用 HTTP。浏览器会阻止 HTTPS 页面调用 HTTP API。",
-    "webDiagnosticsMixedContentFix": "修复：通过 HTTPS 为你的媒体服务器或代理端点提供服务，或仅在受信任的本地网络上通过 HTTP 加载 Moonfin。",
+    "webDiagnosticsMixedContentFix": "修复：通过 HTTPS 为你的媒体服务器或代理端点提供服务，或仅在受信任的本地网络上通过 HTTP 加载 Lambent。",
     "webDiagnosticsNoMixedContentDetected": "从当前运行时设置中未检测到明显的混合内容配置。",
     "webDiagnosticsCorsChecklist": "CORS 清单",
     "webDiagnosticsCorsChecklistItem1": "• 在 Access-Control-Allow-Origin 中允许浏览器来源。",
@@ -7619,7 +7619,7 @@
     "transcodeAudioChannelsNotSupported": "音频声道数不受支持。",
     "sortAlphabetical": "字母顺序",
     "sortReleaseDescending": "发行顺序（降序）",
-    "impellerRestartMessage": "Moonfin 需要重启以更改渲染引擎。立即关闭应用，然后重新打开以应用更改。",
+    "impellerRestartMessage": "Lambent 需要重启以更改渲染引擎。立即关闭应用，然后重新打开以应用更改。",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -7668,7 +7668,7 @@
             }
         }
     },
-    "recommendationSystemSubtitle": "可选用「Moonfin本地资料库推荐算法」，或线上 TMDb 相似度匹配算法。注意：线上推荐功能需要对接 Seerr 服务。",
+    "recommendationSystemSubtitle": "可选用「Lambent本地资料库推荐算法」，或线上 TMDb 相似度匹配算法。注意：线上推荐功能需要对接 Seerr 服务。",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
@@ -8060,7 +8060,7 @@
             }
         }
     },
-    "impellerRenderingSubtitle": "Impeller 是 Flutter 的现代 GPU 渲染器，可实现更流畅的动画和更少的卡顿。在某些电视盒子和旧款 GPU 上可能会导致故障或黑屏；如果遇到这些问题，请将其关闭。自动会为你的设备选择最佳默认值。重启 Moonfin 以应用。",
+    "impellerRenderingSubtitle": "Impeller 是 Flutter 的现代 GPU 渲染器，可实现更流畅的动画和更少的卡顿。在某些电视盒子和旧款 GPU 上可能会导致故障或黑屏；如果遇到这些问题，请将其关闭。自动会为你的设备选择最佳默认值。重启 Lambent 以应用。",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8160,7 +8160,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "在手机上登录 Moonfin",
+    "carSignInPrompt": "在手机上登录 Lambent",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8168,11 +8168,11 @@
     "@adminRefreshAllLibraries": {
         "description": "Floating action button text to refresh all libraries"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "按目标媒体的家长分级限制 Moonfin 推荐内容",
+    "recommendationsApplyParentalRatingCapSubtitle": "按目标媒体的家长分级限制 Lambent 推荐内容",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
-    "customThemeSubtitle": "自定义主题可更改 Moonfin 全部视觉元素，从中挑选一款贴合你的使用风格。",
+    "customThemeSubtitle": "自定义主题可更改 Lambent 全部视觉元素，从中挑选一款贴合你的使用风格。",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -8192,7 +8192,7 @@
     "@deletedScenes": {
         "description": "Tab label for deleted scenes special features"
     },
-    "recommendationSystemMoonfin": "Moonfin 智能推荐",
+    "recommendationSystemMoonfin": "Lambent 智能推荐",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -8215,7 +8215,7 @@
     },
     "audiobookNoChapters": "无章节",
     "settingsAlwaysExpandNavbarLabels": "始终显示顶部导航栏中的文本标签",
-    "detailScreenStyleSubtitle": "Moonfin 是经典布局；Modern 是自适应影院风布局。",
+    "detailScreenStyleSubtitle": "Lambent 是经典布局；Modern 是自适应影院风布局。",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -9184,7 +9184,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android 系统只允许 Moonfin 写入其拥有的文件夹，而此设备没有可移动存储设备。请启用上方的“保存到下载文件夹”选项，将下载内容保存到其他应用可以访问的位置。",
+    "downloadLocationLimitedByAndroid": "Android 系统只允许 Lambent 写入其拥有的文件夹，而此设备没有可移动存储设备。请启用上方的“保存到下载文件夹”选项，将下载内容保存到其他应用可以访问的位置。",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9418,7 +9418,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "当此设备识别错误时覆盖检测到的布局。重启 Moonfin 使更改生效。",
+    "interfaceLayoutSubtitle": "当此设备识别错误时覆盖检测到的布局。重启 Lambent 使更改生效。",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10027,7 +10027,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "自定义 Moonfin 各处使用的加载动画",
+    "loadingAnimationDescription": "自定义 Lambent 各处使用的加载动画",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10039,7 +10039,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Moonfin 徽标",
+    "loadingAnimationImageMoonfinLogo": "Lambent 徽标",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10055,7 +10055,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Moonfin 月相",
+    "loadingAnimationImageMoonfinPhases": "Lambent 月相",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -10211,7 +10211,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Moonfin",
+    "screensaverBackdropMoonfin": "Lambent",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -10231,7 +10231,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Moonfin 徽标",
+    "screensaverComponentMoonfinLogo": "Lambent 徽标",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },
@@ -10387,7 +10387,7 @@
             }
         }
     },
-    "autoDownloadTranscodedForegroundNote": "转码画质仅在 Moonfin 运行时下载；原片画质可后台下载。",
+    "autoDownloadTranscodedForegroundNote": "转码画质仅在 Lambent 运行时下载；原片画质可后台下载。",
     "@autoDownloadTranscodedForegroundNote": {
         "description": "Shown under transcoded options when choosing the quality of an auto-download subscription"
     },
@@ -10395,7 +10395,7 @@
     "@autoDownloadTranscodedRunningNote": {
         "description": "Shown under a running transcoded download that a subscription queued"
     },
-    "autoDownloadForegroundOnly": "仅 Moonfin 运行时才会下载",
+    "autoDownloadForegroundOnly": "仅 Lambent 运行时才会下载",
     "@autoDownloadForegroundOnly": {
         "description": "Short note next to a followed series in a transcoded quality"
     },
@@ -10465,15 +10465,15 @@
     "@autoDownloadBackgroundRefresh": {
         "description": "Setting that lets the system wake the app to check for new episodes"
     },
-    "autoDownloadBackgroundRefreshSubtitle": "允许系统在 Moonfin 关闭时定期检查新剧集",
+    "autoDownloadBackgroundRefreshSubtitle": "允许系统在 Lambent 关闭时定期检查新剧集",
     "@autoDownloadBackgroundRefreshSubtitle": {
         "description": "Explains the background refresh setting"
     },
-    "autoDownloadBackgroundRefreshDenied": "Moonfin 的后台应用刷新已被禁用，请前往 iOS 设置开启。",
+    "autoDownloadBackgroundRefreshDenied": "Lambent 的后台应用刷新已被禁用，请前往 iOS 设置开启。",
     "@autoDownloadBackgroundRefreshDenied": {
         "description": "Shown when iOS forbids background refresh for the app"
     },
-    "autoDownloadBackgroundRestrictedAndroid": "Android 设置限制了 Moonfin 后台运行权限。",
+    "autoDownloadBackgroundRestrictedAndroid": "Android 设置限制了 Lambent 后台运行权限。",
     "@autoDownloadBackgroundRestrictedAndroid": {
         "description": "Shown when Android restricts the app from running in the background"
     },

@@ -1,6 +1,6 @@
 {
     "@@locale": "lv",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin versija {version}",
+    "appVersionFooter": "Lambent versija {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin nevarēja piekļūt jūsu sistēmas atslēgu piekariņam. Pieteikšanos var turpināt, taču droša marķiera krātuve var nebūt pieejama, kamēr atslēgu piekariņš nav atbloķēts.",
+    "secureStorageUnavailableMessage": "Lambent nevarēja piekļūt jūsu sistēmas atslēgu piekariņam. Pieteikšanos var turpināt, taču droša marķiera krātuve var nebūt pieejama, kamēr atslēgu piekariņš nav atbloķēts.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Pārslēdzieties starp Moonfin un Neon Pulse, nerestartējot lietotni",
+    "settingsAppearanceThemeSubtitle": "Pārslēdzieties starp Lambent un Neon Pulse, nerestartējot lietotni",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Vai iziet no Moonfin?",
+    "exitApp": "Vai iziet no Lambent?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Nav iestatīts. Moonfin izmēģinās noklusējuma mpv.conf lietotņu/datu mapēs.",
+    "notSetMpvConf": "Nav iestatīts. Lambent izmēģinās noklusējuma mpv.conf lietotņu/datu mapēs.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Pārslēgt mājas lapas redzamību katrai bibliotēkai. Restartējiet Moonfin, lai izmaiņas stātos spēkā.",
+    "libraryVisibilityDescription": "Pārslēgt mājas lapas redzamību katrai bibliotēkai. Restartējiet Lambent, lai izmaiņas stātos spēkā.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Spēlē Moonfin",
+    "playInMoonfin": "Spēlē Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Vienums nav atrasts jūsu Moonfin bibliotēkā",
+    "itemNotFoundInLibrary": "Vienums nav atrasts jūsu Lambent bibliotēkā",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Notiek servera atsāknēšana",
-    "adminServerRebootMessage": "Notiek servera atsāknēšana, lūdzu, restartējiet Moonfin",
+    "adminServerRebootMessage": "Notiek servera atsāknēšana, lūdzu, restartējiet Lambent",
     "adminActiveSessions": "Aktīvās sesijas",
     "adminSessionsLoadFailed": "Neizdevās ielādēt sesijas",
     "adminNoActiveSessions": "Nav aktīvu sesiju",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Rādīt žanru pogu navigācijas joslā",
     "settingsShowFavoritesButtonInNavigation": "Parādiet izlases pogu navigācijas joslā",
     "settingsShowLibrariesButtonInNavigation": "Parādiet bibliotēkas pogu navigācijas joslā",
-    "settingsLibraryVisibilitySubtitle": "Pārslēgt mājas lapas redzamību katrai bibliotēkai. Restartējiet Moonfin, lai izmaiņas stātos spēkā.",
+    "settingsLibraryVisibilitySubtitle": "Pārslēgt mājas lapas redzamību katrai bibliotēkai. Restartējiet Lambent, lai izmaiņas stātos spēkā.",
     "settingsMediaBarAndLocalPreviews": "Multivides josla un vietējie priekšskatījumi",
     "settingsVisualOverlays": "Vizuālie pārklājumi",
     "settingsSeasonalSurprise": "Sezonas pārsteigums",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licences",
     "settingsOpenSourceLicenseNotices": "Atvērtā koda licences paziņojumi",
     "settingsPrivacyPolicy": "Privātuma politika",
-    "settingsPrivacyPolicySubtitle": "Kā Moonfin apstrādā jūsu datus",
+    "settingsPrivacyPolicySubtitle": "Kā Lambent apstrādā jūsu datus",
     "settingsCheckForUpdates": "Pārbaudiet atjauninājumus",
-    "settingsCheckForUpdatesSubtitle": "Pārbaudiet jaunāko Moonfin versiju",
+    "settingsCheckForUpdatesSubtitle": "Pārbaudiet jaunāko Lambent versiju",
     "settingsPoweredByFlutter": "Darbojas ar Flutter",
     "settingsLicenseNoticesCount": "{count, plural, zero {# licenču paziņojumu} one {# licences paziņojums} other {# licences paziņojumi}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Dodiet priekšroku SDH subtitriem",
     "preferSdhSubtitlesSubtitle": "Veicot automātisko atlasi, piešķiriet prioritāti SDH/CC subtitru celiņiem.",
     "webDiagnostics": "Web diagnostika",
-    "webDiagnosticsTitle": "Moonfin Tīmekļa diagnostika",
+    "webDiagnosticsTitle": "Lambent Tīmekļa diagnostika",
     "webDiagnosticsIntro": "Izmantojiet šo lapu, lai diagnosticētu pārlūkprogrammas savienojamības problēmas (CORS, jaukts saturs un atklāšanas iestatījumi).",
     "webDiagnosticsDetectedMixedContentFailure": "Konstatēta jaukta satura kļūme",
     "webDiagnosticsDetectedCorsPreflightFailure": "Konstatēta CORS/pirmslidojuma kļūme",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin atklāja HTTPS lapu, kas mēģina izsaukt HTTP servera URL. Pārlūkprogrammas bloķē šo pieprasījumu, pirms tas sasniedz jūsu serveri.",
-    "webDiagnosticsCorsFailureBody": "Moonfin atklāja pārlūkprogrammas līmeņa pieprasījuma kļūmi, ko parasti izraisa trūkstošas ​​CORS vai pirmspārbaudes galvenes multivides serverī.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent atklāja HTTPS lapu, kas mēģina izsaukt HTTP servera URL. Pārlūkprogrammas bloķē šo pieprasījumu, pirms tas sasniedz jūsu serveri.",
+    "webDiagnosticsCorsFailureBody": "Lambent atklāja pārlūkprogrammas līmeņa pieprasījuma kļūmi, ko parasti izraisa trūkstošas ​​CORS vai pirmspārbaudes galvenes multivides serverī.",
     "webDiagnosticsTargetUrl": "Mērķa URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "nav konfigurēts",
     "webDiagnosticsMixedContent": "Jaukts saturs",
     "webDiagnosticsMixedContentDetected": "Šī lapa tiek ielādēta, izmantojot HTTPS, bet viens vai vairāki konfigurētie URL ir HTTP. Pārlūkprogrammas neļauj HTTPS lapām izsaukt HTTP API.",
-    "webDiagnosticsMixedContentFix": "Labojums: apkalpojiet multivides serveri vai starpniekservera galapunktu, izmantojot HTTPS, vai ielādējiet Moonfin, izmantojot HTTP, tikai uzticamos lokālos tīklos.",
+    "webDiagnosticsMixedContentFix": "Labojums: apkalpojiet multivides serveri vai starpniekservera galapunktu, izmantojot HTTPS, vai ielādējiet Lambent, izmantojot HTTP, tikai uzticamos lokālos tīklos.",
     "webDiagnosticsNoMixedContentDetected": "Pašreizējos izpildlaika iestatījumos nav konstatēta acīmredzama jaukta satura konfigurācija.",
     "webDiagnosticsCorsChecklist": "CORS kontrolsaraksts",
     "webDiagnosticsCorsChecklistItem1": "• Atļaut pārlūkprogrammas izcelsmi sadaļā Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klasiskais ir oriģinālais centrētais Moonfin izkārtojums. Modernais ir adaptīvs kinematogrāfisks izkārtojums.",
+    "detailScreenStyleSubtitle": "Klasiskais ir oriģinālais centrētais Lambent izkārtojums. Modernais ir adaptīvs kinematogrāfisks izkārtojums.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Izmantojiet Moonfin Recommends vietējās bibliotēkas algoritmu vai tiešsaistes TMDB līdzības rādītājus. Piezīme: tiešsaistes ieteikumiem nepieciešama Seerr integrācija.",
+    "recommendationSystemSubtitle": "Izmantojiet Lambent Recommends vietējās bibliotēkas algoritmu vai tiešsaistes TMDB līdzības rādītājus. Piezīme: tiešsaistes ieteikumiem nepieciešama Seerr integrācija.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Ierobežot Moonfin Recommends ieteikumus atbilstoši izvēlētā satura vecuma ierobežojumam",
+    "recommendationsApplyParentalRatingCapSubtitle": "Ierobežot Lambent Recommends ieteikumus atbilstoši izvēlētā satura vecuma ierobežojumam",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Pielāgotas tēmas maina vizuālos elementus visā Moonfin lietotnē. Izvēlieties vienu no šīm iespējām atbilstoši savam stilam.",
+    "customThemeSubtitle": "Pielāgotas tēmas maina vizuālos elementus visā Lambent lietotnē. Izvēlieties vienu no šīm iespējām atbilstoši savam stilam.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Pierakstieties Moonfin savā tālrunī",
+    "carSignInPrompt": "Pierakstieties Lambent savā tālrunī",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller ir Flutter modernais GPU renderētājs, kas nodrošina plūstošākas animācijas un mazāku raustīšanos. Dažās TV pierīcēs un vecākos GPU tas var radīt traucējumus vai melnu attēlu; tādā gadījumā izslēdziet to. “Automātiski” izvēlas jūsu ierīcei piemērotāko noklusējumu. Lai lietotu izmaiņas, restartējiet Moonfin.",
+    "impellerRenderingSubtitle": "Impeller ir Flutter modernais GPU renderētājs, kas nodrošina plūstošākas animācijas un mazāku raustīšanos. Dažās TV pierīcēs un vecākos GPU tas var radīt traucējumus vai melnu attēlu; tādā gadījumā izslēdziet to. “Automātiski” izvēlas jūsu ierīcei piemērotāko noklusējumu. Lai lietotu izmaiņas, restartējiet Lambent.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lai mainītu renderēšanas dzinēju, Moonfin ir jārestartē. Aizveriet lietotni tagad un atveriet to no jauna.",
+    "impellerRestartMessage": "Lai mainītu renderēšanas dzinēju, Lambent ir jārestartē. Aizveriet lietotni tagad un atveriet to no jauna.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

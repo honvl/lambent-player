@@ -1,6 +1,6 @@
 {
     "@@locale": "ja",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin バージョン {version}",
+    "appVersionFooter": "Lambent バージョン {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin はシステム キーリングにアクセスできませんでした。ログインは続行できますが、キーリングのロックが解除されるまで安全なトークン ストレージを利用できなくなる可能性があります。",
+    "secureStorageUnavailableMessage": "Lambent はシステム キーリングにアクセスできませんでした。ログインは続行できますが、キーリングのロックが解除されるまで安全なトークン ストレージを利用できなくなる可能性があります。",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "アプリを再起動せずに Moonfin と Neon Pulse を切り替える",
+    "settingsAppearanceThemeSubtitle": "アプリを再起動せずに Lambent と Neon Pulse を切り替える",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin を終了しますか?",
+    "exitApp": "Lambent を終了しますか?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "設定されていません。 Moonfin は、app/data フォルダー内のデフォルトの mpv.conf を試行します。",
+    "notSetMpvConf": "設定されていません。 Lambent は、app/data フォルダー内のデフォルトの mpv.conf を試行します。",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "ライブラリごとにホームページの表示を切り替えます。変更を有効にするには、Moonfin を再起動します。",
+    "libraryVisibilityDescription": "ライブラリごとにホームページの表示を切り替えます。変更を有効にするには、Lambent を再起動します。",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Moonfin でプレイする",
+    "playInMoonfin": "Lambent でプレイする",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Moonfin ライブラリにアイテムが見つかりません",
+    "itemNotFoundInLibrary": "Lambent ライブラリにアイテムが見つかりません",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "サーバーの再起動が進行中です",
-    "adminServerRebootMessage": "サーバーの再起動が進行中です。Moonfin を再起動してください。",
+    "adminServerRebootMessage": "サーバーの再起動が進行中です。Lambent を再起動してください。",
     "adminActiveSessions": "アクティブなセッション",
     "adminSessionsLoadFailed": "セッションのロードに失敗しました",
     "adminNoActiveSessions": "アクティブなセッションはありません",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "ナビゲーションバーにジャンルボタンを表示する",
     "settingsShowFavoritesButtonInNavigation": "ナビゲーションバーにお気に入りボタンを表示する",
     "settingsShowLibrariesButtonInNavigation": "ナビゲーション バーにライブラリ ボタンを表示する",
-    "settingsLibraryVisibilitySubtitle": "ライブラリごとにホームページの表示を切り替えます。変更を有効にするには、Moonfin を再起動します。",
+    "settingsLibraryVisibilitySubtitle": "ライブラリごとにホームページの表示を切り替えます。変更を有効にするには、Lambent を再起動します。",
     "settingsMediaBarAndLocalPreviews": "メディアバーとローカルプレビュー",
     "settingsVisualOverlays": "ビジュアルオーバーレイ",
     "settingsSeasonalSurprise": "季節のサプライズ",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "ライセンス",
     "settingsOpenSourceLicenseNotices": "オープンソースライセンスに関する通知",
     "settingsPrivacyPolicy": "プライバシーポリシー",
-    "settingsPrivacyPolicySubtitle": "Moonfin によるデータの処理方法",
+    "settingsPrivacyPolicySubtitle": "Lambent によるデータの処理方法",
     "settingsCheckForUpdates": "アップデートをチェックする",
-    "settingsCheckForUpdatesSubtitle": "最新の Moonfin リリースを確認してください",
+    "settingsCheckForUpdatesSubtitle": "最新の Lambent リリースを確認してください",
     "settingsPoweredByFlutter": "フラッター搭載",
     "settingsLicenseNoticesCount": "{count, plural, one {# 件のライセンス表記} other {# 件のライセンス表記}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH 字幕を優先",
     "preferSdhSubtitlesSubtitle": "自動選択時に SDH / CC の字幕トラックを優先します。",
     "webDiagnostics": "Web 診断",
-    "webDiagnosticsTitle": "Moonfin Web 診断",
+    "webDiagnosticsTitle": "Lambent Web 診断",
     "webDiagnosticsIntro": "このページでは、ブラウザーの接続に関する問題 (CORS、混在コンテンツ、検出設定) を診断できます。",
     "webDiagnosticsDetectedMixedContentFailure": "混在コンテンツによるエラーを検出しました",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS / プリフライトのエラーを検出しました",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin は、HTTPS のページから HTTP のサーバー URL を呼び出そうとしているのを検出しました。ブラウザーはこのリクエストをサーバーに届く前にブロックします。",
-    "webDiagnosticsCorsFailureBody": "Moonfin はブラウザーレベルのリクエスト失敗を検出しました。多くの場合、メディアサーバー側で CORS やプリフライトのヘッダーが不足していることが原因です。",
+    "webDiagnosticsMixedContentFailureBody": "Lambent は、HTTPS のページから HTTP のサーバー URL を呼び出そうとしているのを検出しました。ブラウザーはこのリクエストをサーバーに届く前にブロックします。",
+    "webDiagnosticsCorsFailureBody": "Lambent はブラウザーレベルのリクエスト失敗を検出しました。多くの場合、メディアサーバー側で CORS やプリフライトのヘッダーが不足していることが原因です。",
     "webDiagnosticsTargetUrl": "対象 URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "未設定",
     "webDiagnosticsMixedContent": "混在コンテンツ",
     "webDiagnosticsMixedContentDetected": "このページは HTTPS で読み込まれていますが、設定された URL に HTTP のものが含まれています。ブラウザーは HTTPS のページから HTTP の API を呼び出すことをブロックします。",
-    "webDiagnosticsMixedContentFix": "対処法: メディアサーバーまたはプロキシのエンドポイントを HTTPS で公開するか、信頼できるローカルネットワークでのみ Moonfin を HTTP で読み込んでください。",
+    "webDiagnosticsMixedContentFix": "対処法: メディアサーバーまたはプロキシのエンドポイントを HTTPS で公開するか、信頼できるローカルネットワークでのみ Lambent を HTTP で読み込んでください。",
     "webDiagnosticsNoMixedContentDetected": "現在の実行時設定からは、明らかな混在コンテンツの構成は検出されませんでした。",
     "webDiagnosticsCorsChecklist": "CORS チェックリスト",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin でブラウザーのオリジンを許可する。",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "クラシックは従来の Moonfin の中央寄せレイアウトです。モダンはレスポンシブなシネマティックレイアウトです。",
+    "detailScreenStyleSubtitle": "クラシックは従来の Lambent の中央寄せレイアウトです。モダンはレスポンシブなシネマティックレイアウトです。",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Moonfin Recommends のローカルライブラリ用アルゴリズム、またはオンラインの TMDb 類似度指標を使用します。注: オンラインのおすすめには Seerr 連携が必要です。",
+    "recommendationSystemSubtitle": "Lambent Recommends のローカルライブラリ用アルゴリズム、またはオンラインの TMDb 類似度指標を使用します。注: オンラインのおすすめには Seerr 連携が必要です。",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Moonfin Recommends のおすすめを対象作品の視聴年齢制限で絞り込みます",
+    "recommendationsApplyParentalRatingCapSubtitle": "Lambent Recommends のおすすめを対象作品の視聴年齢制限で絞り込みます",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "カスタムテーマは Moonfin 全体の見た目を変更します。好みに合わせて選択してください。",
+    "customThemeSubtitle": "カスタムテーマは Lambent 全体の見た目を変更します。好みに合わせて選択してください。",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "スマートフォンで Moonfin にサインインしてください",
+    "carSignInPrompt": "スマートフォンで Lambent にサインインしてください",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8893,7 +8893,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller は Flutter の新しい GPU レンダラーで、アニメーションが滑らかになり、カクつきが減ります。一部の TV ボックスや古い GPU では表示の乱れや映像が黒くなることがあり、その場合はオフにしてください。自動はお使いのデバイスに最適な設定を選びます。適用するには Moonfin を再起動してください。",
+    "impellerRenderingSubtitle": "Impeller は Flutter の新しい GPU レンダラーで、アニメーションが滑らかになり、カクつきが減ります。一部の TV ボックスや古い GPU では表示の乱れや映像が黒くなることがあり、その場合はオフにしてください。自動はお使いのデバイスに最適な設定を選びます。適用するには Lambent を再起動してください。",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8904,7 +8904,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "レンダリングエンジンを変更するには Moonfin の再起動が必要です。アプリをいったん終了し、開き直すと適用されます。",
+    "impellerRestartMessage": "レンダリングエンジンを変更するには Lambent の再起動が必要です。アプリをいったん終了し、開き直すと適用されます。",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

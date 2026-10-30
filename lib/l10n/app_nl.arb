@@ -1,6 +1,6 @@
 {
     "@@locale": "nl",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin versie {version}",
+    "appVersionFooter": "Lambent versie {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin heeft geen toegang tot uw systeemsleutel. Inloggen kan doorgaan, maar veilige tokenopslag is mogelijk niet beschikbaar totdat de sleutel wordt ontgrendeld.",
+    "secureStorageUnavailableMessage": "Lambent heeft geen toegang tot uw systeemsleutel. Inloggen kan doorgaan, maar veilige tokenopslag is mogelijk niet beschikbaar totdat de sleutel wordt ontgrendeld.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin verlaten?",
+    "exitApp": "Lambent verlaten?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Niet ingesteld. Moonfin zal een standaard mpv.conf proberen in app/data-mappen.",
+    "notSetMpvConf": "Niet ingesteld. Lambent zal een standaard mpv.conf proberen in app/data-mappen.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Schakel de zichtbaarheid van de startpagina per bibliotheek in. Start Moonfin opnieuw op zodat de wijzigingen van kracht worden.",
+    "libraryVisibilityDescription": "Schakel de zichtbaarheid van de startpagina per bibliotheek in. Start Lambent opnieuw op zodat de wijzigingen van kracht worden.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Speel in Moonfin",
+    "playInMoonfin": "Speel in Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Item niet gevonden in uw Moonfin-bibliotheek",
+    "itemNotFoundInLibrary": "Item niet gevonden in uw Lambent-bibliotheek",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Het opnieuw opstarten van de server wordt uitgevoerd",
-    "adminServerRebootMessage": "Het opnieuw opstarten van de server wordt uitgevoerd. Start Moonfin opnieuw op",
+    "adminServerRebootMessage": "Het opnieuw opstarten van de server wordt uitgevoerd. Start Lambent opnieuw op",
     "adminActiveSessions": "Actieve sessies",
     "adminSessionsLoadFailed": "Kan sessies niet laden",
     "adminNoActiveSessions": "Geen actieve sessies",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Toon de genreknop in de navigatiebalk",
     "settingsShowFavoritesButtonInNavigation": "Toon de favorietenknop in de navigatiebalk",
     "settingsShowLibrariesButtonInNavigation": "Toon de bibliothekenknop in de navigatiebalk",
-    "settingsLibraryVisibilitySubtitle": "Schakel de zichtbaarheid van de startpagina per bibliotheek in. Start Moonfin opnieuw op zodat de wijzigingen van kracht worden.",
+    "settingsLibraryVisibilitySubtitle": "Schakel de zichtbaarheid van de startpagina per bibliotheek in. Start Lambent opnieuw op zodat de wijzigingen van kracht worden.",
     "settingsMediaBarAndLocalPreviews": "Mediabalk en lokale voorbeelden",
     "settingsVisualOverlays": "Visuele overlays",
     "settingsSeasonalSurprise": "Seizoensgebonden verrassing",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licenties",
     "settingsOpenSourceLicenseNotices": "Kennisgevingen over open-sourcelicenties",
     "settingsPrivacyPolicy": "Privacybeleid",
-    "settingsPrivacyPolicySubtitle": "Hoe Moonfin met uw gegevens omgaat",
+    "settingsPrivacyPolicySubtitle": "Hoe Lambent met uw gegevens omgaat",
     "settingsCheckForUpdates": "Controleer op updates",
-    "settingsCheckForUpdatesSubtitle": "Kijk voor de nieuwste Moonfin-release",
+    "settingsCheckForUpdatesSubtitle": "Kijk voor de nieuwste Lambent-release",
     "settingsPoweredByFlutter": "Mogelijk gemaakt door Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# licentiemelding} other {# licentiemeldingen}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Voorkeur voor SDH-ondertitels",
     "preferSdhSubtitlesSubtitle": "Geef bij automatische selectie voorrang aan SDH-/CC-ondertiteltracks.",
     "webDiagnostics": "Webdiagnostiek",
-    "webDiagnosticsTitle": "Moonfin-webdiagnostiek",
+    "webDiagnosticsTitle": "Lambent-webdiagnostiek",
     "webDiagnosticsIntro": "Gebruik deze pagina om verbindingsproblemen in de browser te onderzoeken (CORS, gemengde inhoud en detectie-instellingen).",
     "webDiagnosticsDetectedMixedContentFailure": "Fout door gemengde inhoud gedetecteerd",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS-/preflight-fout gedetecteerd",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin heeft gedetecteerd dat een HTTPS-pagina een HTTP-server-URL probeert aan te roepen. Browsers blokkeren dit verzoek voordat het uw server bereikt.",
-    "webDiagnosticsCorsFailureBody": "Moonfin heeft een verzoekfout op browserniveau gedetecteerd die meestal wordt veroorzaakt door ontbrekende CORS- of preflight-headers op de mediaserver.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent heeft gedetecteerd dat een HTTPS-pagina een HTTP-server-URL probeert aan te roepen. Browsers blokkeren dit verzoek voordat het uw server bereikt.",
+    "webDiagnosticsCorsFailureBody": "Lambent heeft een verzoekfout op browserniveau gedetecteerd die meestal wordt veroorzaakt door ontbrekende CORS- of preflight-headers op de mediaserver.",
     "webDiagnosticsTargetUrl": "Doel-URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "niet geconfigureerd",
     "webDiagnosticsMixedContent": "Gemengde inhoud",
     "webDiagnosticsMixedContentDetected": "Deze pagina wordt via HTTPS geladen, maar een of meer geconfigureerde URL's zijn HTTP. Browsers blokkeren HTTPS-pagina's die HTTP-API's aanroepen.",
-    "webDiagnosticsMixedContentFix": "Oplossing: bied uw mediaserver of proxy-eindpunt via HTTPS aan, of laad Moonfin alleen via HTTP op vertrouwde lokale netwerken.",
+    "webDiagnosticsMixedContentFix": "Oplossing: bied uw mediaserver of proxy-eindpunt via HTTPS aan, of laad Lambent alleen via HTTP op vertrouwde lokale netwerken.",
     "webDiagnosticsNoMixedContentDetected": "Geen duidelijke configuratie met gemengde inhoud gevonden in de huidige runtime-instellingen.",
     "webDiagnosticsCorsChecklist": "CORS-checklist",
     "webDiagnosticsCorsChecklistItem1": "• Sta de browser-origin toe in Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klassiek is de oorspronkelijke gecentreerde Moonfin-lay-out. Modern is een responsieve, filmische lay-out.",
+    "detailScreenStyleSubtitle": "Klassiek is de oorspronkelijke gecentreerde Lambent-lay-out. Modern is een responsieve, filmische lay-out.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Gebruik het lokale bibliotheekalgoritme van Moonfin Recommends of de online gelijkeniswaarden van TMDb. Let op: online aanbevelingen vereisen Seerr-integratie.",
+    "recommendationSystemSubtitle": "Gebruik het lokale bibliotheekalgoritme van Lambent Recommends of de online gelijkeniswaarden van TMDb. Let op: online aanbevelingen vereisen Seerr-integratie.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Aanbeveling Moonfin",
+    "recommendationSystemMoonfin": "Aanbeveling Lambent",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Beperk suggesties van Moonfin Recommends op basis van de leeftijdsclassificatie van de betreffende media",
+    "recommendationsApplyParentalRatingCapSubtitle": "Beperk suggesties van Lambent Recommends op basis van de leeftijdsclassificatie van de betreffende media",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Aangepaste thema's veranderen visuele elementen in heel Moonfin. Kies een van deze opties die bij uw stijl past.",
+    "customThemeSubtitle": "Aangepaste thema's veranderen visuele elementen in heel Lambent. Kies een van deze opties die bij uw stijl past.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Meld u aan bij Moonfin op uw telefoon",
+    "carSignInPrompt": "Meld u aan bij Lambent op uw telefoon",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller is de moderne GPU-renderer van Flutter voor vloeiendere animaties en minder haperingen. Op sommige tv-boxen en oudere GPU's kan dit glitches of zwarte video veroorzaken; zet het dan Uit. Automatisch kiest de beste standaardinstelling voor uw apparaat. Start Moonfin opnieuw op om de wijziging toe te passen.",
+    "impellerRenderingSubtitle": "Impeller is de moderne GPU-renderer van Flutter voor vloeiendere animaties en minder haperingen. Op sommige tv-boxen en oudere GPU's kan dit glitches of zwarte video veroorzaken; zet het dan Uit. Automatisch kiest de beste standaardinstelling voor uw apparaat. Start Lambent opnieuw op om de wijziging toe te passen.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin moet opnieuw worden opgestart om de rendering-engine te wijzigen. Sluit de app nu en open hem daarna opnieuw om de wijziging toe te passen.",
+    "impellerRestartMessage": "Lambent moet opnieuw worden opgestart om de rendering-engine te wijzigen. Sluit de app nu en open hem daarna opnieuw om de wijziging toe te passen.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9212,7 +9212,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android laat Moonfin alleen toe in de folders die door Moonfin gemaakt zijn. Dit apparaat heeft geen verwijderbare opslag. Zet 'opslaan naar downloadmap' aan om de downloads op te slaan op een plek waar Moonfin bij kan.",
+    "downloadLocationLimitedByAndroid": "Android laat Lambent alleen toe in de folders die door Lambent gemaakt zijn. Dit apparaat heeft geen verwijderbare opslag. Zet 'opslaan naar downloadmap' aan om de downloads op te slaan op een plek waar Lambent bij kan.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9597,7 +9597,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "De gedetecteerde lay-out overschrijven als dit apparaat onjuist wordt gelezen. Start Moonfin opnieuw op om de wijzigingen door te voeren.",
+    "interfaceLayoutSubtitle": "De gedetecteerde lay-out overschrijven als dit apparaat onjuist wordt gelezen. Start Lambent opnieuw op om de wijzigingen door te voeren.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },

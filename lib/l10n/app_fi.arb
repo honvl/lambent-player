@@ -1,6 +1,6 @@
 {
     "@@locale": "fi",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin versio {version}",
+    "appVersionFooter": "Lambent versio {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin ei voinut käyttää järjestelmän avainketjua. \tVoit kirjautua, mutta suojatun tunnuksen tallennus ei välttämättä ole käytettävissä, ennen kuin avainketju on avattu.",
+    "secureStorageUnavailableMessage": "Lambent ei voinut käyttää järjestelmän avainketjua. \tVoit kirjautua, mutta suojatun tunnuksen tallennus ei välttämättä ole käytettävissä, ennen kuin avainketju on avattu.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Poistutko Moonfinista?",
+    "exitApp": "Poistutko Lambentista?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Ei asetettu. Moonfin yrittää oletusarvoista mpv.conf-tiedostoa app/data-kansioissa.",
+    "notSetMpvConf": "Ei asetettu. Lambent yrittää oletusarvoista mpv.conf-tiedostoa app/data-kansioissa.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Vaihda etusivun näkyvyys kirjastoittain. Käynnistä Moonfin uudelleen, jotta muutokset tulevat voimaan.",
+    "libraryVisibilityDescription": "Vaihda etusivun näkyvyys kirjastoittain. Käynnistä Lambent uudelleen, jotta muutokset tulevat voimaan.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Toista Moonfinissä",
+    "playInMoonfin": "Toista Lambentissä",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Kohdetta ei löydy Moonfin-kirjastostasi",
+    "itemNotFoundInLibrary": "Kohdetta ei löydy Lambent-kirjastostasi",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Palvelimen uudelleenkäynnistys käynnissä",
-    "adminServerRebootMessage": "Palvelimen uudelleenkäynnistys käynnissä, käynnistä Moonfin uudelleen",
+    "adminServerRebootMessage": "Palvelimen uudelleenkäynnistys käynnissä, käynnistä Lambent uudelleen",
     "adminActiveSessions": "Aktiiviset istunnot",
     "adminSessionsLoadFailed": "Istuntojen lataaminen epäonnistui",
     "adminNoActiveSessions": "Ei aktiivisia istuntoja",
@@ -6497,7 +6497,7 @@
     "settingsShowGenresButtonInNavigation": "Näytä genre-painike navigointipalkissa",
     "settingsShowFavoritesButtonInNavigation": "Näytä suosikit-painike navigointipalkissa",
     "settingsShowLibrariesButtonInNavigation": "Näytä kirjastot-painike navigointipalkissa",
-    "settingsLibraryVisibilitySubtitle": "Vaihda etusivun näkyvyys kirjastoittain. Käynnistä Moonfin uudelleen, jotta muutokset tulevat voimaan.",
+    "settingsLibraryVisibilitySubtitle": "Vaihda etusivun näkyvyys kirjastoittain. Käynnistä Lambent uudelleen, jotta muutokset tulevat voimaan.",
     "settingsMediaBarAndLocalPreviews": "Mediapalkki ja paikalliset esikatselut",
     "settingsVisualOverlays": "Visuaaliset peittokuvat",
     "settingsSeasonalSurprise": "Kauden yllätys",
@@ -6521,9 +6521,9 @@
     "settingsLicenses": "Lisenssit",
     "settingsOpenSourceLicenseNotices": "Avoimen lähdekoodin lisenssi-ilmoitukset",
     "settingsPrivacyPolicy": "Tietosuojakäytäntö",
-    "settingsPrivacyPolicySubtitle": "Kuinka Moonfin käsittelee tietojasi",
+    "settingsPrivacyPolicySubtitle": "Kuinka Lambent käsittelee tietojasi",
     "settingsCheckForUpdates": "Tarkista päivitykset",
-    "settingsCheckForUpdatesSubtitle": "Tarkista viimeisin Moonfin-julkaisu",
+    "settingsCheckForUpdatesSubtitle": "Tarkista viimeisin Lambent-julkaisu",
     "settingsPoweredByFlutter": "Toteutettu Flutter-alustalla",
     "settingsLicenseNoticesCount": "{count, plural, one {# lisenssi-ilmoitus} other {# lisenssi-ilmoitusta}}",
     "@settingsLicenseNoticesCount": {
@@ -7056,12 +7056,12 @@
     "preferSdhSubtitles": "Suosi SDH tekstityksiä",
     "preferSdhSubtitlesSubtitle": "Priorisoi SDH/CC-tekstitysraidat, kun valitset automaattisen valinnan.",
     "webDiagnostics": "Verkkodiagnostiikka",
-    "webDiagnosticsTitle": "Moonfin Verkkodiagnostiikka",
+    "webDiagnosticsTitle": "Lambent Verkkodiagnostiikka",
     "webDiagnosticsIntro": "Tämän sivun avulla voit diagnosoida selaimen yhteysongelmia (CORS, sekasisältö ja etsintäasetukset).",
     "webDiagnosticsDetectedMixedContentFailure": "Havaittu sekasisällön virhe",
     "webDiagnosticsDetectedCorsPreflightFailure": "Havaittu CORS/Preflight Failure",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin havaitsi HTTPS-sivun, joka yritti kutsua HTTP-palvelimen URL-osoitetta. Selaimet estävät tämän pyynnön ennen kuin se saavuttaa palvelimesi.",
-    "webDiagnosticsCorsFailureBody": "Moonfin havaitsi selaintason pyyntövirheen, joka johtuu yleensä puuttuvista CORS- tai esitarkastusotsikoista mediapalvelimelta.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent havaitsi HTTPS-sivun, joka yritti kutsua HTTP-palvelimen URL-osoitetta. Selaimet estävät tämän pyynnön ennen kuin se saavuttaa palvelimesi.",
+    "webDiagnosticsCorsFailureBody": "Lambent havaitsi selaintason pyyntövirheen, joka johtuu yleensä puuttuvista CORS- tai esitarkastusotsikoista mediapalvelimelta.",
     "webDiagnosticsTargetUrl": "Kohde-URL-osoite: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7091,7 +7091,7 @@
     "notConfigured": "ei ole määritetty",
     "webDiagnosticsMixedContent": "Sekoitettu sisältö",
     "webDiagnosticsMixedContentDetected": "Tämä sivu ladataan HTTPS:n kautta, mutta yksi tai useampi määritetty URL-osoite on HTTP. Selaimet estävät HTTPS-sivuja kutsumasta HTTP API:ita.",
-    "webDiagnosticsMixedContentFix": "Korjaus: palvele mediapalvelinta tai välityspalvelinta HTTPS:n kautta tai lataa Moonfin HTTP:n kautta vain luotetuissa paikallisverkoissa.",
+    "webDiagnosticsMixedContentFix": "Korjaus: palvele mediapalvelinta tai välityspalvelinta HTTPS:n kautta tai lataa Lambent HTTP:n kautta vain luotetuissa paikallisverkoissa.",
     "webDiagnosticsNoMixedContentDetected": "Nykyisistä ajonaikaisista asetuksista ei havaittu ilmeisiä sekasisällön määrityksiä.",
     "webDiagnosticsCorsChecklist": "CORS-tarkistuslista",
     "webDiagnosticsCorsChecklistItem1": "• Salli selaimen alkuperä kohdassa Access-Control-Allow-Origin.",
@@ -7319,11 +7319,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Käytä Moonfin Recommends -sovelluksen paikalliskirjastoalgoritmia, Jellyfin Recommends -palvelinmoottoria tai TMDb:n verkkopalvelun samankaltaisuusmittareita. Huomautus: Verkkosuositukset edellyttävät Seerr-integraatiota.",
+    "recommendationSystemSubtitle": "Käytä Lambent Recommends -sovelluksen paikalliskirjastoalgoritmia, Jellyfin Recommends -palvelinmoottoria tai TMDb:n verkkopalvelun samankaltaisuusmittareita. Huomautus: Verkkosuositukset edellyttävät Seerr-integraatiota.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Suositukset",
+    "recommendationSystemMoonfin": "Lambent Suositukset",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7335,7 +7335,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Rajoita Moonfin suosittelee ehdotuksia kohdemedian ikärajan mukaan",
+    "recommendationsApplyParentalRatingCapSubtitle": "Rajoita Lambent suosittelee ehdotuksia kohdemedian ikärajan mukaan",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7383,7 +7383,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Mukautetut teemat muuttavat Moonfinin ulkoasua kauttaaltaan. Valitse tyyliisi sopiva vaihtoehto.",
+    "customThemeSubtitle": "Mukautetut teemat muuttavat Lambentin ulkoasua kauttaaltaan. Valitse tyyliisi sopiva vaihtoehto.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7556,7 +7556,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Kirjaudu Moonfiniin puhelimellasi",
+    "carSignInPrompt": "Kirjaudu Lambentiin puhelimellasi",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8892,7 +8892,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller on Flutterin moderni GPU-renderöijä, joka tuo sulavammat animaatiot ja vähemmän nykimistä. Joissakin TV-bokseissa ja vanhemmissa GPU:issa se voi aiheuttaa häiriöitä tai mustan kuvan; valitse silloin Ei käytössä. Automaattinen valitsee laitteellesi parhaan oletuksen. Ota muutos käyttöön käynnistämällä Moonfin uudelleen.",
+    "impellerRenderingSubtitle": "Impeller on Flutterin moderni GPU-renderöijä, joka tuo sulavammat animaatiot ja vähemmän nykimistä. Joissakin TV-bokseissa ja vanhemmissa GPU:issa se voi aiheuttaa häiriöitä tai mustan kuvan; valitse silloin Ei käytössä. Automaattinen valitsee laitteellesi parhaan oletuksen. Ota muutos käyttöön käynnistämällä Lambent uudelleen.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8903,7 +8903,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin on käynnistettävä uudelleen renderöintimoottorin vaihtamiseksi. Sulje sovellus nyt ja avaa se uudelleen, niin muutos tulee voimaan.",
+    "impellerRestartMessage": "Lambent on käynnistettävä uudelleen renderöintimoottorin vaihtamiseksi. Sulje sovellus nyt ja avaa se uudelleen, niin muutos tulee voimaan.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9136,7 +9136,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android sallii Moonfinin kirjoittaa vain niihin kansioihin, jotka se omistaa, eikä tässä laitteessa ole irrotettavaa tallennustilaa. Ota yllä oleva ”Tallenna Lataukset-kansioon” -vaihtoehto käyttöön, jotta lataukset tallennetaan paikkaan, johon muut sovellukset pääsevät käsiksi.",
+    "downloadLocationLimitedByAndroid": "Android sallii Lambentin kirjoittaa vain niihin kansioihin, jotka se omistaa, eikä tässä laitteessa ole irrotettavaa tallennustilaa. Ota yllä oleva ”Tallenna Lataukset-kansioon” -vaihtoehto käyttöön, jotta lataukset tallennetaan paikkaan, johon muut sovellukset pääsevät käsiksi.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9382,7 +9382,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Ohita havaittu asettelu, jos laitteen tiedot on luettu virheellisesti. Käynnistä Moonfin uudelleen, jotta muutokset astuvat voimaan.",
+    "interfaceLayoutSubtitle": "Ohita havaittu asettelu, jos laitteen tiedot on luettu virheellisesti. Käynnistä Lambent uudelleen, jotta muutokset astuvat voimaan.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10242,7 +10242,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "Mukauta Moonfin sovelluksessa käytettyjä latausanimaatioita",
+    "loadingAnimationDescription": "Mukauta Lambent sovelluksessa käytettyjä latausanimaatioita",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10254,7 +10254,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Moonfin Logo",
+    "loadingAnimationImageMoonfinLogo": "Lambent Logo",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10270,7 +10270,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Moonfin Sykli",
+    "loadingAnimationImageMoonfinPhases": "Lambent Sykli",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -10390,7 +10390,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Moonfin",
+    "screensaverBackdropMoonfin": "Lambent",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -10410,7 +10410,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Moonfin Logo",
+    "screensaverComponentMoonfinLogo": "Lambent Logo",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },
@@ -10589,7 +10589,7 @@
             }
         }
     },
-    "autoDownloadTranscodedForegroundNote": "Transkoodatut versiot ladataan vain silloin, kun Moonfin on auki. Alkuperäinen versio ladataan myös taustalla.",
+    "autoDownloadTranscodedForegroundNote": "Transkoodatut versiot ladataan vain silloin, kun Lambent on auki. Alkuperäinen versio ladataan myös taustalla.",
     "@autoDownloadTranscodedForegroundNote": {
         "description": "Shown under transcoded options when choosing the quality of an auto-download subscription"
     },
@@ -10597,7 +10597,7 @@
     "@autoDownloadTranscodedRunningNote": {
         "description": "Shown under a running transcoded download that a subscription queued"
     },
-    "autoDownloadForegroundOnly": "Lataaminen on mahdollista vain, kun Moonfin on auki",
+    "autoDownloadForegroundOnly": "Lataaminen on mahdollista vain, kun Lambent on auki",
     "@autoDownloadForegroundOnly": {
         "description": "Short note next to a followed series in a transcoded quality"
     },
@@ -10667,15 +10667,15 @@
     "@autoDownloadBackgroundRefresh": {
         "description": "Setting that lets the system wake the app to check for new episodes"
     },
-    "autoDownloadBackgroundRefreshSubtitle": "Salli järjestelmän tarkistaa säännöllisesti uusien jaksojen saatavuuden, vaikka Moonfin-sovellus olisi suljettuna",
+    "autoDownloadBackgroundRefreshSubtitle": "Salli järjestelmän tarkistaa säännöllisesti uusien jaksojen saatavuuden, vaikka Lambent-sovellus olisi suljettuna",
     "@autoDownloadBackgroundRefreshSubtitle": {
         "description": "Explains the background refresh setting"
     },
-    "autoDownloadBackgroundRefreshDenied": "Sovelluksen taustapäivitys on poistettu käytöstä Moonfin-sovelluksessa. Ota se käyttöön iOS:n Asetuksissa.",
+    "autoDownloadBackgroundRefreshDenied": "Sovelluksen taustapäivitys on poistettu käytöstä Lambent-sovelluksessa. Ota se käyttöön iOS:n Asetuksissa.",
     "@autoDownloadBackgroundRefreshDenied": {
         "description": "Shown when iOS forbids background refresh for the app"
     },
-    "autoDownloadBackgroundRestrictedAndroid": "Moonfinin taustakäyttö on rajoitettu Androidin asetuksissa.",
+    "autoDownloadBackgroundRestrictedAndroid": "Lambentin taustakäyttö on rajoitettu Androidin asetuksissa.",
     "@autoDownloadBackgroundRestrictedAndroid": {
         "description": "Shown when Android restricts the app from running in the background"
     },
@@ -11174,7 +11174,7 @@
     "@shortcutToggleFullscreen": {
         "description": "F11 and Alt+Enter anywhere, F in the player"
     },
-    "shortcutQuit": "Poistu Moonfinistä",
+    "shortcutQuit": "Poistu Lambentistä",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },
@@ -13353,7 +13353,7 @@
     "@topShelf": {
         "description": "Apple TV settings label for what the tvOS home screen shows above the Moonfin icon. Top Shelf is Apple's name for that area"
     },
-    "topShelfDescription": "Se, mitä Apple TV:n aloitusnäytössä näkyy Moonfin-kuvakkeen yläpuolella, kun se on valittuna. Tämä asetus säilyy tällä laitteella.",
+    "topShelfDescription": "Se, mitä Apple TV:n aloitusnäytössä näkyy Lambent-kuvakkeen yläpuolella, kun se on valittuna. Tämä asetus säilyy tällä laitteella.",
     "@topShelfDescription": {
         "description": "Apple TV settings subtitle for the Top Shelf option"
     },
@@ -13361,7 +13361,7 @@
     "@topShelfLatestMedia": {
         "description": "Top Shelf option that shows a carousel of the newest items from the home screen's Latest rows"
     },
-    "topShelfAppBanner": "Moonfin-banneri",
+    "topShelfAppBanner": "Lambent-banneri",
     "@topShelfAppBanner": {
         "description": "Top Shelf option that shows only the static Moonfin logo banner, nothing from the library"
     },
@@ -14705,7 +14705,7 @@
     "@searchMusic": {
         "description": "Placeholder and label for the search control in a music library"
     },
-    "smartDownloadsEnableDescription": "Kun olet katsonut jakson loppuun millä tahansa laitteella, Moonfin lataa seuraavat jaksot. Ladatut jaksot poistetaan, kun ne on katsottu.",
+    "smartDownloadsEnableDescription": "Kun olet katsonut jakson loppuun millä tahansa laitteella, Lambent lataa seuraavat jaksot. Ladatut jaksot poistetaan, kun ne on katsottu.",
     "@smartDownloadsEnableDescription": {
         "description": "Explains the smart downloads switch, including that watched episodes are deleted"
     },
@@ -14793,7 +14793,7 @@
     "@bookReadingUnavailableTitle": {
         "description": "Title of the dialog shown on Apple TV when the user tries to open a book or comic, which tvOS has no reader for"
     },
-    "bookReadingUnavailableMessage": "Avaa se Moonfin-sovelluksessa puhelimella, tabletilla tai tietokoneella lukeaksesi sen. Äänikirjat toimivat edelleen tässä sovelluksessa.",
+    "bookReadingUnavailableMessage": "Avaa se Lambent-sovelluksessa puhelimella, tabletilla tai tietokoneella lukeaksesi sen. Äänikirjat toimivat edelleen tässä sovelluksessa.",
     "@bookReadingUnavailableMessage": {
         "description": "Body of the dialog shown on Apple TV when the user tries to open a book or comic"
     },
@@ -15468,7 +15468,7 @@
     "@rommLinked": {
         "description": "Shown when the user's RomM account is linked and the server sent no user name"
     },
-    "rommUnlinkNote": "Linkityksen poistaminen estää Moonfinia käyttämästä RomM-avainta. Avain säilyy RomM:ssä, kunnes poistat sen sieltä API-tunnisteiden joukosta.",
+    "rommUnlinkNote": "Linkityksen poistaminen estää Lambentia käyttämästä RomM-avainta. Avain säilyy RomM:ssä, kunnes poistat sen sieltä API-tunnisteiden joukosta.",
     "@rommUnlinkNote": {
         "description": "Explains what Unlink does on the RomM account screen"
     },
@@ -15484,7 +15484,7 @@
     "@rommLinkDenied": {
         "description": "Error when the user declined the RomM link request"
     },
-    "rommUnreachable": "Moonfin ei saanut yhteyttä RomM:ään. Yritä uudelleen hetken kuluttua.",
+    "rommUnreachable": "Lambent ei saanut yhteyttä RomM:ään. Yritä uudelleen hetken kuluttua.",
     "@rommUnreachable": {
         "description": "Error when the server couldn't reach RomM while linking"
     },
@@ -15533,7 +15533,7 @@
     "@keyboardStyle": {
         "description": "Label for the setting that picks how the on-screen keyboard looks, or whether the TV's own keyboard is used"
     },
-    "keyboardStyleDescription": "Native-tilassa käytetään television omaa näppäimistöä. Classic on alkuperäinen Moonfin-näppäimistö. Glass on himmeä paneeli, jossa on suuremmat näppäimet. Docked-tilassa näppäimistö täyttää näytön alaosan ja näyttää kirjoittamasi tekstin näppäinten yläpuolella.",
+    "keyboardStyleDescription": "Native-tilassa käytetään television omaa näppäimistöä. Classic on alkuperäinen Lambent-näppäimistö. Glass on himmeä paneeli, jossa on suuremmat näppäimet. Docked-tilassa näppäimistö täyttää näytön alaosan ja näyttää kirjoittamasi tekstin näppäinten yläpuolella.",
     "@keyboardStyleDescription": {
         "description": "Explanation under the keyboard style setting"
     },

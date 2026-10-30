@@ -1,6 +1,6 @@
 {
     "@@locale": "sw",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin toleo {version}",
+    "appVersionFooter": "Lambent toleo {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin haikuweza kufikia ufunguo wa mfumo wako. Kuingia kunaweza kuendelea, lakini hifadhi salama ya tokeni huenda isipatikane hadi ufunguo ufunguliwe.",
+    "secureStorageUnavailableMessage": "Lambent haikuweza kufikia ufunguo wa mfumo wako. Kuingia kunaweza kuendelea, lakini hifadhi salama ya tokeni huenda isipatikane hadi ufunguo ufunguliwe.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Badili kati ya Moonfin na Neon Pulse bila kuanzisha upya programu",
+    "settingsAppearanceThemeSubtitle": "Badili kati ya Lambent na Neon Pulse bila kuanzisha upya programu",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Ungependa kufunga Moonfin?",
+    "exitApp": "Ungependa kufunga Lambent?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Haijawekwa. Moonfin itajaribu mpv.conf chaguo-msingi katika folda za programu/data.",
+    "notSetMpvConf": "Haijawekwa. Lambent itajaribu mpv.conf chaguo-msingi katika folda za programu/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Geuza mwonekano wa ukurasa wa nyumbani kwa kila maktaba. Anzisha tena Moonfin ili mabadiliko yaanze kutumika.",
+    "libraryVisibilityDescription": "Geuza mwonekano wa ukurasa wa nyumbani kwa kila maktaba. Anzisha tena Lambent ili mabadiliko yaanze kutumika.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Cheza katika Moonfin",
+    "playInMoonfin": "Cheza katika Lambent",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Kipengee hakipatikani kwenye maktaba yako ya Moonfin",
+    "itemNotFoundInLibrary": "Kipengee hakipatikani kwenye maktaba yako ya Lambent",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Kuwasha upya seva kunaendelea",
-    "adminServerRebootMessage": "Kuwasha upya seva kunaendelea, tafadhali anzisha upya Moonfin",
+    "adminServerRebootMessage": "Kuwasha upya seva kunaendelea, tafadhali anzisha upya Lambent",
     "adminActiveSessions": "Vipindi Amilifu",
     "adminSessionsLoadFailed": "Imeshindwa kupakia vipindi",
     "adminNoActiveSessions": "Hakuna vipindi vinavyotumika",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Onyesha kitufe cha aina kwenye upau wa kusogeza",
     "settingsShowFavoritesButtonInNavigation": "Onyesha kitufe cha vipendwa kwenye upau wa kusogeza",
     "settingsShowLibrariesButtonInNavigation": "Onyesha kitufe cha maktaba kwenye upau wa kusogeza",
-    "settingsLibraryVisibilitySubtitle": "Geuza mwonekano wa ukurasa wa nyumbani kwa kila maktaba. Anzisha tena Moonfin ili mabadiliko yaanze kutumika.",
+    "settingsLibraryVisibilitySubtitle": "Geuza mwonekano wa ukurasa wa nyumbani kwa kila maktaba. Anzisha tena Lambent ili mabadiliko yaanze kutumika.",
     "settingsMediaBarAndLocalPreviews": "Upau wa Midia na Uhakiki wa Karibu Nawe",
     "settingsVisualOverlays": "Viwekeleo vya Kuonekana",
     "settingsSeasonalSurprise": "Mshangao wa Msimu",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Leseni",
     "settingsOpenSourceLicenseNotices": "Notisi za leseni ya chanzo huria",
     "settingsPrivacyPolicy": "Sera ya Faragha",
-    "settingsPrivacyPolicySubtitle": "Jinsi Moonfin hushughulikia data yako",
+    "settingsPrivacyPolicySubtitle": "Jinsi Lambent hushughulikia data yako",
     "settingsCheckForUpdates": "Angalia Usasisho",
-    "settingsCheckForUpdatesSubtitle": "Angalia toleo jipya zaidi la Moonfin",
+    "settingsCheckForUpdatesSubtitle": "Angalia toleo jipya zaidi la Lambent",
     "settingsPoweredByFlutter": "Inaendeshwa na Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {ilani # ya leseni} other {ilani # za leseni}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Pendelea manukuu ya SDH",
     "preferSdhSubtitlesSubtitle": "Tanguliza mikondo ya manukuu ya SDH/CC wakati wa kuchagua kiotomatiki.",
     "webDiagnostics": "Uchunguzi wa wavuti",
-    "webDiagnosticsTitle": "Uchunguzi wa Wavuti wa Moonfin",
+    "webDiagnosticsTitle": "Uchunguzi wa Wavuti wa Lambent",
     "webDiagnosticsIntro": "Tumia ukurasa huu kuchunguza matatizo ya muunganisho wa kivinjari (CORS, maudhui mchanganyiko, na mipangilio ya ugunduzi).",
     "webDiagnosticsDetectedMixedContentFailure": "Hitilafu ya Maudhui Mchanganyiko Imetambuliwa",
     "webDiagnosticsDetectedCorsPreflightFailure": "Hitilafu ya CORS/Preflight Imetambuliwa",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin imetambua ukurasa wa HTTPS unaojaribu kupiga simu kwa URL ya seva ya HTTP. Vivinjari huzuia ombi hili kabla halijafika kwenye seva yako.",
-    "webDiagnosticsCorsFailureBody": "Moonfin imetambua hitilafu ya ombi katika kiwango cha kivinjari ambayo mara nyingi husababishwa na vichwa vya CORS au preflight vinavyokosekana kwenye seva ya maudhui.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent imetambua ukurasa wa HTTPS unaojaribu kupiga simu kwa URL ya seva ya HTTP. Vivinjari huzuia ombi hili kabla halijafika kwenye seva yako.",
+    "webDiagnosticsCorsFailureBody": "Lambent imetambua hitilafu ya ombi katika kiwango cha kivinjari ambayo mara nyingi husababishwa na vichwa vya CORS au preflight vinavyokosekana kwenye seva ya maudhui.",
     "webDiagnosticsTargetUrl": "URL lengwa: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "haijasanidiwa",
     "webDiagnosticsMixedContent": "Maudhui Mchanganyiko",
     "webDiagnosticsMixedContentDetected": "Ukurasa huu umepakiwa kupitia HTTPS, lakini URL moja au zaidi zilizosanidiwa ni za HTTP. Vivinjari huzuia kurasa za HTTPS kupiga simu kwa API za HTTP.",
-    "webDiagnosticsMixedContentFix": "Suluhisho: toa seva yako ya maudhui au ncha ya proksi kupitia HTTPS, au pakia Moonfin kupitia HTTP kwenye mitandao ya ndani inayoaminika pekee.",
+    "webDiagnosticsMixedContentFix": "Suluhisho: toa seva yako ya maudhui au ncha ya proksi kupitia HTTPS, au pakia Lambent kupitia HTTP kwenye mitandao ya ndani inayoaminika pekee.",
     "webDiagnosticsNoMixedContentDetected": "Hakuna usanidi dhahiri wa maudhui mchanganyiko uliotambuliwa kutoka kwa mipangilio ya sasa ya utekelezaji.",
     "webDiagnosticsCorsChecklist": "Orodha ya Kukagua ya CORS",
     "webDiagnosticsCorsChecklistItem1": "• Ruhusu asili ya kivinjari katika Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klasiki ni mpangilio asili wa Moonfin ulio katikati. Kisasa ni mpangilio wa kisinema unaojirekebisha.",
+    "detailScreenStyleSubtitle": "Klasiki ni mpangilio asili wa Lambent ulio katikati. Kisasa ni mpangilio wa kisinema unaojirekebisha.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Tumia algoriti ya maktaba ya ndani ya Moonfin Recommends au Vipimo vya Ufanano vya TMDb mtandaoni. Kumbuka: Mapendekezo ya mtandaoni yanahitaji muunganisho wa Seerr.",
+    "recommendationSystemSubtitle": "Tumia algoriti ya maktaba ya ndani ya Lambent Recommends au Vipimo vya Ufanano vya TMDb mtandaoni. Kumbuka: Mapendekezo ya mtandaoni yanahitaji muunganisho wa Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin Recommends",
+    "recommendationSystemMoonfin": "Lambent Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Punguza mapendekezo ya Moonfin Recommends kulingana na ukadiriaji wa wazazi wa maudhui lengwa",
+    "recommendationsApplyParentalRatingCapSubtitle": "Punguza mapendekezo ya Lambent Recommends kulingana na ukadiriaji wa wazazi wa maudhui lengwa",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Mandhari maalum hubadilisha vipengele vya kuonekana katika Moonfin nzima. Chagua mojawapo ya chaguo hizi ili kuendana na mtindo wako.",
+    "customThemeSubtitle": "Mandhari maalum hubadilisha vipengele vya kuonekana katika Lambent nzima. Chagua mojawapo ya chaguo hizi ili kuendana na mtindo wako.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Ingia kwenye Moonfin kwenye simu yako",
+    "carSignInPrompt": "Ingia kwenye Lambent kwenye simu yako",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller ni kionyeshi cha kisasa cha GPU cha Flutter kwa uhuishaji laini na mkwaruzo mdogo. Kwenye baadhi ya visanduku vya TV na GPU za zamani inaweza kusababisha hitilafu au video nyeusi; izime ikiwa unaona hayo. Kiotomatiki huchagua chaguo-msingi bora kwa kifaa chako. Anzisha upya Moonfin ili kutumia.",
+    "impellerRenderingSubtitle": "Impeller ni kionyeshi cha kisasa cha GPU cha Flutter kwa uhuishaji laini na mkwaruzo mdogo. Kwenye baadhi ya visanduku vya TV na GPU za zamani inaweza kusababisha hitilafu au video nyeusi; izime ikiwa unaona hayo. Kiotomatiki huchagua chaguo-msingi bora kwa kifaa chako. Anzisha upya Lambent ili kutumia.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Moonfin inahitaji kuanzishwa upya ili kubadilisha injini ya uonyeshaji. Funga programu sasa, kisha uifungue tena ili kutumia.",
+    "impellerRestartMessage": "Lambent inahitaji kuanzishwa upya ili kubadilisha injini ya uonyeshaji. Funga programu sasa, kisha uifungue tena ili kutumia.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

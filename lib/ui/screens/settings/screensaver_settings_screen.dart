@@ -590,7 +590,7 @@ class _ScreensaverSettingsScreenState extends State<ScreensaverSettingsScreen> {
                     width: 7,
                     height: 7,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF00A4DC),
+                      color: Color(0xFFFFA028),
                       shape: BoxShape.circle,
                     ),
                   ),

@@ -31,6 +31,7 @@ import '../../../playback/apple_player_ui.dart';
 import '../../../playback/display_hdr_probe.dart';
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/gamepad/gamepad_navigation_scope.dart';
+import '../../../util/lambent_brand.dart';
 import '../../../util/language_codes.dart';
 import '../../../util/live_tv_library.dart';
 import '../../../util/locale_names.dart';

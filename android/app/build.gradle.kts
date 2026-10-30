@@ -80,7 +80,7 @@ android {
     flavorDimensions += "device"
     productFlavors {
         val baseAppId = "org.moonfin.androidtv"
-        val baseAppName = "Moonfin"
+        val baseAppName = "Lambent"
         // Optional application-id suffix for on-device testing, set through the
         // environment so an unset build is byte-identical to before:
         //   MOONFIN_TEST_ID_SUFFIX=.hwtest flutter build apk --flavor androidTv --debug

@@ -1,6 +1,6 @@
 {
     "@@locale": "ko",
-    "appTitle": "Moonfin",
+    "appTitle": "Lambent",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Moonfin 버전 {version}",
+    "appVersionFooter": "Lambent 버전 {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Moonfin이 시스템 키링에 액세스할 수 없습니다. 로그인은 계속할 수 있지만 키링이 잠금 해제될 때까지 보안 토큰 저장을 사용하지 못할 수 있습니다.",
+    "secureStorageUnavailableMessage": "Lambent이 시스템 키링에 액세스할 수 없습니다. 로그인은 계속할 수 있지만 키링이 잠금 해제될 때까지 보안 토큰 저장을 사용하지 못할 수 있습니다.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Moonfin을(를) 종료하시겠습니까?",
+    "exitApp": "Lambent을(를) 종료하시겠습니까?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "설정되지 않았습니다. Moonfin은 app/data 폴더에서 기본 mpv.conf를 시도합니다.",
+    "notSetMpvConf": "설정되지 않았습니다. Lambent은 app/data 폴더에서 기본 mpv.conf를 시도합니다.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "라이브러리별로 홈 페이지 표시 여부를 전환합니다. 변경 사항을 적용하려면 Moonfin을 다시 시작하세요.",
+    "libraryVisibilityDescription": "라이브러리별로 홈 페이지 표시 여부를 전환합니다. 변경 사항을 적용하려면 Lambent을 다시 시작하세요.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Moonfin에서 재생",
+    "playInMoonfin": "Lambent에서 재생",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Moonfin 라이브러리에서 항목을 찾을 수 없습니다.",
+    "itemNotFoundInLibrary": "Lambent 라이브러리에서 항목을 찾을 수 없습니다.",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "서버 재부팅 진행 중",
-    "adminServerRebootMessage": "서버 재부팅이 진행 중입니다. Moonfin을 다시 시작해주세요.",
+    "adminServerRebootMessage": "서버 재부팅이 진행 중입니다. Lambent을 다시 시작해주세요.",
     "adminActiveSessions": "활성 세션",
     "adminSessionsLoadFailed": "세션을 로드하지 못했습니다.",
     "adminNoActiveSessions": "활성 세션 없음",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "탐색 바에 장르 버튼 표시",
     "settingsShowFavoritesButtonInNavigation": "탐색 바에 즐겨찾기 버튼 표시",
     "settingsShowLibrariesButtonInNavigation": "탐색 바에 라이브러리 버튼 표시",
-    "settingsLibraryVisibilitySubtitle": "라이브러리별로 홈 페이지 표시 여부를 전환합니다. 변경 사항을 적용하려면 Moonfin을 다시 시작하세요.",
+    "settingsLibraryVisibilitySubtitle": "라이브러리별로 홈 페이지 표시 여부를 전환합니다. 변경 사항을 적용하려면 Lambent을 다시 시작하세요.",
     "settingsMediaBarAndLocalPreviews": "미디어 바 및 로컬 미리보기",
     "settingsVisualOverlays": "시각적 오버레이",
     "settingsSeasonalSurprise": "계절 깜짝 이벤트",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "라이선스",
     "settingsOpenSourceLicenseNotices": "오픈소스 라이선스 공지",
     "settingsPrivacyPolicy": "개인 정보 보호 정책",
-    "settingsPrivacyPolicySubtitle": "Moonfin이 데이터를 처리하는 방법",
+    "settingsPrivacyPolicySubtitle": "Lambent이 데이터를 처리하는 방법",
     "settingsCheckForUpdates": "업데이트 확인",
-    "settingsCheckForUpdatesSubtitle": "최신 Moonfin 릴리스를 확인합니다",
+    "settingsCheckForUpdatesSubtitle": "최신 Lambent 릴리스를 확인합니다",
     "settingsPoweredByFlutter": "Flutter에서 제공",
     "settingsLicenseNoticesCount": "{count, plural, one {라이선스 고지 #건} other {라이선스 고지 #건}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH 자막 우선",
     "preferSdhSubtitlesSubtitle": "자막을 자동으로 선택할 때 SDH/CC 트랙을 우선합니다.",
     "webDiagnostics": "웹 진단",
-    "webDiagnosticsTitle": "Moonfin 웹 진단",
+    "webDiagnosticsTitle": "Lambent 웹 진단",
     "webDiagnosticsIntro": "이 페이지에서 브라우저 연결 문제(CORS, 혼합 콘텐츠, 검색 설정)를 진단할 수 있습니다.",
     "webDiagnosticsDetectedMixedContentFailure": "혼합 콘텐츠 오류 감지됨",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/프리플라이트 오류 감지됨",
-    "webDiagnosticsMixedContentFailureBody": "Moonfin이 HTTPS 페이지에서 HTTP 서버 URL을 호출하려는 시도를 감지했습니다. 브라우저는 이 요청이 서버에 도달하기 전에 차단합니다.",
-    "webDiagnosticsCorsFailureBody": "Moonfin이 브라우저 수준의 요청 실패를 감지했습니다. 보통 미디어 서버에 CORS 또는 프리플라이트 헤더가 없을 때 발생합니다.",
+    "webDiagnosticsMixedContentFailureBody": "Lambent이 HTTPS 페이지에서 HTTP 서버 URL을 호출하려는 시도를 감지했습니다. 브라우저는 이 요청이 서버에 도달하기 전에 차단합니다.",
+    "webDiagnosticsCorsFailureBody": "Lambent이 브라우저 수준의 요청 실패를 감지했습니다. 보통 미디어 서버에 CORS 또는 프리플라이트 헤더가 없을 때 발생합니다.",
     "webDiagnosticsTargetUrl": "대상 URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "설정되지 않음",
     "webDiagnosticsMixedContent": "혼합 콘텐츠",
     "webDiagnosticsMixedContentDetected": "이 페이지는 HTTPS로 로드되었지만 설정된 URL 중 하나 이상이 HTTP입니다. 브라우저는 HTTPS 페이지에서 HTTP API를 호출하지 못하게 차단합니다.",
-    "webDiagnosticsMixedContentFix": "해결 방법: 미디어 서버나 프록시 엔드포인트를 HTTPS로 제공하거나, 신뢰할 수 있는 로컬 네트워크에서만 Moonfin을 HTTP로 사용하세요.",
+    "webDiagnosticsMixedContentFix": "해결 방법: 미디어 서버나 프록시 엔드포인트를 HTTPS로 제공하거나, 신뢰할 수 있는 로컬 네트워크에서만 Lambent을 HTTP로 사용하세요.",
     "webDiagnosticsNoMixedContentDetected": "현재 실행 설정에서 뚜렷한 혼합 콘텐츠 문제가 감지되지 않았습니다.",
     "webDiagnosticsCorsChecklist": "CORS 점검 목록",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin에 브라우저 출처를 허용하세요.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "클래식은 기존의 가운데 정렬 Moonfin 레이아웃입니다. 모던은 반응형 시네마틱 레이아웃입니다. Spotlight는 대표 이미지를 앞세우고 팝업 콘텐츠 카드를 사용하는 레이아웃입니다. Nouveau는 섹션이 페이지 아래로 차례로 쌓이는 전체 화면 레이아웃입니다. Minimalist는 아트워크, 재생 버튼 하나, 에피소드로만 구성됩니다.",
+    "detailScreenStyleSubtitle": "클래식은 기존의 가운데 정렬 Lambent 레이아웃입니다. 모던은 반응형 시네마틱 레이아웃입니다. Spotlight는 대표 이미지를 앞세우고 팝업 콘텐츠 카드를 사용하는 레이아웃입니다. Nouveau는 섹션이 페이지 아래로 차례로 쌓이는 전체 화면 레이아웃입니다. Minimalist는 아트워크, 재생 버튼 하나, 에피소드로만 구성됩니다.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "로컬 라이브러리 기반 Moonfin 추천 알고리즘, Jellyfin 추천 서버 엔진 또는 온라인 TMDb 유사도 지표를 사용합니다. 참고: 온라인 추천에는 Seerr 연동이 필요합니다.",
+    "recommendationSystemSubtitle": "로컬 라이브러리 기반 Lambent 추천 알고리즘, Jellyfin 추천 서버 엔진 또는 온라인 TMDb 유사도 지표를 사용합니다. 참고: 온라인 추천에는 Seerr 연동이 필요합니다.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Moonfin 추천",
+    "recommendationSystemMoonfin": "Lambent 추천",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "대상 미디어의 시청 등급에 따라 Moonfin 추천 항목을 제한합니다",
+    "recommendationsApplyParentalRatingCapSubtitle": "대상 미디어의 시청 등급에 따라 Lambent 추천 항목을 제한합니다",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "사용자 지정 테마는 Moonfin 전반의 시각 요소를 바꿉니다. 취향에 맞는 테마를 선택하세요.",
+    "customThemeSubtitle": "사용자 지정 테마는 Lambent 전반의 시각 요소를 바꿉니다. 취향에 맞는 테마를 선택하세요.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "휴대폰에서 Moonfin에 로그인하세요",
+    "carSignInPrompt": "휴대폰에서 Lambent에 로그인하세요",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8893,7 +8893,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller는 더 부드러운 애니메이션과 적은 끊김을 제공하는 Flutter의 최신 GPU 렌더러입니다. 일부 TV 박스나 오래된 GPU에서는 화면 깨짐이나 검은 영상이 나타날 수 있으며, 이 경우 끄세요. 자동은 기기에 가장 알맞은 기본값을 선택합니다. 적용하려면 Moonfin을 다시 시작하세요.",
+    "impellerRenderingSubtitle": "Impeller는 더 부드러운 애니메이션과 적은 끊김을 제공하는 Flutter의 최신 GPU 렌더러입니다. 일부 TV 박스나 오래된 GPU에서는 화면 깨짐이나 검은 영상이 나타날 수 있으며, 이 경우 끄세요. 자동은 기기에 가장 알맞은 기본값을 선택합니다. 적용하려면 Lambent을 다시 시작하세요.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8904,7 +8904,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "렌더링 엔진을 변경하려면 Moonfin을 다시 시작해야 합니다. 지금 앱을 종료한 후 다시 실행하면 적용됩니다.",
+    "impellerRestartMessage": "렌더링 엔진을 변경하려면 Lambent을 다시 시작해야 합니다. 지금 앱을 종료한 후 다시 실행하면 적용됩니다.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9091,7 +9091,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android에서는 Moonfin이 소유한 폴더에만 쓸 수 있도록 제한하고 있으며, 이 기기에는 이동식 저장소가 없습니다. 다른 앱이 접근할 수 있는 위치에 다운로드 항목을 보관하려면 위의 '다운로드 폴더에 저장'을 켜세요.",
+    "downloadLocationLimitedByAndroid": "Android에서는 Lambent이 소유한 폴더에만 쓸 수 있도록 제한하고 있으며, 이 기기에는 이동식 저장소가 없습니다. 다른 앱이 접근할 수 있는 위치에 다운로드 항목을 보관하려면 위의 '다운로드 폴더에 저장'을 켜세요.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9983,7 +9983,7 @@
     "@seriesRecordingCancelled": {
         "description": "Snackbar confirmation after cancelling a live TV series recording"
     },
-    "interfaceLayoutSubtitle": "이 기기에서 잘못 읽히는 경우 감지된 레이아웃을 재정의합니다. 변경 사항을 적용하려면 Moonfin을 다시 시작하세요.",
+    "interfaceLayoutSubtitle": "이 기기에서 잘못 읽히는 경우 감지된 레이아웃을 재정의합니다. 변경 사항을 적용하려면 Lambent을 다시 시작하세요.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10620,7 +10620,7 @@
     "@shortcutToggleFullscreen": {
         "description": "F11 and Alt+Enter anywhere, F in the player"
     },
-    "shortcutQuit": "Moonfin 종료",
+    "shortcutQuit": "Lambent 종료",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },
@@ -10946,7 +10946,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "Moonfin 전체에서 사용하는 로딩 애니메이션을 사용자 지정합니다",
+    "loadingAnimationDescription": "Lambent 전체에서 사용하는 로딩 애니메이션을 사용자 지정합니다",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10958,7 +10958,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Moonfin 로고",
+    "loadingAnimationImageMoonfinLogo": "Lambent 로고",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10974,7 +10974,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Moonfin 위상",
+    "loadingAnimationImageMoonfinPhases": "Lambent 위상",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -11742,7 +11742,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Moonfin",
+    "screensaverBackdropMoonfin": "Lambent",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -11762,7 +11762,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Moonfin 로고",
+    "screensaverComponentMoonfinLogo": "Lambent 로고",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },
@@ -13891,7 +13891,7 @@
             }
         }
     },
-    "autoDownloadTranscodedForegroundNote": "트랜스코딩 품질은 Moonfin이 열려 있을 때만 다운로드됩니다. 원본 품질은 백그라운드에서도 다운로드됩니다.",
+    "autoDownloadTranscodedForegroundNote": "트랜스코딩 품질은 Lambent이 열려 있을 때만 다운로드됩니다. 원본 품질은 백그라운드에서도 다운로드됩니다.",
     "@autoDownloadTranscodedForegroundNote": {
         "description": "Shown under transcoded options when choosing the quality of an auto-download subscription"
     },
@@ -13899,7 +13899,7 @@
     "@autoDownloadTranscodedRunningNote": {
         "description": "Shown under a running transcoded download that a subscription queued"
     },
-    "autoDownloadForegroundOnly": "Moonfin이 열려 있을 때만 다운로드",
+    "autoDownloadForegroundOnly": "Lambent이 열려 있을 때만 다운로드",
     "@autoDownloadForegroundOnly": {
         "description": "Short note next to a followed series in a transcoded quality"
     },
@@ -13994,15 +13994,15 @@
     "@autoDownloadBackgroundRefresh": {
         "description": "Setting that lets the system wake the app to check for new episodes"
     },
-    "autoDownloadBackgroundRefreshSubtitle": "Moonfin이 닫혀 있어도 시스템이 주기적으로 새 에피소드를 확인할 수 있게 합니다",
+    "autoDownloadBackgroundRefreshSubtitle": "Lambent이 닫혀 있어도 시스템이 주기적으로 새 에피소드를 확인할 수 있게 합니다",
     "@autoDownloadBackgroundRefreshSubtitle": {
         "description": "Explains the background refresh setting"
     },
-    "autoDownloadBackgroundRefreshDenied": "Moonfin의 백그라운드 앱 새로 고침이 꺼져 있습니다. iOS 설정에서 켜세요.",
+    "autoDownloadBackgroundRefreshDenied": "Lambent의 백그라운드 앱 새로 고침이 꺼져 있습니다. iOS 설정에서 켜세요.",
     "@autoDownloadBackgroundRefreshDenied": {
         "description": "Shown when iOS forbids background refresh for the app"
     },
-    "autoDownloadBackgroundRestrictedAndroid": "Android 설정에서 Moonfin의 백그라운드 사용이 제한되어 있습니다.",
+    "autoDownloadBackgroundRestrictedAndroid": "Android 설정에서 Lambent의 백그라운드 사용이 제한되어 있습니다.",
     "@autoDownloadBackgroundRestrictedAndroid": {
         "description": "Shown when Android restricts the app from running in the background"
     },
@@ -14296,7 +14296,7 @@
     "@topShelf": {
         "description": "Apple TV settings label for what the tvOS home screen shows above the Moonfin icon. Top Shelf is Apple's name for that area"
     },
-    "topShelfDescription": "Moonfin 아이콘을 선택했을 때 Apple TV 홈 화면에서 아이콘 위에 표시되는 내용입니다. 이 설정은 이 기기에만 저장됩니다.",
+    "topShelfDescription": "Lambent 아이콘을 선택했을 때 Apple TV 홈 화면에서 아이콘 위에 표시되는 내용입니다. 이 설정은 이 기기에만 저장됩니다.",
     "@topShelfDescription": {
         "description": "Apple TV settings subtitle for the Top Shelf option"
     },
@@ -14304,7 +14304,7 @@
     "@topShelfLatestMedia": {
         "description": "Top Shelf option that shows a carousel of the newest items from the home screen's Latest rows"
     },
-    "topShelfAppBanner": "Moonfin 배너",
+    "topShelfAppBanner": "Lambent 배너",
     "@topShelfAppBanner": {
         "description": "Top Shelf option that shows only the static Moonfin logo banner, nothing from the library"
     },
