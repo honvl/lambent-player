@@ -941,17 +941,21 @@ class _CardImage extends StatelessWidget {
                   Positioned(top: 6, right: 6, child: _buildWatchedIndicator()),
                 if (playedPercentage != null && playedPercentage! > 0)
                   Positioned(
-                    left: 6,
-                    right: 6,
-                    bottom: 6,
+                    // Glass: a thin, rounded amber bar inset like the mockup's
+                    // (20px in, 18px up and 8px thick on a 1920 canvas).
+                    left: AppColorScheme.isGlass ? 10 : 6,
+                    right: AppColorScheme.isGlass ? 10 : 6,
+                    bottom: AppColorScheme.isGlass ? 9 : 6,
                     child: ClipRRect(
-                      borderRadius: AppRadius.circular(3),
+                      borderRadius: AppRadius.circular(
+                        AppColorScheme.isGlass ? 999 : 3,
+                      ),
                       child: LinearProgressIndicator(
                         value: playedPercentage! / 100,
-                        minHeight: 6,
-                        backgroundColor: AppColorScheme.scrim.withValues(
-                          alpha: 0.54,
-                        ),
+                        minHeight: AppColorScheme.isGlass ? 4 : 6,
+                        backgroundColor: AppColorScheme.isGlass
+                            ? Colors.white.withValues(alpha: 0.28)
+                            : AppColorScheme.scrim.withValues(alpha: 0.54),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           AppColorScheme.accent,
                         ),

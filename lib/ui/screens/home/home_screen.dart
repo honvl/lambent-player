@@ -2730,13 +2730,21 @@ class _ContentRowsState extends State<_ContentRows>
         _rowPeekHeader = measured;
       });
     });
+    // The glass home puts the whole first row (cards and their titles) under
+    // the hero, like the mockup. Other themes show the top half of its artwork.
+    final showsWholeRow =
+        AppColorScheme.isGlass &&
+        PlatformDetection.isTV &&
+        !_isRowModern(row, prefs);
     _rowPeekCover = header +
         (5.0 * metadataScale) +
         _focusHeadroom(
           imageHeight,
           prefs.get(UserPreferences.cardFocusExpansion),
         ) +
-        imageHeight / 2;
+        (showsWholeRow
+            ? imageHeight + (_classicCardMetadataHeight * metadataScale)
+            : imageHeight / 2);
     _rowPeek = extraTopPadding + _rowPeekCover;
   }
 
@@ -5618,6 +5626,13 @@ class _ContentRowsState extends State<_ContentRows>
                   final String cardTitle;
                   final String? cardSubtitle;
                   final Widget? cardSubtitleWidget;
+                  final glassTimeLeft =
+                      AppColorScheme.isGlass &&
+                          !isRowsV2 &&
+                          (row.rowType == HomeRowType.resume ||
+                              row.rowType == HomeRowType.nextUp)
+                      ? _glassTimeLeft(item, AppLocalizations.of(context))
+                      : null;
 
           if (item.type == 'Episode') {
             final s = item.parentIndexNumber;
@@ -5667,6 +5682,12 @@ class _ContentRowsState extends State<_ContentRows>
             } else if (isRowsV2) {
               cardSubtitle = episodeInfo ?? item.name;
               cardSubtitleWidget = null;
+            } else if (glassTimeLeft != null) {
+              // Glass Continue Watching: how long is left, like the mockup.
+              cardSubtitle = episodeInfo != null
+                  ? '$episodeInfo \u00B7 $glassTimeLeft'
+                  : glassTimeLeft;
+              cardSubtitleWidget = null;
             } else {
               // Classic cards never expand, so their one subtitle line carries
               // the episode name alongside the numbers.
@@ -5685,6 +5706,8 @@ class _ContentRowsState extends State<_ContentRows>
             final userRating = item.rawData['UserRating'] as String? ?? '';
             if (showUserRatings && userRating.isNotEmpty) {
               cardSubtitle = userRating;
+            } else if (glassTimeLeft != null) {
+              cardSubtitle = glassTimeLeft;
             } else {
               cardSubtitle = (canUseExpandedV2Card &&
                       effectiveV2Focused &&
@@ -5932,6 +5955,25 @@ class _ContentRowsState extends State<_ContentRows>
         additionalRatings: ratingsByKey[itemKey] ?? const {},
       ),
     );
+  }
+
+  /// "1h 12m left" for a partly watched item, or null when the server sent
+  /// no runtime or no progress.
+  static String? _glassTimeLeft(AggregatedItem item, AppLocalizations l10n) {
+    final runtime = item.runtime;
+    final played = item.playedPercentage;
+    if (runtime == null || played == null || played <= 0 || played >= 100) {
+      return null;
+    }
+    final left = Duration(
+      microseconds: (runtime.inMicroseconds * (1 - played / 100)).round(),
+    );
+    final totalMinutes = (left.inSeconds / 60).ceil().clamp(1, 100000);
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    if (hours == 0) return l10n.guideMinutesLeft(minutes);
+    if (minutes == 0) return l10n.guideHoursLeft(hours);
+    return l10n.guideHoursMinutesLeft(hours, minutes);
   }
 
   static String _v2MetadataLine(AggregatedItem item) {

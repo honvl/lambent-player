@@ -1217,7 +1217,10 @@ class UserPreferences extends ChangeNotifier {
 
   static final posterSize = EnumPreference(
     key: 'poster_size',
-    defaultValue: PosterSize.medium,
+    // The glass mockups draw home cards well above the medium size.
+    defaultValue: PlatformDetection.isTV
+        ? PosterSize.extraLarge
+        : PosterSize.medium,
     values: PosterSize.values,
   );
 
@@ -1253,7 +1256,10 @@ class UserPreferences extends ChangeNotifier {
 
   static final homeRowsStyle = EnumPreference(
     key: 'pref_home_rows_style',
-    defaultValue: PlatformDetection.useMobileUi
+    // Lambent glass on a TV: classic rows, so Continue Watching can be a row of
+    // 16:9 cards and the poster rows stay posters (Modern draws every card as
+    // a portrait until it grows).
+    defaultValue: PlatformDetection.useMobileUi || PlatformDetection.isTV
         ? HomeRowsStyle.v1
         : HomeRowsStyle.v2,
     values: HomeRowsStyle.values,
@@ -1814,7 +1820,9 @@ class UserPreferences extends ChangeNotifier {
   /// server like [detailScreenStyle].
   static final detailShowTechnicalDetails = Preference(
     key: 'pref_detail_show_technical_details',
-    defaultValue: false,
+    // Lambent glass on a TV shows the resolution, HDR and audio chips under the
+    // title, like the mockup.
+    defaultValue: PlatformDetection.isTV,
   );
 
   /// When on, the details screen hands remote trailers to the system, the
@@ -1943,19 +1951,21 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: false,
   );
 
+  // The glass nav pill is Home, Search, the libraries and Settings. Shuffle,
+  // Genres and Favorites are one toggle away in settings.
   static final showShuffleButton = Preference(
     key: 'pref_show_shuffle_button',
-    defaultValue: true,
+    defaultValue: !PlatformDetection.isTV,
   );
 
   static final showGenresButton = Preference(
     key: 'pref_show_genres_button',
-    defaultValue: true,
+    defaultValue: !PlatformDetection.isTV,
   );
 
   static final showFavoritesButton = Preference(
     key: 'pref_show_favorites_button',
-    defaultValue: true,
+    defaultValue: !PlatformDetection.isTV,
   );
 
   static final showLiveTvButton = Preference(
@@ -1983,14 +1993,16 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: true,
   );
 
+  // Glass nav pill on a TV: Movies, Shows and the other libraries are their
+  // own labelled buttons.
   static final showLibrariesIndividually = Preference(
     key: 'pref_show_libraries_individually',
-    defaultValue: false,
+    defaultValue: PlatformDetection.isTV,
   );
 
   static final navbarAlwaysExpanded = Preference(
     key: 'pref_navbar_always_expanded',
-    defaultValue: false,
+    defaultValue: PlatformDetection.isTV,
   );
 
   static final showSeerrButton = Preference(
@@ -2975,9 +2987,11 @@ class UserPreferences extends ChangeNotifier {
 
   static final mediaBarMode = Preference(
     key: 'mediaBarMode',
+    // MakD is the layout closest to the Lambent glass hero: the title and
+    // overview sit bare on the left, over a left-to-right and a bottom scrim.
     defaultValue: PlatformDetection.useMobileUi
         ? mediaBarModeGallery
-        : mediaBarModeMoonfin,
+        : mediaBarModeMakd,
   );
 
   static final mediaBarContentType = Preference(
@@ -3029,7 +3043,8 @@ class UserPreferences extends ChangeNotifier {
   /// bar on TV and desktop.
   static final mediaBarRowPeek = Preference(
     key: 'mediaBarRowPeek',
-    defaultValue: false,
+    // The glass home shows the hero with the first row already under it.
+    defaultValue: PlatformDetection.isTV,
   );
 
   static final mediaBarTrailerPreview = Preference(
@@ -3135,6 +3150,9 @@ class UserPreferences extends ChangeNotifier {
   static ImageType _defaultHomeRowImageType(HomeSectionType sectionType) {
     return switch (sectionType) {
       HomeSectionType.libraryTilesSmall => ImageType.thumb,
+      // Continue Watching is a row of 16:9 cards on a TV.
+      HomeSectionType.resume ||
+      HomeSectionType.nextUp when PlatformDetection.isTV => ImageType.thumb,
       _ => ImageType.poster,
     };
   }

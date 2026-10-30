@@ -633,6 +633,11 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
 
   bool get _showBackArrow => widget.showBackButton && !PlatformDetection.isTV;
 
+  /// The glass home puts the avatar beside the clock at the right, the way the
+  /// mockups do, and leaves the left for the back arrow.
+  bool get _avatarAtEnd =>
+      AppColorScheme.isGlass && !PlatformDetection.useMobileUi;
+
   @override
   void didUpdateWidget(covariant TopToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -662,12 +667,16 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
         clockBehavior == ClockBehavior.always ||
         clockBehavior == ClockBehavior.inMenus;
     final hasEndSection = !isMobile && showClock;
-    final startReservedWidth = switch ((_showAvatar, _showBackArrow)) {
+    final startAvatar = _showAvatar && !_avatarAtEnd;
+    final startReservedWidth = switch ((startAvatar, _showBackArrow)) {
       (true, true) => 96.0,
       (false, false) => 0.0,
       _ => 44.0,
     };
-    final endReservedWidth = hasEndSection ? 96.0 : 0.0;
+    final endAvatar = _showAvatar && _avatarAtEnd;
+    final endReservedWidth = hasEndSection || endAvatar
+        ? (endAvatar ? 150.0 : 96.0)
+        : 0.0;
     final centerSidePadding =
         math.max(startReservedWidth, endReservedWidth) + 14.0;
     final toolbarHeight = isTV
@@ -859,9 +868,9 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (_showAvatar) _buildAvatar(),
+          if (_showAvatar && !_avatarAtEnd) _buildAvatar(),
           if (_showBackArrow) ...[
-            if (_showAvatar) const SizedBox(width: 8),
+            if (_showAvatar && !_avatarAtEnd) const SizedBox(width: 8),
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
@@ -1061,7 +1070,7 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
                 order: (order++).toDouble(),
                 child: ExpandableIconButton(
                   key: const ValueKey('toolbar_search'),
-                  forceExpanded: alwaysExpanded,
+                  forceExpanded: alwaysExpanded && !AppColorScheme.isGlass,
                   icon: Icons.search_rounded,
                   label: l10n.search,
                   baseColor: nextNavColor(),
@@ -1252,7 +1261,7 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
                 order: 99,
                 child: ExpandableIconButton(
                   key: const ValueKey('toolbar_settings'),
-                  forceExpanded: alwaysExpanded,
+                  forceExpanded: alwaysExpanded && !AppColorScheme.isGlass,
                   icon: Icons.settings_rounded,
                   label: l10n.settings,
                   baseColor: nextNavColor(),
@@ -1266,8 +1275,11 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
                     final inwardKey = isRtl
                         ? LogicalKeyboardKey.arrowRight
                         : LogicalKeyboardKey.arrowLeft;
+                    // The avatar sits past Settings on the glass pill, so the
+                    // key has to be allowed through to reach it.
                     if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
                         PlatformDetection.isTV &&
+                        !_avatarAtEnd &&
                         event.logicalKey == outwardKey) {
                       return KeyEventResult.handled;
                     }
@@ -1455,9 +1467,10 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
         clockBehavior == ClockBehavior.inMenus;
     final isNeon = ThemeRegistry.active.id == ThemeRegistry.neonPulseId;
 
-    if (!showClock) return const SizedBox.shrink();
+    final avatarAtEnd = _showAvatar && _avatarAtEnd;
+    if (!showClock && !avatarAtEnd) return const SizedBox.shrink();
 
-    return ValueListenableBuilder<String>(
+    final clock = ValueListenableBuilder<String>(
       valueListenable: _currentTime,
       builder: (context, time, _) {
         return Text(
@@ -1475,6 +1488,17 @@ class _TopToolbarState extends State<TopToolbar> with RouteAware {
           ),
         );
       },
+    );
+    if (!avatarAtEnd) return clock;
+    return FocusTraversalOrder(
+      order: const NumericFocusOrder(100),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showClock) ...[clock, const SizedBox(width: 12)],
+          _buildAvatar(),
+        ],
+      ),
     );
   }
 

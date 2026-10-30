@@ -33,6 +33,7 @@ import '../../../../util/media_source_summary.dart';
 import '../../../../util/overview_text.dart';
 import '../../../../util/playback_time_label.dart';
 import '../../../../util/platform_detection.dart';
+import '../../../../util/tv_ui_scale.dart';
 import '../../../../util/focus/dpad_keys.dart';
 import '../../../../util/focus/focus_scroll.dart';
 import '../../../navigation/destinations.dart';
@@ -4038,6 +4039,28 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
           ? AppColorScheme.accent
           : AppColorScheme.onBackground;
 
+  /// The hero title's style. Lambent glass sets it big, semibold and tightly
+  /// tracked (112px weight 600, -0.025em on a 1920 canvas), stepping down for
+  /// long names so they stay inside a couple of lines.
+  TextStyle? _heroTitleStyle(TextTheme textTheme, String title) {
+    final base = (_landscape ? textTheme.displaySmall : textTheme.headlineMedium)
+        ?.copyWith(fontWeight: FontWeight.w700, color: _titleColor);
+    if (!AppColorScheme.isGlass || !_landscape) return base;
+    final size = tvPx(
+      title.length <= 14
+          ? 112
+          : title.length <= 28
+          ? 88
+          : 68,
+    );
+    return base?.copyWith(
+      fontSize: size,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.025 * size,
+      height: 1.0,
+    );
+  }
+
   List<Shadow>? _neonTextGlow(double blurRadius) =>
       ThemeRegistry.active.id == ThemeRegistry.neonPulseId
           ? [Shadow(color: AppColorScheme.accent, blurRadius: blurRadius)]
@@ -4073,7 +4096,11 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
         onCollapse: widget.onCollapseBiography,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
           height: 1.45,
-          color: AppColorScheme.onBackground.withValues(alpha: 0.85),
+          color: AppColorScheme.onBackground.withValues(
+            alpha: AppColorScheme.isGlass ? 0.82 : 0.85,
+          ),
+          // Glass: 25px on a 1920 canvas.
+          fontSize: AppColorScheme.isGlass && _landscape ? tvPx(25) : null,
         ),
       ),
     );
@@ -4517,10 +4544,7 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
                 const SizedBox(width: 16),
                 Text(
                   item.name,
-                  style: (_landscape
-                          ? textTheme.displaySmall
-                          : textTheme.headlineMedium)
-                      ?.copyWith(fontWeight: FontWeight.w700, color: _titleColor),
+                  style: _heroTitleStyle(textTheme, item.name),
                 ),
               ],
             ),
@@ -4555,10 +4579,9 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
             ),
             Text(
               item.name,
-              style: (_landscape
-                      ? textTheme.displaySmall
-                      : textTheme.headlineMedium)
-                  ?.copyWith(fontWeight: FontWeight.w700, color: _titleColor),
+              maxLines: AppColorScheme.isGlass ? 2 : null,
+              overflow: AppColorScheme.isGlass ? TextOverflow.ellipsis : null,
+              style: _heroTitleStyle(textTheme, item.name),
             ),
           ] else if (logoTag != null && logoId != null) ...[
             Padding(
@@ -4588,10 +4611,10 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
                 Flexible(
                   child: Text(
                     item.name,
-                    style: (_landscape
-                            ? textTheme.displaySmall
-                            : textTheme.headlineMedium)
-                        ?.copyWith(fontWeight: FontWeight.w700, color: _titleColor),
+                    maxLines: AppColorScheme.isGlass ? 2 : null,
+                    overflow:
+                        AppColorScheme.isGlass ? TextOverflow.ellipsis : null,
+                    style: _heroTitleStyle(textTheme, item.name),
                   ),
                 ),
                 ..._versionBadge(item, selectedSource, textTheme),
@@ -4705,8 +4728,15 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
   Widget _metadataRow(BuildContext context, AggregatedItem item, Map<String, dynamic>? selectedMediaSource) {
     final l10n = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
-    final muted = AppColorScheme.onBackground.withValues(alpha: 0.75);
-    final style = textTheme.bodyMedium?.copyWith(color: muted);
+    final glass = AppColorScheme.isGlass && _landscape;
+    final muted = AppColorScheme.onBackground.withValues(
+      alpha: glass ? 0.82 : 0.75,
+    );
+    // Glass: the info line is 26px on a 1920 canvas.
+    final style = textTheme.bodyMedium?.copyWith(
+      color: muted,
+      fontSize: glass ? tvPx(26) : null,
+    );
 
     final prefs = GetIt.instance<UserPreferences>();
     final hidden = detailMetadataLayout.hidden(prefs);
@@ -4843,6 +4873,31 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
 
   Widget _techChip(ThemeData theme, String label) {
     final isNeon = ThemeRegistry.active.id == ThemeRegistry.neonPulseId;
+    if (AppColorScheme.isGlass) {
+      // A glass capsule: 40px tall on a 1920 canvas, 10% white with a hairline.
+      return Container(
+        height: tvPx(40),
+        padding: EdgeInsets.symmetric(horizontal: tvPx(18)),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.16),
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: AppColorScheme.onSurface,
+            fontSize: tvPx(20),
+            fontWeight: FontWeight.w600,
+            height: 1.0,
+          ),
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
