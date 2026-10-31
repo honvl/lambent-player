@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Lambent mark: an amber orb with a soft glow. File name kept so existing asset references keep working. -->
+<!-- Lambent mark: the Vision Pro icon's sunset (sun, halo arc, horizon). File name kept so existing asset references keep working. -->
 <svg
   version="1.1"
   xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 1024 1024"
 >
   <defs>
-    <radialGradient id="lambentGlow" cx="512" cy="512" r="500" gradientUnits="userSpaceOnUse">
-      <stop offset="0.60" style="stop-color:#FFA028;stop-opacity:0.60" />
-      <stop offset="0.72" style="stop-color:#FFA028;stop-opacity:0.27" />
-      <stop offset="0.86" style="stop-color:#FFA028;stop-opacity:0.06" />
-      <stop offset="1" style="stop-color:#FFA028;stop-opacity:0" />
+    <radialGradient id="lambentGlow" cx="512" cy="560" r="440" gradientUnits="userSpaceOnUse">
+      <stop offset="0.55" style="stop-color:#FF964A;stop-opacity:0.35" />
+      <stop offset="0.80" style="stop-color:#FF964A;stop-opacity:0.12" />
+      <stop offset="1" style="stop-color:#FF964A;stop-opacity:0" />
     </radialGradient>
-    <radialGradient id="lambentOrb" cx="512" cy="512" r="300" gradientUnits="userSpaceOnUse">
-      <stop offset="0" style="stop-color:#FFD682" />
-      <stop offset="1" style="stop-color:#FFA028" />
-    </radialGradient>
+    <linearGradient id="lambentSun" x1="0" y1="338" x2="0" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" style="stop-color:#F86B44" />
+      <stop offset="0.35" style="stop-color:#FF9954" />
+      <stop offset="0.65" style="stop-color:#FFC06A" />
+      <stop offset="1" style="stop-color:#FFFFCF" />
+    </linearGradient>
+    <linearGradient id="lambentReflection" x1="0" y1="630" x2="0" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0" style="stop-color:#FFA252;stop-opacity:0.5" />
+      <stop offset="1" style="stop-color:#FFA252;stop-opacity:0" />
+    </linearGradient>
+    <linearGradient id="lambentHorizon" x1="120" y1="0" x2="904" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" style="stop-color:#FFF6E4;stop-opacity:0" />
+      <stop offset="0.5" style="stop-color:#FFF6E4;stop-opacity:0.9" />
+      <stop offset="1" style="stop-color:#FFF6E4;stop-opacity:0" />
+    </linearGradient>
   </defs>
-  <circle cx="512" cy="512" r="500" fill="url(#lambentGlow)" />
-  <circle cx="512" cy="512" r="300" fill="url(#lambentOrb)" />
+  <circle cx="512" cy="560" r="440" fill="url(#lambentGlow)" />
+  <rect x="220" y="630" width="584" height="130" fill="url(#lambentReflection)" />
+  <path d="M220 630 A292 292 0 0 1 804 630 Z" fill="url(#lambentSun)" />
+  <path d="M188 630 A324 324 0 0 1 836 630" fill="none" stroke="#FFF6E4" stroke-width="10" stroke-linecap="round" />
+  <rect x="120" y="627" width="784" height="5" fill="url(#lambentHorizon)" />
 </svg>
