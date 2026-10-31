@@ -972,6 +972,10 @@ extension HomeSectionTypeSeerrRow on HomeSectionType {
       };
 }
 
+/// A Lambent Server enhancement default on this screen: follow the server's
+/// own setting, or force it on or off.
+enum LambentServerChoice { server, on, off }
+
 enum ScreensaverMode { library, logo }
 
 enum ScreensaverBackdrop {

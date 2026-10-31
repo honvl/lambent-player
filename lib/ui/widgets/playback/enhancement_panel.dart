@@ -18,6 +18,8 @@ import '../track_selector_dialog.dart';
 Future<void> showEnhancementPanel(
   BuildContext context, {
   required LambentEnhancement current,
+  required bool enhanced,
+  required void Function(bool on) onSetEnhancement,
   required void Function(LambentEnhancement chosen) onApply,
   required VoidCallback onReset,
   required VoidCallback onShowStreamInfo,
@@ -35,6 +37,11 @@ Future<void> showEnhancementPanel(
           Navigator.of(dialogContext, rootNavigator: useRootNavigator).pop();
       return _EnhancementPanelBody(
         current: current,
+        enhanced: enhanced,
+        onSetEnhancement: (on) {
+          close();
+          onSetEnhancement(on);
+        },
         onApply: (chosen) {
           close();
           onApply(chosen);
@@ -64,12 +71,19 @@ typedef _Range = ({int min, int max});
 class _EnhancementPanelBody extends StatefulWidget {
   const _EnhancementPanelBody({
     required this.current,
+    required this.enhanced,
+    required this.onSetEnhancement,
     required this.onApply,
     required this.onReset,
     required this.onShowStreamInfo,
   });
 
   final LambentEnhancement current;
+
+  /// Whether the stream is the PC-enhanced one. When it is not, the panel
+  /// offers only the way back on.
+  final bool enhanced;
+  final void Function(bool on) onSetEnhancement;
   final void Function(LambentEnhancement chosen) onApply;
   final VoidCallback onReset;
   final VoidCallback onShowStreamInfo;
@@ -241,11 +255,37 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         ),
     ];
 
+    // Acts at once rather than waiting for Apply: it swaps the whole stream.
+    final enhancementRow = _EnhancementRow(
+      autofocus: autofocusNext(),
+      label: 'PC enhancement',
+      value: widget.enhanced ? 'On' : 'Off · original file',
+      onStep: (_, _) => widget.onSetEnhancement(!widget.enhanced),
+    );
+    if (!widget.enhanced) {
+      return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            enhancementRow,
+            const SizedBox(height: 8),
+            FocusableDialogRow(
+              icon: Icons.info_outline_rounded,
+              label: 'Stream info',
+              onTap: widget.onShowStreamInfo,
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          enhancementRow,
           ...upscaleRows,
           if (pictureRows.isNotEmpty) ...[
             const _SectionLabel('Picture'),

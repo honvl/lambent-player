@@ -95,7 +95,7 @@ class JellyfinMediaStreamResolver implements MediaStreamResolver {
       );
       final rawInfo = await _client.playbackApi.getPlaybackInfo(
         itemId,
-        requestBody: request.toJson(),
+        requestBody: LambentEnhancement.decoratePlaybackInfo(request.toJson()),
         userId: _client.userId,
         startTimeTicks: startTimeTicks,
         waitForMediaProbe: true,

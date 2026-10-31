@@ -55,13 +55,30 @@ class LambentEnhancement {
   /// offer alone.
   static LambentEnhancement overrides = none;
 
+  /// True plays Plex's own file instead of the enhanced stream: the
+  /// PlaybackInfo request goes out with `EnableTranscoding: false`, which
+  /// Lambent Server answers with direct play.
+  static bool enhancementOff = false;
+
+  /// This screen's own defaults, sent as PlaybackInfo's `Lambent` object
+  /// (`RtxHdr`, `DeepenBlacks`, `DolbyVision`, `Saturation`, `Contrast`,
+  /// `Brightness`, `Peak`, `Hue`). A member left out follows the server.
+  static Map<String, Object> screenDefaults = const {};
+
+  /// [body] with this screen's choices added, for a PlaybackInfo request.
+  static Map<String, dynamic> decoratePlaybackInfo(Map<String, dynamic> body) {
+    if (enhancementOff) body['EnableTranscoding'] = false;
+    if (screenDefaults.isNotEmpty) body['Lambent'] = screenDefaults;
+    return body;
+  }
+
   static const _path = '/v1/enhanced/';
 
   static const qualityRange = (min: 1, max: 4);
   static const saturationRange = (min: 0, max: 200);
   static const contrastRange = (min: 0, max: 200);
   static const middleGrayRange = (min: 10, max: 100);
-  static const peakRange = (min: 400, max: 2000);
+  static const peakRange = (min: 400, max: 1400);
   static const hueRange = (min: -30, max: 30);
 
   static bool isEnhancedUrl(String? url) {

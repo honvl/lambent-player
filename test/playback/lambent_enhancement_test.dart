@@ -6,7 +6,34 @@ const _url =
     '?tv=1&q=4&hdr=1&dv=1&blacks=1&maxh=2160&audio=0&start=60.000';
 
 void main() {
-  tearDown(() => LambentEnhancement.overrides = LambentEnhancement.none);
+  tearDown(() {
+    LambentEnhancement.overrides = LambentEnhancement.none;
+    LambentEnhancement.enhancementOff = false;
+    LambentEnhancement.screenDefaults = const {};
+  });
+
+  group('decoratePlaybackInfo', () {
+    test('leaves the request alone by default', () {
+      expect(
+        LambentEnhancement.decoratePlaybackInfo({'EnableTranscoding': true}),
+        {'EnableTranscoding': true},
+      );
+    });
+
+    test('asks for direct play when enhancement is off', () {
+      LambentEnhancement.enhancementOff = true;
+      final body = LambentEnhancement.decoratePlaybackInfo({
+        'EnableTranscoding': true,
+      });
+      expect(body['EnableTranscoding'], false);
+    });
+
+    test('sends the screen defaults as the Lambent object', () {
+      LambentEnhancement.screenDefaults = {'DolbyVision': false, 'Saturation': 115};
+      final body = LambentEnhancement.decoratePlaybackInfo({});
+      expect(body['Lambent'], {'DolbyVision': false, 'Saturation': 115});
+    });
+  });
 
   group('LambentEnhancement.fromUrl', () {
     test('reads the settings the URL names', () {

@@ -409,6 +409,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   final _tvSecondaryLastFocus = FocusNode(
     debugLabel: 'video_player_tv_secondary_last',
   );
+  /// The glass TV bar opens compact (seek bar, transport, the enhancement
+  /// chip and a "more" button) and only grows into the full row of buttons
+  /// when "more" is pressed. It folds back each time the controls hide.
+  bool _tvGlassExpanded = false;
+  final _tvGlassMoreFocus = FocusNode(debugLabel: 'video_player_tv_glass_more');
   final _tvEnhancementFocus = FocusNode(
     debugLabel: 'video_player_tv_enhancement',
   );
@@ -1083,6 +1088,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _tvTransportLastFocus.dispose();
     _tvSecondaryLastFocus.dispose();
     _tvEnhancementFocus.dispose();
+    _tvGlassMoreFocus.dispose();
     if (!_isMinimizing) unawaited(_autoHdrSwitcher.restore());
     if (!_isMinimizing) TrackPicker.resetDelays();
     _themeMusicService.setExternalAudioActive(false);
@@ -2851,7 +2857,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       return;
     }
     final wasVisible = _controlsVisible;
-    setState(() => _controlsVisible = true);
+    setState(() {
+      _controlsVisible = true;
+      if (!wasVisible) _tvGlassExpanded = false;
+    });
     if (!wasVisible) {
       _prefetchTrickplayDirectional(_state.position, forward: true);
     }
@@ -5108,50 +5117,80 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// rounded bar instead of a black fade along the bottom edge. Video can't be
   /// blurred under it, so a dark tint and a bright rim carry the glass look.
   Widget _buildTvGlassControlsBar(EdgeInsets padding) {
-    const radius = 40.0;
-    return Padding(
-      key: _bottomOverlayKey,
-      padding: EdgeInsets.only(
-        bottom: padding.bottom + AppSpacing.spaceLg,
-        left: AppSpacing.spaceXl,
-        right: AppSpacing.spaceXl,
+    final compact = !_tvGlassExpanded;
+    final radius = compact ? 32.0 : 40.0;
+    final screen = MediaQuery.sizeOf(context);
+    // Both sizes ride above the band where subtitles sit, at the same height,
+    // so growing the bar does not make it jump. Compact, it is only as wide as
+    // a seek bar needs; expanded, it takes the width its buttons need.
+    final bar = DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0x8C101218),
+        borderRadius: AppRadius.circular(radius),
+        // Kept small: a wide soft shadow is a large blur to draw over video.
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 24,
+            offset: Offset(0, 10),
+          ),
+        ],
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: const Color(0x8C101218),
-          borderRadius: AppRadius.circular(radius),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x73000000),
-              blurRadius: 60,
-              offset: Offset(0, 24),
-            ),
-          ],
-        ),
-        child: CustomPaint(
-          foregroundPainter: const GlassHairlinePainter(radius: radius),
+      child: CustomPaint(
+        foregroundPainter: GlassHairlinePainter(radius: radius),
+        // The seek bar repaints on every position tick. The boundary keeps
+        // that from repainting the bar's shadow and rim with it.
+        child: RepaintBoundary(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.spaceLg,
-              AppSpacing.spaceMd,
-              AppSpacing.spaceLg,
-              AppSpacing.spaceMd,
-            ),
+            padding: compact
+                ? const EdgeInsets.fromLTRB(
+                    AppSpacing.spaceLg,
+                    AppSpacing.spaceSm,
+                    AppSpacing.spaceMd,
+                    AppSpacing.spaceSm,
+                  )
+                : const EdgeInsets.fromLTRB(
+                    AppSpacing.spaceLg,
+                    AppSpacing.spaceMd,
+                    AppSpacing.spaceLg,
+                    AppSpacing.spaceMd,
+                  ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildSeekbar(),
-                const SizedBox(height: AppSpacing.spaceXs),
-                _buildTvBottomControlsRow(),
+                RepaintBoundary(child: _buildSeekbar(compact: compact)),
+                SizedBox(height: compact ? 2 : AppSpacing.spaceXs),
+                if (compact)
+                  _buildTvCompactControlsRow()
+                else
+                  _buildTvBottomControlsRow(),
               ],
             ),
           ),
         ),
       ),
     );
+    return Padding(
+      key: _bottomOverlayKey,
+      padding: EdgeInsets.only(
+        bottom: padding.bottom + screen.height * 0.18,
+        left: AppSpacing.spaceXl,
+        right: AppSpacing.spaceXl,
+      ),
+      child: compact
+          ? Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: math.min(screen.width * 0.5, 600),
+                ),
+                child: bar,
+              ),
+            )
+          : bar,
+    );
   }
 
-  Widget _buildSeekbar() {
+  Widget _buildSeekbar({bool compact = false}) {
     // The slot layout only changes from the settings screen, so resolve it
     // here instead of on every position tick inside the stream builders.
     final aboveLeftSlot = _prefs.get(UserPreferences.playbackTimeAboveLeft);
@@ -5211,9 +5250,22 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                   use24Hour: use24Hour,
                 );
                 final hasAboveRow =
-                    aboveLeft.isNotEmpty ||
-                    aboveCenter.isNotEmpty ||
-                    aboveRight.isNotEmpty;
+                    !compact &&
+                    (aboveLeft.isNotEmpty ||
+                        aboveCenter.isNotEmpty ||
+                        aboveRight.isNotEmpty);
+                final belowLeft = _timeSlotLabel(
+                  belowLeftSlot,
+                  position: livePosition,
+                  duration: duration,
+                  use24Hour: use24Hour,
+                );
+                final belowRight = _timeSlotLabel(
+                  belowRightSlot,
+                  position: livePosition,
+                  duration: duration,
+                  use24Hour: use24Hour,
+                );
 
                 return LayoutBuilder(
                   builder: (context, seekbarConstraints) {
@@ -5239,7 +5291,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                               bold: true,
                             ),
                           ),
-                        MouseRegion(
+                        _withInlineTimes(
+                          compact: compact,
+                          left: belowLeft,
+                          right: belowRight,
+                          child: MouseRegion(
                           opaque: false,
                           onHover: PlatformDetection.useDesktopUi
                               ? (event) => _handleSeekbarHover(
@@ -5317,6 +5373,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                             ),
                           ),
                         ),
+                        ),
+                        if (!compact)
                         _buildTimeSlotRow(
                           left: _timeSlotLabel(
                             belowLeftSlot,
@@ -5795,6 +5853,143 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     );
   }
 
+  /// The compact glass bar's seek bar, with the elapsed and remaining times
+  /// at its ends instead of on a row of their own.
+  Widget _withInlineTimes({
+    required bool compact,
+    required String left,
+    required String right,
+    required Widget child,
+  }) {
+    if (!compact) return child;
+    final style = TextStyle(
+      color: Colors.white.withValues(alpha: 0.85),
+      fontSize: AppTypography.fontSizeSm,
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    return Row(
+      children: [
+        if (left.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.spaceSm),
+            child: Text(left, style: style),
+          ),
+        Expanded(child: child),
+        if (right.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: AppSpacing.spaceSm),
+            child: Text(right, style: style),
+          ),
+      ],
+    );
+  }
+
+  /// The compact glass bar's one row: back, play or pause and forward, then
+  /// the enhancement chip and "more", which grows the bar into the full row.
+  Widget _buildTvCompactControlsRow() {
+    final l10n = AppLocalizations.of(context);
+    final scale = _osdButtonScale;
+    final extent = 46.0 * scale;
+    final iconSize = 24.0 * scale;
+    final chipLabel = _enhancementChipLabel;
+    return Focus(
+      skipTraversal: true,
+      canRequestFocus: false,
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          _tvSeekbarFocus.requestFocus();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: FocusTraversalGroup(
+        policy: ReadingOrderTraversalPolicy(),
+        child: Row(
+          children: [
+            _controlButton(
+              seekBackIcon(_prefs.get(UserPreferences.skipBackLength)),
+              onPressed: () =>
+                  _seekRelative(-_prefs.get(UserPreferences.skipBackLength)),
+              size: iconSize,
+              extent: extent,
+              focusNode: _tvTransportFirstFocus,
+              tooltip: l10n.playerTooltipSeekBack,
+            ),
+            StreamBuilder<bool>(
+              stream: _state.playingStream,
+              initialData: _state.isPlaying,
+              builder: (context, snap) {
+                final isPlaying = _isPlayingShown;
+                return _controlButton(
+                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  onPressed: () => isPlaying
+                      ? _manager.pause()
+                      : _resumeWithConfiguredRewind(),
+                  size: iconSize,
+                  extent: extent,
+                  focusNode: _primaryPlayFocus,
+                  tooltip: isPlaying ? l10n.pause : l10n.play,
+                );
+              },
+            ),
+            _controlButton(
+              seekForwardIcon(_prefs.get(UserPreferences.skipForwardLength)),
+              onPressed: () =>
+                  _seekRelative(_prefs.get(UserPreferences.skipForwardLength)),
+              size: iconSize,
+              extent: extent,
+              focusNode: _tvTransportLastFocus,
+              tooltip: l10n.playerTooltipSeekForward,
+            ),
+            const Spacer(),
+            _controlButton(
+              Icons.more_horiz_rounded,
+              onPressed: _expandTvGlassBar,
+              size: iconSize,
+              extent: extent,
+              focusNode: _tvGlassMoreFocus,
+              tooltip: l10n.more,
+              // The chip is the only stop to its right.
+              onRightBoundary: () {
+                if (chipLabel != null && _tvEnhancementFocus.context != null) {
+                  _tvEnhancementFocus.requestFocus();
+                }
+              },
+            ),
+            if (chipLabel != null) ...[
+              const SizedBox(width: AppSpacing.spaceXs),
+              EnhancementChip(
+                label: chipLabel,
+                height: extent,
+                accent: AppColorScheme.accent,
+                fontSize: AppTypography.fontSizeSm,
+                focusNode: _tvEnhancementFocus,
+                onPressed: _showEnhancementPanel,
+                onLeft: () => _tvGlassMoreFocus.requestFocus(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _expandTvGlassBar() {
+    setState(() => _tvGlassExpanded = true);
+    _showControls();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_tvSecondaryFocus.context != null) {
+        _tvSecondaryFocus.requestFocus();
+      } else if (_primaryPlayFocus.context != null) {
+        _primaryPlayFocus.requestFocus();
+      }
+    });
+  }
+
   Widget _buildTvBottomControlsRow() {
     return Focus(
       skipTraversal: true,
@@ -5841,9 +6036,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// "4K HDR" and the like for a Lambent Server enhanced stream, otherwise
   /// null: the chip shows only on the glass TV bar, and only when the server
   /// says the stream is enhanced.
-  String? get _enhancementChipLabel => _useTvGlassOverlay
-      ? lambentEnhancementLabel(_manager.currentResolution?.streamUrl)
-      : null;
+  String? get _enhancementChipLabel {
+    if (!_useTvGlassOverlay) return null;
+    final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
+    if (label != null) return label;
+    // Turned off from the chip or in settings: the chip stays, so there is a
+    // way back on.
+    return LambentEnhancement.enhancementOff ? 'Original' : null;
+  }
 
   /// The ends of the secondary row carry the TV focus nodes, so they follow
   /// whatever order the buttons are in. Without a stop on the last one, right
@@ -8194,15 +8394,23 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// back to the stream info.
   void _showEnhancementPanel() {
     final url = _manager.currentResolution?.streamUrl;
-    if (!LambentEnhancement.isEnhancedUrl(url)) {
+    final enhanced = LambentEnhancement.isEnhancedUrl(url);
+    if (!enhanced && !LambentEnhancement.enhancementOff) {
       _showStreamInfo();
       return;
     }
-    final current = LambentEnhancement.fromUrl(url!);
+    final current = enhanced
+        ? LambentEnhancement.fromUrl(url!)
+        : LambentEnhancement.none;
     unawaited(
       showEnhancementPanel(
         context,
         current: current,
+        enhanced: enhanced,
+        onSetEnhancement: (on) {
+          LambentEnhancement.enhancementOff = !on;
+          unawaited(_manager.reopenAtCurrentPosition());
+        },
         onApply: (chosen) {
           // Pin only what changed; everything else keeps following the server.
           LambentEnhancement.overrides = LambentEnhancement.overrides.merge(

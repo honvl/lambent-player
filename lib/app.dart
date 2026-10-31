@@ -56,6 +56,7 @@ import 'ui/widgets/keyboard_shortcuts/keyboard_shortcut_reference.dart';
 import 'ui/screensaver/screensaver_controller.dart';
 import 'ui/screensaver/screensaver_host.dart';
 import 'util/achievement_icons.dart';
+import 'util/lambent_enhancement_defaults.dart';
 import 'util/app_exit.dart';
 import 'util/focus/dpad_keys.dart';
 import 'util/focus/siri_remote_glide.dart';
@@ -97,6 +98,7 @@ class _MoonfinAppState extends State<MoonfinApp> {
     _lastResolvedLocale = _resolveLocale();
     AppUiIdiomResolver.setOverride(_prefs.get(UserPreferences.interfaceStyle));
     GlassCapability.apply(_prefs.get(UserPreferences.glassQuality));
+    bindLambentEnhancementDefaults(_prefs);
     _prefs.addListener(_syncThemeFromPrefs);
     _prefs.addListener(_syncLocaleFromPrefs);
     _prefs.addListener(_syncIdiomFromPrefs);

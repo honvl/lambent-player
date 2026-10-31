@@ -67,6 +67,7 @@ import '../../widgets/detail_reviews.dart';
 import '../../widgets/trailer_picker.dart';
 import '../../widgets/progress_snack_bar.dart';
 import '../../../util/remote_subtitle_labels.dart';
+import '../../../util/lambent_brand.dart';
 import '../../../util/subtitle_appearance_schedule.dart';
 import '../../../preference/preference_constants.dart';
 import '../../../preference/user_preferences.dart';
@@ -8023,8 +8024,12 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
     return '${m}m';
   }
 
+  // Lambent Server has none of the endpoints behind these, so the button
+  // and its dialog stay away unless the switch brings them back.
   Set<DetailAdminAction> _adminActionsFor(AggregatedItem item) =>
-      detailAdminActions(
+      !LambentBrand.enableServerAdmin
+      ? const {}
+      : detailAdminActions(
         isAdministrator:
             GetIt.instance<UserRepository>().currentUser?.isAdministrator ??
             false,

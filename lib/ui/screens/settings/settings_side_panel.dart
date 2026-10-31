@@ -140,6 +140,7 @@ part 'panel/keyboard_shortcuts_screen.dart';
 part 'panel/playback_category_screen.dart';
 part 'panel/video_playback_screen.dart';
 part 'panel/quality_decoding_screen.dart';
+part 'panel/lambent_enhancement_screen.dart';
 part 'panel/playback_time_layout_screen.dart';
 part 'panel/osd_buttons_screen.dart';
 part 'panel/detail_buttons_screen.dart';
@@ -313,6 +314,8 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
         ref.watch(isAdminProvider) &&
         adminServerSupported();
     final enablePanelAutofocus = !PlatformDetection.useMobileUi;
+    final prefs = GetIt.instance<UserPreferences>();
+    final advanced = prefs.get(UserPreferences.showAdvancedSettings);
 
     // Kids Mode leaves one entry standing. Hiding settings outright would
     // leave no way back, and a hidden gesture is worse than an obvious tile.
@@ -353,6 +356,7 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
               subtitle: l10n.settingsGeneralSubtitle,
               onTap: () => context.pushSettingsScreen(const _GeneralScreen()),
             ),
+            if (advanced)
             _PanelEntry(
               icon: Icons.palette,
               title: l10n.appearance,
@@ -368,7 +372,7 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
             ),
             // The image cache lives here, so the entry stays on every native
             // platform. The download sections inside gate themselves.
-            if (!PlatformDetection.isWeb)
+            if (advanced && !PlatformDetection.isWeb)
               _PanelEntry(
                 icon: Icons.download_for_offline,
                 title: l10n.storageAndDownloads,
@@ -376,6 +380,15 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                 onTap: () =>
                     context.pushSettingsScreen(const DownloadSettingsScreen()),
               ),
+            if (!advanced)
+              _PanelEntry(
+                icon: Icons.nights_stay_outlined,
+                title: l10n.screensaver,
+                subtitle: 'The idle screen',
+                onTap: () =>
+                    context.pushSettingsScreen(const ScreensaverSettingsScreen()),
+              ),
+            if (advanced)
             _PanelEntry(
               icon: Icons.hub,
               title: l10n.integrations,
@@ -387,6 +400,17 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
               title: l10n.aboutTitle,
               subtitle: l10n.settingsAboutSubtitle,
               onTap: () => context.pushSettingsScreen(const _AboutCategoryScreen()),
+            ),
+            _PanelEntry(
+              icon: advanced ? Icons.toggle_on : Icons.toggle_off_outlined,
+              title: 'Show advanced settings',
+              subtitle: advanced
+                  ? 'On: themes, layout, player tweaks and more'
+                  : 'Off: only the everyday settings',
+              onTap: () {
+                prefs.set(UserPreferences.showAdvancedSettings, !advanced);
+                setState(() {});
+              },
             ),
           ];
 

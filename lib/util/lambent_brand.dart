@@ -17,4 +17,10 @@ class LambentBrand {
   /// settings search entry). It reads Moonfin-Client's GitHub releases, so it
   /// would offer Moonfin builds over Lambent ones.
   static const bool enableAppUpdateCheck = false;
+
+  /// The server admin panel and the details page's admin actions (identify,
+  /// change artwork, delete). Lambent Server administers itself and leaves the
+  /// library to Plex, so none of the Jellyfin admin endpoints behind these
+  /// exist there and every one of them would fail.
+  static const bool enableServerAdmin = false;
 }

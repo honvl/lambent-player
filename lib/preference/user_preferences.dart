@@ -2211,6 +2211,61 @@ class UserPreferences extends ChangeNotifier {
     values: StillWatchingBehavior.values,
   );
 
+  /// Off, Settings shows the everyday screens only; on, every customization
+  /// screen inherited from Moonfin comes back. Kept to this device.
+  static final showAdvancedSettings = Preference(
+    key: 'pref_show_advanced_settings',
+    defaultValue: false,
+  );
+
+  // Lambent Server's PC enhancement: this screen's own defaults, so they are
+  // not synced to the account. Sent with every PlaybackInfo request.
+  static final lambentEnhanceOnPc = Preference(
+    key: 'pref_lambent_enhance_on_pc',
+    defaultValue: true,
+  );
+  static final lambentRtxHdr = EnumPreference(
+    key: 'pref_lambent_rtx_hdr',
+    defaultValue: LambentServerChoice.server,
+    values: LambentServerChoice.values,
+  );
+  static final lambentDolbyVision = EnumPreference(
+    key: 'pref_lambent_dolby_vision',
+    defaultValue: LambentServerChoice.server,
+    values: LambentServerChoice.values,
+  );
+  static final lambentDeepenBlacks = EnumPreference(
+    key: 'pref_lambent_deepen_blacks',
+    defaultValue: LambentServerChoice.server,
+    values: LambentServerChoice.values,
+  );
+  /// Off: the picture follows the server's settings. On: the five values
+  /// below are sent as this screen's picture.
+  static final lambentCustomPicture = Preference(
+    key: 'pref_lambent_custom_picture',
+    defaultValue: false,
+  );
+  static final lambentSaturation = Preference(
+    key: 'pref_lambent_saturation',
+    defaultValue: 100,
+  );
+  static final lambentContrast = Preference(
+    key: 'pref_lambent_contrast',
+    defaultValue: 100,
+  );
+  static final lambentBrightness = Preference(
+    key: 'pref_lambent_brightness',
+    defaultValue: 50,
+  );
+  static final lambentPeak = Preference(
+    key: 'pref_lambent_peak',
+    defaultValue: 1000,
+  );
+  static final lambentHue = Preference(
+    key: 'pref_lambent_hue',
+    defaultValue: 0,
+  );
+
   static final screensaverEnabled = Preference(
     key: 'pref_screensaver_enabled',
     defaultValue: true,

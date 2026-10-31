@@ -14,19 +14,35 @@ class _PlaybackCategoryScreen extends StatelessWidget {
         // disappears the moment the emulator backend toggle flips.
         body: ListenableBuilder(
           listenable: GetIt.instance<UserPreferences>(),
-          builder: (context, _) => ListView(
+          builder: (context, _) {
+            final advanced = GetIt.instance<UserPreferences>().get(
+              UserPreferences.showAdvancedSettings,
+            );
+            return ListView(
             children: [
               _SectionHeader(l10n.video),
               adaptiveListSection(
                 children: [
                   _TvSettingsListTile(
                     autofocus: true,
+                    leading: const Icon(Icons.auto_awesome),
+                    title: const Text('Lambent enhancement'),
+                    subtitle: const Text(
+                      'PC upscaling and HDR defaults for this screen',
+                    ),
+                    onTap: () => context.pushSettingsScreen(
+                      const _LambentEnhancementScreen(),
+                    ),
+                  ),
+                  if (advanced)
+                  _TvSettingsListTile(
                     leading: const Icon(Icons.play_circle),
                     title: Text(l10n.player),
                     subtitle: Text(l10n.playerSettingsSubtitle),
                     onTap: () =>
                         context.pushSettingsScreen(const _VideoPlaybackScreen()),
                   ),
+                  if (advanced)
                   _TvSettingsListTile(
                     leading: const Icon(Icons.high_quality_outlined),
                     title: Text(l10n.qualityAndDecoding),
@@ -71,6 +87,7 @@ class _PlaybackCategoryScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              if (advanced) ...[
               _SectionHeader(l10n.settingsWatchTogetherSection),
               adaptiveListSection(
                 children: [
@@ -84,7 +101,8 @@ class _PlaybackCategoryScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              if (canToggleGameBackend || usesNativeGameBackend) ...[
+              ],
+              if (advanced && (canToggleGameBackend || usesNativeGameBackend)) ...[
                 _SectionHeader(l10n.games),
                 adaptiveListSection(
                   children: [
@@ -130,10 +148,11 @@ class _PlaybackCategoryScreen extends StatelessWidget {
               ],
               // Everything left on Advanced Playback is either Android player
               // routing or mpv, so other platforms would open an empty screen.
-              if (PlatformDetection.isAndroid ||
-                  (!PlatformDetection.isTV &&
-                      !PlatformDetection.isIOS &&
-                      !PlatformDetection.isWeb)) ...[
+              if (advanced &&
+                  (PlatformDetection.isAndroid ||
+                      (!PlatformDetection.isTV &&
+                          !PlatformDetection.isIOS &&
+                          !PlatformDetection.isWeb))) ...[
                 _SectionHeader(l10n.settingsAdvancedSection),
                 adaptiveListSection(
                   children: [
@@ -149,7 +168,8 @@ class _PlaybackCategoryScreen extends StatelessWidget {
                 ),
               ],
             ],
-          ),
+          );
+          },
         ),
       ),
     );
