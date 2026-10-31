@@ -19,6 +19,11 @@ import 'server_transcode_capabilities.dart';
 class Media3PlayerBackend extends PlayerBackend
     with SubtitleDelayState
     implements SubtitleLoadingBackend, SecondarySubtitleBackend {
+  /// Set just before stopping to reopen the same title with other Lambent
+  /// enhancement settings. The next stop then keeps the television's display
+  /// mode and the last frame on screen until the new stream's first frame.
+  static bool nextStopIsReopen = false;
+
   @override
   bool get supportsSecondarySubtitleDelay => true;
   @override
@@ -1294,7 +1299,9 @@ class Media3PlayerBackend extends PlayerBackend
     _loadRequestedAtMs = 0;
     // Ticks between this stop and the next load still carry this position.
     _previousItemPosition = _position;
-    await _invoke<void>(command);
+    final reopen = command == 'stop' && nextStopIsReopen;
+    nextStopIsReopen = false;
+    await _invoke<void>(command, reopen ? {'reopen': true} : null);
     if (_isPlaying) {
       _isPlaying = false;
       _playingStream.add(false);

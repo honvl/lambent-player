@@ -272,6 +272,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   bool _displayPlaying = false;
   Timer? _displayPlayingDebounce;
   Timer? _endsAtTicker;
+
+  /// Ticks once a second for the glass TV overlay's clock readings, so only
+  /// the title and seek bar rebuild instead of the whole player screen.
+  final _endsAtTick = ValueNotifier<int>(0);
   bool _isSeeking = false;
   double _seekValue = 0;
   Duration? _pendingScrubSeekTarget;
@@ -336,6 +340,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   StreamSubscription<bool>? _screensaverPlayingSub;
   StreamSubscription<void>? _completedSub;
   bool _isRestoringPosition = false;
+
+  /// A reopen for new Lambent enhancement settings: the same title comes
+  /// back, so the picture is not dimmed or covered while it reloads. Only a
+  /// small pill says what is happening.
+  bool _quietReopen = false;
+  bool _quietReopenStarted = false;
+  Timer? _quietReopenTimeout;
   DateTime? _suppressSeekPromptsUntil;
   bool _wasPlayingBeforeScreenLock = false;
   LogicalKeyboardKey? _tvTemporarySpeedHoldKey;
@@ -854,6 +865,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _syncMedia3VolumeBoostLevel(resetWhenUnavailable: true);
     if (PlatformDetection.isTV) {
       _tvSeekbarFocus.addListener(_onSeekbarFocusChange);
+      // These handle their own arrow keys, so the screen's key handler never
+      // sees focus land on them and the controls would hide under the viewer.
+      _tvEnhancementFocus.addListener(_keepControlsForGlassFocus);
+      _tvGlassMoreFocus.addListener(_keepControlsForGlassFocus);
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showControls(focusSeekbar: true);
@@ -987,6 +1002,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   @override
   void dispose() {
+    _quietReopenTimeout?.cancel();
     if (kIsWeb) unawaited(BrowserContextMenu.enableContextMenu());
     _cancelPopAfterBackKeyUp?.call();
     _trickplayLoadGeneration++;
@@ -1027,6 +1043,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _cinemaSkip.dispose();
     _displayPlayingDebounce?.cancel();
     _endsAtTicker?.cancel();
+    _endsAtTick.dispose();
     _volumeOverlayTimer?.cancel();
     _brightnessOverlayTimer?.cancel();
     _zoomModeToastTimer?.cancel();
@@ -2735,7 +2752,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           _state.duration <= Duration.zero) {
         return;
       }
-      setState(() {});
+      if (_useTvGlassOverlay) {
+        _endsAtTick.value++;
+      } else {
+        setState(() {});
+      }
     });
   }
 
@@ -4289,8 +4310,91 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     }
   }
 
+  void _keepControlsForGlassFocus() {
+    if (!mounted || !_controlsVisible) return;
+    if (_tvEnhancementFocus.hasFocus || _tvGlassMoreFocus.hasFocus) {
+      _scheduleHide();
+    }
+  }
+
+  void _startQuietReopen() {
+    Media3PlayerBackend.nextStopIsReopen = true;
+    setState(() {
+      _quietReopen = true;
+      _quietReopenStarted = false;
+    });
+    _quietReopenTimeout?.cancel();
+    _quietReopenTimeout = Timer(const Duration(seconds: 30), () {
+      if (mounted) setState(() => _quietReopen = false);
+    });
+    unawaited(_manager.reopenAtCurrentPosition());
+  }
+
+  Widget _buildQuietReopenPill() {
+    return Positioned(
+      top: 36,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: Center(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0x8C101218),
+              borderRadius: AppRadius.circular(999),
+              border: Border.all(color: const Color(0x2EFFFFFF)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.spaceLg,
+                vertical: AppSpacing.spaceSm,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColorScheme.accent,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.spaceSm),
+                  const Text(
+                    'Applying enhancement',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: AppTypography.fontSizeSm,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBringupOverlay(BuildContext context) {
-    if (!_isBringupInProgress(_bringupState.phase)) {
+    final bringingUp = _isBringupInProgress(_bringupState.phase);
+    if (_quietReopen) {
+      if (bringingUp) {
+        _quietReopenStarted = true;
+        return _buildQuietReopenPill();
+      }
+      if (_quietReopenStarted) {
+        // The new stream is up; the next bring-up is an ordinary one.
+        _quietReopen = false;
+        _quietReopenStarted = false;
+        _quietReopenTimeout?.cancel();
+        return const SizedBox.shrink();
+      }
+      // Stopped, not yet bringing the new stream up.
+      return _buildQuietReopenPill();
+    }
+    if (!bringingUp) {
       return const SizedBox.shrink();
     }
 
@@ -4639,7 +4743,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             ),
             Expanded(
               child: _useTvGlassOverlay
-                  ? _buildTvGlassTitleInfo()
+                  ? ValueListenableBuilder<int>(
+                      valueListenable: _endsAtTick,
+                      builder: (context, _, _) => _buildTvGlassTitleInfo(),
+                    )
                   : _buildTitleInfo(),
             ),
             if (_canMinimize)
@@ -5158,7 +5265,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RepaintBoundary(child: _buildSeekbar(compact: compact)),
+                RepaintBoundary(
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: _endsAtTick,
+                    builder: (context, _, _) => _buildSeekbar(compact: compact),
+                  ),
+                ),
                 SizedBox(height: compact ? 2 : AppSpacing.spaceXs),
                 if (compact)
                   _buildTvCompactControlsRow()
@@ -8409,18 +8521,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         enhanced: enhanced,
         onSetEnhancement: (on) {
           LambentEnhancement.enhancementOff = !on;
-          unawaited(_manager.reopenAtCurrentPosition());
+          _startQuietReopen();
         },
         onApply: (chosen) {
           // Pin only what changed; everything else keeps following the server.
           LambentEnhancement.overrides = LambentEnhancement.overrides.merge(
             chosen.changesFrom(current),
           );
-          unawaited(_manager.reopenAtCurrentPosition());
+          _startQuietReopen();
         },
         onReset: () {
           LambentEnhancement.overrides = LambentEnhancement.none;
-          unawaited(_manager.reopenAtCurrentPosition());
+          _startQuietReopen();
         },
         onShowStreamInfo: _showStreamInfo,
       ),

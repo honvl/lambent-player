@@ -684,6 +684,11 @@ class Media3VideoView(
         // arriving in between keeps the mode instead of the television
         // flipping to its default and straight back.
         private const val DISPLAY_MODE_RESTORE_GRACE_MS = 2_000L
+
+        // A reopen of the same title (Lambent's enhancement settings changed)
+        // can take the PC several seconds to answer. The television keeps its
+        // mode that long, so it does not renegotiate HDMI twice.
+        private const val REOPEN_DISPLAY_MODE_HOLD_MS = 20_000L
         /** One greppable logcat tag for everything live recovery reports. */
         private const val LIVE_TAG = "MoonfinLive"
         // An HDMI route flap pauses the player through the becoming-noisy
@@ -1024,6 +1029,10 @@ class Media3VideoView(
     private var displayModeChosenForCurrentSource = false
     private var detectedFrameRate: Float? = null
     private var sourceFrameRateHint: Float? = null
+
+    // Set by a reopen's stop: the next source keeps the last frame on screen
+    // until its own first frame, instead of covering the picture with black.
+    private var keepFrameForReopen = false
     private var sourceVideoWidthHint = 0
     private var sourceVideoHeightHint = 0
     // Offload only saves battery, which a TV has no use for, and on some TVs an
@@ -2325,7 +2334,9 @@ class Media3VideoView(
                 }
 
                 "stop" -> {
-                    stopPlaybackAndRestoreDisplayMode()
+                    stopPlaybackAndRestoreDisplayMode(
+                        reopen = call.argument<Boolean>("reopen") == true,
+                    )
                     if (isDisposedByFlutter && currentMediaType != "audio") {
                         forceReleasePlayer()
                         Media3Bridge.detachView(this)
@@ -2552,7 +2563,9 @@ class Media3VideoView(
                 }
 
                 "stop" -> {
-                    stopPlaybackAndRestoreDisplayMode()
+                    stopPlaybackAndRestoreDisplayMode(
+                        reopen = (args as? Map<*, *>)?.get("reopen") == true,
+                    )
                     if (isDisposedByFlutter && currentMediaType != "audio") {
                         forceReleasePlayer()
                         Media3Bridge.detachView(this)
@@ -2859,7 +2872,11 @@ class Media3VideoView(
             ?.takeIf { it > 0 }
         pendingClosedCaptionId = (args["closedCaptionTrackId"] as? Number)?.toInt()
         firstFrameRendered = false
-        firstFrameCover.visibility = View.VISIBLE
+        if (keepFrameForReopen) {
+            keepFrameForReopen = false
+        } else {
+            firstFrameCover.visibility = View.VISIBLE
+        }
         if (letterboxCrop != null) {
             letterboxCrop = null
             applyVideoLayout()
@@ -3095,7 +3112,7 @@ class Media3VideoView(
         }
     }
 
-    private fun stopPlaybackAndRestoreDisplayMode() {
+    private fun stopPlaybackAndRestoreDisplayMode(reopen: Boolean = false) {
         secondarySubtitleTrackId = null
         secondarySubtitleUrl = null
         secondarySubtitleCodec = null
@@ -3115,8 +3132,13 @@ class Media3VideoView(
         // straight away keeps the mode.
         cancelHeldStart()
         mainHandler.removeCallbacks(deferredDisplayModeRestore)
-        mainHandler.postDelayed(deferredDisplayModeRestore, DISPLAY_MODE_RESTORE_GRACE_MS)
-        firstFrameCover.visibility = View.VISIBLE
+        mainHandler.postDelayed(
+            deferredDisplayModeRestore,
+            if (reopen) REOPEN_DISPLAY_MODE_HOLD_MS else DISPLAY_MODE_RESTORE_GRACE_MS,
+        )
+        keepFrameForReopen = reopen
+        // A reopen leaves the last frame up: the same title is coming back.
+        if (!reopen) firstFrameCover.visibility = View.VISIBLE
         emitState()
     }
 
