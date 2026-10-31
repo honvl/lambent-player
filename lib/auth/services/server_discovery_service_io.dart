@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:multicast_dns/multicast_dns.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../data/services/log_service.dart';
@@ -18,9 +20,30 @@ class ServerDiscoveryService {
   static const _listenDuration = Duration(milliseconds: 2500);
   static const _rebroadcastInterval = Duration(milliseconds: 800);
 
+  /// Lambent Server advertises itself over Bonjour and does not answer
+  /// Jellyfin's UDP discovery on 7359, so it is found here instead.
+  static const _lambentService = '_vbridge._tcp.local';
+  static const _multicastLock = MethodChannel('org.moonfin/multicast_lock');
+
   Stream<DiscoveredServer> discoverLocalServers() async* {
     final controller = StreamController<DiscoveredServer>();
     final seen = <String>{};
+    // A Plex server on a machine that also runs Lambent Server is the one
+    // Lambent fronts; offering it too invites signing in past the enhancement.
+    // Plex answers wait until the Bonjour lookup has had its chance.
+    final lambentHosts = <String>{};
+    final plexHeld = <DiscoveredServer>[];
+    void emit(DiscoveredServer server) {
+      if (!controller.isClosed && seen.add(server.id)) controller.add(server);
+    }
+
+    void releasePlex() {
+      for (final plex in plexHeld) {
+        final host = Uri.tryParse(plex.address)?.host;
+        if (host == null || !lambentHosts.contains(host)) emit(plex);
+      }
+      plexHeld.clear();
+    }
     RawDatagramSocket? socket;
     Timer? rebroadcastTimer;
     Timer? stopTimer;
@@ -53,16 +76,27 @@ class ServerDiscoveryService {
             ? parsePlexGdmResponse(response, datagram.address.address)
             : _parseResponse(response);
         if (server == null) return;
-        if (seen.add(server.id)) {
-          controller.add(server);
+        if (server.serverType == ServerType.plex) {
+          plexHeld.add(server);
+        } else {
+          emit(server);
         }
       });
+
+      unawaited(
+        _discoverLambent((server) {
+          final host = Uri.tryParse(server.address)?.host;
+          if (host != null) lambentHosts.add(host);
+          emit(server);
+        }),
+      );
 
       sendBroadcasts();
       rebroadcastTimer = Timer.periodic(_rebroadcastInterval, (_) {
         sendBroadcasts();
       });
       stopTimer = Timer(_listenDuration, () {
+        releasePlex();
         if (!controller.isClosed) controller.close();
       });
 
@@ -83,6 +117,72 @@ class ServerDiscoveryService {
       stopTimer?.cancel();
       socket?.close();
       if (!controller.isClosed) await controller.close();
+    }
+  }
+
+  /// Browses Bonjour for Lambent Server, calling [found] for each one that
+  /// resolves to an IPv4 address. Lambent Server answers as a Jellyfin server.
+  Future<void> _discoverLambent(void Function(DiscoveredServer) found) async {
+    final client = MDnsClient();
+    try {
+      // Wi-Fi drops multicast on Android unless the app holds a lock.
+      if (Platform.isAndroid) {
+        try {
+          await _multicastLock.invokeMethod<bool>('acquire');
+        } catch (_) {}
+      }
+      await client.start();
+      final timeout = _listenDuration - const Duration(milliseconds: 300);
+      await for (final ptr in client
+          .lookup<PtrResourceRecord>(
+            ResourceRecordQuery.serverPointer(_lambentService),
+          )
+          .timeout(timeout, onTimeout: (sink) => sink.close())) {
+        final txt = <String, String>{};
+        await for (final record in client.lookup<TxtResourceRecord>(
+          ResourceRecordQuery.text(ptr.domainName),
+        )) {
+          for (final line in record.text.split('\n')) {
+            final i = line.indexOf('=');
+            if (i > 0) txt[line.substring(0, i)] = line.substring(i + 1);
+          }
+        }
+        await for (final srv in client.lookup<SrvResourceRecord>(
+          ResourceRecordQuery.service(ptr.domainName),
+        )) {
+          await for (final ip in client.lookup<IPAddressResourceRecord>(
+            ResourceRecordQuery.addressIPv4(srv.target),
+          )) {
+            final name = txt['name'] ??
+                ptr.domainName.split('.').first;
+            found(
+              DiscoveredServer(
+                id: 'lambent:${txt['id'] ?? ptr.domainName}',
+                name: name,
+                address: 'http://${ip.address.address}:${srv.port}',
+                serverType: ServerType.jellyfin,
+              ),
+            );
+            break;
+          }
+          break;
+        }
+      }
+    } catch (error) {
+      if (GetIt.instance.isRegistered<LogService>()) {
+        GetIt.instance<LogService>().network(
+          'Lambent Server Bonjour discovery failed',
+          level: LogLevel.warning,
+          error: error,
+        );
+      }
+    } finally {
+      client.stop();
+      if (Platform.isAndroid) {
+        try {
+          await _multicastLock.invokeMethod<void>('release');
+        } catch (_) {}
+      }
     }
   }
 

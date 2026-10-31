@@ -2375,7 +2375,11 @@ class UserPreferences extends ChangeNotifier {
 
   static final refreshRateSwitchingBehavior = EnumPreference(
     key: 'refresh_rate_switching_behavior',
-    defaultValue: RefreshRateSwitchingBehavior.disabled,
+    // Lambent: a TV matches the film's frame rate (24p plays at 24 Hz) and
+    // keeps its resolution, so only the refresh rate changes.
+    defaultValue: PlatformDetection.isTV
+        ? RefreshRateSwitchingBehavior.scaleOnDevice
+        : RefreshRateSwitchingBehavior.disabled,
     values: RefreshRateSwitchingBehavior.values,
   );
 
