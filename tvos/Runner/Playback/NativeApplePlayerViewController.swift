@@ -128,6 +128,8 @@ final class NativeApplePlayerViewController: UIViewController {
     private var isFavorite = false
     private var canDownloadSubtitles = false
     private var canBrowseEpisodes = false
+    /// What the play button's symbol last showed, so it morphs only on a change.
+    private var playIconPaused: Bool?
     private weak var episodeBrowser: EpisodeBrowserViewController?
     /// The searching / downloading alert. Dart raises and clears it, so both
     /// halves of the flow report their own ending instead of the search one
@@ -1456,6 +1458,7 @@ final class NativeApplePlayerViewController: UIViewController {
         ])
         controlViews[id] = container
         controlIcons[id] = iconView
+        if id == .playPause { playIconPaused = isPaused() }
         #if os(iOS)
         container.addGestureRecognizer(
             UITapGestureRecognizer(target: self, action: #selector(handleControlTap(_:))))
@@ -1520,14 +1523,28 @@ final class NativeApplePlayerViewController: UIViewController {
             if liveRecord != nil { ids.append(.record) }
             if !streamInfoSections.isEmpty, osdShows(.info) { ids.append(.info) }
         } else if !barExpanded {
-            // The compact bar, as on Android TV: back, play or pause and
-            // forward, then "more" and the 4K HDR chip at the far end.
+            #if os(tvOS)
+            // The compact bar, as on Android TV and as Apple TV's and Netflix's
+            // keep it: play or pause, subtitles, audio and the next episode,
+            // then "more" and the 4K HDR chip at the far end. No seek buttons:
+            // left and right on the remote already skip.
+            ids.append(.playPause)
+            if !subtitleTracks.isEmpty || canDownloadSubtitles { ids.append(.subtitles) }
+            if audioTracks.count > 1 { ids.append(.audio) }
+            if canBrowseEpisodes { ids.append(.next) }
+            ids.append(.more)
+            #else
             ids += [.skipBack, .playPause, .skipForward, .more]
+            #endif
             if lambentInfo != nil { ids.append(.lambent) }
         } else {
             // Both always present, because they step chapters before they
             // step the queue, so they have something to do on a lone movie.
+            #if os(tvOS)
+            ids += [.prev, .playPause, .next]
+            #else
             ids += [.prev, .skipBack, .playPause, .skipForward, .next]
+            #endif
 
             // Everything past the transport answers to the player button
             // settings, both for whether it appears and where it sits.
@@ -1557,7 +1574,8 @@ final class NativeApplePlayerViewController: UIViewController {
         // Metadata arrives often, so the same buttons keep their views and only
         // redraw icons. That way a tap that's landing isn't lost to a new set.
         if sameButtons, !controlViews.isEmpty {
-            for (id, icon) in controlIcons {
+            // Play or pause keeps its own symbol, which morphs as it changes.
+            for (id, icon) in controlIcons where id != .playPause {
                 icon.image = UIImage(
                     systemName: iconName(for: id), withConfiguration: icon.image?.symbolConfiguration)
             }
@@ -3980,12 +3998,20 @@ final class NativeApplePlayerViewController: UIViewController {
         if scrubTargetMs == nil && scrubFrozenMs == nil {
             prefetchTrickplay(aroundMs: Int(player.currentTime * 1000), forward: true, sheetsAhead: 1)
         }
-        if let playIcon = controlIcons[.playPause] {
+        if let playIcon = controlIcons[.playPause], playIconPaused != isPaused() {
             // Keeps whichever size the button was built at, docked or centered.
-            playIcon.image = UIImage(
-                systemName: isPaused() ? "play.fill" : "pause.fill",
+            // The symbol morphs from one to the other, as Apple TV's own does.
+            let paused = isPaused()
+            let image = UIImage(
+                systemName: paused ? "play.fill" : "pause.fill",
                 withConfiguration: playIcon.image?.symbolConfiguration
                     ?? UIImage.SymbolConfiguration(pointSize: 27 * Self.controlScale, weight: .medium))
+            if let image, playIconPaused != nil {
+                playIcon.setSymbolImage(image, contentTransition: .replace)
+            } else {
+                playIcon.image = image
+            }
+            playIconPaused = paused
         }
 
         updateNextUpCountdown()
