@@ -59,6 +59,7 @@ import 'util/device_performance.dart';
 import 'ui/navigation/app_router.dart';
 import 'ui/screensaver/screensaver_controller.dart';
 import 'ui/widgets/reader/epub_js_view.dart';
+import 'util/focus/navigation_sounds.dart';
 import 'util/platform_detection.dart';
 import 'util/process_exit_reporter.dart';
 import 'util/system_ui.dart';
@@ -957,6 +958,7 @@ void main() async {
   await configureDependencies();
   _installCrashHandlers();
   if (PlatformDetection.isAndroid) _startProcessExitReporter();
+  if (PlatformDetection.isAndroid && PlatformDetection.isTV) NavigationSounds.install();
   // When the system runs the auto-download refresh task against this
   // engine, the native side retries its call until this handler is bound.
   if (AutoDownloadService.isSupportedPlatform) {
