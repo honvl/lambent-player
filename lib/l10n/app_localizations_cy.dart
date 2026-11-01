@@ -5742,6 +5742,16 @@ class AppLocalizationsCy extends AppLocalizations {
   String get similar => 'Tebyg';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'Argymhellion';
 
   @override

@@ -154,7 +154,8 @@ class NouveauPeopleSectionState extends State<NouveauPeopleSection> {
   }) {
     final l10n = AppLocalizations.of(context);
 
-    if (hasCast && hasCreators) {
+    // Plex titles the row Cast & Crew whoever is in it.
+    if (hasCast && (hasCreators || PlatformDetection.isTV)) {
       return l10n.castAndCrew;
     }
 
@@ -200,7 +201,7 @@ class NouveauPeopleSectionState extends State<NouveauPeopleSection> {
         : _fullVisibleCards;
 
     final itemGap = PlatformDetection.isTV
-        ? NouveauSpacing.tvRailItemGap
+        ? NouveauSpacing.tvPeopleItemGap
         : NouveauSpacing.railItemGap;
 
     final avatarWidthFactor = PlatformDetection.isTV
@@ -212,8 +213,13 @@ class NouveauPeopleSectionState extends State<NouveauPeopleSection> {
 
     final avatarSize = cardWidth * avatarWidthFactor;
 
-    final nameHeight = textScaler.scale(34).clamp(34.0, 54.0);
-    final roleHeight = textScaler.scale(30).clamp(30.0, 48.0);
+    final tv = PlatformDetection.isTV;
+    final nameHeight = tv
+        ? textScaler.scale(20).clamp(20.0, 30.0)
+        : textScaler.scale(34).clamp(34.0, 54.0);
+    final roleHeight = tv
+        ? textScaler.scale(18).clamp(18.0, 28.0)
+        : textScaler.scale(30).clamp(30.0, 48.0);
 
     final cardHeight = avatarSize + 12 + nameHeight + roleHeight;
 

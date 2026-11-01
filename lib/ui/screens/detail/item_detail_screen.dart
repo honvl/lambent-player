@@ -6937,6 +6937,8 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
     final canShowDownloadActions =
         _isDownloadable(item.type) && userCanDownload();
 
+    final plexEpisode = isSeries ? _plexOnDeck(viewModel) : null;
+
     final String playButtonLabel;
     if (isPhoto) {
       playButtonLabel = l10n.view;
@@ -6950,6 +6952,8 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
       } else {
         playButtonLabel = l10n.resume;
       }
+    } else if (isSeries && _plexEpisodeLabel(l10n, plexEpisode) != null) {
+      playButtonLabel = _plexEpisodeLabel(l10n, plexEpisode)!;
     } else if (isSeries) {
       if (isFullyWatched) {
         playButtonLabel = l10n.replay;
@@ -7001,6 +7005,13 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
         if (isSeason && viewModel.episodes.isNotEmpty) {
           final targetEp = seasonNextUpEp ?? viewModel.episodes[0];
           _play(context, targetEp, resume: seasonNextUpEp != null);
+        } else if (plexEpisode != null) {
+          // The episode the button names.
+          _play(
+            context,
+            plexEpisode,
+            resume: (plexEpisode.playbackPosition ?? Duration.zero) > Duration.zero,
+          );
         } else {
           _play(
             context,
@@ -8014,6 +8025,42 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
       },
       child: withDownloads,
     );
+  }
+
+  /// The episode Plex's On Deck offers for a show: one part watched (the
+  /// latest of them), or else the next one up.
+  AggregatedItem? _plexOnDeck(ItemDetailViewModel viewModel) {
+    final started = viewModel.seriesEpisodes
+        .where((e) => (e.playbackPosition ?? Duration.zero) > Duration.zero)
+        .toList();
+    if (started.isNotEmpty) {
+      started.sort((a, b) => (b.lastPlayedDate ?? DateTime(0)).compareTo(a.lastPlayedDate ?? DateTime(0)));
+      return started.first;
+    }
+    return viewModel.nextUp;
+  }
+
+  /// The show's button as Plex words it, naming the episode it plays:
+  /// "Resume S1 E1 • 23m left", or "Play S2 E4" for one not started.
+  String? _plexEpisodeLabel(AppLocalizations l10n, AggregatedItem? episode) {
+    final season = episode?.parentIndexNumber;
+    final number = episode?.indexNumber;
+    if (episode == null || season == null || number == null) return null;
+    final position = episode.playbackPosition ?? Duration.zero;
+    final runtime = episode.runtime;
+    final name = 'S$season E$number';
+    if (position <= Duration.zero || runtime == null || runtime <= position) {
+      return '${l10n.play} $name';
+    }
+    final left = runtime - position;
+    final hours = left.inHours;
+    final minutes = left.inMinutes.remainder(60);
+    final time = hours == 0
+        ? l10n.guideMinutesLeft(left.inMinutes.clamp(1, 59))
+        : minutes == 0
+        ? l10n.guideHoursLeft(hours)
+        : l10n.guideHoursMinutesLeft(hours, minutes);
+    return '${l10n.resume} $name \u2022 $time';
   }
 
   String _formatResumePosition(Duration? position) {

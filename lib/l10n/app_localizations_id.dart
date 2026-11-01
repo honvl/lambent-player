@@ -5717,6 +5717,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get similar => 'Serupa';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'Rekomendasi';
 
   @override

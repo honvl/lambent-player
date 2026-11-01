@@ -5906,6 +5906,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get similar => 'Podobne';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'Polecane';
 
   @override

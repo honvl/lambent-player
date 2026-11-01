@@ -5592,6 +5592,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get similar => '비슷한 작품';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => '추천';
 
   @override

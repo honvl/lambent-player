@@ -16,6 +16,20 @@ class AppTheme {
       brightness: Brightness.dark,
       fontFamily: spec.fontFamily,
     ).textTheme;
+    if (spec.isGlass) {
+      // Plex sets its headings in a geometric bold over Inter Display text;
+      // Figtree is the open font closest to it.
+      TextStyle? heading(TextStyle? style) => style?.copyWith(fontFamily: 'Figtree');
+      return base.copyWith(
+        displayLarge: heading(base.displayLarge),
+        displayMedium: heading(base.displayMedium),
+        displaySmall: heading(base.displaySmall),
+        headlineLarge: heading(base.headlineLarge),
+        headlineMedium: heading(base.headlineMedium),
+        headlineSmall: heading(base.headlineSmall),
+        titleLarge: heading(base.titleLarge),
+      );
+    }
     if (spec.textGlow.isEmpty) {
       return base;
     }

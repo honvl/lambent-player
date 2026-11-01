@@ -7,6 +7,7 @@ import 'package:moonfin_design/moonfin_design.dart';
 import '../../../../../data/models/aggregated_item.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../util/focus/dpad_keys.dart';
+import '../../../../../util/platform_detection.dart';
 import '../../../../widgets/focus/focusable_wrapper.dart';
 import '../../../../widgets/media_badge.dart';
 import '../../../../widgets/offline_aware_image.dart';
@@ -283,7 +284,7 @@ class NouveauLandscapeMediaCardState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildArtworkCard(context),
-          SizedBox(height: widget.compactLayout ? 10 : 8),
+          SizedBox(height: widget.compactLayout ? 10 : (PlatformDetection.isTV ? 4 : 8)),
           _buildDetailsCard(context),
         ],
       ),
@@ -632,7 +633,10 @@ class NouveauLandscapeMediaCardState
     final textTheme = theme.textTheme;
     final foreground = AppColorScheme.onSurface;
 
-    final overview = (item.overview ?? '').trim();
+    // Plex's TV rows caption a still with its title alone, so the whole row
+    // stays on screen; the summary is on the episode's own page.
+    final plexTv = PlatformDetection.isTV;
+    final overview = plexTv ? '' : (item.overview ?? '').trim();
 
     if (widget.compactLayout) {
       return MouseRegion(
@@ -803,19 +807,27 @@ class NouveauLandscapeMediaCardState
               duration: _focusMotionDuration,
               curve: Curves.easeOutCubic,
               width: widget.width,
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: plexTv
+                  ? const EdgeInsets.fromLTRB(4, 6, 4, 6)
+                  : const EdgeInsets.fromLTRB(16, 14, 16, 16),
               decoration: BoxDecoration(
-                color: _detailsActive
+                color: plexTv && !_detailsActive
+                    ? Colors.transparent
+                    : _detailsActive
                     ? theme.scaffoldBackgroundColor.withValues(alpha: 0.96)
                     : theme.scaffoldBackgroundColor.withValues(alpha: 0.88),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(plexTv ? 10 : 16),
                 border: Border.all(
-                  color: _detailsFocused
+                  color: plexTv && !_detailsFocused
+                      ? Colors.transparent
+                      : _detailsFocused
                       ? foreground.withValues(alpha: 0.20)
                       : foreground.withValues(alpha: 0.11),
                   width: 1,
                 ),
-                boxShadow: _detailsActive
+                boxShadow: plexTv && !_detailsActive
+                    ? const []
+                    : _detailsActive
                     ? [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.26),
@@ -841,6 +853,7 @@ class NouveauLandscapeMediaCardState
                     style:
                         textTheme.titleMedium?.copyWith(
                           color: foreground,
+                          fontSize: plexTv ? 15 : null,
                           fontWeight: _detailsActive
                               ? FontWeight.w700
                               : FontWeight.w600,

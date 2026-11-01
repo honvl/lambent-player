@@ -22,6 +22,7 @@ import 'chapters/nouveau_chapters_section.dart';
 import 'collection/nouveau_collection_section.dart';
 import 'details/nouveau_details_section.dart';
 import 'discovery/nouveau_discovery_section.dart';
+import 'discovery/nouveau_more_rows_section.dart';
 import 'episodes/nouveau_episodes_section.dart';
 import 'extras/nouveau_extras_section.dart';
 import 'hero/nouveau_hero.dart';
@@ -85,6 +86,9 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
   final GlobalKey<NouveauDiscoverySectionState> _discoverySectionKey =
       GlobalKey<NouveauDiscoverySectionState>();
+
+  final GlobalKey<NouveauMoreRowsSectionState> _moreSectionKey =
+      GlobalKey<NouveauMoreRowsSectionState>();
 
   final GlobalKey<NouveauReviewsSectionState> _reviewsSectionKey =
       GlobalKey<NouveauReviewsSectionState>();
@@ -150,7 +154,9 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
   bool _sectionVisible(GlobalKey key, AggregatedItem item) {
     return switch (key) {
       _ when key == _episodesSectionKey =>
-        item.type == 'Series' || item.type == 'Season',
+        item.type == 'Series' ||
+            item.type == 'Season' ||
+            (PlatformDetection.isTV && item.type == 'Episode'),
       _ when key == _collectionSectionKey =>
         NouveauCollectionSection.shouldInclude(_vm, _visibility),
       _ when key == _chaptersSectionKey =>
@@ -159,6 +165,8 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
         _visibility.shows(DetailSection.extras) && _vm.features.isNotEmpty,
       _ when key == _discoverySectionKey =>
         NouveauDiscoverySection.shouldInclude(_vm, _visibility),
+      _ when key == _moreSectionKey =>
+        NouveauMoreRowsSection.shouldInclude(_vm),
       _ when key == _reviewsSectionKey =>
         _visibility.shows(DetailSection.reviews) && _vm.reviews.isNotEmpty,
       _ when key == _peopleSectionKey =>
@@ -210,6 +218,8 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
         _extrasSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _discoverySectionKey =>
         _discoverySectionKey.currentState?.canFocusTop ?? false,
+      _ when key == _moreSectionKey =>
+        _moreSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _reviewsSectionKey =>
         _reviewsSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _peopleSectionKey =>
@@ -346,6 +356,22 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
     return true;
   }
 
+  bool _focusMore({required bool top}) {
+    final state = _moreSectionKey.currentState;
+
+    if (state == null || !(top ? state.focusTop() : state.focusBottom())) {
+      return false;
+    }
+
+    final revealKey = top ? state.topRevealKey : state.bottomRevealKey;
+
+    if (revealKey != null) {
+      _scheduleOuterReveal(revealKey);
+    }
+
+    return true;
+  }
+
   bool _focusDetailsTop() {
     final state = _detailsSectionKey.currentState;
 
@@ -410,6 +436,10 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
     if (target == _discoverySectionKey) {
       return _focusDiscoveryBottom();
+    }
+
+    if (target == _moreSectionKey) {
+      return _focusMore(top: false);
     }
 
     if (target == _collectionSectionKey) {
@@ -514,6 +544,10 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
     if (target == _detailsSectionKey) {
       return _focusDetailsTop();
+    }
+
+    if (target == _moreSectionKey) {
+      return _focusMore(top: true);
     }
 
     if (target == _discoverySectionKey) {
@@ -1187,12 +1221,29 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       sectionWidgets[_peopleSectionKey] = _buildCastCrewSection(item);
     }
 
+    if (_sectionVisible(_moreSectionKey, item)) {
+      sectionWidgets[_moreSectionKey] = NouveauMoreRowsSection(
+        key: _moreSectionKey,
+        viewModel: _vm,
+        prefs: widget.prefs,
+        onNavigateUp: () => _moveUp(_moreSectionKey),
+        onNavigateDown: () => _moveDown(_moreSectionKey),
+        onRevealRequested: _scheduleOuterReveal,
+      );
+    }
+
     for (final key in _orderedMediaSectionKeys(item)) {
       final child = sectionWidgets[key];
 
       if (child != null) {
         addSection(_sectionName(key), child);
       }
+    }
+
+    // A show has no file of its own to describe, and Plex's show page ends
+    // with its rows.
+    if (PlatformDetection.isTV && item.type == 'Series') {
+      return sections;
     }
 
     final detailsIndex = sections.length;
@@ -1219,6 +1270,21 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
   }
 
   List<GlobalKey> _orderedMediaSectionKeys(AggregatedItem item) {
+    // Plex's TV order: the episodes, Cast & Crew, Related, then the More
+    // from and More with rows. Lambent's TV page leaves reviews out, as it
+    // does ratings from people.
+    if (PlatformDetection.isTV) {
+      return <GlobalKey>[
+        _episodesSectionKey,
+        _peopleSectionKey,
+        _chaptersSectionKey,
+        _extrasSectionKey,
+        _collectionSectionKey,
+        _discoverySectionKey,
+        _moreSectionKey,
+      ].where((key) => _sectionVisible(key, item)).toList();
+    }
+
     return <GlobalKey>[
       _episodesSectionKey,
       _chaptersSectionKey,
@@ -1227,6 +1293,7 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       _discoverySectionKey,
       _reviewsSectionKey,
       _peopleSectionKey,
+      _moreSectionKey,
     ].where((key) => _sectionVisible(key, item)).toList();
   }
 
@@ -1253,6 +1320,10 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
     if (key == _reviewsSectionKey) {
       return 'reviews';
+    }
+
+    if (key == _moreSectionKey) {
+      return 'more';
     }
 
     return 'people';

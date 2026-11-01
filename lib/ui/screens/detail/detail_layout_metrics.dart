@@ -144,6 +144,10 @@ double nouveauHeroScale(Size size) {
 double nouveauHeroTop(BuildContext context, {UserPreferences? prefs}) {
   final navbarIsTop = _navbarIsTop(prefs: prefs);
 
+  // Plex's TV page puts the title art 75 points down a 647 tall canvas,
+  // beside its sidebar.
+  if (PlatformDetection.isTV && !navbarIsTop) return plexTvHeroTop;
+
   final size = MediaQuery.sizeOf(context);
   final scale = nouveauHeroScale(size);
 
@@ -171,8 +175,13 @@ double nouveauHeroMinHeight(Size size) {
 }
 
 /// The horizontal inset either side of the Nouveau landscape hero.
+/// Where Plex's TV detail page starts its title art, and its left edge, on
+/// the 1150 wide canvas.
+const double plexTvHeroTop = 75;
+const double plexTvInset = 77;
+
 double nouveauHorizontalInset(Size size) => PlatformDetection.isTV
-    ? 56.0
+    ? plexTvInset
     : (size.width * 0.046).clamp(56.0, 96.0);
 
 /// The Minimalist episode rail.

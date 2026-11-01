@@ -7506,6 +7506,16 @@
   "@similar": {
     "description": "Section title for similar media"
   },
+  "moreFromStudio": "More from {name}",
+  "@moreFromStudio": {
+    "description": "Detail page row of other titles from the same studio, as Plex titles it",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "moreWithPerson": "More with {name}",
+  "@moreWithPerson": {
+    "description": "Detail page row of other titles with the same actor, as Plex titles it",
+    "placeholders": {"name": {"type": "String"}}
+  },
   "recommendations": "Recommendations",
   "@recommendations": {
     "description": "Section title for recommended media"

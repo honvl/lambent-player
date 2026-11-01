@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../util/platform_detection.dart';
 import '../../../widgets/bottom_nav/bottom_navbar.dart';
 import 'shared/nouveau_spacing.dart';
 
@@ -108,7 +109,11 @@ class NouveauLandscapeLayout extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: NouveauSpacing.sectionGap),
+                      SizedBox(
+                        height: PlatformDetection.isTV
+                            ? NouveauSpacing.tvHeroToSection
+                            : NouveauSpacing.sectionGap,
+                      ),
 
                       Padding(
                         padding: firstSectionPadding,

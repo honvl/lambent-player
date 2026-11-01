@@ -70,7 +70,17 @@ double _nouveauActionScale(BuildContext context) {
 /// scale from the text scaler, so font sizes stay on [_nouveauActionScale].
 double _nouveauButtonScale(BuildContext context) =>
     _nouveauActionScale(context) *
-    (detailIsCompact(context) ? 1.0 : detailDesktopScale());
+    (detailIsCompact(context) ? 1.0 : detailDesktopScale()) *
+    _plexTvButtonSize;
+
+/// Plex's TV buttons are 38 points tall on the 1150 canvas, two thirds of
+/// Nouveau's, with labels about a sixth smaller.
+double get _plexTvButtonSize => PlatformDetection.isTV ? 0.68 : 1.0;
+
+double get _plexTvLabelSize => PlatformDetection.isTV ? 0.85 : 1.0;
+
+/// Their icons shrink less than the buttons: 18 points in a 38 point circle.
+double get _plexTvIconSize => PlatformDetection.isTV ? 1.25 : 1.0;
 
 class NouveauActionButtons extends StatefulWidget {
   final NouveauAction? primaryAction;
@@ -425,8 +435,9 @@ class _NouveauActionButtonsState extends State<NouveauActionButtons> {
   ) {
     final scale = _nouveauButtonScale(context);
 
-    final primaryGap = 18.0 * scale;
-    final secondaryGap = 12.0 * scale;
+    // Plex spaces its smaller buttons wider apart: 19 and 20 points.
+    final primaryGap = PlatformDetection.isTV ? 19.0 : 18.0 * scale;
+    final secondaryGap = PlatformDetection.isTV ? 20.0 : 12.0 * scale;
     final scrolls = widget.maxVisibleButtons == -1;
 
     final rowChildren = <Widget>[
@@ -636,7 +647,7 @@ class _NouveauPrimaryButtonState extends State<_NouveauPrimaryButton> {
 
     final labelStyle = TextStyle(
       color: _highlighted ? Colors.black : Colors.white,
-      fontSize: phone ? 15.5 : 16.5 * textScale,
+      fontSize: phone ? 15.5 : 16.5 * textScale * _plexTvLabelSize,
       fontWeight: FontWeight.w700,
       height: 1,
       letterSpacing: -0.1,
@@ -766,7 +777,9 @@ class _NouveauPrimaryButtonState extends State<_NouveauPrimaryButton> {
               height: height,
               constraints: widget.fullWidth
                   ? const BoxConstraints()
-                  : BoxConstraints(minWidth: 0, maxWidth: 270.0 * scale),
+                  // Plex's label names the episode and the time left, so the
+                  // cap stays where it was before the button shrank.
+                  : BoxConstraints(minWidth: 0, maxWidth: 270.0 * scale / _plexTvButtonSize),
               padding: EdgeInsets.symmetric(
                 horizontal: phone ? 20 : 23.0 * scale,
               ),
@@ -836,7 +849,7 @@ class _NouveauPrimaryButtonState extends State<_NouveauPrimaryButton> {
                             style: TextStyle(
                               color: (_highlighted ? Colors.black : Colors.white)
                                   .withValues(alpha: 0.62),
-                              fontSize: phone ? 13 : 13.5 * textScale,
+                              fontSize: phone ? 13 : 13.5 * textScale * _plexTvLabelSize,
                               fontWeight: FontWeight.w600,
                               height: 1,
                               letterSpacing: -0.1,
@@ -1123,6 +1136,9 @@ class _NouveauCircleActionButtonState
                     decoration: BoxDecoration(
                       color: _highlighted
                           ? Colors.white
+                          : PlatformDetection.isTV
+                          // Plex's round buttons are a light veil, no rim.
+                          ? Colors.white.withValues(alpha: 0.14)
                           : Colors.black.withValues(
                               alpha: widget.compact ? 0.34 : 0.28,
                             ),
@@ -1130,7 +1146,9 @@ class _NouveauCircleActionButtonState
                       border: Border.all(
                         color: _highlighted
                             ? Colors.white
-                            : Colors.white.withValues(alpha: 0.18),
+                            : Colors.white.withValues(
+                                alpha: PlatformDetection.isTV ? 0 : 0.18,
+                              ),
                         width: 1,
                       ),
                       boxShadow: _highlighted
@@ -1149,7 +1167,7 @@ class _NouveauCircleActionButtonState
                     child: Center(
                       child: _ActionIcon(
                         action: action,
-                        size: widget.compact ? 20 : 22.0 * scale,
+                        size: widget.compact ? 20 : 22.0 * scale * _plexTvIconSize,
                         color: _highlighted
                             ? Colors.black
                             : action.isActive
@@ -1393,7 +1411,7 @@ class _NouveauMoreButtonState extends State<_NouveauMoreButton> {
                     ),
                     child: Icon(
                       Icons.more_horiz_rounded,
-                      size: widget.compact ? 22 : 25.0 * scale,
+                      size: widget.compact ? 22 : 25.0 * scale * _plexTvIconSize,
                       color: _highlighted ? Colors.black : Colors.white,
                     ),
                   ),

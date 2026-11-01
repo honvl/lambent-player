@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
 import '../../../../../data/models/aggregated_item.dart';
@@ -10,6 +11,7 @@ import '../../../../../preference/detail_metadata_layout.dart';
 import '../../../../../preference/detail_section_layout.dart';
 import '../../../../../preference/user_preferences.dart';
 import '../../../../../util/overview_text.dart';
+import '../../../../../util/platform_detection.dart';
 import '../../../../../util/playback_time_label.dart';
 import '../../../../widgets/logo_view.dart';
 import '../../../../widgets/navigation_layout.dart';
@@ -256,7 +258,8 @@ class NouveauHeroState extends State<NouveauHero> {
     final hiddenMetadata = detailMetadataLayout.hidden(widget.prefs);
 
     final showGenres = !hiddenMetadata.contains(DetailMetadataItem.genres.id);
-    final genres = showGenres
+    // Plex names two genres on the metadata line rather than above the title.
+    final genres = showGenres && !_plexTv
         ? item.genres
             .take(3)
             .map((genre) => genre.trim())
@@ -275,10 +278,12 @@ class NouveauHeroState extends State<NouveauHero> {
         ? 64.0
         : (17.0 * scale).clamp(14.0, 19.0);
 
-    final reserveGenreRow =
+    final reserveGenreRow = !_plexTv &&
         genres.isEmpty && (item.type == 'Episode' || item.type == 'Season');
 
-    final metadata = _metadataContent(context, item, scale);
+    final metadata = _plexTv
+        ? _plexMetadataContent(context, item)
+        : _metadataContent(context, item, scale);
 
     final ratingsRow = RatingsRow.forDetailScreen(
       item: item,
@@ -340,12 +345,17 @@ class NouveauHeroState extends State<NouveauHero> {
 
     final logoMaxWidth = isPhonePortrait
         ? (size.width - 40) * 0.72
+        : _plexTv
+        ? 300.0
         : isCompact
         ? heroMaxWidth * 0.73
         : (480.0 * scale).clamp(432.0, 520.0);
 
     final logoMaxHeight = isPhonePortrait
         ? 82.0
+        : _plexTv
+        // An episode's or season's show art is smaller, with its title under it.
+        ? (shouldUseSeriesLogo ? 57.0 : 96.0)
         : (106.0 * scale).clamp(92.0, 114.0);
 
     final titleStyle = textTheme.displaySmall?.copyWith(
@@ -358,7 +368,11 @@ class NouveauHeroState extends State<NouveauHero> {
 
     final overviewStyle = TextStyle(
       color: foreground.withValues(alpha: 0.87),
-      fontSize: isPhonePortrait ? 15.5 : (18.0 * scale).clamp(16.0, 19.0),
+      fontSize: isPhonePortrait
+          ? 15.5
+          : _plexTv
+          ? 15.0
+          : (18.0 * scale).clamp(16.0, 19.0),
       fontWeight: FontWeight.w400,
       height: isPhonePortrait ? 1.42 : 1.36,
       letterSpacing: -0.10,
@@ -378,7 +392,9 @@ class NouveauHeroState extends State<NouveauHero> {
     final branding = _NouveauBranding(
       title: item.name,
       logoUrl: logoUrl,
-      companionTitle: isSeason ? item.name : null,
+      // Plex names the episode under its show's title art.
+      companionTitle: isSeason || (_plexTv && isEpisode) ? item.name : null,
+      stackCompanion: _plexTv,
       titleStyle: titleStyle,
       maxWidth: logoMaxWidth,
       maxHeight: logoMaxHeight,
@@ -664,7 +680,7 @@ class NouveauHeroState extends State<NouveauHero> {
 
           branding,
 
-          SizedBox(height: (28.0 * scale).clamp(24.0, 30.0)),
+          SizedBox(height: _plexTv ? 12.0 : (28.0 * scale).clamp(24.0, 30.0)),
 
           if (hasBadges) ...[
             _badgeRow(
@@ -679,7 +695,7 @@ class NouveauHeroState extends State<NouveauHero> {
 
           if (metadata.isNotEmpty)
             Wrap(
-              spacing: (7.0 * scale).clamp(6.0, 8.0),
+              spacing: _plexTv ? 11.0 : (7.0 * scale).clamp(6.0, 8.0),
               runSpacing: (6.0 * scale).clamp(5.0, 7.0),
               crossAxisAlignment: WrapCrossAlignment.center,
               children: metadata,
@@ -707,9 +723,9 @@ class NouveauHeroState extends State<NouveauHero> {
           ],
 
           if (overview.isNotEmpty && !hideOverview) ...[
-            SizedBox(height: (22.0 * scale).clamp(19.0, 24.0)),
+            SizedBox(height: _plexTv ? 14.0 : (22.0 * scale).clamp(19.0, 24.0)),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: descriptionMaxWidth),
+              constraints: BoxConstraints(maxWidth: _plexTv ? 485.0 : descriptionMaxWidth),
               child: _NouveauOverview(
                 text: overview,
                 maxLines: 3,
@@ -729,14 +745,14 @@ class NouveauHeroState extends State<NouveauHero> {
       children: [
         textContent,
         if (ratingsRow != null) ...[
-          SizedBox(height: (13.0 * scale).clamp(11.0, 15.0)),
+          SizedBox(height: _plexTv ? 9.0 : (13.0 * scale).clamp(11.0, 15.0)),
           ConstrainedBox(
             constraints: BoxConstraints(maxWidth: ratingsMaxWidth),
             child: ratingsRow,
           ),
         ],
         belowRatings,
-        SizedBox(height: (36.0 * scale).clamp(30.0, 38.0)),
+        SizedBox(height: _plexTv ? 16.0 : (36.0 * scale).clamp(30.0, 38.0)),
         actions,
       ],
     );
@@ -866,6 +882,63 @@ class NouveauHeroState extends State<NouveauHero> {
       TimeOfDay.fromDateTime(end),
       alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
+  }
+
+  /// Plex's TV layout: its hero is smaller and sits higher, and its
+  /// metadata line reads "2022  23m  Animation, Comedy  TV-14".
+  bool get _plexTv => PlatformDetection.isTV;
+
+  /// The line under Plex's title art, spaced without dots: the year, the
+  /// runtime and two genres for a show or film; "S2 • E3", the air date and
+  /// the runtime for an episode; then the age rating in an outline.
+  List<Widget> _plexMetadataContent(BuildContext context, AggregatedItem item) {
+    final foreground = AppColorScheme.onSurface;
+    final style = TextStyle(
+      color: foreground.withValues(alpha: 0.82),
+      fontSize: 13.5,
+      fontWeight: FontWeight.w400,
+      height: 1.1,
+    );
+    final hidden = detailMetadataLayout.hidden(widget.prefs);
+    final values = <Widget>[];
+    void add(String? text) {
+      if (text == null || text.trim().isEmpty) return;
+      values.add(Text(text, style: style));
+    }
+
+    final runtime = _effectiveRuntime(item);
+    final runtimeText = runtime != null && runtime > Duration.zero ? formatRuntimeShort(runtime) : null;
+    if (item.type == 'Episode') {
+      final season = item.parentIndexNumber;
+      final episode = item.indexNumber;
+      if (season != null && episode != null) add('S$season \u2022 E$episode');
+      final aired = item.premiereDate;
+      if (aired != null) {
+        // An air date is a day, sent as its UTC midnight: read it as that day.
+        add(DateFormat.yMMMd(Localizations.localeOf(context).toLanguageTag()).format(aired.toUtc()));
+      }
+      add(runtimeText);
+    } else if (item.type != 'Season') {
+      if (!hidden.contains(DetailMetadataItem.year.id)) add(item.productionYear?.toString());
+      add(runtimeText);
+      if (!hidden.contains(DetailMetadataItem.genres.id)) {
+        add(item.genres.map((g) => g.trim()).where((g) => g.isNotEmpty).take(2).join(', '));
+      }
+    }
+    final rating = item.officialRating?.trim();
+    if (rating != null && rating.isNotEmpty && !hidden.contains(DetailMetadataItem.parentalRating.id)) {
+      values.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(3),
+            border: Border.all(color: foreground.withValues(alpha: 0.55)),
+          ),
+          child: Text(rating, style: style.copyWith(fontSize: 12, fontWeight: FontWeight.w600)),
+        ),
+      );
+    }
+    return values;
   }
 
   List<Widget> _metadataContent(
@@ -1431,6 +1504,9 @@ class _NouveauBranding extends StatefulWidget {
   final String title;
   final String? logoUrl;
   final String? companionTitle;
+
+  /// Plex's TV layout: the title under the art, not beside it.
+  final bool stackCompanion;
   final TextStyle? titleStyle;
   final double maxWidth;
   final double maxHeight;
@@ -1440,6 +1516,7 @@ class _NouveauBranding extends StatefulWidget {
     required this.title,
     required this.logoUrl,
     required this.companionTitle,
+    this.stackCompanion = false,
     required this.titleStyle,
     required this.maxWidth,
     required this.maxHeight,
@@ -1575,6 +1652,30 @@ class _NouveauBrandingState extends State<_NouveauBranding> {
       );
     }
 
+    if (widget.stackCompanion) {
+      return Align(
+        alignment: widget.alignment,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LogoView(
+              imageUrl: widget.logoUrl,
+              maxHeight: widget.maxHeight,
+              maxWidth: widget.maxWidth,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              companionTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: widget.titleStyle?.copyWith(fontSize: 17, letterSpacing: 0, height: 1.15),
+            ),
+          ],
+        ),
+      );
+    }
+
     final logoWidth = widget.maxWidth * 0.42;
     final logoHeight = widget.maxHeight * 0.76;
 
@@ -1619,8 +1720,10 @@ class _NouveauBrandingState extends State<_NouveauBranding> {
 
   @override
   Widget build(BuildContext context) {
+    final stacked = widget.stackCompanion && (widget.companionTitle?.trim().isNotEmpty ?? false);
     return SizedBox(
-      height: widget.maxHeight,
+      // A stacked title adds its line under the art.
+      height: widget.maxHeight + (stacked ? 32 : 0),
       width: widget.maxWidth,
       child: AnimatedSwitcher(
         duration: _animateLogo

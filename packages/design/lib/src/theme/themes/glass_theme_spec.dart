@@ -6,6 +6,7 @@ const glassThemeSpec = ThemeSpec(
   id: 'glass',
   displayName: 'Glass',
   isGlass: true,
+  fontFamily: 'InterDisplay',
   transparentNavbarSurface: true,
   semantic: ThemeSemanticTokens(
     statusAvailable: Color(0xFF30D158),

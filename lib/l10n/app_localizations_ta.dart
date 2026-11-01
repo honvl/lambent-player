@@ -5747,6 +5747,16 @@ class AppLocalizationsTa extends AppLocalizations {
   String get similar => 'ஒத்த';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'பரிந்துரைகள்';
 
   @override

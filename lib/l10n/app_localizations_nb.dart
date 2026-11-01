@@ -5712,6 +5712,16 @@ class AppLocalizationsNb extends AppLocalizations {
   String get similar => 'Lignende';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'Anbefalinger';
 
   @override
