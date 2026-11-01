@@ -40,6 +40,9 @@ class SetupWizardGate {
 
   final UserPreferences _prefs;
 
+  /// Upstream Moonfin's first-run questions. Off in Lambent; tests turn it on.
+  static bool askOnFirstRun = false;
+
   /// Set when a run is abandoned before it can finish, because the server was
   /// out of reach or its settings never arrived. Without it the router would
   /// send the user straight back in on the next navigation and strand them.
@@ -93,8 +96,12 @@ class SetupWizardGate {
       _prefs.get(UserPreferences.setupWizardVersionForServer(serverKey)) >=
       UserPreferences.setupWizardVersion;
 
+  /// Lambent never opens the wizard on its own: the defaults are already the
+  /// glass layout, so first launch goes straight to Home. It still runs when
+  /// asked for from settings.
   bool shouldRun(MediaServerClient client) {
     if (_rerunning) return true;
+    if (!askOnFirstRun) return false;
     if (_deferredThisLaunch) return false;
 
     // A server we can't reach can neither serve the previews nor resolve the

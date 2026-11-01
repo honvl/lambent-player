@@ -66,14 +66,24 @@ void main() {
     await store.init();
     prefs = UserPreferences(store);
     gate = SetupWizardGate(prefs);
+    // Lambent keeps the wizard off; these tests are about upstream's gate.
+    SetupWizardGate.askOnFirstRun = true;
     // Tests run as Android, which would offer the bottom navbar. Most of these
     // are about the gate itself, so they run as a device without one.
     PlatformDetection.setInterfaceLayout(InterfaceLayout.desktop);
   });
 
-  tearDown(
-    () => PlatformDetection.setInterfaceLayout(InterfaceLayout.automatic),
-  );
+  tearDown(() {
+    SetupWizardGate.askOnFirstRun = false;
+    PlatformDetection.setInterfaceLayout(InterfaceLayout.automatic);
+  });
+
+  test('Lambent goes straight to Home on a fresh sign-in, unless asked', () {
+    SetupWizardGate.askOnFirstRun = false;
+    expect(gate.shouldRun(client), isFalse);
+    gate.beginRerun();
+    expect(gate.shouldRun(client), isTrue);
+  });
 
   group('what the wizard still has to ask', () {
     test('a fresh sign-in is asked everything, and ends on the tour', () {
