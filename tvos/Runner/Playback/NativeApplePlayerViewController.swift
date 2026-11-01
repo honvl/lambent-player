@@ -288,7 +288,8 @@ final class NativeApplePlayerViewController: UIViewController {
     /// drawn larger to stay a comfortable size to tap once scaled.
     private static let controlSize: CGFloat = 120
     #else
-    private static let controlSize: CGFloat = 72
+    /// 56 points on the TV's 1920 x 1080: the Android TV glass bar's size. At 72 the row crowded the seek bar.
+    private static let controlSize: CGFloat = 56
     #endif
     private static var controlScale: CGFloat { controlSize / 64 }
     /// The size the current row of buttons is drawn at. Only iOS shrinks it.
@@ -774,7 +775,8 @@ final class NativeApplePlayerViewController: UIViewController {
             controlBar.leadingAnchor.constraint(equalTo: controlGlass.leadingAnchor, constant: 28),
             controlBar.trailingAnchor.constraint(equalTo: controlGlass.trailingAnchor, constant: -22),
             controlBar.bottomAnchor.constraint(equalTo: controlGlass.bottomAnchor, constant: -14),
-            scrubber.bottomAnchor.constraint(equalTo: controlBar.topAnchor, constant: -6),
+            // Room above the row for a focused button, which tvOS draws larger than the rest.
+            scrubber.bottomAnchor.constraint(equalTo: controlBar.topAnchor, constant: -18),
             belowRow.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
             belowRow.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
             belowRow.centerYAnchor.constraint(equalTo: scrubber.centerYAnchor),
