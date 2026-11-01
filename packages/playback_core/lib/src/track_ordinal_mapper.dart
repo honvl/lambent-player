@@ -39,18 +39,37 @@ class TrackOrdinalMapper {
         .toList();
   }
 
-  /// The number of embedded subtitle tracks the player demuxes from the
-  /// stream. External sub-add ordinals start after this count, and callers
-  /// waiting for the demux to finish must wait for this same number.
-  static int embeddedSubtitleCount({
+  /// The subtitle streams the player finds inside the stream, in the order
+  /// it numbers them: the container's own, or, when those are stripped
+  /// (transcode/directStream), the ones the server delivers as renditions of
+  /// the HLS stream itself (`DeliveryMethod: Hls`, as Lambent Server does for
+  /// a title it enhances), which the player loads a segment at a time.
+  static List<Map<String, dynamic>> inStreamSubtitles({
     required List<Map<String, dynamic>> mediaStreams,
     required bool embeddedStripped,
   }) {
-    if (embeddedStripped) return 0;
-    return mediaStreams
-        .where((s) => s['Type'] == 'Subtitle' && s['IsExternal'] != true)
-        .length;
+    final subtitles = mediaStreams.where(
+      (s) => s['Type'] == 'Subtitle' && s['IsExternal'] != true,
+    );
+    if (!embeddedStripped) return subtitles.toList();
+    return subtitles
+        .where(
+          (s) =>
+              (s['DeliveryMethod'] as String?)?.trim().toLowerCase() == 'hls',
+        )
+        .toList();
   }
+
+  /// The number of subtitle tracks the player demuxes from the stream.
+  /// External sub-add ordinals start after this count, and callers waiting
+  /// for the demux to finish must wait for this same number.
+  static int embeddedSubtitleCount({
+    required List<Map<String, dynamic>> mediaStreams,
+    required bool embeddedStripped,
+  }) => inStreamSubtitles(
+    mediaStreams: mediaStreams,
+    embeddedStripped: embeddedStripped,
+  ).length;
 
   /// Converts a Jellyfin `MediaStream.Index` into the index the same stream
   /// carries inside the container.
@@ -127,7 +146,12 @@ class TrackOrdinalMapper {
         }
       }
 
-      if (embeddedStripped) return null;
+      final inStream = inStreamSubtitles(
+        mediaStreams: mediaStreams,
+        embeddedStripped: embeddedStripped,
+      );
+      final position = inStream.indexWhere((s) => s['Index'] == streamIndex);
+      return position < 0 ? null : position + 1;
     }
 
     // Only the container's own tracks are numbered here. An external audio
@@ -178,6 +202,14 @@ class TrackOrdinalMapper {
         }
         return null;
       }
+      final inStream = inStreamSubtitles(
+        mediaStreams: mediaStreams,
+        embeddedStripped: embeddedStripped,
+      );
+      final position = mpvTrackId - 1;
+      return position >= 0 && position < inStream.length
+          ? inStream[position]['Index'] as int?
+          : null;
     }
 
     final embedded = typeStreams.where((s) => s['IsExternal'] != true).toList();

@@ -366,4 +366,61 @@ void main() {
       );
     });
   });
+
+  group('subtitles inside an HLS stream (Lambent Server)', () {
+    // An enhanced title: video, audio, two SRT tracks in the stream's own
+    // HLS renditions, and an ASS track still delivered as a file.
+    final enhanced = <Map<String, dynamic>>[
+      _stream(0, 'Video'),
+      _stream(1, 'Audio'),
+      {..._stream(2, 'Subtitle'), 'DeliveryMethod': 'Hls'},
+      {
+        ..._stream(3, 'Subtitle', isExternal: true, deliveryUrl: '/s/3'),
+        'DeliveryMethod': 'External',
+      },
+      {..._stream(4, 'Subtitle'), 'DeliveryMethod': 'Hls'},
+    ];
+
+    test('are numbered in the stream, ahead of the files', () {
+      int? id(int index) => TrackOrdinalMapper.mpvTrackIdForStream(
+        streamIndex: index,
+        type: 'Subtitle',
+        mediaStreams: enhanced,
+        externalSubtitles: [_external(3)],
+        embeddedStripped: true,
+      );
+      expect([id(2), id(4), id(3)], [1, 2, 3]);
+      expect(
+        TrackOrdinalMapper.embeddedSubtitleCount(
+          mediaStreams: enhanced,
+          embeddedStripped: true,
+        ),
+        2,
+      );
+    });
+
+    test('map back from the player\'s numbers', () {
+      int? index(int id) => TrackOrdinalMapper.streamIndexForMpvTrackId(
+        mpvTrackId: id,
+        type: 'Subtitle',
+        mediaStreams: enhanced,
+        externalSubtitles: [_external(3)],
+        embeddedStripped: true,
+      );
+      expect([index(1), index(2), index(3), index(4)], [2, 4, 3, null]);
+    });
+
+    test('an embedded track a transcode strips still has no number', () {
+      expect(
+        TrackOrdinalMapper.mpvTrackIdForStream(
+          streamIndex: 2,
+          type: 'Subtitle',
+          mediaStreams: issueStreams,
+          externalSubtitles: const [],
+          embeddedStripped: true,
+        ),
+        isNull,
+      );
+    });
+  });
 }
