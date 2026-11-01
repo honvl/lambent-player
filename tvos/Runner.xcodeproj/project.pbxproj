@@ -682,7 +682,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -693,7 +693,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -711,7 +711,7 @@
 				CODE_SIGN_ENTITLEMENTS = MoonfinTopShelf/MoonfinTopShelf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MoonfinTopShelf/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -720,7 +720,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -737,7 +737,7 @@
 				CODE_SIGN_ENTITLEMENTS = MoonfinTopShelf/MoonfinTopShelf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MoonfinTopShelf/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -746,7 +746,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -823,7 +823,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -834,7 +834,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -905,7 +905,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
@@ -916,7 +916,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -934,7 +934,7 @@
 				CODE_SIGN_ENTITLEMENTS = MoonfinTopShelf/MoonfinTopShelf.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = CCBYLPUSVH;
+				DEVELOPMENT_TEAM = T6355X8JD5;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MoonfinTopShelf/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -943,7 +943,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
