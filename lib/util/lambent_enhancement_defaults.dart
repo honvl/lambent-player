@@ -26,6 +26,7 @@ Map<String, Object> lambentScreenDefaults(UserPreferences prefs) {
       'Brightness': prefs.get(UserPreferences.lambentBrightness),
       'Peak': prefs.get(UserPreferences.lambentPeak),
       'Hue': prefs.get(UserPreferences.lambentHue),
+      'Gamut': prefs.get(UserPreferences.lambentWideColour),
     },
   };
 }

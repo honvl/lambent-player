@@ -61,6 +61,18 @@ void main() {
       expect(e.peakNits, 556);
       expect(e.hue, -30);
     });
+
+    test('offers wide colour at 0 on a stream with the picture controls', () {
+      expect(LambentEnhancement.fromUrl(_url).wideColour, isNull);
+      expect(LambentEnhancement.fromUrl('$_url&mid=50').wideColour, 0);
+      expect(LambentEnhancement.fromUrl('$_url&mid=50&gamut=150').wideColour, 100);
+    });
+
+    test('writes wide colour as gamut', () {
+      LambentEnhancement.overrides = const LambentEnhancement(wideColour: 50);
+      final out = Uri.parse(LambentEnhancement.applyOverrides(_url));
+      expect(out.queryParameters['gamut'], '50');
+    });
   });
 
   group('LambentEnhancement.applyOverrides', () {

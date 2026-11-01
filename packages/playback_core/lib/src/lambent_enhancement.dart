@@ -20,6 +20,7 @@ class LambentEnhancement {
     this.middleGray,
     this.peakNits,
     this.hue,
+    this.wideColour,
   });
 
   /// RTX Video upscaling quality, 1 (fastest) to 4 (best).
@@ -49,6 +50,12 @@ class LambentEnhancement {
   /// Hue rotation in degrees, -30 to 30 (0 is neutral).
   final int? hue;
 
+  /// Wide colour, 0 (off) to 100: how far vivid colours are pushed from SDR's
+  /// range toward the wider P3 range of graded HDR; skin, greys and soft
+  /// colours stay. RTX HDR only. The URL names it (`gamut`) only when it is
+  /// on, so an HDR stream that has the picture controls offers it at 0.
+  final int? wideColour;
+
   static const none = LambentEnhancement();
 
   /// The viewer's choices for this session. Null fields leave the server's own
@@ -62,7 +69,8 @@ class LambentEnhancement {
 
   /// This screen's own defaults, sent as PlaybackInfo's `Lambent` object
   /// (`RtxHdr`, `DeepenBlacks`, `DolbyVision`, `Saturation`, `Contrast`,
-  /// `Brightness`, `Peak`, `Hue`). A member left out follows the server.
+  /// `Brightness`, `Peak`, `Hue`, `Gamut`). A member left out follows the
+  /// server.
   static Map<String, Object> screenDefaults = const {};
 
   /// [body] with this screen's choices added, for a PlaybackInfo request.
@@ -80,6 +88,7 @@ class LambentEnhancement {
   static const middleGrayRange = (min: 10, max: 100);
   static const peakRange = (min: 400, max: 1400);
   static const hueRange = (min: -30, max: 30);
+  static const wideColourRange = (min: 0, max: 100);
 
   static bool isEnhancedUrl(String? url) {
     if (url == null) return false;
@@ -111,6 +120,9 @@ class LambentEnhancement {
       middleGray: number('mid', middleGrayRange),
       peakNits: number('peak', peakRange),
       hue: number('hue', hueRange),
+      wideColour:
+          number('gamut', wideColourRange) ??
+          (query.containsKey('mid') ? 0 : null),
     );
   }
 
@@ -133,6 +145,7 @@ class LambentEnhancement {
     number('mid', o.middleGray, middleGrayRange);
     number('peak', o.peakNits, peakRange);
     number('hue', o.hue, hueRange);
+    number('gamut', o.wideColour, wideColourRange);
     // Dolby Vision rides on RTX HDR, so it is off whenever HDR is.
     final hdrOn = (query['hdr'] ?? '0') == '1';
     if (o.dolbyVision != null || (query.containsKey('dv') && !hdrOn)) {
@@ -152,6 +165,7 @@ class LambentEnhancement {
     middleGray: other.middleGray ?? middleGray,
     peakNits: other.peakNits ?? peakNits,
     hue: other.hue ?? hue,
+    wideColour: other.wideColour ?? wideColour,
   );
 
   /// Only the fields of this that differ from [base], so pinning a choice
@@ -166,6 +180,7 @@ class LambentEnhancement {
     middleGray: middleGray != base.middleGray ? middleGray : null,
     peakNits: peakNits != base.peakNits ? peakNits : null,
     hue: hue != base.hue ? hue : null,
+    wideColour: wideColour != base.wideColour ? wideColour : null,
   );
 
   LambentEnhancement copyWith({
@@ -178,6 +193,7 @@ class LambentEnhancement {
     int? middleGray,
     int? peakNits,
     int? hue,
+    int? wideColour,
   }) => LambentEnhancement(
     quality: quality ?? this.quality,
     hdr: hdr ?? this.hdr,
@@ -188,6 +204,7 @@ class LambentEnhancement {
     middleGray: middleGray ?? this.middleGray,
     peakNits: peakNits ?? this.peakNits,
     hue: hue ?? this.hue,
+    wideColour: wideColour ?? this.wideColour,
   );
 
   @override
@@ -201,7 +218,8 @@ class LambentEnhancement {
       other.contrast == contrast &&
       other.middleGray == middleGray &&
       other.peakNits == peakNits &&
-      other.hue == hue;
+      other.hue == hue &&
+      other.wideColour == wideColour;
 
   @override
   int get hashCode => Object.hash(
@@ -214,6 +232,7 @@ class LambentEnhancement {
     middleGray,
     peakNits,
     hue,
+    wideColour,
   );
 
   static Map<String, String> _query(String url) =>

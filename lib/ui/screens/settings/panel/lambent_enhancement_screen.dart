@@ -120,6 +120,17 @@ class _LambentEnhancementScreen extends StatelessWidget {
                           divisions: 12,
                           labelOf: (v) => '$v°',
                         ),
+                        SliderPreferenceTile(
+                          preference: UserPreferences.lambentWideColour,
+                          title: 'Wide colour',
+                          description:
+                              "RTX HDR only: vivid colours toward HDR's wider range; skin stays",
+                          icon: Icons.palette_outlined,
+                          min: 0,
+                          max: 100,
+                          divisions: 4,
+                          labelOf: (v) => v == 0 ? 'Off' : '$v%',
+                        ),
                       ],
                     ],
                   ),

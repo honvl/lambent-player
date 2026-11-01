@@ -253,6 +253,16 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           unit: '°',
           set: (v) => pending.copyWith(hue: v),
         ),
+      if (cur.wideColour != null)
+        number(
+          label: 'Wide colour',
+          value: pending.wideColour,
+          step: 25,
+          range: LambentEnhancement.wideColourRange,
+          unit: '%',
+          needsHdr: true,
+          set: (v) => pending.copyWith(wideColour: v),
+        ),
     ];
 
     // Acts at once rather than waiting for Apply: it swaps the whole stream.
