@@ -3651,9 +3651,10 @@ class UserPreferences extends ChangeNotifier {
     ];
   }
 
+  // On, as Plex plays a show's theme on its page; home rows stay quiet.
   static final themeMusicEnabled = Preference(
     key: 'themeMusicEnabled',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   static final themeMusicVolume = Preference(

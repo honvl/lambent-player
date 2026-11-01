@@ -78,9 +78,9 @@ void main() {
       final prefs = await _prefsWith(_scope);
 
       expect(prefs.get(UserPreferences.screensaverBackdrop),
-          ScreensaverBackdrop.library);
+          ScreensaverBackdrop.nightLandscape);
       expect(prefs.get(UserPreferences.screensaverComponent),
-          ScreensaverComponent.moonfinLogo);
+          ScreensaverComponent.none);
     });
 
     test('an existing choice is never overwritten by the migration', () async {
