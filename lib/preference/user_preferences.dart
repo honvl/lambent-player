@@ -2224,6 +2224,17 @@ class UserPreferences extends ChangeNotifier {
     key: 'pref_lambent_enhance_on_pc',
     defaultValue: true,
   );
+  /// Apple TV only, with [lambentEnhanceOnPc] off: an SDR title plays as
+  /// Plex's own file and the Apple TV lifts it to HDR10 on its GPU
+  /// (tvos/Runner/Playback/Lambent/LambentHDRLift.swift reads these two).
+  static final lambentClientHdr = Preference(
+    key: 'pref_lambent_client_hdr',
+    defaultValue: false,
+  );
+  static final lambentClientDeepenBlacks = Preference(
+    key: 'pref_lambent_client_blacks',
+    defaultValue: false,
+  );
   static final lambentRtxHdr = EnumPreference(
     key: 'pref_lambent_rtx_hdr',
     defaultValue: LambentServerChoice.server,

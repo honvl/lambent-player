@@ -93,6 +93,10 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     #endif
 
     private let playerView = AetherPlayerView()
+    #if os(tvOS)
+        /// Lambent's Auto HDR on the device (Playback/Lambent/LambentHDRLift.swift), for SDR titles.
+        private lazy var hdrLift = LambentHDRLift()
+    #endif
     let subtitleOverlay = SubtitleOverlay()
     let secondarySubtitleOverlay = SubtitleOverlay()
     private var pendingSecondarySubtitle: SecondarySubtitleSelection?
@@ -1003,6 +1007,9 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         #endif
         endNativePrimaryBridge(restoreNative: false)
         nativePrimaryBridgeFailure = nil
+        #if os(tvOS)
+            hdrLift?.stop()
+        #endif
         // A load from a healthy or just ended session goes straight to
         // engine.load, whose internal supersede keeps the AVPlayer instance
         // and current item alive across the seam for PiP and Control Center.
@@ -1126,6 +1133,11 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 }
                 nowPlaying.setIntervalSkipsEnabled(!audioOnly)
             #endif
+            #if os(tvOS)
+                if !audioOnly, LambentHDRLift.isEnabled {
+                    _ = hdrLift?.start(engine: engine, in: playerView)
+                }
+            #endif
             seatDeclaredSubtitles(engine)
             if forceSubtitlesDisabledOnStart {
                 engine.clearSubtitle()
@@ -1220,6 +1232,9 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func stop() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
+        #if os(tvOS)
+            hdrLift?.stop()
+        #endif
         #if os(iOS)
             // A stop from a wrapper that was shut down, or that another one has
             // taken the engine from, would land on whatever plays next.
@@ -1240,6 +1255,9 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func shutdown() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
+        #if os(tvOS)
+            hdrLift?.stop()
+        #endif
         stopObservingForegroundReturn()
         guard let engine = Self.sharedEngine() else { return }
         #if os(iOS)

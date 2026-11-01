@@ -28,6 +28,8 @@
 		5DA743B4851DEB574E7EA6E6 /* MoonfinURLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1263D42B138D48499CB25F10 /* MoonfinURLSession.swift */; };
 		6E8429C73DFB8688BD40C60F /* AppleTvSystemChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D05FC70CE4F8BD2EC3962C /* AppleTvSystemChannel.swift */; };
 		76204B7FA09C5286ACA2FE6C /* AssRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */; };
+		AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */; };
+		8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */; };
 		7A8BDAB827D12F39CAF7401E /* AetherEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFE3931A7703B48EA41DA54 /* AetherEngine */; };
 		81DCCA41EF933CEC711C17AF /* genesis_plus_gx_libretro.framework in Embed Libretro Cores */ = {isa = PBXBuildFile; fileRef = 3D25A3FF43C9B94D5ED8A397 /* genesis_plus_gx_libretro.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		86EBDA29EC9F3F8B48EC6A25 /* AppleTvPreviewChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B3D4A2E4C583DF7B8CAE4BA /* AppleTvPreviewChannel.swift */; };
@@ -158,6 +160,8 @@
 		E96043FE795EA6E651493D5F /* snes9x_libretro.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = snes9x_libretro.framework; sourceTree = "<group>"; };
 		EBDE8DF681CD2620EB749A48 /* fceumm_libretro.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = fceumm_libretro.framework; sourceTree = "<group>"; };
 		EC66562038A8BA35AC8B1733 /* MoonfinTopShelf.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MoonfinTopShelf.entitlements; sourceTree = "<group>"; };
+		1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentHDRLift.swift; path = Lambent/LambentHDRLift.swift; sourceTree = "<group>"; };
+		C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentTrueHDRTables.swift; path = Lambent/LambentTrueHDRTables.swift; sourceTree = "<group>"; };
 		F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AssRenderer.swift; path = Aether/AssRenderer.swift; sourceTree = "<group>"; };
 		F2A0477050CD294B7CB8C754 /* SubtitleOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SubtitleOverlay.swift; path = Aether/SubtitleOverlay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -250,6 +254,8 @@
 				78635028C38C060155519D22 /* AetherVideoChannel.swift */,
 				A3E7D10600000000000000C2 /* AetherVideoPlatformView.swift */,
 				F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */,
+				C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */,
+				1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */,
 				DDC62E8B96B51BBBCBA1EC23 /* EngineTrustPolicy.swift */,
 				81BEA439F41D2A8701F2EC3E /* ClientIdentityStore.swift */,
 				1263D42B138D48499CB25F10 /* MoonfinURLSession.swift */,
@@ -586,6 +592,8 @@
 				CAE8045C3AB63C66024FA6B7 /* AetherVideoChannel.swift in Sources */,
 				A3E7D10500000000000000C1 /* AetherVideoPlatformView.swift in Sources */,
 				76204B7FA09C5286ACA2FE6C /* AssRenderer.swift in Sources */,
+				AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */,
+				8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */,
 				6A5B8E29CBD0D987A4C5E44A /* EngineTrustPolicy.swift in Sources */,
 				583F601A53A8E8037B41AB76 /* ClientIdentityStore.swift in Sources */,
 				5DA743B4851DEB574E7EA6E6 /* MoonfinURLSession.swift in Sources */,
