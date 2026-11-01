@@ -99,6 +99,11 @@ class MediaBarRepository {
           .cast<Map<String, dynamic>>();
 
       final validLibraryIds = <String>{};
+      // Libraries the bar draws from when the user picked none. Lambent
+      // Server marks home videos and PC folders, whose files are mostly
+      // unmatched and titled by file name; like Plex's home, the bar leaves
+      // them out unless they are picked.
+      final defaultLibraryIds = <String>{};
       for (final view in views) {
         final viewId = view['Id']?.toString();
         if (viewId == null ||
@@ -107,6 +112,10 @@ class MediaBarRepository {
         }
 
         validLibraryIds.add(viewId);
+        final lambentKind = view['LambentLibraryKind']?.toString();
+        if (lambentKind != 'homevideos' && lambentKind != 'folders') {
+          defaultLibraryIds.add(viewId);
+        }
 
         // A mixed library is left off this map so it keeps the full type list
         final type = _normalizeCollectionType(view['CollectionType']);
@@ -126,7 +135,7 @@ class MediaBarRepository {
       allParentIds.addAll(collectionIds);
 
       if (allParentIds.isEmpty) {
-        allParentIds.addAll(validLibraryIds);
+        allParentIds.addAll(defaultLibraryIds);
       }
     } catch (_) {
       // The views lookup failed, so fall back to what the user picked. Those

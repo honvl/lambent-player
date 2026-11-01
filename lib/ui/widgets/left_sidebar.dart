@@ -62,6 +62,15 @@ const _kExpandedBackdropWidthTV = _kExpandedWidthTV - 16.0;
 const _kBackdropEdgeBlendWidthTV =
     _kExpandedWidthTV - _kExpandedBackdropWidthTV;
 
+/// Lambent's glass skin on a TV draws the sidebar as Plex's TV app does: a
+/// small capsule of marks while closed, a solid black floating panel while
+/// open. Sizes are Plex's, measured on a 1280-wide screenshot and scaled to
+/// the app's 1150-wide canvas.
+bool get _plexTv => PlatformDetection.isTV && AppColorScheme.isGlass;
+const _kPlexPanelInset = 21.0;
+const _kPlexPanelWidth = 230.0;
+const _kPlexPanelPadding = 18.0;
+
 class LeftSidebar extends StatefulWidget {
   final String? activeRoute;
   final FocusNode? contentFocusNode;
@@ -777,7 +786,158 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
     );
   }
 
+  Widget _buildPlexTvRail() {
+    final expanded = _isExpanded;
+    return SizedBox(
+      width: expanded
+          ? _kPlexPanelInset + _kPlexPanelWidth + 8
+          : _kCollapsedWidthTV,
+      child: FocusScope(
+        node: _sidebarFocus,
+        onFocusChange: _onSidebarFocusChange,
+        onKeyEvent: _onKeyEvent,
+        child: Stack(
+          children: [
+            if (expanded)
+              Positioned(
+                left: _kPlexPanelInset,
+                top: _kPlexPanelInset,
+                bottom: _kPlexPanelInset,
+                width: _kPlexPanelWidth,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(11),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: _kPlexPanelPadding,
+                      vertical: 12,
+                    ),
+                    child: _buildContent(),
+                  ),
+                ),
+              )
+            else ...[
+              // The rows stay in the tree, unseen, so focus can still land
+              // on Home and open the panel.
+              Positioned.fill(
+                child: Opacity(opacity: 0, child: _buildContent()),
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: _buildPlexClosedCapsule(),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Plex's closed sidebar: the avatar, Search, Home and a menu mark.
+  Widget _buildPlexClosedCapsule() {
+    final user = _userRepo.currentUser;
+    final initial = (user?.name.isNotEmpty == true)
+        ? user!.name[0].toUpperCase()
+        : '?';
+    final mark = Colors.white.withValues(alpha: 0.85);
+    Widget icon(IconData data) => SizedBox(
+      height: 29,
+      child: Center(child: Icon(data, size: 15, color: mark)),
+    );
+    return IgnorePointer(
+      child: Container(
+        width: 44,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.32),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 23,
+              height: 23,
+              margin: const EdgeInsets.only(bottom: 4),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColorScheme.accent,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: _userImageUrl != null
+                  ? Image(
+                      image: PacedNetworkImage(
+                        _userImageUrl!,
+                        headers: serverImageHeaders,
+                      ),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Text(
+                          initial,
+                          style: TextStyle(
+                            color: AppColorScheme.onAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        initial,
+                        style: TextStyle(
+                          color: AppColorScheme.onAccent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+            ),
+            icon(Icons.search_rounded),
+            icon(Icons.home_outlined),
+            icon(Icons.menu_rounded),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// A small grey section name over a hairline, as Plex heads its library
+  /// rows; with no name, the hairline alone.
+  Widget _plexSectionHeader(String? name) {
+    final faint = Colors.white.withValues(alpha: 0.45);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 0, 6),
+      child: Row(
+        children: [
+          if (name != null) ...[
+            Text(
+              name,
+              style: TextStyle(color: faint, fontSize: 10.5),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.white.withValues(alpha: 0.14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTvLayout() {
+    if (_plexTv) return _buildPlexTvRail();
     final backdropColor = _overlayColor().withValues(alpha: _overlayOpacity());
     final isNeon = ThemeRegistry.active.id == ThemeRegistry.neonPulseId;
     final desktopHoverRail =
@@ -805,9 +965,18 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                         if (AppColorScheme.isGlass)
                           SizedBox(
                             width: _kExpandedBackdropWidthTV,
-                            child: const GlassSurface(
-                              cornerRadius: 18,
-                              fallbackColor: Colors.transparent,
+                            // Darkened like Plex's open sidebar, so the page
+                            // behind doesn't show through the labels.
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.55),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: const GlassSurface(
+                                cornerRadius: 18,
+                                reinforced: true,
+                                fallbackColor: Colors.transparent,
+                              ),
                             ),
                           )
                         else
@@ -993,10 +1162,28 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 return c;
               }
 
+              final plex = _plexTv && _showLabels;
               final items = <Widget>[
+                if (_plexTv)
+                  _SidebarItem(
+                    key: const ValueKey('sidebar-search'),
+                    icon: Icons.search_rounded,
+                    label: l10n.search,
+                    baseColor: nextMainSidebarColor(),
+                    showLabel: _showLabels,
+                    onPressed: () {
+                      _onNavigate();
+                      if (_isActive(Destinations.search)) {
+                        _exitSidebarToContent();
+                        return;
+                      }
+                      _markNavigationAwayFromSidebar();
+                      context.navigateTopLevel(Destinations.search);
+                    },
+                  ),
                 _SidebarItem(
                   key: const ValueKey('sidebar-home'),
-                  icon: Icons.home_rounded,
+                  icon: Icons.home_outlined,
                   label: l10n.home,
                   baseColor: nextMainSidebarColor(),
                   focusNode: _homeFocusNode,
@@ -1013,22 +1200,23 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                     context.go(Destinations.home);
                   },
                 ),
-                _SidebarItem(
-                  key: const ValueKey('sidebar-search'),
-                  icon: Icons.search_rounded,
-                  label: l10n.search,
-                  baseColor: nextMainSidebarColor(),
-                  showLabel: _showLabels,
-                  onPressed: () {
-                    _onNavigate();
-                    if (_isActive(Destinations.search)) {
-                      _exitSidebarToContent();
-                      return;
-                    }
-                    _markNavigationAwayFromSidebar();
-                    context.navigateTopLevel(Destinations.search);
-                  },
-                ),
+                if (!_plexTv)
+                  _SidebarItem(
+                    key: const ValueKey('sidebar-search'),
+                    icon: Icons.search_rounded,
+                    label: l10n.search,
+                    baseColor: nextMainSidebarColor(),
+                    showLabel: _showLabels,
+                    onPressed: () {
+                      _onNavigate();
+                      if (_isActive(Destinations.search)) {
+                        _exitSidebarToContent();
+                        return;
+                      }
+                      _markNavigationAwayFromSidebar();
+                      context.navigateTopLevel(Destinations.search);
+                    },
+                  ),
                 if (showShuffle)
                   _SidebarItem(
                     key: const ValueKey('sidebar-shuffle'),
@@ -1066,7 +1254,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 if (showFavorites)
                   _SidebarItem(
                     key: const ValueKey('sidebar-favorites'),
-                    icon: Icons.favorite_rounded,
+                    icon: Icons.favorite_outline,
                     label: l10n.favorites,
                     baseColor: nextMainSidebarColor(),
                     showLabel: _showLabels,
@@ -1083,7 +1271,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 if (showLiveTv)
                   _SidebarItem(
                     key: const ValueKey('sidebar-livetv'),
-                    icon: Icons.live_tv_rounded,
+                    icon: Icons.live_tv_outlined,
                     label: l10n.liveTv,
                     baseColor: nextMainSidebarColor(),
                     showLabel: _showLabels,
@@ -1100,7 +1288,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 if (showSyncPlay)
                   _SidebarItem(
                     key: const ValueKey('sidebar-syncplay'),
-                    icon: Icons.groups_rounded,
+                    icon: Icons.groups_outlined,
                     label: l10n.syncPlay,
                     baseColor: nextMainSidebarColor(),
                     showLabel: _showLabels,
@@ -1135,7 +1323,9 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                       context.navigateTopLevel(Destinations.seerrDiscover);
                     },
                   ),
-                if (showLibraries && showLibrariesIndividually)
+                if (plex && showLibraries && navLibraries.isNotEmpty)
+                  _plexSectionHeader(l10n.libraries),
+                if (showLibraries && (showLibrariesIndividually || _plexTv))
                   for (final lib in navLibraries)
                     _SidebarItem(
                       // Two servers can share a library id, so the key is the
@@ -1200,6 +1390,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                         : const SizedBox.shrink(),
                   ),
                 ],
+                if (plex) _plexSectionHeader(null),
                 // The slot is taken here rather than inside the builder, so
                 // the rows below keep their colour whether or not anything is
                 // saved right now.
@@ -1225,7 +1416,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                   ),
                 _SidebarItem(
                   key: const ValueKey('sidebar-settings'),
-                  icon: Icons.settings_rounded,
+                  icon: Icons.settings_outlined,
                   label: l10n.settings,
                   baseColor: nextMainSidebarColor(),
                   focusNode: _settingsFocusNode,
@@ -1250,7 +1441,9 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                     minHeight: math.max(0, constraints.maxHeight - 8),
                   ),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: _plexTv
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.center,
                     children: items,
                   ),
                 ),
@@ -1262,7 +1455,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
           isExpanded: _showLabels,
           focusNode: _musicCardFocusNode,
         ),
-        if (showClock)
+        if (showClock && !_plexTv)
           Visibility(
             visible: _showLabels,
             maintainSize: true,
@@ -1293,7 +1486,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
             ),
           )
         else
-          const SizedBox(height: 16),
+          SizedBox(height: _plexTv ? 0 : 16),
       ],
     );
   }
@@ -1317,10 +1510,10 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
     final fallback = Center(
       child: Text(
         initial,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: _plexTv ? AppColorScheme.onAccent : Colors.white,
           fontWeight: FontWeight.w600,
-          fontSize: 18,
+          fontSize: _plexTv ? 13 : 18,
         ),
       ),
     );
@@ -1334,16 +1527,20 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
     final tvFocused = PlatformDetection.isTV && isFocused;
     final focusColor = Color(_prefs.get(UserPreferences.focusColor).colorValue);
 
+    final avatarSize = _plexTv ? 27.0 : 40.0;
     final avatar = Container(
-      width: 40,
-      height: 40,
-      decoration: const BoxDecoration(
+      width: avatarSize,
+      height: avatarSize,
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF00A4DC), Color(0xFF0077B6)],
-        ),
+        color: _plexTv ? AppColorScheme.accent : null,
+        gradient: _plexTv
+            ? null
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF00A4DC), Color(0xFF0077B6)],
+              ),
       ),
       child: ClipOval(
         child: _userImageUrl != null
@@ -1352,7 +1549,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 // at the painted size instead of a full bitmap per user.
                 image: ResizeImage.resizeIfNeeded(
                   ArtworkDecode.widthFor(
-                    40,
+                    avatarSize,
                     MediaQuery.devicePixelRatioOf(context),
                   ),
                   null,
@@ -1362,8 +1559,8 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                   ),
                 ),
                 fit: BoxFit.cover,
-                width: 40,
-                height: 40,
+                width: avatarSize,
+                height: avatarSize,
                 errorBuilder: (_, _, _) => fallback,
               )
             : fallback,
@@ -1372,7 +1569,9 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
 
     final content = AnimatedContainer(
       duration: const Duration(milliseconds: 150),
-      padding: EdgeInsets.all(innerPad),
+      padding: _plexTv
+          ? const EdgeInsets.fromLTRB(10, 5, 8, 5)
+          : EdgeInsets.all(innerPad),
       decoration: BoxDecoration(
         color: (tvFocused && _showLabels)
             ? Colors.white
@@ -1395,19 +1594,29 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                       : isFocused
                       ? focusColor
                       : Colors.white.withValues(alpha: 0.9),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: _plexTv ? 13 : 14,
+                  fontWeight: _plexTv ? FontWeight.w500 : FontWeight.w600,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            if (_plexTv)
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: tvFocused
+                    ? Colors.black
+                    : Colors.white.withValues(alpha: 0.7),
+              ),
           ],
         ],
       ),
     );
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+      padding: _plexTv
+          ? const EdgeInsets.only(bottom: 6)
+          : const EdgeInsets.fromLTRB(8, 16, 8, 8),
       child: Focus(
         focusNode: _profileFocusNode,
         onKeyEvent: (_, event) {
@@ -1517,14 +1726,17 @@ class _SidebarItemState extends State<_SidebarItem> {
     final focusColor = Color(_prefs.get(UserPreferences.focusColor).colorValue);
     final tvFocused = PlatformDetection.isTV && _isFocused;
     final baseColor = widget.baseColor ?? Colors.white.withValues(alpha: 0.6);
+    final plex = _plexTv && widget.showLabel;
+    final iconSize = desktopSidebar ? 28.0 : (plex ? 18.0 : 24.0);
+    final iconSlotWidth = desktopSidebar ? 36.0 : (plex ? 22.0 : 32.0);
+    final labelFontSize = desktopSidebar ? 16.0 : (plex ? 15.0 : 14.0);
+    final restColor = plex ? Colors.white.withValues(alpha: 0.92) : null;
     final fgColor = tvFocused
         ? Colors.black
-        : highlighted
-        ? (useBaseForFocus ? baseColor : focusColor)
-        : baseColor;
-    final iconSize = desktopSidebar ? 28.0 : 24.0;
-    final iconSlotWidth = desktopSidebar ? 36.0 : 32.0;
-    final labelFontSize = desktopSidebar ? 16.0 : 14.0;
+        : restColor ??
+              (highlighted
+                  ? (useBaseForFocus ? baseColor : focusColor)
+                  : baseColor);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
@@ -1544,10 +1756,10 @@ class _SidebarItemState extends State<_SidebarItem> {
             onTap: widget.onPressed,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              height: desktopSidebar ? 44 : 40,
+              height: desktopSidebar ? 44 : (plex ? 38 : 40),
               padding: EdgeInsets.only(
-                left: _tvCompact ? 12 : 18,
-                right: _tvCompact ? 12 : 18,
+                left: plex ? 10 : (_tvCompact ? 12 : 18),
+                right: plex ? 10 : (_tvCompact ? 12 : 18),
               ),
               decoration: BoxDecoration(
                 color: tvFocused
@@ -1579,14 +1791,14 @@ class _SidebarItemState extends State<_SidebarItem> {
                     ),
                   ),
                   if (widget.showLabel) ...[
-                    const SizedBox(width: 12),
+                    SizedBox(width: plex ? 10 : 12),
                     Expanded(
                       child: Text(
                         widget.label,
                         style: TextStyle(
                           color: fgColor,
                           fontSize: labelFontSize,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: plex ? FontWeight.w400 : FontWeight.w500,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),

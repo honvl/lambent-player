@@ -31,6 +31,7 @@ List<AggregatedLibrary> _parseUserViews(Map<String, dynamic> response) {
       backdropImageTags: (data['BackdropImageTags'] as List?)
           ?.map((e) => e.toString())
           .toList(),
+      lambentKind: data['LambentLibraryKind'] as String?,
     );
   }).toList();
 }

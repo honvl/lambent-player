@@ -56,20 +56,32 @@ class _Server {
 void main() {
   tearDown(() => GetIt.instance.reset());
 
-  Future<List<String>> load(_Server server, {required int itemCount}) async {
+  Future<List<String>> load(
+    _Server server, {
+    required int itemCount,
+    List<Map<String, dynamic>> libraries = const [],
+    String? pickedLibraries,
+  }) async {
     SharedPreferences.setMockInitialValues({});
     final store = PreferenceStore();
     await store.init();
     final prefs = UserPreferences(store);
     await prefs.set(UserPreferences.pluginSyncEnabled, false);
     await prefs.set(UserPreferences.mediaBarItemCount, '$itemCount');
-    await prefs.set(
-      UserPreferences.mediaBarCollectionIds,
-      server.collections.keys.join(','),
-    );
+    if (libraries.isEmpty) {
+      await prefs.set(
+        UserPreferences.mediaBarCollectionIds,
+        server.collections.keys.join(','),
+      );
+    }
+    if (pickedLibraries != null) {
+      await prefs.set(UserPreferences.mediaBarLibraryIds, pickedLibraries);
+    }
 
     final views = _UserViewsApi();
-    when(() => views.getUserViews()).thenAnswer((_) async => {'Items': []});
+    when(
+      () => views.getUserViews(),
+    ).thenAnswer((_) async => {'Items': libraries});
     final items = _ItemsApi();
     when(
       () => items.getItems(
@@ -143,5 +155,42 @@ void main() {
 
     expect(shown.toSet(), shared.toSet());
     expect(shown, hasLength(5));
+  });
+
+  group('Lambent Server home videos', () {
+    final libraries = [
+      {'Id': 'movies', 'CollectionType': 'movies'},
+      {
+        'Id': 'home',
+        'CollectionType': 'movies',
+        'LambentLibraryKind': 'homevideos',
+      },
+    ];
+    Map<String, List<String>> titles() => {
+      'movies': ['film', 'show'],
+      'home': ['clip.2021.1080p', 'clip.2022.1080p'],
+    };
+
+    test('stay out of the bar unless picked', () async {
+      final server = _Server(titles());
+
+      final shown = await load(server, itemCount: 10, libraries: libraries);
+
+      expect(server.asked, {'movies'});
+      expect(shown.toSet(), {'film', 'show'});
+    });
+
+    test('fill the bar when the user picks them', () async {
+      final server = _Server(titles());
+
+      await load(
+        server,
+        itemCount: 10,
+        libraries: libraries,
+        pickedLibraries: 'home',
+      );
+
+      expect(server.asked, {'home'});
+    });
   });
 }

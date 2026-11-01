@@ -190,6 +190,7 @@ class MultiServerRepository {
               backdropImageTags: (data['BackdropImageTags'] as List?)
                   ?.map((e) => e.toString())
                   .toList(),
+              lambentKind: data['LambentLibraryKind'] as String?,
             );
           }).toList();
         }, label: 'libraries from ${session.server.name}'),
