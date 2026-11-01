@@ -106,6 +106,16 @@ void main() {
       expect(out.queryParameters['hue'], '5');
     });
 
+    test('turns compare on and off', () {
+      LambentEnhancement.overrides = const LambentEnhancement(compare: true);
+      final on = LambentEnhancement.applyOverrides(_url);
+      expect(Uri.parse(on).queryParameters['cmp'], '1');
+      expect(LambentEnhancement.fromUrl(on).compare, true);
+      LambentEnhancement.overrides = const LambentEnhancement(compare: false);
+      final off = Uri.parse(LambentEnhancement.applyOverrides(on));
+      expect(off.queryParameters.containsKey('cmp'), false);
+    });
+
     test('clamps what it writes', () {
       LambentEnhancement.overrides = const LambentEnhancement(
         quality: 9,

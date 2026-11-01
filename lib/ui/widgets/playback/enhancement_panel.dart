@@ -68,6 +68,9 @@ const _qualityNames = <int, String>{
 
 typedef _Range = ({int min, int max});
 
+double _fraction(int value, _Range range) =>
+    (value - range.min) / (range.max - range.min);
+
 class _EnhancementPanelBody extends StatefulWidget {
   const _EnhancementPanelBody({
     required this.current,
@@ -128,6 +131,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
       required LambentEnhancement Function(int) set,
       String unit = '',
       bool needsHdr = false,
+      int? origin,
     }) {
       final enabled = !needsHdr || hdrOn;
       return _EnhancementRow(
@@ -135,10 +139,14 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         label: label,
         value: enabled ? '$value$unit' : 'Needs HDR',
         dimmed: !enabled,
+        slider: (
+          value: _fraction(value!, range),
+          origin: _fraction(origin ?? range.min, range),
+        ),
         onStep: (dir, wrap) {
           if (!enabled) return;
           setState(() {
-            _pending = set(_stepped(value!, dir, step, range, wrap));
+            _pending = set(_stepped(value, dir, step, range, wrap));
           });
         },
       );
@@ -204,6 +212,14 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           value: pending.deepenBlacks,
           set: (on) => pending.copyWith(deepenBlacks: on),
         ),
+      // The server only names `cmp` while it is on, so any enhanced stream
+      // offers it.
+      if (cur.quality != null)
+        toggle(
+          label: 'Compare with original',
+          value: pending.compare ?? false,
+          set: (on) => pending.copyWith(compare: on),
+        ),
     ];
 
     final pictureRows = <Widget>[
@@ -251,6 +267,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           step: 5,
           range: LambentEnhancement.hueRange,
           unit: '°',
+          origin: 0,
           set: (v) => pending.copyWith(hue: v),
         ),
     ];
@@ -350,10 +367,15 @@ class _EnhancementRow extends StatefulWidget {
     required this.onStep,
     this.autofocus = false,
     this.dimmed = false,
+    this.slider,
   });
 
   final String label;
   final String value;
+
+  /// Draws a track under the row, filled from [origin] to [value], both as
+  /// fractions of the range. Left and right still step it.
+  final ({double value, double origin})? slider;
 
   /// Called with -1 or 1; the flag is true for a select press, which wraps at
   /// the top of a range.
@@ -419,28 +441,117 @@ class _EnhancementRowState extends State<_EnhancementRow> {
             active: _focused,
             radius: 22,
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Text(
-                  widget.label,
-                  style: TextStyle(
-                    color: foreground,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: foreground,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
+                  Text(
+                    widget.value,
+                    style: TextStyle(
+                      color: foreground.withValues(alpha: _focused ? 0.8 : 0.7),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                widget.value,
-                style: TextStyle(
-                  color: foreground.withValues(alpha: _focused ? 0.8 : 0.7),
-                  fontSize: 15,
+              if (widget.slider case final slider?) ...[
+                const SizedBox(height: 10),
+                _SliderTrack(
+                  value: slider.value,
+                  origin: slider.origin,
+                  color: foreground,
+                  focused: _focused,
+                  dimmed: widget.dimmed,
                 ),
-              ),
+              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A thin track with a round thumb at [value], filled from [origin], both as
+/// fractions of the width.
+class _SliderTrack extends StatelessWidget {
+  const _SliderTrack({
+    required this.value,
+    required this.origin,
+    required this.color,
+    required this.focused,
+    required this.dimmed,
+  });
+
+  final double value;
+  final double origin;
+  final Color color;
+  final bool focused;
+  final bool dimmed;
+
+  @override
+  Widget build(BuildContext context) {
+    const thumb = 12.0;
+    final alpha = dimmed ? 0.35 : 1.0;
+    return SizedBox(
+      height: thumb,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth - thumb;
+          final at = width * value.clamp(0.0, 1.0);
+          final from = width * origin.clamp(0.0, 1.0);
+          return Stack(
+            children: [
+              Positioned(
+                left: thumb / 2,
+                right: thumb / 2,
+                top: (thumb - 4) / 2,
+                height: 4,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.18 * alpha),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: thumb / 2 + (at < from ? at : from),
+                width: (at - from).abs(),
+                top: (thumb - 4) / 2,
+                height: 4,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.8 * alpha),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: at,
+                top: 0,
+                width: thumb,
+                height: thumb,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: alpha),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

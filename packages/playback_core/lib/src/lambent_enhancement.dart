@@ -20,6 +20,7 @@ class LambentEnhancement {
     this.middleGray,
     this.peakNits,
     this.hue,
+    this.compare,
   });
 
   /// RTX Video upscaling quality, 1 (fastest) to 4 (best).
@@ -48,6 +49,10 @@ class LambentEnhancement {
 
   /// Hue rotation in degrees, -30 to 30 (0 is neutral).
   final int? hue;
+
+  /// Split screen: the left half is the original, as this screen would play
+  /// it without the PC, and the right half is enhanced.
+  final bool? compare;
 
   static const none = LambentEnhancement();
 
@@ -111,6 +116,7 @@ class LambentEnhancement {
       middleGray: number('mid', middleGrayRange),
       peakNits: number('peak', peakRange),
       hue: number('hue', hueRange),
+      compare: flag('cmp'),
     );
   }
 
@@ -133,6 +139,9 @@ class LambentEnhancement {
     number('mid', o.middleGray, middleGrayRange);
     number('peak', o.peakNits, peakRange);
     number('hue', o.hue, hueRange);
+    // Off is the server's default, so it leaves the query as it was.
+    if (o.compare == true) query['cmp'] = '1';
+    if (o.compare == false) query.remove('cmp');
     // Dolby Vision rides on RTX HDR, so it is off whenever HDR is.
     final hdrOn = (query['hdr'] ?? '0') == '1';
     if (o.dolbyVision != null || (query.containsKey('dv') && !hdrOn)) {
@@ -152,6 +161,7 @@ class LambentEnhancement {
     middleGray: other.middleGray ?? middleGray,
     peakNits: other.peakNits ?? peakNits,
     hue: other.hue ?? hue,
+    compare: other.compare ?? compare,
   );
 
   /// Only the fields of this that differ from [base], so pinning a choice
@@ -166,6 +176,7 @@ class LambentEnhancement {
     middleGray: middleGray != base.middleGray ? middleGray : null,
     peakNits: peakNits != base.peakNits ? peakNits : null,
     hue: hue != base.hue ? hue : null,
+    compare: compare != base.compare ? compare : null,
   );
 
   LambentEnhancement copyWith({
@@ -178,6 +189,7 @@ class LambentEnhancement {
     int? middleGray,
     int? peakNits,
     int? hue,
+    bool? compare,
   }) => LambentEnhancement(
     quality: quality ?? this.quality,
     hdr: hdr ?? this.hdr,
@@ -188,6 +200,7 @@ class LambentEnhancement {
     middleGray: middleGray ?? this.middleGray,
     peakNits: peakNits ?? this.peakNits,
     hue: hue ?? this.hue,
+    compare: compare ?? this.compare,
   );
 
   @override
@@ -201,7 +214,8 @@ class LambentEnhancement {
       other.contrast == contrast &&
       other.middleGray == middleGray &&
       other.peakNits == peakNits &&
-      other.hue == hue;
+      other.hue == hue &&
+      other.compare == compare;
 
   @override
   int get hashCode => Object.hash(
@@ -214,6 +228,7 @@ class LambentEnhancement {
     middleGray,
     peakNits,
     hue,
+    compare,
   );
 
   static Map<String, String> _query(String url) =>
