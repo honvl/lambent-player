@@ -38,9 +38,8 @@ class _LambentEnhancementScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (!on &&
-                    (PlatformDetection.isAppleTV ||
-                        (PlatformDetection.isAndroid && PlatformDetection.isTV))) ...[
+                // Apple TV only: other TV devices get HDR from the PC (Enhance on PC).
+                if (!on && PlatformDetection.isAppleTV) ...[
                   const _SectionHeader('On this TV'),
                   adaptiveListSection(
                     children: [
