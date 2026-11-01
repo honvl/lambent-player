@@ -2674,12 +2674,14 @@ class UserPreferences extends ChangeNotifier {
   /// Which player video plays through on iOS and Apple TV. Belongs to the
   /// device rather than the account, so it isn't synced. Apple TV keeps the
   /// native player it always had unless the viewer switches.
-  // The Flutter player everywhere, Apple TV included: it carries Lambent's
-  // glass player (the 4K HDR chip and panel, previews, compare). The native
-  // player stays a choice in settings.
+  // Apple TV plays through the native Swift player, restyled to Lambent's
+  // Liquid Glass design (NativeApplePlayerViewController); the Flutter one
+  // stays a choice in settings.
   static final applePlayerUi = EnumPreference(
     key: 'pref_apple_player_ui',
-    defaultValue: ApplePlayerUi.flutter,
+    defaultValue: PlatformDetection.isAppleTV
+        ? ApplePlayerUi.native
+        : ApplePlayerUi.flutter,
     values: ApplePlayerUi.values,
   );
 

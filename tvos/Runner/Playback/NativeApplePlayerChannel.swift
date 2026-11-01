@@ -348,6 +348,11 @@ final class NativeApplePlayerChannel: NSObject, FlutterStreamHandler {
         vc.onSetSpeed = { [weak self] speed in
             self?.send(["event": "setSpeed", "speed": speed])
         }
+        vc.onSetLambent = { [weak self] change in
+            var payload = change
+            payload["event"] = "setLambent"
+            self?.send(payload)
+        }
         vc.onSetBitrate = { [weak self] mbps in
             self?.send(["event": "setBitrate", "mbps": mbps])
         }

@@ -37,7 +37,12 @@ Map<String, Object> lambentScreenDefaults(UserPreferences prefs) {
 /// changes, so turning enhancement off from the 4K HDR chip survives an
 /// unrelated settings change.
 void bindLambentEnhancementDefaults(UserPreferences prefs) {
-  var enhanceOn = prefs.get(UserPreferences.lambentEnhanceOnPc);
+  // A build made with --dart-define=LAMBENT_ORIGINAL=true plays Plex's own
+  // file, which a simulator can decode where it can't the enhanced HEVC HDR
+  // stream.
+  const forceOriginal = bool.fromEnvironment('LAMBENT_ORIGINAL');
+  var enhanceOn =
+      prefs.get(UserPreferences.lambentEnhanceOnPc) && !forceOriginal;
   LambentEnhancement.enhancementOff = !enhanceOn;
   LambentEnhancement.screenDefaults = lambentScreenDefaults(prefs);
   prefs.addListener(() {

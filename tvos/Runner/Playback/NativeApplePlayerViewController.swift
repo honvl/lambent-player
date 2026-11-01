@@ -95,6 +95,10 @@ final class NativeApplePlayerViewController: UIViewController {
     var onSelectEpisodesSeason: ((String) -> Void)?
     var onSelectEpisode: ((String) -> Void)?
     var onEpisodesClosed: (() -> Void)?
+    /// A change made in the 4K HDR chip's sheet, for the Dart side to apply
+    /// (`enhancement`, `reset`, or `quality`/`hdr`/`dolbyVision`/
+    /// `deepenBlacks`/`compare`).
+    var onSetLambent: (([String: Any]) -> Void)?
     var baseSubtitlePos = 92
     private var didAttachSurface = false
     /// Set while the channel takes the player off screen for Flutter UI, so
@@ -255,6 +259,8 @@ final class NativeApplePlayerViewController: UIViewController {
         case prev, skipBack, playPause, skipForward, next
         case speed, chapters, episodes, subtitles, audio, cast, quality, zoom, info
         case channels, favorite, guide, syncplay, goLive, record, orientation
+        /// Lambent's 4K HDR chip and the "Picture and sound" sheet.
+        case lambent, more
     }
     private var focusedZone: Zone = .buttons
     private var focusedControlIndex = 0
@@ -282,7 +288,7 @@ final class NativeApplePlayerViewController: UIViewController {
     /// drawn larger to stay a comfortable size to tap once scaled.
     private static let controlSize: CGFloat = 120
     #else
-    private static let controlSize: CGFloat = 64
+    private static let controlSize: CGFloat = 72
     #endif
     private static var controlScale: CGFloat { controlSize / 64 }
     /// The size the current row of buttons is drawn at. Only iOS shrinks it.
@@ -327,6 +333,18 @@ final class NativeApplePlayerViewController: UIViewController {
     private let trickplayStrip = UIView()
     private var trickplayStripTiles: [UIImageView] = []
     private let trickplayCover = UIImageView()
+
+    /// Lambent's glass: the control panel at the bottom and the round back
+    /// button at the top left (Liquid Glass on tvOS 26, a dark blur before).
+    private let controlGlass = NativeApplePlayerViewController.makeGlass(cornerRadius: 44)
+    private let backGlass = NativeApplePlayerViewController.makeGlass(cornerRadius: 34)
+    private let backIcon = UIImageView()
+    private let headerRow = UIStackView()
+    /// What Lambent Server makes of this stream (the chip's label and the
+    /// settings its sheet changes), from the Dart side; nil hides the chip.
+    private var lambentInfo: [String: Any]?
+    private var lambentLabel: UILabel?
+    private let controlSpacer = UIView()
 
     private let osdScrim = UIView()
     private let topContainer = UIView()
@@ -437,6 +455,28 @@ final class NativeApplePlayerViewController: UIViewController {
         }
     }
 
+    /// A rounded panel of Liquid Glass where the system has it, else the dark
+    /// blur material, with the light rim the design gives every glass surface.
+    static func makeGlass(cornerRadius: CGFloat) -> UIVisualEffectView {
+        let effect: UIVisualEffect
+        if #available(tvOS 26.0, iOS 26.0, *) {
+            let glass = UIGlassEffect(style: .regular)
+            glass.tintColor = UIColor(red: 0.06, green: 0.07, blue: 0.09, alpha: 0.35)
+            effect = glass
+        } else {
+            effect = UIBlurEffect(style: .dark)
+        }
+        let view = UIVisualEffectView(effect: effect)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.isUserInteractionEnabled = false
+        view.layer.cornerRadius = cornerRadius
+        view.layer.cornerCurve = .continuous
+        view.layer.borderWidth = 1.5
+        view.layer.borderColor = UIColor(white: 1, alpha: 0.18).cgColor
+        view.clipsToBounds = true
+        return view
+    }
+
     private static func color(fromARGB value: Int) -> UIColor {
         let a = CGFloat((value >> 24) & 0xFF) / 255.0
         let r = CGFloat((value >> 16) & 0xFF) / 255.0
@@ -518,7 +558,7 @@ final class NativeApplePlayerViewController: UIViewController {
 
     private func setupOsd() {
         osdScrim.translatesAutoresizingMaskIntoConstraints = false
-        osdScrim.backgroundColor = UIColor(white: 0, alpha: 0.3)
+        osdScrim.backgroundColor = UIColor(white: 0, alpha: 0.12)
         osdScrim.alpha = 0
         view.addSubview(osdScrim)
         NSLayoutConstraint.activate([
@@ -539,7 +579,7 @@ final class NativeApplePlayerViewController: UIViewController {
         ])
 
         topGradientLayer.colors = [
-            UIColor(white: 0, alpha: 0.85).cgColor,
+            UIColor(white: 0, alpha: 0.5).cgColor,
             UIColor.clear.cgColor,
         ]
         topContainer.layer.addSublayer(topGradientLayer)
@@ -551,27 +591,50 @@ final class NativeApplePlayerViewController: UIViewController {
         logoImageView.widthAnchor.constraint(lessThanOrEqualToConstant: 480).isActive = true
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = .systemFont(ofSize: 42, weight: .bold)
+        titleLabel.font = .systemFont(ofSize: 34, weight: .semibold)
         titleLabel.textColor = .white
         titleLabel.numberOfLines = 1
 
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.font = .systemFont(ofSize: 28, weight: .semibold)
-        subtitleLabel.textColor = UIColor(white: 1, alpha: 0.75)
+        subtitleLabel.font = .systemFont(ofSize: 21, weight: .regular)
+        subtitleLabel.textColor = UIColor(white: 1, alpha: 0.78)
         subtitleLabel.numberOfLines = 1
 
         headerStack.translatesAutoresizingMaskIntoConstraints = false
         headerStack.axis = .vertical
         headerStack.alignment = .leading
-        headerStack.spacing = 10
-        topContainer.addSubview(headerStack)
+        headerStack.spacing = 2
+
+        // The round glass "<" ahead of the title. Decoration: Back on the
+        // remote leaves the player, so it takes no focus.
+        backIcon.translatesAutoresizingMaskIntoConstraints = false
+        backIcon.image = UIImage(
+            systemName: "chevron.left",
+            withConfiguration: UIImage.SymbolConfiguration(pointSize: 28, weight: .semibold))
+        backIcon.tintColor = .white
+        backIcon.contentMode = .center
+        backGlass.contentView.addSubview(backIcon)
         NSLayoutConstraint.activate([
-            headerStack.leadingAnchor.constraint(
-                equalTo: topContainer.leadingAnchor, constant: 90),
-            headerStack.trailingAnchor.constraint(
-                lessThanOrEqualTo: topContainer.trailingAnchor, constant: -90),
-            headerStack.topAnchor.constraint(
-                equalTo: topContainer.safeAreaLayoutGuide.topAnchor, constant: 40),
+            backGlass.widthAnchor.constraint(equalToConstant: 68),
+            backGlass.heightAnchor.constraint(equalToConstant: 68),
+            backIcon.centerXAnchor.constraint(equalTo: backGlass.contentView.centerXAnchor, constant: -2),
+            backIcon.centerYAnchor.constraint(equalTo: backGlass.contentView.centerYAnchor),
+        ])
+
+        headerRow.translatesAutoresizingMaskIntoConstraints = false
+        headerRow.axis = .horizontal
+        headerRow.alignment = .center
+        headerRow.spacing = 24
+        headerRow.addArrangedSubview(backGlass)
+        headerRow.addArrangedSubview(headerStack)
+        topContainer.addSubview(headerRow)
+        NSLayoutConstraint.activate([
+            headerRow.leadingAnchor.constraint(
+                equalTo: topContainer.leadingAnchor, constant: 96),
+            headerRow.trailingAnchor.constraint(
+                lessThanOrEqualTo: topContainer.trailingAnchor, constant: -96),
+            headerRow.topAnchor.constraint(
+                equalTo: topContainer.safeAreaLayoutGuide.topAnchor, constant: 48),
         ])
 
         osdContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -586,9 +649,11 @@ final class NativeApplePlayerViewController: UIViewController {
 
         gradientLayer.colors = [
             UIColor.clear.cgColor,
-            UIColor(white: 0, alpha: 0.9).cgColor,
+            UIColor(white: 0, alpha: 0.55).cgColor,
         ]
         osdContainer.layer.addSublayer(gradientLayer)
+        // The glass panel sits behind the times, the scrubber and the buttons.
+        osdContainer.addSubview(controlGlass)
 
         controlBar.translatesAutoresizingMaskIntoConstraints = false
         osdContainer.addSubview(controlBar)
@@ -614,7 +679,7 @@ final class NativeApplePlayerViewController: UIViewController {
         scrubber.translatesAutoresizingMaskIntoConstraints = false
         scrubber.progressTintColor = UIColor(red: 0.9, green: 0.1, blue: 0.55, alpha: 1)
         scrubber.trackTintColor = UIColor(white: 1, alpha: 0.25)
-        scrubber.layer.cornerRadius = 3
+        scrubber.layer.cornerRadius = 5
         scrubber.clipsToBounds = true
         osdContainer.addSubview(scrubber)
 
@@ -634,16 +699,26 @@ final class NativeApplePlayerViewController: UIViewController {
             equalTo: controlBar.trailingAnchor)
         #else
         let controlStackTrailing = controlStack.trailingAnchor.constraint(
-            lessThanOrEqualTo: controlBar.trailingAnchor)
+            equalTo: controlBar.trailingAnchor)
+        controlSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        controlSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         #endif
 
         NSLayoutConstraint.activate([
-            controlBar.leadingAnchor.constraint(
-                equalTo: osdContainer.leadingAnchor, constant: 90),
-            controlBar.trailingAnchor.constraint(
-                equalTo: osdContainer.trailingAnchor, constant: -90),
-            controlBar.bottomAnchor.constraint(
+            controlGlass.leadingAnchor.constraint(
+                equalTo: osdContainer.leadingAnchor, constant: 96),
+            controlGlass.trailingAnchor.constraint(
+                equalTo: osdContainer.trailingAnchor, constant: -96),
+            controlGlass.bottomAnchor.constraint(
                 equalTo: osdContainer.bottomAnchor, constant: -56),
+            controlGlass.topAnchor.constraint(equalTo: aboveRow.topAnchor, constant: -28),
+
+            controlBar.leadingAnchor.constraint(
+                equalTo: controlGlass.leadingAnchor, constant: 36),
+            controlBar.trailingAnchor.constraint(
+                equalTo: controlGlass.trailingAnchor, constant: -36),
+            controlBar.bottomAnchor.constraint(
+                equalTo: controlGlass.bottomAnchor, constant: -28),
             controlBar.heightAnchor.constraint(equalToConstant: Self.controlSize + 8),
 
             controlStack.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
@@ -659,7 +734,7 @@ final class NativeApplePlayerViewController: UIViewController {
             scrubber.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
             scrubber.bottomAnchor.constraint(
                 equalTo: belowRow.topAnchor, constant: -10),
-            scrubber.heightAnchor.constraint(equalToConstant: 6),
+            scrubber.heightAnchor.constraint(equalToConstant: 10),
 
             chapterOverlay.leadingAnchor.constraint(equalTo: scrubber.leadingAnchor),
             chapterOverlay.trailingAnchor.constraint(equalTo: scrubber.trailingAnchor),
@@ -814,7 +889,7 @@ final class NativeApplePlayerViewController: UIViewController {
 
     private func updateLoadingOverlay() {
         guard !loadingDismissed else { return }
-        if player.currentTime > 0 || player.state == .playing || player.state == .error {
+        if Self.osdPinned || player.currentTime > 0 || player.state == .playing || player.state == .error {
             loadingDismissed = true
             loadingSpinner.stopAnimating()
             UIView.animate(withDuration: 0.25) {
@@ -1285,6 +1360,8 @@ final class NativeApplePlayerViewController: UIViewController {
         case .goLive: return "dot.radiowaves.left.and.right"
         case .record: return liveRecord?.series == true ? "smallcircle.filled.circle" : "circle.fill"
         case .orientation: return orientationLock == false ? "rotate.right" : "lock.rotation"
+        case .lambent: return "sparkles"
+        case .more: return "slider.horizontal.3"
         }
     }
 
@@ -1298,6 +1375,7 @@ final class NativeApplePlayerViewController: UIViewController {
 
     private func makeControl(_ id: ControlId, side: CGFloat? = nil) -> UIView {
         let side = side ?? controlSide
+        if id == .lambent { return makeLambentChip(side: side) }
         // The icon keeps the proportions the 64 point TV button has.
         let iconScale = side / 64
         let container = UIView()
@@ -1345,7 +1423,7 @@ final class NativeApplePlayerViewController: UIViewController {
         case .syncplay: return "syncPlay"
         case .orientation: return "orientation"
         case .prev, .skipBack, .playPause, .skipForward, .next, .channels, .guide, .goLive,
-            .record:
+            .record, .lambent, .more:
             return nil
         }
     }
@@ -1385,29 +1463,13 @@ final class NativeApplePlayerViewController: UIViewController {
             if liveRecord != nil { ids.append(.record) }
             if !streamInfoSections.isEmpty, osdShows(.info) { ids.append(.info) }
         } else {
-            // Both always present, because they step chapters before they
-            // step the queue, so they have something to do on a lone movie.
-            ids.append(.prev)
-            ids.append(.skipBack)
-            ids.append(.playPause)
-            ids.append(.skipForward)
-            ids.append(.next)
-
-            // Everything past the transport answers to the player button
-            // settings, both for whether it appears and where it sits.
-            var secondary: [ControlId] = []
-            if canFavorite { secondary.append(.favorite) }
-            secondary.append(.speed)
-            if chapters.count > 1 { secondary.append(.chapters) }
-            if canBrowseEpisodes { secondary.append(.episodes) }
-            if !subtitleTracks.isEmpty || canDownloadSubtitles { secondary.append(.subtitles) }
-            if audioTracks.count > 1 { secondary.append(.audio) }
-            if hasCast { secondary.append(.cast) }
-            if syncPlayEnabled { secondary.append(.syncplay) }
-            secondary.append(.quality)
-            secondary.append(.zoom)
-            if !streamInfoSections.isEmpty { secondary.append(.info) }
-            ids += arrangedOsdControls(secondary)
+            // Lambent's compact bar: the transport on the left; subtitles, the
+            // 4K HDR chip and "Picture and sound" (which holds the rest) on
+            // the right.
+            ids += [.skipBack, .playPause, .skipForward]
+            if !subtitleTracks.isEmpty || canDownloadSubtitles { ids.append(.subtitles) }
+            if lambentInfo != nil { ids.append(.lambent) }
+            ids.append(.more)
         }
 
         #if os(iOS)
@@ -1424,6 +1486,7 @@ final class NativeApplePlayerViewController: UIViewController {
                 icon.image = UIImage(
                     systemName: iconName(for: id), withConfiguration: icon.image?.symbolConfiguration)
             }
+            lambentLabel?.text = (lambentInfo?["label"] as? String) ?? "Enhanced"
             updateFocusHighlight()
             return
         }
@@ -1450,6 +1513,10 @@ final class NativeApplePlayerViewController: UIViewController {
         controlSide = min(Self.controlSize, (room / CGFloat(max(ids.count, 1))).rounded(.down))
         #endif
         for id in ids {
+            // The right-hand group sits at the far end, past a flexible gap.
+            if !isLive, id == ids.first(where: { ![.skipBack, .playPause, .skipForward].contains($0) }) {
+                controlStack.addArrangedSubview(controlSpacer)
+            }
             controlStack.addArrangedSubview(makeControl(id))
         }
 
@@ -1474,6 +1541,7 @@ final class NativeApplePlayerViewController: UIViewController {
     }
 
     func applyUiMetadata(_ args: [String: Any]) {
+        lambentInfo = args["lambent"] as? [String: Any]
         headerPrimary = (args["topTitle"] as? String) ?? ""
         headerSecondary = (args["topSubtitle"] as? String) ?? ""
 
@@ -2411,7 +2479,146 @@ final class NativeApplePlayerViewController: UIViewController {
         case .goLive:
             player.seekToLiveEdge()
             if isPaused() { togglePlayPause() }
+        case .lambent:
+            presentLambentMenu()
+        case .more:
+            presentMoreMenu()
         }
+    }
+
+    // MARK: Lambent
+
+    private static let lambentQualityNames = [1: "1 · Fastest", 2: "2", 3: "3", 4: "4 · Best"]
+
+    private func onOff(_ value: Bool) -> String { value ? "On" : "Off" }
+
+    /// The 4K HDR chip's sheet: Lambent Server's PC enhancement for this
+    /// stream. A change goes to the Dart side, which reopens the stream with it.
+    private func presentLambentMenu() {
+        guard let info = lambentInfo else { return }
+        let enhanced = (info["enhanced"] as? Bool) ?? false
+        let sheet = makePlayerMenu(
+            title: (info["label"] as? String) ?? "Enhanced",
+            message: "Lambent PC enhancement", preferredStyle: .actionSheet)
+        let send: ([String: Any]) -> Void = { [weak self] change in self?.onSetLambent?(change) }
+        sheet.addAction(makePlayerAction(title: "PC enhancement: \(onOff(enhanced))", style: .default) { _ in
+            send(["enhancement": !enhanced])
+        })
+        if enhanced {
+            if let quality = (info["quality"] as? NSNumber)?.intValue {
+                let name = Self.lambentQualityNames[quality] ?? "\(quality)"
+                sheet.addAction(makePlayerAction(title: "Upscaling quality: \(name)", style: .default) {
+                    [weak self] _ in self?.presentLambentQualityMenu(current: quality)
+                })
+            }
+            let hdr = info["hdr"] as? Bool
+            if let hdr {
+                sheet.addAction(makePlayerAction(title: "RTX HDR: \(onOff(hdr))", style: .default) { _ in
+                    send(["hdr": !hdr])
+                })
+            }
+            if let dv = info["dolbyVision"] as? Bool, hdr == true {
+                sheet.addAction(makePlayerAction(title: "Dolby Vision: \(onOff(dv))", style: .default) { _ in
+                    send(["dolbyVision": !dv])
+                })
+            }
+            if let blacks = info["deepenBlacks"] as? Bool {
+                sheet.addAction(makePlayerAction(title: "Deepen blacks: \(onOff(blacks))", style: .default) { _ in
+                    send(["deepenBlacks": !blacks])
+                })
+            }
+            let compare = (info["compare"] as? Bool) ?? false
+            sheet.addAction(makePlayerAction(title: "Compare with original: \(onOff(compare))", style: .default) { _ in
+                send(["compare": !compare])
+            })
+            sheet.addAction(makePlayerAction(title: "Reset to server settings", style: .default) { _ in
+                send(["reset": true])
+            })
+        }
+        if !streamInfoSections.isEmpty {
+            sheet.addAction(makePlayerAction(title: "Stream info", style: .default) { [weak self] _ in
+                self?.presentInfoPanel()
+            })
+        }
+        sheet.addAction(makePlayerAction(title: "Cancel", style: .cancel))
+        presentSheet(sheet, from: .lambent)
+    }
+
+    private func presentLambentQualityMenu(current: Int) {
+        let sheet = makePlayerMenu(title: "Upscaling quality", message: nil, preferredStyle: .actionSheet)
+        for quality in 1...4 {
+            let check = quality == current ? "\u{2713} " : ""
+            sheet.addAction(makePlayerAction(
+                title: "\(check)\(Self.lambentQualityNames[quality] ?? "\(quality)")", style: .default
+            ) { [weak self] _ in
+                self?.onSetLambent?(["quality": quality])
+            })
+        }
+        sheet.addAction(makePlayerAction(title: "Cancel", style: .cancel))
+        presentSheet(sheet, from: .lambent)
+    }
+
+    /// "Picture and sound": everything the compact bar leaves off it, in the
+    /// order the player button settings give, as one glass sheet.
+    private func presentMoreMenu() {
+        let sheet = makePlayerMenu(title: "Picture and sound", message: nil, preferredStyle: .actionSheet)
+        var entries: [ControlId] = []
+        if lambentInfo != nil { entries.append(.lambent) }
+        var rest: [ControlId] = []
+        if audioTracks.count > 1 { rest.append(.audio) }
+        rest.append(.speed)
+        if chapters.count > 1 { rest.append(.chapters) }
+        if canBrowseEpisodes { rest.append(.episodes) }
+        if hasCast { rest.append(.cast) }
+        if syncPlayEnabled { rest.append(.syncplay) }
+        rest.append(.quality)
+        rest.append(.zoom)
+        if !streamInfoSections.isEmpty { rest.append(.info) }
+        if canFavorite { rest.append(.favorite) }
+        entries += arrangedOsdControls(rest).isEmpty ? rest : arrangedOsdControls(rest)
+        entries += [.prev, .next]
+        for id in entries {
+            sheet.addAction(makePlayerAction(title: tooltipText(for: id), style: .default) { [weak self] _ in
+                self?.activate(id)
+            })
+        }
+        sheet.addAction(makePlayerAction(title: "Cancel", style: .cancel))
+        presentSheet(sheet, from: .more)
+    }
+
+    /// The chip: a glass pill with the accent dot and the stream's label.
+    private func makeLambentChip(side: CGFloat) -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.layer.cornerRadius = side / 2
+        let dot = UIView()
+        dot.translatesAutoresizingMaskIntoConstraints = false
+        dot.backgroundColor = themeAccent
+        dot.layer.cornerRadius = 6
+        dot.layer.shadowColor = themeAccent.cgColor
+        dot.layer.shadowRadius = 7
+        dot.layer.shadowOpacity = 0.9
+        dot.layer.shadowOffset = .zero
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = (lambentInfo?["label"] as? String) ?? "Enhanced"
+        label.font = .systemFont(ofSize: 23, weight: .semibold)
+        label.textColor = .white
+        container.addSubview(dot)
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            container.heightAnchor.constraint(equalToConstant: side),
+            dot.widthAnchor.constraint(equalToConstant: 12),
+            dot.heightAnchor.constraint(equalToConstant: 12),
+            dot.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 22),
+            dot.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: dot.trailingAnchor, constant: 12),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -28),
+            label.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+        ])
+        controlViews[.lambent] = container
+        lambentLabel = label
+        return container
     }
 
     // The Dart side pauses before requesting this and resumes on Continue, so
@@ -2527,11 +2734,20 @@ final class NativeApplePlayerViewController: UIViewController {
             let isFocused = false
             #endif
             container.backgroundColor =
-                isFocused ? .white : UIColor(white: 1, alpha: 0)
+                isFocused ? .white : UIColor(white: 1, alpha: 0.1)
+            container.layer.borderWidth = isFocused ? 0 : 1.5
+            container.layer.borderColor = UIColor(white: 1, alpha: 0.14).cgColor
             controlIcons[id]?.tintColor =
-                isFocused ? .black : (id == .record ? recordTint : UIColor(white: 1, alpha: 0.85))
+                isFocused
+                ? UIColor(red: 0.06, green: 0.07, blue: 0.09, alpha: 1)
+                : (id == .record ? recordTint : UIColor(white: 1, alpha: 0.92))
             container.transform =
-                isFocused ? CGAffineTransform(scaleX: 1.12, y: 1.12) : .identity
+                isFocused ? CGAffineTransform(scaleX: 1.08, y: 1.08) : .identity
+        }
+        if let label = lambentLabel {
+            let chipFocused = focusedZone == .buttons && controls.indices.contains(focusedControlIndex)
+                && controls[focusedControlIndex] == .lambent
+            label.textColor = chipFocused ? UIColor(red: 0.06, green: 0.07, blue: 0.09, alpha: 1) : .white
         }
         let scrubFocused = focusedZone == .scrubber
         scrubber.transform =
@@ -2564,6 +2780,8 @@ final class NativeApplePlayerViewController: UIViewController {
         case .goLive: return "Jump to Live"
         case .record: return liveRecord?.timer == true ? "Cancel Recording" : "Record"
         case .orientation: return orientationLock == true ? "Unlock Orientation" : "Lock Landscape"
+        case .lambent: return "Picture enhancement"
+        case .more: return "Picture and sound"
         }
     }
 
@@ -2991,7 +3209,8 @@ final class NativeApplePlayerViewController: UIViewController {
 
     /// An appearance change can reset the native position while the OSD is still visible.
     func reapplySubtitleClearance() {
-        player.setSubtitlePosition(subtitlesRaised ? min(baseSubtitlePos, 70) : baseSubtitlePos)
+        // Clear of the glass control panel, whose top sits near 73% of the height.
+        player.setSubtitlePosition(subtitlesRaised ? min(baseSubtitlePos, 66) : baseSubtitlePos)
     }
 
     /// The dim, the top bar, the bottom bar and, on iOS, the centered
@@ -3005,7 +3224,16 @@ final class NativeApplePlayerViewController: UIViewController {
         #endif
     }
 
+    #if DEBUG
+    /// Debug builds launched with LAMBENT_OSD_PINNED=1 keep the controls up,
+    /// so the simulator (which can't press the remote) can be screenshotted.
+    private static let osdPinned = ProcessInfo.processInfo.environment["LAMBENT_OSD_PINNED"] == "1"
+    #else
+    private static let osdPinned = false
+    #endif
+
     private func hideOsd() {
+        if Self.osdPinned { return }
         setSubtitlesRaised(false)
         UIView.animate(withDuration: 0.3) {
             self.setOsdAlpha(0)

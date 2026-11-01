@@ -37,6 +37,7 @@ import '../../../util/subtitle_appearance_schedule.dart';
 import '../../../util/episode_playability.dart';
 import '../../../util/overview_text.dart';
 import '../../../util/platform_detection.dart';
+import '../../widgets/playback/enhancement_chip.dart';
 import 'appletv_playback_prompt_controller.dart';
 import 'episode_browser.dart';
 import 'osd_buttons.dart';
@@ -1269,6 +1270,7 @@ class _AppleTvPlayerHostScreenState extends State<AppleTvPlayerHostScreen> {
     );
 
     backend.setUiMetadata(
+      lambent: _lambentMetadata(),
       topTitle: topTitle,
       topSubtitle: topSubtitle,
       chapters: chapters,
@@ -1500,6 +1502,57 @@ class _AppleTvPlayerHostScreenState extends State<AppleTvPlayerHostScreen> {
     _pushMetadata();
   }
 
+  /// The 4K HDR chip and its sheet: what the stream is and how Lambent
+  /// Server enhances it (lambent_enhancement.dart). Null for a stream that is
+  /// neither enhanced nor turned to the original from the chip.
+  Map<String, dynamic>? _lambentMetadata() {
+    final url = _manager?.currentResolution?.streamUrl;
+    final enhanced = LambentEnhancement.isEnhancedUrl(url);
+    if (!enhanced && !LambentEnhancement.enhancementOff) return null;
+    final current = enhanced
+        ? LambentEnhancement.fromUrl(url!)
+        : LambentEnhancement.none;
+    return {
+      'label': enhanced ? (lambentEnhancementLabel(url) ?? 'Enhanced') : 'Original',
+      'enhanced': enhanced,
+      'quality': ?current.quality,
+      'hdr': ?current.hdr,
+      'dolbyVision': ?current.dolbyVision,
+      'deepenBlacks': ?current.deepenBlacks,
+      'compare': current.compare ?? false,
+    };
+  }
+
+  /// A change from the chip's sheet, applied as the Android panel does: only
+  /// what changed is pinned, then the stream reopens where it is.
+  void _applyLambent(Map<String, dynamic> action) {
+    final manager = _manager;
+    if (manager == null) return;
+    final url = manager.currentResolution?.streamUrl;
+    final current = LambentEnhancement.isEnhancedUrl(url)
+        ? LambentEnhancement.fromUrl(url!)
+        : LambentEnhancement.none;
+    if (action['enhancement'] is bool) {
+      LambentEnhancement.enhancementOff = !(action['enhancement'] as bool);
+    } else if (action['reset'] == true) {
+      LambentEnhancement.overrides = LambentEnhancement.none;
+    } else {
+      final hdr = action['hdr'] as bool?;
+      final chosen = current.copyWith(
+        quality: (action['quality'] as num?)?.toInt(),
+        hdr: hdr,
+        // Dolby Vision rides on RTX HDR.
+        dolbyVision: hdr == false ? false : action['dolbyVision'] as bool?,
+        deepenBlacks: action['deepenBlacks'] as bool?,
+        compare: action['compare'] as bool?,
+      );
+      LambentEnhancement.overrides = LambentEnhancement.overrides.merge(
+        chosen.changesFrom(current),
+      );
+    }
+    unawaited(manager.reopenAtCurrentPosition());
+  }
+
   void _handleUiAction(Map<String, dynamic> action) {
     final manager = _manager;
     if (manager == null) return;
@@ -1598,6 +1651,8 @@ class _AppleTvPlayerHostScreenState extends State<AppleTvPlayerHostScreen> {
         if (speed != null && speed > 0) {
           unawaited(_backend?.setPlaybackSpeed(speed) ?? Future<void>.value());
         }
+      case 'setLambent':
+        _applyLambent(action);
       case 'setBitrate':
         final mbps = (action['mbps'] as num?)?.toInt();
         unawaited(
