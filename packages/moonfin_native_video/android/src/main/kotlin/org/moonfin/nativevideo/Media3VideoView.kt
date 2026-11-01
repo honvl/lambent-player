@@ -979,6 +979,9 @@ class Media3VideoView(
     // outlives the native objects it reads.
     private var assOverlayView: MoonfinAssOverlayView? = null
 
+    // Adds a Lambent live ASS track's events to libass as the PC reads them.
+    private var liveAssFeeder: LiveAssFeeder? = null
+
     // True once a source has been loaded into the current player. Reusing the
     // same ExoPlayer instance + surface for a second source hangs in buffering
     // on some Android TVs (e.g. Sony BRAVIA after a cinema-mode intro), so the
@@ -1317,6 +1320,8 @@ class Media3VideoView(
 
         override fun onTracksChanged(tracks: androidx.media3.common.Tracks) {
             retimeTextTrack()
+            liveAssFeeder?.updatePosition(player.currentPosition)
+            liveAssFeeder?.follow(selectedExternalSubtitleUri())
             pendingSubtitleIndex?.let { index ->
                 if (!applyPendingSubtitle() && subtitleRetime == null &&
                     index in 1..trackCount(C.TRACK_TYPE_TEXT)
@@ -1714,6 +1719,7 @@ class Media3VideoView(
         cancelPendingAudioRekick()
         cancelResumeWedgeCheck()
         stopTicker()
+        liveAssFeeder?.stop()
         closeExternalAudioEffectSessionIfOpen()
         currentAudioSessionId = C.AUDIO_SESSION_ID_UNSET
         restorePreferredDisplayMode()
@@ -2066,6 +2072,15 @@ class Media3VideoView(
             AssHandlerConfig(cacheSize = assCacheSizeMb()),
         )
         registerAssFonts(assHandler)
+        liveAssFeeder?.stop()
+        liveAssFeeder = LiveAssFeeder(assHandler, httpDataSourceFactory) {
+            // Playing, the overlay draws on the next frame; paused, it needs asking.
+            mainHandler.post {
+                if (!isPlayerReleased && !player.isPlaying) {
+                    assOverlayView?.renderAtPlaybackPosition(player.currentPosition)
+                }
+            }
+        }
         // Tie extractor callbacks to this player, not a later replacement.
         val associatedAssOverlay = AtomicReference<MoonfinAssOverlayView?>()
         // Serializes track creation and dialogue reads against the overlay's
@@ -5439,6 +5454,23 @@ class Media3VideoView(
         return applyTrackOverride(C.TRACK_TYPE_TEXT, entry)
     }
 
+    /** The uri of the selected text track when it is one of the external subtitles. */
+    private fun selectedExternalSubtitleUri(): Uri? {
+        for (group in player.currentTracks.groups) {
+            if (group.type != C.TRACK_TYPE_TEXT) continue
+            for (index in 0 until group.length) {
+                if (!group.isTrackSelected(index)) continue
+                val id = group.getTrackFormat(index).id ?: continue
+                externalSubtitleConfigurations.forEachIndexed { configIndex, configuration ->
+                    if (externalFormatIdMatches(id, (EXTERNAL_SUBTITLE_ID_BASE + configIndex).toString())) {
+                        return configuration.uri
+                    }
+                }
+            }
+        }
+        return null
+    }
+
     private fun findExternalSubtitle(url: String): TrackEntry? {
         // The configuration uri was built with Uri.parse at add time, so parse
         // the request the same way. Comparing a parsed uri to the raw string
@@ -5806,6 +5838,7 @@ class Media3VideoView(
         if (ticker != null) return
         val runnable = object : Runnable {
             override fun run() {
+                liveAssFeeder?.updatePosition(player.currentPosition)
                 emitState()
                 mainHandler.postDelayed(this, 250L)
             }
