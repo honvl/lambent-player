@@ -132,12 +132,14 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
       String unit = '',
       bool needsHdr = false,
       int? origin,
+      String? zeroLabel,
     }) {
       final enabled = !needsHdr || hdrOn;
+      final shown = value == 0 && zeroLabel != null ? zeroLabel : '$value$unit';
       return _EnhancementRow(
         autofocus: autofocusNext(),
         label: label,
-        value: enabled ? '$value$unit' : 'Needs HDR',
+        value: enabled ? shown : 'Needs HDR',
         dimmed: !enabled,
         slider: (
           value: _fraction(value!, range),
@@ -269,6 +271,17 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           unit: '°',
           origin: 0,
           set: (v) => pending.copyWith(hue: v),
+        ),
+      if (cur.wideColour != null)
+        number(
+          label: 'Wide colour',
+          value: pending.wideColour,
+          step: 25,
+          range: LambentEnhancement.wideColourRange,
+          unit: '%',
+          needsHdr: true,
+          zeroLabel: 'Off',
+          set: (v) => pending.copyWith(wideColour: v),
         ),
     ];
 
