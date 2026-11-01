@@ -78,8 +78,12 @@ class LambentEnhancement {
   /// server.
   static Map<String, Object> screenDefaults = const {};
 
-  /// [body] with this screen's choices added, for a PlaybackInfo request.
+  /// [body] with this screen's choices added, for the PlaybackInfo request
+  /// playback starts from. `LambentPlay` tells Lambent Server it is about to
+  /// play (not a detail page asking), so the PC starts making the stream while
+  /// the TV switches its display mode.
   static Map<String, dynamic> decoratePlaybackInfo(Map<String, dynamic> body) {
+    body['LambentPlay'] = true;
     if (enhancementOff) body['EnableTranscoding'] = false;
     if (screenDefaults.isNotEmpty) body['Lambent'] = screenDefaults;
     return body;

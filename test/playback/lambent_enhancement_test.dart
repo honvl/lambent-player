@@ -13,10 +13,10 @@ void main() {
   });
 
   group('decoratePlaybackInfo', () {
-    test('leaves the request alone by default', () {
+    test('only marks the request as playback by default', () {
       expect(
         LambentEnhancement.decoratePlaybackInfo({'EnableTranscoding': true}),
-        {'EnableTranscoding': true},
+        {'EnableTranscoding': true, 'LambentPlay': true},
       );
     });
 
