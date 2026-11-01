@@ -3957,6 +3957,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                           child: ColoredBox(color: Colors.black),
                         ),
                       _buildPausedDescriptionOverlay(),
+                      _buildCompareLabel(context),
                       if (_controlsVisible &&
                           !_isOsdLocked &&
                           !hideOsdForPreroll) ...[
@@ -6155,6 +6156,41 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
     return LambentEnhancement.enhancementOff ? 'Original' : null;
+  }
+
+  /// Compare (`cmp=1`): the PC draws the original on the left half and a
+  /// line down the middle; this names the enhanced right half, with or
+  /// without the controls.
+  Widget _buildCompareLabel(BuildContext context) {
+    final url = _manager.currentResolution?.streamUrl;
+    if (!LambentEnhancement.isEnhancedUrl(url) ||
+        LambentEnhancement.fromUrl(url!).compare != true) {
+      return const SizedBox.shrink();
+    }
+    return Positioned(
+      top: MediaQuery.of(context).padding.top + 28,
+      left: MediaQuery.sizeOf(context).width / 2 + 14,
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0x99101218),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0x33FFFFFF)),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Text(
+              'Enhanced',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// The ends of the secondary row carry the TV focus nodes, so they follow
