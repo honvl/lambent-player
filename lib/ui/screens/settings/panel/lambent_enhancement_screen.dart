@@ -38,16 +38,18 @@ class _LambentEnhancementScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (!on && PlatformDetection.isAppleTV) ...[
-                  const _SectionHeader('On this Apple TV'),
+                if (!on &&
+                    (PlatformDetection.isAppleTV ||
+                        (PlatformDetection.isAndroid && PlatformDetection.isTV))) ...[
+                  const _SectionHeader('On this TV'),
                   adaptiveListSection(
                     children: [
                       SwitchPreferenceTile(
                         preference: UserPreferences.lambentClientHdr,
-                        title: 'HDR on this Apple TV',
+                        title: 'HDR on this TV',
                         subtitle:
-                            'SDR titles play as Plex\'s own file and the Apple '
-                            'TV turns them into HDR10, with Lambent\'s HDR curve.',
+                            'SDR titles play as Plex\'s own file and this '
+                            'device turns them into HDR10, with Lambent\'s HDR curve.',
                         icon: Icons.hdr_on,
                       ),
                       if (prefs.get(UserPreferences.lambentClientHdr))

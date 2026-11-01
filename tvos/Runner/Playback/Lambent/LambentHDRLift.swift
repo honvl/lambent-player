@@ -16,7 +16,7 @@ import UIKit
 /// BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid over the hidden
 /// `AVPlayerLayer`. The panel is asked for HDR10 at the film's rate.
 ///
-/// Turned on in Settings > Lambent enhancement > HDR on this Apple TV (with
+/// Turned on in Settings > Lambent enhancement > HDR on this TV (with
 /// Enhance on PC off, so the server direct-plays), stored by Flutter as
 /// `flutter.pref_lambent_client_hdr`; a launch argument
 /// `-flutter.pref_lambent_client_hdr YES` does the same. Logs `[LambentHDR]`

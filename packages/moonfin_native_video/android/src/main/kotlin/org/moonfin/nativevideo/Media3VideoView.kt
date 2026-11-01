@@ -1054,6 +1054,13 @@ class Media3VideoView(
     // mid-play track switches re-gate tunneling.
     private var currentAudioIsLossless = false
     private var tunnelingActive = false
+
+    // Lambent's Auto HDR on this TV (LambentHdrStage): with it on, an SDR
+    // title's pictures go through the GL lift into a BT.2020 PQ surface.
+    // Tunneled video never reaches a SurfaceTexture, so it stays off then.
+    private var lambentClientHdr = false
+    private var lambentClientBlacks = false
+    private var hdrStage: LambentHdrStage? = null
     private var audioRekickRunnable: Runnable? = null
     private var suppressStateEmissionsForRekick = false
     private var resumeWedgeCheck: Runnable? = null
@@ -1453,6 +1460,7 @@ class Media3VideoView(
             if (frameRate.isFinite() && frameRate > 0f) {
                 maybeApplyFrameRateSwitching(frameRate)
             }
+            updateHdrStage(format, frameRate)
         }
 
         override fun onAudioInputFormatChanged(
@@ -1728,6 +1736,7 @@ class Media3VideoView(
         player.removeListener(listener)
         player.removeAnalyticsListener(analyticsListener)
         audioPipeline.release()
+        releaseHdrStage(reattach = false)
         player.clearVideoSurface()
         Media3SessionController.releaseForPlayer(player)
         // Stop and clear before releasing so the render threads unwind and the
@@ -2277,10 +2286,52 @@ class Media3VideoView(
         )
     }
 
+    /**
+     * Puts LambentHdrStage between the decoder and the SurfaceView for an SDR
+     * picture when Auto HDR on this TV is on, and takes it out for an HDR one.
+     */
+    private fun updateHdrStage(format: Format, frameRate: Float) {
+        val surfaceView = videoView as? SurfaceView ?: return
+        val hdrSource = format.colorInfo?.colorTransfer.let {
+            it == C.COLOR_TRANSFER_ST2084 || it == C.COLOR_TRANSFER_HLG
+        } || format.sampleMimeType == MimeTypes.VIDEO_DOLBY_VISION
+        val wanted = lambentClientHdr && !hdrSource && currentMediaType != "audio"
+        val stage = hdrStage
+        if (!wanted) {
+            if (stage != null) releaseHdrStage(reattach = true)
+            return
+        }
+        if (stage == null) {
+            val made = LambentHdrStage(surfaceView, lambentClientBlacks)
+            if (!made.start()) {
+                android.util.Log.w("LambentHdr", "the device cannot draw BT.2020 PQ; playing SDR")
+                return
+            }
+            player.setVideoSurface(made.inputSurface)
+            hdrStage = made
+            Media3Bridge.emitEvent(mapOf("event" to "lambentClientHdr", "active" to true))
+        }
+        hdrStage?.setVideoFormat(format.width, format.height, if (frameRate.isFinite()) frameRate else 0f)
+    }
+
+    private fun releaseHdrStage(reattach: Boolean) {
+        val stage = hdrStage ?: return
+        hdrStage = null
+        if (reattach) {
+            (videoView as? SurfaceView)?.let {
+                it.holder.setSizeFromLayout()
+                it.holder.setFormat(android.graphics.PixelFormat.OPAQUE)
+                player.setVideoSurfaceView(it)
+            }
+        }
+        stage.release()
+    }
+
     // Swaps in a fresh SurfaceView/TextureView so each new source gets a brand
     // new Surface. Reusing the same Surface across sources hangs the decoder in
     // buffering on some Android TVs even after the ExoPlayer is recreated.
     private fun recreateVideoView() {
+        releaseHdrStage(reattach = false)
         val params = FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT,
@@ -2744,6 +2795,13 @@ class Media3VideoView(
         pausedWhileReady = false
 
         detectedFrameRate = null
+        val nextClientHdr = args["lambentClientHdr"] as? Boolean ?: false
+        lambentClientBlacks = args["lambentClientBlacks"] as? Boolean ?: false
+        if (nextClientHdr != lambentClientHdr) {
+            lambentClientHdr = nextClientHdr
+            applyTrackSelectorForCurrentSource()
+        }
+        releaseHdrStage(reattach = true)
         // Most containers, mkv and ts among them, come out of the extractor
         // with no frame rate on the Format, so the rate the server reported
         // rides along as the answer of last resort.
@@ -3337,6 +3395,7 @@ class Media3VideoView(
             externalSubtitleConfigurations.isNotEmpty()
         val shouldEnableTunneling =
             !isAudioContent &&
+                !lambentClientHdr &&
                 !hasExternalSubtitle &&
                 !sessionTunnelingDisabled &&
                 // Tunneled TrueHD/MLP passthrough can be silent with no sink

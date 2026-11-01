@@ -1191,6 +1191,10 @@ class Media3PlayerBackend extends PlayerBackend
       'videoStartDelayMs': _prefs.get(UserPreferences.videoStartDelay),
       'videoWidth': (payload['videoWidth'] as num?)?.toInt(),
       'videoHeight': (payload['videoHeight'] as num?)?.toInt(),
+      // Lambent's Auto HDR on this TV (LambentHdrStage.kt): SDR pictures are
+      // lifted to HDR10 on the device.
+      'lambentClientHdr': _prefs.get(UserPreferences.lambentClientHdr),
+      'lambentClientBlacks': _prefs.get(UserPreferences.lambentClientDeepenBlacks),
       'isLive': _sourceIsLive,
       'normalizationGainDb': normalizationGainDb,
       'skipSilenceEnabled': _skipSilenceEnabled,
