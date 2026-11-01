@@ -52,8 +52,9 @@ class LambentEnhancement {
 
   /// Wide colour, 0 (off) to 100: how far vivid colours are pushed from SDR's
   /// range toward the wider P3 range of graded HDR; skin, greys and soft
-  /// colours stay. RTX HDR only. The URL names it (`gamut`) only when it is
-  /// on, so an HDR stream that has the picture controls offers it at 0.
+  /// colours stay. RTX HDR only. Lambent Server starts at 50; the URL names
+  /// it (`gamut`) only when it is on, so an HDR stream that has the picture
+  /// controls and no `gamut` offers it at 0 (off).
   final int? wideColour;
 
   static const none = LambentEnhancement();

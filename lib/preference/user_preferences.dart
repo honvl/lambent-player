@@ -2267,7 +2267,7 @@ class UserPreferences extends ChangeNotifier {
   );
   static final lambentWideColour = Preference(
     key: 'pref_lambent_wide_colour',
-    defaultValue: 0,
+    defaultValue: 50,
   );
 
   static final screensaverEnabled = Preference(
