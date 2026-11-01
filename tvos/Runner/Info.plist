@@ -101,5 +101,9 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_vbridge._tcp</string>
+	</array>
 </dict>
 </plist>

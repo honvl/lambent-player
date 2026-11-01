@@ -8,6 +8,7 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../data/services/log_service.dart';
+import '../../util/platform_detection.dart';
 
 import 'server_discovery_types.dart';
 
@@ -24,6 +25,7 @@ class ServerDiscoveryService {
   /// Jellyfin's UDP discovery on 7359, so it is found here instead.
   static const _lambentService = '_vbridge._tcp.local';
   static const _multicastLock = MethodChannel('org.moonfin/multicast_lock');
+  static const _bonjour = MethodChannel('org.moonfin/bonjour');
 
   Stream<DiscoveredServer> discoverLocalServers() async* {
     final controller = StreamController<DiscoveredServer>();
@@ -123,6 +125,9 @@ class ServerDiscoveryService {
   /// Browses Bonjour for Lambent Server, calling [found] for each one that
   /// resolves to an IPv4 address. Lambent Server answers as a Jellyfin server.
   Future<void> _discoverLambent(void Function(DiscoveredServer) found) async {
+    // Apple TV only lets the system's Bonjour browse (the app holds no
+    // multicast entitlement), so the native side does it there.
+    if (PlatformDetection.isAppleTV) return _discoverLambentNative(found);
     final client = MDnsClient();
     try {
       // Wi-Fi drops multicast on Android unless the app holds a lock.
@@ -182,6 +187,38 @@ class ServerDiscoveryService {
         try {
           await _multicastLock.invokeMethod<void>('release');
         } catch (_) {}
+      }
+    }
+  }
+
+  Future<void> _discoverLambentNative(
+    void Function(DiscoveredServer) found,
+  ) async {
+    try {
+      final results = await _bonjour.invokeListMethod<Map>('browse', {
+        'type': '_vbridge._tcp',
+        'timeoutMs':
+            (_listenDuration - const Duration(milliseconds: 300)).inMilliseconds,
+      });
+      for (final result in results ?? const <Map>[]) {
+        final txt = (result['txt'] as Map?)?.cast<String, String>() ?? const {};
+        final name = result['name'] as String? ?? 'Lambent Server';
+        found(
+          DiscoveredServer(
+            id: 'lambent:${txt['id'] ?? name}',
+            name: txt['name'] ?? name,
+            address: 'http://${result['host']}:${result['port']}',
+            serverType: ServerType.jellyfin,
+          ),
+        );
+      }
+    } catch (error) {
+      if (GetIt.instance.isRegistered<LogService>()) {
+        GetIt.instance<LogService>().network(
+          'Lambent Server Bonjour discovery failed',
+          level: LogLevel.warning,
+          error: error,
+        );
       }
     }
   }
