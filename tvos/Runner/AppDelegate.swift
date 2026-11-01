@@ -37,6 +37,9 @@ final class GamepadNavigationHostViewController: GCEventViewController {
 
 @main
 class AppDelegate: FlutterAppDelegate {
+    /// The root the scene's window shows, made at launch with the channels it
+    /// carries; the window itself comes with the scene (SceneDelegate).
+    fileprivate var gamepadHost: GamepadNavigationHostViewController?
     private var nativeApplePlayerChannel: NativeApplePlayerChannel?
     private var aetherVideoChannel: AetherVideoChannel?
     private var topShelfChannel: TopShelfChannel?
@@ -54,10 +57,7 @@ class AppDelegate: FlutterAppDelegate {
         let flutterViewController = FlutterViewController(project: nil, nibName: nil, bundle: nil)
         let gamepadHost = GamepadNavigationHostViewController(
             flutterViewController: flutterViewController)
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = gamepadHost
-        window.makeKeyAndVisible()
-        self.window = window
+        self.gamepadHost = gamepadHost
 
         // FlutterAppDelegate only hands out registrars when the window's root
         // is a FlutterViewController, and the host sits there now, so plugins
@@ -111,6 +111,44 @@ class AppDelegate: FlutterAppDelegate {
     ) -> Bool {
         topShelfChannel?.deliverDeepLink(url, isLaunch: false)
         return true
+    }
+
+    fileprivate func deliverDeepLink(_ url: URL, isLaunch: Bool) {
+        topShelfChannel?.deliverDeepLink(url, isLaunch: isLaunch)
+    }
+}
+
+/// The app's one window scene. Apps built with the tvOS 27 SDK must adopt the
+/// scene life cycle or they are refused at launch, so the window the app
+/// delegate used to make is made here, around the root it already set up, and
+/// Top Shelf deep links that now arrive through the scene are handed on.
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene,
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+            let root = appDelegate.gamepadHost
+        else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = root
+        window.makeKeyAndVisible()
+        self.window = window
+        appDelegate.window = window
+        if let url = connectionOptions.urlContexts.first?.url {
+            appDelegate.deliverDeepLink(url, isLaunch: true)
+        }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let url = URLContexts.first?.url,
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else { return }
+        appDelegate.deliverDeepLink(url, isLaunch: false)
     }
 }
 
