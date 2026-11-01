@@ -2924,6 +2924,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   bool _dismissControlsOrOverlays() {
+    // Back during a preview seek cancels it: playback carries on from where
+    // it was, and the controls stay up.
+    if (_pendingScrubSeekTarget != null || _isPausedScrubActive) {
+      _suppressBackNavigation(duration: const Duration(milliseconds: 500));
+      _dropScrubSession(resume: true);
+      _showControls(focusSeekbar: true);
+      return true;
+    }
     if (_isCinemaSkipVisible) {
       _dismissCinemaSkip();
       return true;
