@@ -3611,6 +3611,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
               _prefs.get(UserPreferences.skipBackLength),
               event,
             );
+            // With preview thumbnails the first press already previews,
+            // as the focused seek bar's presses do; play commits it.
+            if (_hasTrickplayPreview) {
+              _showControls(focusSeekbar: true);
+              _seekRelativeAccumulate(-step);
+              return KeyEventResult.handled;
+            }
             _seekRelative(-step, showControls: false);
             _showControls(focusSeekbar: true);
             return KeyEventResult.handled;
@@ -3625,6 +3632,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
               _prefs.get(UserPreferences.skipForwardLength),
               event,
             );
+            // With preview thumbnails the first press already previews,
+            // as the focused seek bar's presses do; play commits it.
+            if (_hasTrickplayPreview) {
+              _showControls(focusSeekbar: true);
+              _seekRelativeAccumulate(step);
+              return KeyEventResult.handled;
+            }
             _seekRelative(step, showControls: false);
             _showControls(focusSeekbar: true);
             return KeyEventResult.handled;
