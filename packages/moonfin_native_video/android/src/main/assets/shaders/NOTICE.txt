@@ -1,0 +1,7 @@
+Upscaling shader used by Lambent's Auto HDR on Android TV (LambentHdrStage / LambentHookShader)
+
+ravu-lite-ar-r3.hook is the mpv user shader as published, unmodified. The app reads and compiles it at run time, so it contains none
+of its code, and you may replace this file with your own build of the same or a modified shader.
+
+RAVU (ravu-lite-ar-r3)              Copyright (C) bjin. https://github.com/bjin/mpv-prescalers, commit b3f0a59 (2024-01-11).
+                                    GNU Lesser General Public License, version 3 or later (LGPL-3.0.txt, which refers to GPL-3.0.txt).

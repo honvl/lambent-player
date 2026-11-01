@@ -34,7 +34,18 @@ import java.nio.FloatBuffer
  * 11: docs/CLIENT_HDR.md in Lambent). The Shield only has fp16 window configs,
  * so fp16 is tried first, then 10-10-10-2.
  *
- * All GL work runs on its own thread. Logs `LambentHdr` every 2 s.
+ * A picture smaller than the display is upscaled here, not by the hardware
+ * composer (whose stretch is soft and hides the picture from the TV's own
+ * scaler): the surface is the display's size, a pass at the picture's size
+ * bends the blacks (and sharpens, for Catmull-Rom), RAVU-lite (an mpv
+ * shader loaded from the app's assets, LambentHookShader) doubles Y', and a
+ * last pass at the display's size scales, lifts and writes PQ. Without the
+ * shader file, Catmull-Rom with an RCAS-style sharpen.
+ *
+ * All GL work runs on its own thread. Logs `LambentHdr` every 2 s. For
+ * measuring, a file `lambent_scaler` in the app's external files dir picks
+ * the scaler (native, bilinear, catrom, ravu) and `lambent_dump` writes the
+ * next picture's middle through every scaler as PNGs there.
  */
 class LambentHdrStage(
     private val view: SurfaceView,
@@ -51,6 +62,19 @@ class LambentHdrStage(
     private var fp16 = true
     private var program = 0
     private var measureProgram = 0
+    private var prepProgram = 0
+    private var prepSharpProgram = 0
+    private val finalPrograms = HashMap<Scaler, Int>()
+    private var ravu: LambentHookShader? = null
+    private var pictureTex = 0
+    private var pictureFbo = 0
+    private var pictureW = 0
+    private var pictureH = 0
+    private var srcW = 0
+    private var srcH = 0
+    @Volatile private var scaler = Scaler.RAVU
+    private var dumpTex = 0
+    private var dumpFbo = 0
     private var oes = 0
     private var fbo = 0
     private var surfaceTexture: SurfaceTexture? = null
@@ -98,6 +122,7 @@ class LambentHdrStage(
             return false
         }
         view.holder.addCallback(this)
+        view.addOnLayoutChangeListener(layoutListener)
         view.holder.setFormat(if (fp16) PixelFormat.RGBA_F16 else PixelFormat.RGBA_1010102)
         if (view.holder.surface?.isValid == true) {
             val frame = view.holder.surfaceFrame
@@ -111,16 +136,36 @@ class LambentHdrStage(
     fun setVideoFormat(width: Int, height: Int, rate: Float) {
         if (width <= 0 || height <= 0) return
         frameRate = rate
-        view.post {
-            view.holder.setFixedSize(width, height)
-        }
+        srcW = width
+        srcH = height
+        view.post { applySurfaceSize() }
         gl.post { surfaceTexture?.setDefaultBufferSize(width, height) }
+    }
+
+    private val layoutListener = android.view.View.OnLayoutChangeListener { _, l, t, r, b, ol, ot, or, ob ->
+        if (r - l != or - ol || b - t != ob - ot) applySurfaceSize()
+    }
+
+    /** The surface is the view's size in display pixels when the stage scales, the picture's own size when the HWC does. */
+    private fun applySurfaceSize() {
+        if (srcW <= 0) return
+        val display = view.display
+        val physical = display?.mode?.physicalWidth ?: 0
+        val logical = view.resources.displayMetrics.widthPixels
+        val k = if (physical > 0 && logical > 0) physical.toFloat() / logical else 1f
+        val w = Math.round(view.width * k)
+        val h = Math.round(view.height * k)
+        val scale = scaler != Scaler.NATIVE && w > srcW && h > srcH
+        if (scale) view.holder.setFixedSize(w and 1.inv(), h and 1.inv()) else view.holder.setFixedSize(srcW, srcH)
     }
 
     fun release() {
         isReady = false
         view.holder.removeCallback(this)
+        view.removeOnLayoutChangeListener(layoutListener)
         gl.post {
+            ravu?.release()
+            ravu = null
             surfaceTexture?.release()
             surfaceTexture = null
             inputSurface?.release()
@@ -172,7 +217,19 @@ class LambentHdrStage(
         EGL14.eglMakeCurrent(dpy, pbuffer, pbuffer, ctx)
         program = program(VERTEX, LIFT)
         measureProgram = program(VERTEX, MEASURE)
-        if (program == 0 || measureProgram == 0) return false
+        prepProgram = program(VERTEX, PREP)
+        prepSharpProgram = program(VERTEX, defined(PREP, "SHARPEN"))
+        for (sc in listOf(Scaler.BILINEAR, Scaler.CATROM, Scaler.RAVU)) finalPrograms[sc] = program(VERTEX_PLAIN, defined(FINAL, sc.name))
+        if (program == 0 || measureProgram == 0 || prepProgram == 0 || prepSharpProgram == 0 || finalPrograms.values.any { it == 0 }) return false
+        for (p in finalPrograms.values) {
+            GLES30.glUseProgram(p)
+            GLES30.glUniform1fv(GLES30.glGetUniformLocation(p, "curve"), 65, LambentToneCurve.table(peak = 1000f), 0)
+            GLES30.glUniform1f(GLES30.glGetUniformLocation(p, "saturation"), 1f)
+        }
+        ravu = runCatching {
+            view.context.assets.open(RAVU_ASSET).bufferedReader().use { it.readText() }
+        }.getOrNull()?.let { LambentHookShader.load("ravu-lite-ar-r3", it) }
+        scaler = if (ravu != null) Scaler.RAVU else Scaler.CATROM
         GLES30.glUseProgram(program)
         GLES30.glUniform1fv(GLES30.glGetUniformLocation(program, "curve"), 65, LambentToneCurve.table(peak = 1000f), 0)
         GLES30.glUniform1f(GLES30.glGetUniformLocation(program, "saturation"), 1f)
@@ -196,7 +253,7 @@ class LambentHdrStage(
         st.setOnFrameAvailableListener(this, gl)
         surfaceTexture = st
         inputSurface = Surface(st)
-        Log.i(TAG, "ready: ${if (fp16) "fp16" else "10-bit"} BT.2020 PQ, deepen blacks ${if (deepenBlacks) "on" else "off"}")
+        Log.i(TAG, "ready: ${if (fp16) "fp16" else "10-bit"} BT.2020 PQ, deepen blacks ${if (deepenBlacks) "on" else "off"}, scaler $scaler")
         return true
     }
 
@@ -259,11 +316,10 @@ class LambentHdrStage(
         st.getTransformMatrix(stMatrix)
         if (deepenBlacks && frameIndex % 4 == 0) measure(st.timestamp)
         frameIndex++
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
-        GLES30.glViewport(0, 0, outW, outH)
         val timed = queryHead - queryTail < queries.size
         if (timed) GLES30.glBeginQuery(GL_TIME_ELAPSED_EXT, queries[queryHead % queries.size])
-        draw(program, 0f, 0f, 1f, 1f)
+        if (dumpRequested) dump()
+        render(currentScaler(), 0)
         if (timed) {
             GLES30.glEndQuery(GL_TIME_ELAPSED_EXT)
             queryHead++
@@ -272,6 +328,115 @@ class LambentHdrStage(
         EGL14.eglSwapBuffers(dpy, window)
         frames++
         report()
+    }
+
+    /** The scaler this picture gets: none when the surface is the picture's own size (or the picture is as big as the screen). */
+    private fun currentScaler(): Scaler =
+        if (scaler == Scaler.NATIVE || outW <= srcW || outH <= srcH) Scaler.NATIVE
+        // RAVU-lite took 16-21 ms a 1080p -> 4K picture on a Shield Pro: inside a 24 or 30 fps frame, not a 50 or 60 fps one, where
+        // Catmull-Rom (10 ms) runs instead (docs/CLIENT_HDR.md in Lambent).
+        else if (scaler == Scaler.RAVU && (ravu == null || outW < srcW * 1.414f || frameRate > RAVU_MAX_FPS)) Scaler.CATROM
+        else scaler
+
+    /** One picture into framebuffer [fb] at outW x outH: the lift alone, or the picture pass, the prescaler and the final pass. */
+    private fun render(sc: Scaler, fb: Int) {
+        if (sc == Scaler.NATIVE) {
+            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, fb)
+            GLES30.glViewport(0, 0, outW, outH)
+            draw(program, 0f, 0f, 1f, 1f)
+            return
+        }
+        ensurePicture(srcW, srcH)
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, pictureFbo)
+        GLES30.glViewport(0, 0, srcW, srcH)
+        val prep = if (sc == Scaler.CATROM) prepSharpProgram else prepProgram
+        GLES30.glUseProgram(prep)
+        GLES30.glUniform2f(GLES30.glGetUniformLocation(prep, "srcPt"), 1f / srcW, 1f / srcH)
+        draw(prep, 0f, 0f, 1f, 1f)
+        var hi = 0
+        if (sc == Scaler.RAVU) hi = ravu!!.run(pictureTex, srcW, srcH, quad).first
+        val fin = finalPrograms.getValue(sc)
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, fb)
+        GLES30.glViewport(0, 0, outW, outH)
+        GLES30.glUseProgram(fin)
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, pictureTex)
+        GLES30.glUniform1i(GLES30.glGetUniformLocation(fin, "picture"), 0)
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, hi)
+        GLES30.glUniform1i(GLES30.glGetUniformLocation(fin, "luma2x"), 1)
+        GLES30.glUniform2f(GLES30.glGetUniformLocation(fin, "srcSize"), srcW.toFloat(), srcH.toFloat())
+        val pos = GLES30.glGetAttribLocation(fin, "pos")
+        GLES30.glEnableVertexAttribArray(pos)
+        GLES30.glVertexAttribPointer(pos, 2, GLES30.GL_FLOAT, false, 0, quad)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+    }
+
+    private fun ensurePicture(w: Int, h: Int) {
+        if (pictureTex != 0 && pictureW == w && pictureH == h) return
+        if (pictureTex != 0) {
+            GLES30.glDeleteFramebuffers(1, intArrayOf(pictureFbo), 0)
+            GLES30.glDeleteTextures(1, intArrayOf(pictureTex), 0)
+        }
+        val t = IntArray(1)
+        GLES30.glGenTextures(1, t, 0)
+        pictureTex = t[0]
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, pictureTex)
+        GLES30.glTexStorage2D(GLES30.GL_TEXTURE_2D, 1, GLES30.GL_RGBA16F, w, h)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
+        GLES30.glGenFramebuffers(1, t, 0)
+        pictureFbo = t[0]
+        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, pictureFbo)
+        GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, pictureTex, 0)
+        pictureW = w
+        pictureH = h
+    }
+
+    @Volatile private var dumpRequested = false
+
+    /** The next picture's middle (a quarter of the screen) through every scaler, as PNGs of the PQ code values. */
+    private fun dump() {
+        dumpRequested = false
+        val dir = view.context.getExternalFilesDir(null) ?: return
+        if (dumpTex == 0) {
+            val t = IntArray(1)
+            GLES30.glGenTextures(1, t, 0)
+            dumpTex = t[0]
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, dumpTex)
+            GLES30.glTexStorage2D(GLES30.GL_TEXTURE_2D, 1, GLES30.GL_RGBA16F, 3840, 2160)
+            GLES30.glGenFramebuffers(1, t, 0)
+            dumpFbo = t[0]
+            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, dumpFbo)
+            GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, dumpTex, 0)
+        }
+        val keepW = outW
+        val keepH = outH
+        for (sc in Scaler.values()) {
+            if (sc == Scaler.RAVU && ravu == null) continue
+            // The current path: the picture lifted at its own size, then stretched to the screen (here bilinear, as a stand-in for the HWC).
+            outW = if (sc == Scaler.NATIVE) srcW else minOf(keepW, 3840)
+            outH = if (sc == Scaler.NATIVE) srcH else minOf(keepH, 2160)
+            render(sc, dumpFbo)
+            val cw = outW / 4
+            val ch = outH / 4
+            val buf = ByteBuffer.allocateDirect(cw * ch * 16).order(ByteOrder.nativeOrder())
+            GLES30.glReadPixels((outW - cw) / 2, (outH - ch) / 2, cw, ch, GLES30.GL_RGBA, GLES30.GL_FLOAT, buf)
+            val f = buf.asFloatBuffer()
+            val px = IntArray(cw * ch)
+            for (y in 0 until ch) for (x in 0 until cw) {
+                val i = ((ch - 1 - y) * cw + x) * 4
+                fun c(v: Float) = (v.coerceIn(0f, 1f) * 255f + 0.5f).toInt()
+                px[y * cw + x] = (0xff shl 24) or (c(f.get(i)) shl 16) or (c(f.get(i + 1)) shl 8) or c(f.get(i + 2))
+            }
+            val bmp = android.graphics.Bitmap.createBitmap(px, cw, ch, android.graphics.Bitmap.Config.ARGB_8888)
+            java.io.File(dir, "dump_${sc.name.lowercase()}.png").outputStream().use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+            Log.i(TAG, "dumped ${sc.name.lowercase()}: ${cw}x$ch of ${outW}x$outH")
+        }
+        outW = keepW
+        outH = keepH
     }
 
     private fun draw(p: Int, x: Float, y: Float, w: Float, h: Float) {
@@ -339,14 +504,38 @@ class LambentHdrStage(
         Log.i(
             TAG,
             String.format(
-                java.util.Locale.ROOT, "%dx%d frames %d of %d decoded, %.2f fps, gpu_ms mean %.3f p95 %.3f, floor %.3f lift %.3f",
-                outW, outH, frames, available, frames * 1000f / (now - windowStart), mean, p95, floor, lift,
+                java.util.Locale.ROOT, "%dx%d from %dx%d %s, frames %d of %d decoded, %.2f fps, gpu_ms mean %.3f p95 %.3f, floor %.3f lift %.3f",
+                outW, outH, srcW, srcH, currentScaler().name.lowercase(), frames, available, frames * 1000f / (now - windowStart), mean, p95,
+                floor, lift,
             ),
         )
+        readControls()
         frames = 0
         available = 0
         gpuCount = 0
         windowStart = now
+    }
+
+    private fun readControls() {
+        val dir = view.context.getExternalFilesDir(null) ?: return
+        java.io.File(dir, "lambent_scaler").takeIf { it.exists() }?.readText()?.trim()?.uppercase()?.let { name ->
+            Scaler.values().firstOrNull { it.name == name }?.takeIf { it != scaler }?.let {
+                scaler = it
+                view.post { applySurfaceSize() }
+            }
+        }
+        java.io.File(dir, "lambent_dump").takeIf { it.exists() }?.let {
+            it.delete()
+            dumpRequested = true
+        }
+    }
+
+    private enum class Scaler { NATIVE, BILINEAR, CATROM, RAVU }
+
+    /** [source] with `#define [name] 1` after its `#version` line. */
+    private fun defined(source: String, name: String): String {
+        val end = source.indexOf('\n') + 1
+        return source.substring(0, end) + "#define $name 1\n" + source.substring(end)
     }
 
     private fun program(vs: String, fs: String): Int {
@@ -392,15 +581,95 @@ class LambentHdrStage(
         private const val BLACK_LANDS = 0.016f
         private const val KNEE = 0.5f
 
+        private const val RAVU_ASSET = "shaders/ravu-lite-ar-r3.hook"
+        private const val RAVU_MAX_FPS = 31f
+
         private const val VERTEX = """#version 300 es
-in vec2 pos; uniform mat4 st; uniform vec4 crop; out vec2 uv;
-void main() { vec2 t = crop.xy + (pos * 0.5 + 0.5) * crop.zw; uv = (st * vec4(t, 0.0, 1.0)).xy; gl_Position = vec4(pos, 0.0, 1.0); }
+in vec2 pos; uniform mat4 st; uniform vec4 crop; out vec2 uv; out vec2 tc;
+void main() { vec2 t = crop.xy + (pos * 0.5 + 0.5) * crop.zw; tc = t; uv = (st * vec4(t, 0.0, 1.0)).xy; gl_Position = vec4(pos, 0.0, 1.0); }
+"""
+
+        private const val VERTEX_PLAIN = """#version 300 es
+in vec2 pos; out vec2 uv;
+void main() { uv = pos * 0.5 + 0.5; gl_Position = vec4(pos, 0.0, 1.0); }
 """
 
         private const val HEAD = """#version 300 es
 #extension GL_OES_EGL_image_external_essl3 : require
 precision highp float;
-uniform samplerExternalOES tex; uniform vec2 deepen; in vec2 uv; out vec4 color;
+uniform samplerExternalOES tex; uniform vec2 deepen; in vec2 uv; in vec2 tc; out vec4 color;
+"""
+
+        // The picture pass, at the picture's size: R'G'B' with Deepen blacks' bend, Y' in alpha (what a LUMA prescaler reads). With
+        // SHARPEN (the Catmull-Rom path), FSR's RCAS on the cross of neighbours first, at a light setting.
+        private const val PREP = HEAD + """
+uniform mat4 st; uniform vec2 srcPt;
+vec3 at(vec2 o) { return clamp(texture(tex, (st * vec4(tc + o * srcPt, 0.0, 1.0)).xy).rgb, 0.0, 1.0); }
+void main() {
+  vec3 e = at(vec2(0.0));
+#ifdef SHARPEN
+  vec3 b = at(vec2(0.0, -1.0)), d = at(vec2(-1.0, 0.0)), f = at(vec2(1.0, 0.0)), h = at(vec2(0.0, 1.0));
+  vec3 mn = min(min(b, d), min(f, h)), mx = max(max(b, d), max(f, h));
+  vec3 hitMin = min(mn, e) / (4.0 * max(mx, e) + 1e-5);
+  vec3 hitMax = (1.0 - max(mx, e)) / (4.0 * min(mn, e) - 4.0 - 1e-5);
+  vec3 lobe3 = max(-hitMin, hitMax);
+  float lobe = max(-0.1875, min(max(lobe3.r, max(lobe3.g, lobe3.b)), 0.0)) * 0.5;
+  e = clamp((lobe * (b + d + f + h) + e) / (4.0 * lobe + 1.0), 0.0, 1.0);
+#endif
+  if (deepen.x > 0.0) { float y = dot(e, vec3(0.2126, 0.7152, 0.0722)); float t = clamp(1.0 - y / deepen.y, 0.0, 1.0);
+    e *= y > 1e-4 ? clamp((y - deepen.x * t * t) / y, 0.0, 1.0) : 0.0; }
+  color = vec4(e, dot(e, vec3(0.2126, 0.7152, 0.0722)));
+}
+"""
+
+        private const val LIFT_FN = """
+uniform float curve[65]; uniform float saturation;
+vec3 pq(vec3 nits) { const float m1 = 0.1593017578125, m2 = 78.84375, c1 = 0.8359375, c2 = 18.8515625, c3 = 18.6875;
+  vec3 l = pow(clamp(nits / 10000.0, 0.0, 1.0), vec3(m1)); return pow((c1 + c2 * l) / (1.0 + c3 * l), vec3(m2)); }
+float pq_nits(float e) { const float m1 = 0.1593017578125, m2 = 78.84375, c1 = 0.8359375, c2 = 18.8515625, c3 = 18.6875;
+  float p = pow(clamp(e, 0.0, 1.0), 1.0 / m2); return 10000.0 * pow(max(p - c1, 0.0) / (c2 - c3 * p), 1.0 / m1); }
+vec3 lift(vec3 rgb) {
+  vec3 lin = pow(rgb, vec3(2.4));
+  float y = dot(lin, vec3(0.2126, 0.7152, 0.0722));
+  float x = pow(y, 1.0 / 2.4) * 64.0; int i = min(int(x), 63);
+  float nits = pq_nits(mix(curve[i], curve[i + 1], x - float(i)));
+  vec3 o = lin * (y > 1e-7 ? nits / y : 0.0);
+  float yo = dot(o, vec3(0.2126, 0.7152, 0.0722));
+  o = max(yo + (o - yo) * (0.985 * saturation), 0.0);
+  const mat3 to2020 = mat3(vec3(0.6274, 0.0691, 0.0164), vec3(0.3293, 0.9195, 0.0880), vec3(0.0433, 0.0114, 0.8956));
+  return pq(to2020 * o);
+}
+"""
+
+        // The last pass, at the screen's size: the picture scaled (bilinear; Catmull-Rom in nine bilinear taps; or RAVU-lite's doubled
+        // Y' with the picture's chroma, as R'G'B' plus the luma detail), then the lift.
+        private const val FINAL = """#version 300 es
+precision highp float;
+uniform sampler2D picture; uniform sampler2D luma2x; uniform vec2 srcSize; in vec2 uv; out vec4 color;
+""" + LIFT_FN + """
+vec4 catrom(vec2 p) {
+  vec2 sp = p * srcSize; vec2 t1 = floor(sp - 0.5) + 0.5; vec2 f = sp - t1;
+  vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f)); vec2 w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+  vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f)); vec2 w3 = f * f * (-0.5 + 0.5 * f);
+  vec2 w12 = w1 + w2; vec2 t0 = (t1 - 1.0) / srcSize; vec2 t3 = (t1 + 2.0) / srcSize; vec2 t12 = (t1 + w2 / w12) / srcSize;
+  vec4 r = texture(picture, vec2(t0.x, t0.y)) * w0.x * w0.y + texture(picture, vec2(t12.x, t0.y)) * w12.x * w0.y
+         + texture(picture, vec2(t3.x, t0.y)) * w3.x * w0.y + texture(picture, vec2(t0.x, t12.y)) * w0.x * w12.y
+         + texture(picture, vec2(t12.x, t12.y)) * w12.x * w12.y + texture(picture, vec2(t3.x, t12.y)) * w3.x * w12.y
+         + texture(picture, vec2(t0.x, t3.y)) * w0.x * w3.y + texture(picture, vec2(t12.x, t3.y)) * w12.x * w3.y
+         + texture(picture, vec2(t3.x, t3.y)) * w3.x * w3.y;
+  return r;
+}
+void main() {
+#if defined(CATROM)
+  vec3 rgb = catrom(uv).rgb;
+#elif defined(RAVU)
+  vec4 lo = texture(picture, uv);
+  vec3 rgb = lo.rgb + (texture(luma2x, uv).r - lo.a);
+#else
+  vec3 rgb = texture(picture, uv).rgb;
+#endif
+  color = vec4(lift(clamp(rgb, 0.0, 1.0)), 1.0);
+}
 """
 
         private const val MEASURE = HEAD + """
