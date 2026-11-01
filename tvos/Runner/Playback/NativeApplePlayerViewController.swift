@@ -259,7 +259,7 @@ final class NativeApplePlayerViewController: UIViewController {
         case prev, skipBack, playPause, skipForward, next
         case speed, chapters, episodes, subtitles, audio, cast, quality, zoom, info
         case channels, favorite, guide, syncplay, goLive, record, orientation
-        /// Lambent's 4K HDR chip and the "Picture and sound" sheet.
+        /// Lambent's 4K HDR chip, and "more", which grows the bar.
         case lambent, more
     }
     private var focusedZone: Zone = .buttons
@@ -345,6 +345,18 @@ final class NativeApplePlayerViewController: UIViewController {
     private var lambentInfo: [String: Any]?
     private var lambentLabel: UILabel?
     private let controlSpacer = UIView()
+    /// The glass bar opens compact and grows into the full row of buttons
+    /// when "more" is pressed; it folds back each time the controls hide.
+    private var barExpanded = false
+    private var compactBarConstraints: [NSLayoutConstraint] = []
+    private var expandedBarConstraints: [NSLayoutConstraint] = []
+    /// How far the bar rides above the bottom: 18% of the height, clear of
+    /// the band where subtitles sit.
+    private static let barLift: CGFloat = 194
+    /// Compare (`cmp=1`): Lambent Server draws the original on the left half
+    /// and a line down the middle; this names the enhanced right half, with
+    /// or without the controls.
+    private let compareTag = NativeApplePlayerViewController.makeGlass(cornerRadius: 22)
 
     private let osdScrim = UIView()
     private let topContainer = UIView()
@@ -427,6 +439,27 @@ final class NativeApplePlayerViewController: UIViewController {
         layoutHeader()
         rebuildStats()
         restyleForTheme()
+        setupCompareTag()
+    }
+
+    private func setupCompareTag() {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Enhanced"
+        label.font = .systemFont(ofSize: 22, weight: .semibold)
+        label.textColor = .white
+        compareTag.contentView.addSubview(label)
+        compareTag.isHidden = true
+        // Above the picture and below the controls.
+        view.insertSubview(compareTag, belowSubview: osdScrim)
+        NSLayoutConstraint.activate([
+            compareTag.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            compareTag.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: 14),
+            label.leadingAnchor.constraint(equalTo: compareTag.contentView.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: compareTag.contentView.trailingAnchor, constant: -20),
+            label.topAnchor.constraint(equalTo: compareTag.contentView.topAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: compareTag.contentView.bottomAnchor, constant: -8),
+        ])
     }
 
     func applyThemeConfig(_ args: [String: Any]) {
@@ -453,6 +486,14 @@ final class NativeApplePlayerViewController: UIViewController {
         if isViewLoaded {
             restyleForTheme()
         }
+    }
+
+    private func applyBarLayout() {
+        NSLayoutConstraint.deactivate(barExpanded ? compactBarConstraints : expandedBarConstraints)
+        NSLayoutConstraint.activate(barExpanded ? expandedBarConstraints : compactBarConstraints)
+        controlGlass.layer.cornerRadius = barExpanded ? 44 : 40
+        aboveRow.isHidden = !barExpanded
+        belowCenterLabel.isHidden = !barExpanded
     }
 
     /// A rounded panel of Liquid Glass where the system has it, else the dark
@@ -644,7 +685,7 @@ final class NativeApplePlayerViewController: UIViewController {
             osdContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             osdContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             osdContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            osdContainer.heightAnchor.constraint(equalToConstant: 296 + Self.controlSize),
+            osdContainer.heightAnchor.constraint(equalToConstant: 296 + Self.controlSize + Self.barLift),
         ])
 
         gradientLayer.colors = [
@@ -705,47 +746,61 @@ final class NativeApplePlayerViewController: UIViewController {
         #endif
 
         NSLayoutConstraint.activate([
-            controlGlass.leadingAnchor.constraint(
-                equalTo: osdContainer.leadingAnchor, constant: 96),
-            controlGlass.trailingAnchor.constraint(
-                equalTo: osdContainer.trailingAnchor, constant: -96),
+            // Both sizes ride above the band where subtitles sit, at the same
+            // height, so growing the bar does not make it jump.
             controlGlass.bottomAnchor.constraint(
-                equalTo: osdContainer.bottomAnchor, constant: -56),
-            controlGlass.topAnchor.constraint(equalTo: aboveRow.topAnchor, constant: -28),
-
-            controlBar.leadingAnchor.constraint(
-                equalTo: controlGlass.leadingAnchor, constant: 36),
-            controlBar.trailingAnchor.constraint(
-                equalTo: controlGlass.trailingAnchor, constant: -36),
-            controlBar.bottomAnchor.constraint(
-                equalTo: controlGlass.bottomAnchor, constant: -28),
+                equalTo: osdContainer.bottomAnchor, constant: -Self.barLift),
             controlBar.heightAnchor.constraint(equalToConstant: Self.controlSize + 8),
 
             controlStack.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
             controlStack.centerYAnchor.constraint(equalTo: controlBar.centerYAnchor),
             controlStackTrailing,
 
-            belowRow.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
-            belowRow.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
-            belowRow.bottomAnchor.constraint(
-                equalTo: controlBar.topAnchor, constant: -16),
-
-            scrubber.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
-            scrubber.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
-            scrubber.bottomAnchor.constraint(
-                equalTo: belowRow.topAnchor, constant: -10),
             scrubber.heightAnchor.constraint(equalToConstant: 10),
 
             chapterOverlay.leadingAnchor.constraint(equalTo: scrubber.leadingAnchor),
             chapterOverlay.trailingAnchor.constraint(equalTo: scrubber.trailingAnchor),
             chapterOverlay.centerYAnchor.constraint(equalTo: scrubber.centerYAnchor),
             chapterOverlay.heightAnchor.constraint(equalToConstant: 16),
+        ])
 
+        // Compact (as the Android TV glass bar): about half the width and
+        // centred, the times inline at the ends of the seek bar, one row of
+        // buttons.
+        compactBarConstraints = [
+            controlGlass.centerXAnchor.constraint(equalTo: osdContainer.centerXAnchor),
+            controlGlass.widthAnchor.constraint(equalToConstant: 960),
+            controlGlass.topAnchor.constraint(equalTo: scrubber.topAnchor, constant: -22),
+            controlBar.leadingAnchor.constraint(equalTo: controlGlass.leadingAnchor, constant: 28),
+            controlBar.trailingAnchor.constraint(equalTo: controlGlass.trailingAnchor, constant: -22),
+            controlBar.bottomAnchor.constraint(equalTo: controlGlass.bottomAnchor, constant: -14),
+            scrubber.bottomAnchor.constraint(equalTo: controlBar.topAnchor, constant: -6),
+            belowRow.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
+            belowRow.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
+            belowRow.centerYAnchor.constraint(equalTo: scrubber.centerYAnchor),
+            scrubber.leadingAnchor.constraint(equalTo: belowLeftLabel.trailingAnchor, constant: 16),
+            scrubber.trailingAnchor.constraint(equalTo: belowRightLabel.leadingAnchor, constant: -16),
+        ]
+        // Expanded by "more": the full width the whole row of buttons needs,
+        // with the time rows above and below the seek bar.
+        expandedBarConstraints = [
+            controlGlass.leadingAnchor.constraint(equalTo: osdContainer.leadingAnchor, constant: 96),
+            controlGlass.trailingAnchor.constraint(equalTo: osdContainer.trailingAnchor, constant: -96),
+            controlGlass.topAnchor.constraint(equalTo: aboveRow.topAnchor, constant: -26),
+            controlBar.leadingAnchor.constraint(equalTo: controlGlass.leadingAnchor, constant: 36),
+            controlBar.trailingAnchor.constraint(equalTo: controlGlass.trailingAnchor, constant: -36),
+            controlBar.bottomAnchor.constraint(equalTo: controlGlass.bottomAnchor, constant: -24),
+            belowRow.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
+            belowRow.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
+            belowRow.bottomAnchor.constraint(equalTo: controlBar.topAnchor, constant: -14),
+            scrubber.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
+            scrubber.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
+            scrubber.bottomAnchor.constraint(equalTo: belowRow.topAnchor, constant: -10),
             aboveRow.leadingAnchor.constraint(equalTo: controlBar.leadingAnchor),
             aboveRow.trailingAnchor.constraint(equalTo: controlBar.trailingAnchor),
-            aboveRow.bottomAnchor.constraint(
-                equalTo: scrubber.topAnchor, constant: -8),
-        ])
+            aboveRow.bottomAnchor.constraint(equalTo: scrubber.topAnchor, constant: -8),
+        ]
+        applyBarLayout()
 
         setupTrickplay()
         setupNextUpCard()
@@ -1361,7 +1416,7 @@ final class NativeApplePlayerViewController: UIViewController {
         case .record: return liveRecord?.series == true ? "smallcircle.filled.circle" : "circle.fill"
         case .orientation: return orientationLock == false ? "rotate.right" : "lock.rotation"
         case .lambent: return "sparkles"
-        case .more: return "slider.horizontal.3"
+        case .more: return "ellipsis"
         }
     }
 
@@ -1462,14 +1517,32 @@ final class NativeApplePlayerViewController: UIViewController {
             if osdShows(.quality) { ids.append(.quality) }
             if liveRecord != nil { ids.append(.record) }
             if !streamInfoSections.isEmpty, osdShows(.info) { ids.append(.info) }
-        } else {
-            // Lambent's compact bar: the transport on the left; subtitles, the
-            // 4K HDR chip and "Picture and sound" (which holds the rest) on
-            // the right.
-            ids += [.skipBack, .playPause, .skipForward]
-            if !subtitleTracks.isEmpty || canDownloadSubtitles { ids.append(.subtitles) }
+        } else if !barExpanded {
+            // The compact bar, as on Android TV: back, play or pause and
+            // forward, then "more" and the 4K HDR chip at the far end.
+            ids += [.skipBack, .playPause, .skipForward, .more]
             if lambentInfo != nil { ids.append(.lambent) }
-            ids.append(.more)
+        } else {
+            // Both always present, because they step chapters before they
+            // step the queue, so they have something to do on a lone movie.
+            ids += [.prev, .skipBack, .playPause, .skipForward, .next]
+
+            // Everything past the transport answers to the player button
+            // settings, both for whether it appears and where it sits.
+            var secondary: [ControlId] = []
+            if canFavorite { secondary.append(.favorite) }
+            secondary.append(.speed)
+            if chapters.count > 1 { secondary.append(.chapters) }
+            if canBrowseEpisodes { secondary.append(.episodes) }
+            if !subtitleTracks.isEmpty || canDownloadSubtitles { secondary.append(.subtitles) }
+            if audioTracks.count > 1 { secondary.append(.audio) }
+            if hasCast { secondary.append(.cast) }
+            if syncPlayEnabled { secondary.append(.syncplay) }
+            secondary.append(.quality)
+            secondary.append(.zoom)
+            if !streamInfoSections.isEmpty { secondary.append(.info) }
+            ids += arrangedOsdControls(secondary)
+            if lambentInfo != nil { ids.append(.lambent) }
         }
 
         #if os(iOS)
@@ -1512,12 +1585,15 @@ final class NativeApplePlayerViewController: UIViewController {
         let room = 1920 - 180 - CGFloat(max(ids.count - 1, 0)) * controlStack.spacing
         controlSide = min(Self.controlSize, (room / CGFloat(max(ids.count, 1))).rounded(.down))
         #endif
+        // The flexible gap: before "more" on the compact bar, before the chip
+        // (or at the end) on the full row, so the stack can span the bar.
+        let gapBefore: ControlId? = isLive ? nil : (barExpanded ? .lambent : .more)
         for id in ids {
-            // The right-hand group sits at the far end, past a flexible gap.
-            if !isLive, id == ids.first(where: { ![.skipBack, .playPause, .skipForward].contains($0) }) {
-                controlStack.addArrangedSubview(controlSpacer)
-            }
+            if id == gapBefore { controlStack.addArrangedSubview(controlSpacer) }
             controlStack.addArrangedSubview(makeControl(id))
+        }
+        if gapBefore == nil || !ids.contains(gapBefore!) {
+            controlStack.addArrangedSubview(controlSpacer)
         }
 
         if !controls.indices.contains(focusedControlIndex) {
@@ -1542,6 +1618,8 @@ final class NativeApplePlayerViewController: UIViewController {
 
     func applyUiMetadata(_ args: [String: Any]) {
         lambentInfo = args["lambent"] as? [String: Any]
+        compareTag.isHidden = !((lambentInfo?["compare"] as? Bool ?? false)
+            && (lambentInfo?["enhanced"] as? Bool ?? false))
         headerPrimary = (args["topTitle"] as? String) ?? ""
         headerSecondary = (args["topSubtitle"] as? String) ?? ""
 
@@ -2482,7 +2560,11 @@ final class NativeApplePlayerViewController: UIViewController {
         case .lambent:
             presentLambentMenu()
         case .more:
-            presentMoreMenu()
+            barExpanded = true
+            applyBarLayout()
+            rebuildControls()
+            focusedControlIndex = controls.firstIndex(of: .playPause) ?? 0
+            updateFocusHighlight()
         }
     }
 
@@ -2556,34 +2638,6 @@ final class NativeApplePlayerViewController: UIViewController {
         }
         sheet.addAction(makePlayerAction(title: "Cancel", style: .cancel))
         presentSheet(sheet, from: .lambent)
-    }
-
-    /// "Picture and sound": everything the compact bar leaves off it, in the
-    /// order the player button settings give, as one glass sheet.
-    private func presentMoreMenu() {
-        let sheet = makePlayerMenu(title: "Picture and sound", message: nil, preferredStyle: .actionSheet)
-        var entries: [ControlId] = []
-        if lambentInfo != nil { entries.append(.lambent) }
-        var rest: [ControlId] = []
-        if audioTracks.count > 1 { rest.append(.audio) }
-        rest.append(.speed)
-        if chapters.count > 1 { rest.append(.chapters) }
-        if canBrowseEpisodes { rest.append(.episodes) }
-        if hasCast { rest.append(.cast) }
-        if syncPlayEnabled { rest.append(.syncplay) }
-        rest.append(.quality)
-        rest.append(.zoom)
-        if !streamInfoSections.isEmpty { rest.append(.info) }
-        if canFavorite { rest.append(.favorite) }
-        entries += arrangedOsdControls(rest).isEmpty ? rest : arrangedOsdControls(rest)
-        entries += [.prev, .next]
-        for id in entries {
-            sheet.addAction(makePlayerAction(title: tooltipText(for: id), style: .default) { [weak self] _ in
-                self?.activate(id)
-            })
-        }
-        sheet.addAction(makePlayerAction(title: "Cancel", style: .cancel))
-        presentSheet(sheet, from: .more)
     }
 
     /// The chip: a glass pill with the accent dot and the stream's label.
@@ -2781,7 +2835,7 @@ final class NativeApplePlayerViewController: UIViewController {
         case .record: return liveRecord?.timer == true ? "Cancel Recording" : "Record"
         case .orientation: return orientationLock == true ? "Unlock Orientation" : "Lock Landscape"
         case .lambent: return "Picture enhancement"
-        case .more: return "Picture and sound"
+        case .more: return "More"
         }
     }
 
@@ -3209,8 +3263,9 @@ final class NativeApplePlayerViewController: UIViewController {
 
     /// An appearance change can reset the native position while the OSD is still visible.
     func reapplySubtitleClearance() {
-        // Clear of the glass control panel, whose top sits near 73% of the height.
-        player.setSubtitlePosition(subtitlesRaised ? min(baseSubtitlePos, 66) : baseSubtitlePos)
+        // The glass bar rides above the band where subtitles sit, so they stay
+        // where the viewer put them while the controls show.
+        player.setSubtitlePosition(baseSubtitlePos)
     }
 
     /// The dim, the top bar, the bottom bar and, on iOS, the centered
@@ -3807,6 +3862,11 @@ final class NativeApplePlayerViewController: UIViewController {
 
     private func showOsd() {
         guard !cinemaSkipActive else { return }
+        if barExpanded, !isOsdOnScreen {
+            barExpanded = false
+            applyBarLayout()
+            rebuildControls()
+        }
         lastShowAt = CACurrentMediaTime()
         osdDismissed = false
         setSubtitlesRaised(true)

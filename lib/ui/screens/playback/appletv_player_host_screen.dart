@@ -564,7 +564,9 @@ class _AppleTvPlayerHostScreenState extends State<AppleTvPlayerHostScreen> {
       var imageCount = durationMs > 0
           ? (durationMs / msPerImage).ceil() + 1
           : 16;
-      imageCount = imageCount.clamp(1, 128);
+      // Lambent Server serves one frame an image (every 5 s), so a long film
+      // needs a few thousand; the old cap of 128 stopped the previews part way.
+      imageCount = imageCount.clamp(1, 4096);
       urls = List<String>.generate(
         imageCount,
         (i) => client.imageApi.getTrickplayTileImageUrl(
