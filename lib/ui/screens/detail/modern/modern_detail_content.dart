@@ -4709,6 +4709,7 @@ class _ModernDetailContentState extends State<ModernDetailContent> {
                     MediaQuery.sizeOf(context),
                     hasUpNext: hasUpNext,
                     isBoxSet: item.type == 'BoxSet',
+                    room: ModernLandscapeLayout.roomFor(context),
                   )
                 : null,
             onArrowRightAtEnd: _landscape ? _focusRightOfActions : null,

@@ -37,22 +37,44 @@ class ModernLandscapeLayout extends StatelessWidget {
   /// The width of the left hero column. The action row measures itself
   /// against this to work out how many buttons fit on one line, so it lives
   /// next to the layout that hands the width out.
+  ///
+  /// `room` caps it at the width the row really has ([roomFor]): a share of
+  /// the screen alone ran past the row on Apple TV, whose safe area takes the
+  /// screen's edges, by 3.3 pixels.
   static double heroWidthFor(
     Size size, {
     required bool hasUpNext,
     required bool isBoxSet,
-  }) => hasUpNext
-      ? (isBoxSet
-            ? (size.width * 0.70).clamp(450.0, 950.0)
-            : (size.width * 0.50).clamp(360.0, 680.0))
-      : (size.width * 0.85).clamp(450.0, 1100.0);
+    double? room,
+  }) {
+    final width = hasUpNext
+        ? (isBoxSet
+              ? (size.width * 0.70).clamp(450.0, 950.0)
+              : (size.width * 0.50).clamp(360.0, 680.0))
+        : (size.width * 0.85).clamp(450.0, 1100.0);
+    return room == null || room >= width ? width : room;
+  }
+
+  /// The width the hero row has: the screen less its safe area (tvOS keeps
+  /// the edges clear) and the row's own padding.
+  static double roomFor(BuildContext context) {
+    final safe = MediaQuery.paddingOf(context);
+    final hasLeftSidebar =
+        GetIt.instance<UserPreferences>().get(UserPreferences.navbarPosition) ==
+        NavbarPosition.left;
+    return MediaQuery.sizeOf(context).width -
+        safe.left -
+        safe.right -
+        (hasLeftSidebar ? 120.0 : 40.0) -
+        40.0;
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final hasUpNext = upNext != null;
     final scale = GetIt.instance<UserPreferences>().get(UserPreferences.desktopUiScale).scaleFactor;
-    final heroWidth = heroWidthFor(size, hasUpNext: hasUpNext, isBoxSet: isBoxSet);
+    final heroWidth = heroWidthFor(size, hasUpNext: hasUpNext, isBoxSet: isBoxSet, room: roomFor(context));
 
     final hasLeftSidebar = GetIt.instance<UserPreferences>().get(UserPreferences.navbarPosition) == NavbarPosition.left;
     final leftPadding = hasLeftSidebar ? 120.0 : 40.0;
