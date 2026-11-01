@@ -1,0 +1,25 @@
+# Drives an Apple TV simulator with the Siri Remote (XCUIRemote), for checking the Lambent app by hand-free steps.
+# Generated with `xcodegen`; run through ./drive.sh. Nothing here ships in the app.
+name: RemoteDriver
+options:
+  bundleIdPrefix: com.honver.lambent.remotedriver
+  deploymentTarget:
+    tvOS: "18.0"
+targets:
+  Host:
+    type: application
+    platform: tvOS
+    sources: [Host]
+    info:
+      path: Host/Info.plist
+      properties:
+        UILaunchScreen: {}
+  RemoteDriverUITests:
+    type: bundle.ui-testing
+    platform: tvOS
+    sources: [UITests]
+    dependencies:
+      - target: Host
+    settings:
+      TEST_TARGET_NAME: Host
+      GENERATE_INFOPLIST_FILE: YES
