@@ -16,14 +16,19 @@ import UIKit
 /// BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid over the hidden
 /// `AVPlayerLayer`. The panel is asked for HDR10 at the film's rate.
 ///
-/// Turned on in Settings > Lambent enhancement > HDR on this TV (with
-/// Enhance on PC off, so the server direct-plays), stored by Flutter as
-/// `flutter.pref_lambent_client_hdr`; a launch argument
-/// `-flutter.pref_lambent_client_hdr YES` does the same. Logs `[LambentHDR]`
+/// On by default whenever Enhance on PC is off (the server then direct-plays);
+/// Settings > Lambent enhancement > HDR on this TV turns it off. Flutter stores
+/// both as `flutter.pref_lambent_enhance_on_pc` / `flutter.pref_lambent_client_hdr`. Logs `[LambentHDR]`
 /// lines every 2 s.
 @MainActor
 final class LambentHDRLift {
-    static var isEnabled: Bool { UserDefaults.standard.bool(forKey: "flutter.pref_lambent_client_hdr") }
+    /// On while Enhance on PC is off (Flutter's defaults: Enhance on PC on, HDR on this TV on, so an unset key is true).
+    static var isEnabled: Bool {
+        let defaults = UserDefaults.standard
+        let enhanceOnPc = defaults.object(forKey: "flutter.pref_lambent_enhance_on_pc") as? Bool ?? true
+        let clientHdr = defaults.object(forKey: "flutter.pref_lambent_client_hdr") as? Bool ?? true
+        return !enhanceOnPc && clientHdr
+    }
     static var deepenBlacks: Bool { UserDefaults.standard.bool(forKey: "flutter.pref_lambent_client_blacks") }
 
     private weak var playerLayer: AVPlayerLayer?
