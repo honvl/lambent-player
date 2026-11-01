@@ -2906,9 +2906,11 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: true,
   );
 
+  // On a TV, 10 s each way, as left and right on Apple TV's and Android TV's
+  // own players; 30 s forward elsewhere.
   static final skipForwardLength = Preference(
     key: 'skipForwardLength',
-    defaultValue: 30000,
+    defaultValue: PlatformDetection.isTV ? 10000 : 30000,
   );
 
   static final unpauseRewindDuration = Preference(

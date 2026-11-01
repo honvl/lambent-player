@@ -5927,50 +5927,42 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
               tooltip: l10n.playerTooltipPrevious,
             ),
             const SizedBox(width: 4),
-            _controlButton(
-              seekBackIcon(_prefs.get(UserPreferences.skipBackLength)),
-              onPressed: () =>
-                  _seekRelative(-_prefs.get(UserPreferences.skipBackLength)),
+            // A remote's left and right already skip (Android TV's and Apple
+            // TV's own players have no seek buttons), so only pointer and
+            // touch screens get them.
+            if (!PlatformDetection.isTV) ...[
+              _controlButton(
+                seekBackIcon(_prefs.get(UserPreferences.skipBackLength)),
+                onPressed: () =>
+                    _seekRelative(-_prefs.get(UserPreferences.skipBackLength)),
+                size: buttonIconSize,
+                extent: buttonExtent,
+                tooltip: _tooltipMessage(
+                  l10n.playerTooltipSeekBack,
+                  shortcut: 'Left',
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            _playPauseButton(
               size: buttonIconSize,
               extent: buttonExtent,
-              tooltip: _tooltipMessage(
-                l10n.playerTooltipSeekBack,
-                shortcut: 'Left',
+              shortcut: 'Space',
+            ),
+            if (!PlatformDetection.isTV) ...[
+              const SizedBox(width: 8),
+              _controlButton(
+                seekForwardIcon(_prefs.get(UserPreferences.skipForwardLength)),
+                onPressed: () =>
+                    _seekRelative(_prefs.get(UserPreferences.skipForwardLength)),
+                size: buttonIconSize,
+                extent: buttonExtent,
+                tooltip: _tooltipMessage(
+                  l10n.playerTooltipSeekForward,
+                  shortcut: 'Right',
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            StreamBuilder<bool>(
-              stream: _state.playingStream,
-              initialData: _state.isPlaying,
-              builder: (context, snap) {
-                final isPlaying = _isPlayingShown;
-                return _controlButton(
-                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  onPressed: () => isPlaying
-                      ? _manager.pause()
-                      : _resumeWithConfiguredRewind(),
-                  size: buttonIconSize,
-                  extent: buttonExtent,
-                  focusNode: _primaryPlayFocus,
-                  tooltip: _tooltipMessage(
-                    isPlaying ? l10n.pause : l10n.play,
-                    shortcut: 'Space',
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-            _controlButton(
-              seekForwardIcon(_prefs.get(UserPreferences.skipForwardLength)),
-              onPressed: () =>
-                  _seekRelative(_prefs.get(UserPreferences.skipForwardLength)),
-              size: buttonIconSize,
-              extent: buttonExtent,
-              tooltip: _tooltipMessage(
-                l10n.playerTooltipSeekForward,
-                shortcut: 'Right',
-              ),
-            ),
+            ],
             const SizedBox(width: 4),
             // Always here, because it steps chapters before it steps the
             // queue, so it has something to do on a lone movie too.
@@ -6027,6 +6019,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     final extent = 46.0 * scale;
     final iconSize = 24.0 * scale;
     final chipLabel = _enhancementChipLabel;
+    // What Apple TV's and Netflix's bars keep on top: subtitles and audio,
+    // and the next episode. Left and right on the remote skip, so there are no
+    // seek buttons; everything rarer is behind More.
+    final item = _queue.currentItem;
+    final hasSubtitleStreams = _currentPlaybackMediaStreams().any(
+      (s) => s['Type'] == 'Subtitle',
+    );
+    final canDownloadSubtitles =
+        item is AggregatedItem && TrackPicker.canDownloadRemoteSubtitles(item);
     return Focus(
       skipTraversal: true,
       canRequestFocus: false,
@@ -6044,41 +6045,32 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         policy: ReadingOrderTraversalPolicy(),
         child: Row(
           children: [
+            _playPauseButton(size: iconSize, extent: extent),
+            if (hasSubtitleStreams || canDownloadSubtitles)
+              _controlButton(
+                !hasSubtitleStreams
+                    ? Icons.download_rounded
+                    : Icons.subtitles_outlined,
+                onPressed: () => _showTrackSelector(audio: false),
+                size: iconSize,
+                extent: extent,
+                tooltip: l10n.subtitles,
+              ),
             _controlButton(
-              seekBackIcon(_prefs.get(UserPreferences.skipBackLength)),
-              onPressed: () =>
-                  _seekRelative(-_prefs.get(UserPreferences.skipBackLength)),
+              Icons.audiotrack_outlined,
+              onPressed: () => _showTrackSelector(audio: true),
               size: iconSize,
               extent: extent,
-              focusNode: _tvTransportFirstFocus,
-              tooltip: l10n.playerTooltipSeekBack,
+              tooltip: l10n.audio,
             ),
-            StreamBuilder<bool>(
-              stream: _state.playingStream,
-              initialData: _state.isPlaying,
-              builder: (context, snap) {
-                final isPlaying = _isPlayingShown;
-                return _controlButton(
-                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  onPressed: () => isPlaying
-                      ? _manager.pause()
-                      : _resumeWithConfiguredRewind(),
-                  size: iconSize,
-                  extent: extent,
-                  focusNode: _primaryPlayFocus,
-                  tooltip: isPlaying ? l10n.pause : l10n.play,
-                );
-              },
-            ),
-            _controlButton(
-              seekForwardIcon(_prefs.get(UserPreferences.skipForwardLength)),
-              onPressed: () =>
-                  _seekRelative(_prefs.get(UserPreferences.skipForwardLength)),
-              size: iconSize,
-              extent: extent,
-              focusNode: _tvTransportLastFocus,
-              tooltip: l10n.playerTooltipSeekForward,
-            ),
+            if (_queue.hasNext)
+              _controlButton(
+                Icons.skip_next_rounded,
+                onPressed: _manager.next,
+                size: iconSize,
+                extent: extent,
+                tooltip: l10n.next,
+              ),
             const Spacer(),
             _controlButton(
               Icons.more_horiz_rounded,
@@ -6109,6 +6101,57 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           ],
         ),
       ),
+    );
+  }
+
+  /// Play and pause in one button. On a TV its icon morphs between the two, as
+  /// Apple TV's does; elsewhere it swaps, as before.
+  Widget _playPauseButton({
+    required double size,
+    required double extent,
+    String? shortcut,
+  }) {
+    final l10n = AppLocalizations.of(context);
+    return StreamBuilder<bool>(
+      stream: _state.playingStream,
+      initialData: _state.isPlaying,
+      builder: (context, snap) {
+        final isPlaying = _isPlayingShown;
+        void onPressed() =>
+            isPlaying ? _manager.pause() : _resumeWithConfiguredRewind();
+        final tooltip = _tooltipMessage(
+          isPlaying ? l10n.pause : l10n.play,
+          shortcut: shortcut,
+        );
+        if (!PlatformDetection.isTV) {
+          return _controlButton(
+            isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            onPressed: onPressed,
+            size: size,
+            extent: extent,
+            focusNode: _primaryPlayFocus,
+            tooltip: tooltip,
+          );
+        }
+        final icon = TweenAnimationBuilder<double>(
+          tween: Tween(end: isPlaying ? 1.0 : 0.0),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          builder: (context, progress, _) => AnimatedIcon(
+            icon: AnimatedIcons.play_pause,
+            progress: AlwaysStoppedAnimation(progress),
+            color: Colors.white,
+            size: size,
+          ),
+        );
+        return _TvFocusButton(
+          focusNode: _primaryPlayFocus,
+          extent: extent,
+          tooltip: tooltip,
+          onPressed: () => _handleControlButtonPress(onPressed),
+          child: icon,
+        );
+      },
     );
   }
 
