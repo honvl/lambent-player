@@ -78,6 +78,23 @@ final class PlayerHost: UIView {
             // LIFT_FP16 in the environment: the fp16 models for everything after this.
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
         }
+        if ProcessInfo.processInfo.environment["LIFT_IO"] != nil {
+            IOBench.run()
+            print("BENCH done")
+            return
+        }
+        if ProcessInfo.processInfo.environment["LIFT_VARIANTS"] != nil {
+            VariantBench.run()
+            print("BENCH done")
+            return
+        }
+        if ProcessInfo.processInfo.environment["LIFT_PLAN"] != nil {
+            Task {
+                await ComputePlanBench.run("neural-low")
+                print("BENCH done")
+            }
+            return
+        }
         if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
             capacity([ai])
             print("BENCH done")

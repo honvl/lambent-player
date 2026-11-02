@@ -106,8 +106,13 @@ final class LambentNeuralScaler {
     /// One picture's buffers. Three, for the player's three stages (LambentHDRLift.swift): the GPU packs picture N + 2 while the
     /// Neural Engine runs N + 1 and the GPU finishes N. On an A16 the network takes 15 ms back to back but 24 ms with a 5 ms pack
     /// between runs (the Neural Engine idles and slows), and 29 ms when it also takes turns with the GPU's finish.
+    ///
+    /// The network's input and output are IOSurface pixel buffers (half-float, 960 wide, channels x 544 high, rows unpadded) wrapped as
+    /// Core ML arrays: on an A16 the network took 13.1-13.5 ms on those against 15.4 ms on arrays over plain shared Metal buffers (Core
+    /// ML copied those). Metal reaches the same memory as buffers made over the surfaces, in the same linear layout.
     final class Slot {
         let input: MTLBuffer, output: MTLBuffer
+        private let surfaces: (CVPixelBuffer, CVPixelBuffer)
         let features: MLFeatureProvider
         let options = MLPredictionOptions()
         var base: MTLTexture?, luma: MTLTexture?, chroma: MTLTexture?
@@ -117,20 +122,31 @@ final class LambentNeuralScaler {
 
         init(device: MTLDevice) throws {
             let (w2, h2) = (LambentNeuralScaler.modelSize.0 / 2, LambentNeuralScaler.modelSize.1 / 2)
-            // Input and output live in shared memory the GPU writes and reads directly.
-            guard let input = device.makeBuffer(length: 16 * w2 * h2 * 2, options: .storageModeShared),
-                let output = device.makeBuffer(length: 48 * w2 * h2 * 2, options: .storageModeShared)
-            else { throw Failure("no buffers") }
+            func surface(_ channels: Int) throws -> (CVPixelBuffer, MLMultiArray, MTLBuffer) {
+                var made: CVPixelBuffer?
+                let attrs: [String: Any] = [
+                    kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](), kCVPixelBufferMetalCompatibilityKey as String: true,
+                ]
+                CVPixelBufferCreate(nil, w2, channels * h2, kCVPixelFormatType_OneComponent16Half, attrs as CFDictionary, &made)
+                guard let buffer = made, let io = CVPixelBufferGetIOSurface(buffer)?.takeUnretainedValue(),
+                    CVPixelBufferGetBytesPerRow(buffer) == w2 * 2
+                else { throw Failure("no \(channels)-channel surface") }
+                // The surface's memory stays mapped for its life; the buffer keeps the pixel buffer (and so the surface) alive.
+                let length = channels * h2 * w2 * 2
+                guard let metal = device.makeBuffer(
+                    bytesNoCopy: IOSurfaceGetBaseAddress(io), length: (length + 16383) / 16384 * 16384, options: .storageModeShared,
+                    deallocator: { _, _ in _ = buffer })
+                else { throw Failure("no Metal buffer over the \(channels)-channel surface") }
+                let shape = [1, NSNumber(value: channels), NSNumber(value: h2), NSNumber(value: w2)]
+                return (buffer, MLMultiArray(pixelBuffer: buffer, shape: shape), metal)
+            }
+            let (inBuffer, inArray, input) = try surface(16)
+            let (outBuffer, outArray, output) = try surface(48)
+            surfaces = (inBuffer, outBuffer)
             self.input = input
             self.output = output
-            func array(_ buffer: MTLBuffer, _ channels: Int) throws -> MLMultiArray {
-                try MLMultiArray(
-                    dataPointer: buffer.contents(), shape: [1, NSNumber(value: channels), NSNumber(value: h2), NSNumber(value: w2)],
-                    dataType: .float16,
-                    strides: [NSNumber(value: channels * h2 * w2), NSNumber(value: h2 * w2), NSNumber(value: w2), 1])
-            }
-            features = try MLDictionaryFeatureProvider(dictionary: ["x": MLFeatureValue(multiArray: try array(input, 16))])
-            options.outputBackings = ["residual": try array(output, 48)]
+            features = try MLDictionaryFeatureProvider(dictionary: ["x": MLFeatureValue(multiArray: inArray)])
+            options.outputBackings = ["residual": outArray]
         }
     }
 
