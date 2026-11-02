@@ -191,11 +191,22 @@ final class LambentLiftProcessor: @unchecked Sendable {
         let slot: LambentNeuralScaler.Slot
     }
 
-    /// The first stage of a picture, on its own queue: when the AI upscaler is the scaler, the picture packed and run through the network
-    /// on the Neural Engine (waited for); nil otherwise, or while the model loads. `process` then finishes it on the GPU. Run this
-    /// stage for picture N + 1 while `process` runs for picture N, at most two pictures in flight (the network has two slots): the
-    /// Neural Engine and the GPU then work at once. `process` alone does both, one after the other.
+    /// The AI upscaler's first two stages in one: `pack`, then `infer`.
     func prepare(_ picture: CVPixelBuffer) -> NeuralPrepared? {
+        guard let packed = pack(picture) else { return nil }
+        return infer(packed)
+    }
+
+    /// The network's stage (its own queue): `pack`'s picture through the network on the Neural Engine, waited for; nil when it fails.
+    func infer(_ packed: NeuralPrepared) -> NeuralPrepared? {
+        (try? packed.scaler.infer(packed.slot)) != nil ? packed : nil
+    }
+
+    /// The first stage of a picture, on its own queue: when the AI upscaler is the scaler, the picture packed for the network on the GPU
+    /// (waited for); nil otherwise, or while the model loads. Then `infer` on another queue, and `process` finishes it on the GPU. The
+    /// player runs the three a picture apart (pack N + 2, network N + 1, finish N), at most three pictures in flight (the network has
+    /// three slots), so the Neural Engine never waits for a pack. `process` alone does all three, one after the other.
+    func pack(_ picture: CVPixelBuffer) -> NeuralPrepared? {
         let w = CVPixelBufferGetWidth(picture), h = CVPixelBufferGetHeight(picture)
         guard scaler == .neural, scales(w, h), LambentNeuralScaler.fits(w, h) else { return nil }
         if network == nil {
@@ -208,7 +219,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         let formats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
         guard let a = texture(picture, 0, formats.0, prepareCache), let b = texture(picture, 1, formats.1, prepareCache),
             let inY = CVMetalTextureGetTexture(a), let inC = CVMetalTextureGetTexture(b),
-            let slot = try? neural.run(inY: inY, inC: inC, codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
+            let slot = try? neural.pack(inY: inY, inC: inC, codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
         else { return nil }
         withExtendedLifetime((a, b)) {}
         return NeuralPrepared(scaler: neural, slot: slot)

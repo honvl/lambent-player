@@ -48,7 +48,9 @@ final class LambentHDRLift {
     private var link: CADisplayLink?
     private let processor: LambentLiftProcessor
     private let queue = DispatchQueue(label: "lambent.hdr-lift", qos: .userInteractive)
-    /// The AI upscaler's first stage (the network on the Neural Engine), a picture ahead of `queue`'s GPU work.
+    /// The AI upscaler's first two stages, each a picture ahead of the next: the pack on the GPU, then the network on the Neural Engine;
+    /// `queue` finishes on the GPU.
+    private let packQueue = DispatchQueue(label: "lambent.hdr-lift.pack", qos: .userInteractive)
     private let neuralQueue = DispatchQueue(label: "lambent.hdr-lift.neural", qos: .userInteractive)
     /// Seconds from fetching a picture to handing it to the display layer, smoothed (`queue` writes it, the main thread reads it).
     private let latency = OSAllocatedUnfairLock(initialState: 0.0)
@@ -61,7 +63,8 @@ final class LambentHDRLift {
     /// How far ahead of the next vsync a picture is fetched and shown, so the processing time does not put the picture behind the
     /// sound (0 when a picture is ready by the next vsync).
     private var lead: CFTimeInterval = 0
-    /// Pictures handed to the queue and not yet shown; a new one is dropped at 2, so a slow picture never queues the next ones behind it.
+    /// Pictures handed to the stages and not yet shown; a new one is dropped at 3 (the network's slots), so a slow picture never queues
+    /// more behind it.
     private let inFlight = OSAllocatedUnfairLock(initialState: 0)
 
     init?() {
@@ -206,15 +209,17 @@ final class LambentHDRLift {
             let processor = processor
             let inFlight = inFlight
             let taken = inFlight.withLock { n -> Bool in
-                guard n < 2 else { return false }
+                guard n < LambentNeuralScaler.slotCount else { return false }
                 n += 1
                 return true
             }
             if taken {
                 let fetched = CACurrentMediaTime()
-                let queue = queue, latency = latency
-                neuralQueue.async {
-                    let prepared = processor.prepare(source)
+                let queue = queue, latency = latency, neuralQueue = neuralQueue
+                packQueue.async {
+                  let packed = processor.pack(source)
+                  neuralQueue.async {
+                    let prepared = packed.flatMap { processor.infer($0) }
                     queue.async {
                         defer { inFlight.withLock { $0 -= 1 } }
                         guard let lifted = processor.process(source, deadline: target, prepared: prepared),
@@ -224,6 +229,7 @@ final class LambentHDRLift {
                         let took = CACurrentMediaTime() - fetched
                         latency.withLock { $0 = $0 == 0 ? took : $0 + (took - $0) * 0.05 }
                     }
+                  }
                 }
             }
         }
@@ -243,14 +249,13 @@ final class LambentHDRLift {
     }
 
     /// As many vsyncs ahead as a picture takes from fetch to display layer, less the one the display link already gives (with 3 ms to
-    /// spare). The AI upscaler on an A16 takes about two film frames at 24 fps (the network for one picture while the GPU finishes the one
-    /// before), so pictures are fetched a vsync or two ahead; the shaders fit in one. Before the first measurement, the AI upscaler counts
-    /// as 50 ms. Changes only when that count of vsyncs does (one picture is skipped or repeated then).
+    /// spare). With the AI upscaler that is its three stages, a picture apart, so pictures are fetched two or three film frames ahead;
+    /// the shaders fit in one. Before the first measurement, the AI upscaler counts as 60 ms. Changes only when that count of vsyncs does (one picture is skipped or repeated then).
     private func updateLead(_ link: CADisplayLink) {
         let d = max(link.duration, 1.0 / 120)
         var took = latency.withLock { $0 }
-        if took == 0 { took = processor.scaler == .neural ? 0.050 : 0 }
-        let want = d * min(4, max(0, ceil((took + 0.003) / d) - 1))
+        if took == 0 { took = processor.scaler == .neural ? 0.060 : 0 }
+        let want = d * min(8, max(0, ceil((took + 0.003) / d) - 1))
         if abs(want - lead) > 0.001 { lead = want }
     }
 

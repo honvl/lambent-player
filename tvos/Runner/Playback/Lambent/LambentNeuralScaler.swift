@@ -103,9 +103,9 @@ final class LambentNeuralScaler {
     private let finishPipeline: MTLComputePipelineState
     private let model: MLModel
 
-    /// One picture's buffers. Two, so the Neural Engine runs one picture while the GPU finishes the one before (the player's two-stage
-    /// pipeline, LambentHDRLift.swift): on an A16 the network takes 15 ms back to back but 29 ms when the Neural Engine and the GPU
-    /// take turns, both clocking down while they wait.
+    /// One picture's buffers. Three, for the player's three stages (LambentHDRLift.swift): the GPU packs picture N + 2 while the
+    /// Neural Engine runs N + 1 and the GPU finishes N. On an A16 the network takes 15 ms back to back but 24 ms with a 5 ms pack
+    /// between runs (the Neural Engine idles and slows), and 29 ms when it also takes turns with the GPU's finish.
     final class Slot {
         let input: MTLBuffer, output: MTLBuffer
         let features: MLFeatureProvider
@@ -135,6 +135,7 @@ final class LambentNeuralScaler {
     }
 
     private let slots: [Slot]
+    static let slotCount = 3
     private var next = 0
 
     private init(device: MTLDevice, network: String, int8: Bool) throws {
@@ -151,7 +152,7 @@ final class LambentNeuralScaler {
         // The Neural Engine: the GPU stays free for decoding, the lift and the last pass.
         config.computeUnits = .cpuAndNeuralEngine
         model = try MLModel(contentsOf: url, configuration: config)
-        slots = [try Slot(device: device), try Slot(device: device)]
+        slots = [try Slot(device: device), try Slot(device: device), try Slot(device: device)]
     }
 
     /// A bench: `n` network runs back to back on whatever is in the input (no GPU work between them); mean ms.
@@ -178,10 +179,10 @@ final class LambentNeuralScaler {
         return slot.luma != nil && slot.chroma != nil ? slot.base : nil
     }
 
-    /// Packs the picture (its Y' and CbCr planes as Metal textures, video range; `codeScale` turns a sample into a 10-bit code) and runs
-    /// the network, waiting for both, into the next of the two slots. Then `encodeFinish` with that slot, before the slot after next is
-    /// run (the caller keeps at most two pictures in flight).
-    func run(inY: MTLTexture, inC: MTLTexture, codeScale: Float) throws -> Slot {
+    /// Packs the picture (its Y' and CbCr planes as Metal textures, video range; `codeScale` turns a sample into a 10-bit code) into the
+    /// next of the slots, waiting for it; then `infer` and `encodeFinish` with that slot, all before it comes round again (the caller
+    /// keeps at most as many pictures in flight as there are slots).
+    func pack(inY: MTLTexture, inC: MTLTexture, codeScale: Float) throws -> Slot {
         let slot = slots[next]
         next = (next + 1) % slots.count
         let (w, h) = (inY.width, inY.height)
@@ -204,10 +205,14 @@ final class LambentNeuralScaler {
         if let error = buffer.error { throw error }
         slot.packWallMs = (CACurrentMediaTime() - committed) * 1000
         slot.packMs = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000
+        return slot
+    }
+
+    /// The network on the slot's packed picture, on the Neural Engine, waited for.
+    func infer(_ slot: Slot) throws {
         let started = CACurrentMediaTime()
         _ = try model.prediction(from: slot.features, options: slot.options)
         slot.engineMs = (CACurrentMediaTime() - started) * 1000
-        return slot
     }
 
     /// The slot's residual onto a bicubic 2x, in `buffer`: Y' at twice the picture's size and the 2 x 2 blocks' chroma (the picture's

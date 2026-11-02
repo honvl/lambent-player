@@ -35,6 +35,7 @@ final class PlayerHost: UIView {
     private var processor: LambentLiftProcessor?
     private let queue = DispatchQueue(label: "bench", qos: .userInteractive)
     private let neuralQueue = DispatchQueue(label: "bench.neural", qos: .userInteractive)
+    private let packQueue = DispatchQueue(label: "bench.pack", qos: .userInteractive)
     private let inFlight = OSAllocatedUnfairLock(initialState: 0)
     private var runs: [(String, String, [LambentLiftProcessor.Scaler]?)] = []
     /// Runs whose pictures are processed but not shown: an iPhone's compositor scales and tone-maps every 4K HDR picture to its own
@@ -77,6 +78,11 @@ final class PlayerHost: UIView {
             // LIFT_FP16 in the environment: the fp16 models for everything after this.
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
         }
+        if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
+            capacity([ai])
+            print("BENCH done")
+            return
+        }
         // LIFT_KERNELS in the environment: the lift kernels alone.
         if ProcessInfo.processInfo.environment["LIFT_KERNELS"] != nil {
             capacity([])
@@ -89,9 +95,9 @@ final class PlayerHost: UIView {
             capacity([ai])
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
             capacity([ai, ravu])
-            runs = [("sdr1080p24", "AI upscaler", [ai]), ("sdr1080p24", "AI upscaler SDR out", [ai]),
-                    ("sdr1080p60", "AI upscaler hidden", [ai]), ("sdr1080p24", "player's own ladder", nil),
-                    ("sdr1080p60", "player's own ladder hidden", nil), ("sdr1080p24", "AI upscaler long", [ai])]
+            runs = [("sdr1080p24", "AI upscaler", [ai]), ("sdr1080p30", "AI upscaler", [ai]), ("sdr1080p30", "AI upscaler SDR out", [ai]),
+                    ("sdr1080p60", "AI upscaler hidden", [ai]), ("sdr1080p30", "player's own ladder", nil),
+                    ("sdr1080p60", "player's own ladder hidden", nil), ("sdr1080p30", "AI upscaler long", [ai])]
             return next()
         }
         capacity([.none, .catmullRom, ravu, fsr, ai])
@@ -152,18 +158,22 @@ final class PlayerHost: UIView {
             if sc == .neural {
                 print(String(format: "BENCH capacity %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms",
                              r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs))
-                // Pipelined, as the player runs it: the network for picture N + 1 while the GPU finishes picture N.
+                // Pipelined, as the player runs it: pack N + 2, network N + 1 and finish N at once.
                 p.pipelined = true
-                let a = DispatchQueue(label: "cap.a"), b = DispatchQueue(label: "cap.b"), gate = DispatchSemaphore(value: 2)
+                let pk = DispatchQueue(label: "cap.pack")
+                let a = DispatchQueue(label: "cap.a"), b = DispatchQueue(label: "cap.b"), gate = DispatchSemaphore(value: LambentNeuralScaler.slotCount)
                 let group = DispatchGroup()
                 let t0 = CACurrentMediaTime()
                 for i in 0..<240 {
                     gate.wait()
                     group.enter()
                     let pic = pictures[i % pictures.count]
-                    a.async {
-                        let prepared = p.prepare(pic)
-                        b.async { _ = p.process(pic, deadline: .infinity, prepared: prepared); gate.signal(); group.leave() }
+                    pk.async {
+                        let packed = p.pack(pic)
+                        a.async {
+                            let prepared = packed.flatMap { p.infer($0) }
+                            b.async { _ = p.process(pic, deadline: .infinity, prepared: prepared); gate.signal(); group.leave() }
+                        }
                     }
                 }
                 group.wait()
@@ -171,6 +181,36 @@ final class PlayerHost: UIView {
                 r = p.takeReport()
                 print(String(format: "BENCH capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, pack wall %.2f ms, thermal %d",
                              r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
+                // Experiments (LIFT_EXP): the network's stage with no GPU stage beside it, and the GPU stage with SDR output.
+                if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
+                    for variant in ["no GPU stage", "SDR out"] {
+                        p.hdr = variant != "SDR out"
+                        var ane: [Double] = [], packs: [Double] = []
+                        let t1 = CACurrentMediaTime()
+                        for i in 0..<120 {
+                            gate.wait()
+                            group.enter()
+                            let pic = pictures[i % pictures.count]
+                            pk.async {
+                              let packed = p.pack(pic)
+                              a.async {
+                                let prepared = packed.flatMap { p.infer($0) }
+                                if let prepared { ane.append(prepared.slot.engineMs); packs.append(prepared.slot.packWallMs) }
+                                b.async {
+                                    if variant != "no GPU stage" { _ = p.process(pic, deadline: .infinity, prepared: prepared) }
+                                    gate.signal(); group.leave()
+                                }
+                              }
+                            }
+                        }
+                        group.wait()
+                        let ms = (CACurrentMediaTime() - t1) * 1000 / 120
+                        let gpu = p.takeReport().meanMs
+                        print(String(format: "BENCH experiment %@: %.2f ms a picture, Neural Engine %.2f ms, pack wall %.2f ms, GPU %.2f ms", variant, ms,
+                                     ane.reduce(0, +) / Double(max(ane.count, 1)), packs.reduce(0, +) / Double(max(packs.count, 1)), gpu))
+                    }
+                    p.hdr = true
+                }
                 continue
             }
             print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
@@ -212,7 +252,7 @@ final class PlayerHost: UIView {
         processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }
         processor.outputSize = (3840, 2160)
-        processor.frameRate = clip.hasSuffix("60") ? 59.94 : 23.976
+        processor.frameRate = clip.hasSuffix("60") ? 59.94 : clip.hasSuffix("30") ? 29.97 : 23.976
         self.processor = processor
         let item = AVPlayerItem(url: url)
         let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
@@ -256,16 +296,18 @@ final class PlayerHost: UIView {
         let t = output.itemTime(forHostTime: target)
         if output.hasNewPixelBuffer(forItemTime: t), let source = output.copyPixelBuffer(forItemTime: t, itemTimeForDisplay: nil) {
             let renderer = (shown.layer as! AVSampleBufferDisplayLayer).sampleBufferRenderer
-            // As the player does it: the network a picture ahead on its own queue, at most two pictures in flight.
+            // As the player does it: pack, network and finish a picture apart, each on its own queue, at most three pictures in flight.
             let taken = inFlight.withLock { n -> Bool in
-                guard n < 2 else { return false }
+                guard n < LambentNeuralScaler.slotCount else { return false }
                 n += 1
                 return true
             }
             guard taken else { return }
-            let queue = queue, inFlight = inFlight
-            neuralQueue.async { [weak self] in
-              let prepared = processor.prepare(source)
+            let queue = queue, inFlight = inFlight, neuralQueue = neuralQueue
+            packQueue.async { [weak self] in
+             let packed = processor.pack(source)
+             neuralQueue.async { [weak self] in
+              let prepared = packed.flatMap { processor.infer($0) }
               queue.async { [weak self] in
                 defer { inFlight.withLock { $0 -= 1 } }
                 guard let lifted = processor.process(source, deadline: target, prepared: prepared) else { return }
@@ -277,6 +319,7 @@ final class PlayerHost: UIView {
                 if let sample, !(self?.hiddenNow ?? false) { renderer.enqueue(sample) }
                 DispatchQueue.main.async { self?.enqueued += 1 }
               }
+             }
             }
         }
         let now = CACurrentMediaTime()
