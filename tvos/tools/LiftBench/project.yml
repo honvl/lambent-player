@@ -2,7 +2,8 @@
 # upscalers) fed by AVPlayer through an AVPlayerItemVideoOutput and shown in an AVSampleBufferDisplayLayer, as the player does it.
 # `make_videos.sh` first (the clips are git-ignored), then `xcodegen`, build with xcodebuild and run with
 # `xcrun devicectl device process launch --console`; it prints BENCH lines. The iOS target runs on an iPhone (an A-series GPU like the
-# Apple TV's); the tvOS one on an Apple TV.
+# Apple TV's); the tvOS one on an Apple TV. LIFT_IPAD in the environment: the iPad's upscale (SDR out, at the player's size on the
+# screen, as LambentHDRLift runs it on iOS).
 name: LiftBench
 options:
   bundleIdPrefix: app.getlambent
@@ -17,6 +18,7 @@ targets:
       - ../../Runner/Playback/Lambent/LambentPrescaler.swift
       - ../../Runner/Playback/Lambent/LambentNeuralScaler.swift
       - ../../Runner/Playback/Lambent/LambentTrueHDRTables.swift
+      - ../../Runner/Playback/Lambent/LambentClientUpscale.swift
       - path: ../../Runner/Shaders
         type: folder
         buildPhase: resources
@@ -40,6 +42,7 @@ targets:
       - ../../Runner/Playback/Lambent/LambentPrescaler.swift
       - ../../Runner/Playback/Lambent/LambentNeuralScaler.swift
       - ../../Runner/Playback/Lambent/LambentTrueHDRTables.swift
+      - ../../Runner/Playback/Lambent/LambentClientUpscale.swift
       - path: ../../Runner/Shaders
         type: folder
         buildPhase: resources

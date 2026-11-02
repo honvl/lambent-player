@@ -2,6 +2,7 @@ import AVFoundation
 import os
 import SwiftUI
 import UIKit
+import VideoToolbox
 
 // First the capacity of each scaler: 240 pictures back to back through the processor, as the player runs it (one at a time, waited
 // for), wall-clock ms a picture: what it can keep up with once the GPU's clock has risen. Then each clip played through the processor
@@ -44,6 +45,9 @@ final class PlayerHost: UIView {
     private var runStart = 0.0, lastReport = 0.0, enqueued = 0
     private var label = ""
     private var endObserver: NSObjectProtocol?
+    /// Where each run's pictures go, and whether the lift is on (off: upscaling only, the iPad).
+    private var runSize = (3840, 2160)
+    private var runHDR = true
 
     func run() {
         backgroundColor = .black
@@ -81,6 +85,7 @@ final class PlayerHost: UIView {
             // LIFT_FP16 in the environment: the fp16 models for everything after this.
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
         }
+        if ProcessInfo.processInfo.environment["LIFT_IPAD"] != nil { return iPad(ravu: ravu, fsr: fsr) }
         if ProcessInfo.processInfo.environment["LIFT_IO"] != nil {
             IOBench.run()
             print("BENCH done")
@@ -147,6 +152,93 @@ final class PlayerHost: UIView {
                     ("sdr1080p24", "player's own ladder", nil), ("sdr1080p60", "player's own ladder hidden", nil)]
         }
         next()
+    }
+
+    /// The iPad's upscale: a 1080p title fit to the screen (the player full screen, capped at the plan's `cup=2160`), the picture's own
+    /// SDR colours out. Each scaler's capacity, then each clip played with the player's own ladder and with each scaler alone.
+    private func iPad(ravu: LambentLiftProcessor.Scaler, fsr: LambentLiftProcessor.Scaler) {
+        let screen = window?.windowScene?.screen ?? UIScreen.main
+        runSize = LambentClientUpscale.outputSize(picture: (1920, 1080), bounds: bounds.size, scale: screen.nativeScale, maxHeight: 2160)
+        runHDR = false
+        print("BENCH iPad \(Int(bounds.width))x\(Int(bounds.height)) pt at \(screen.nativeScale): 1920x1080 -> \(runSize.0)x\(runSize.1)")
+        guard let url = Bundle.main.url(forResource: "Videos/sdr1080p24", withExtension: "mp4") else { return }
+        let asset = AVURLAsset(url: url)
+        guard let reader = try? AVAssetReader(asset: asset), let track = asset.tracks(withMediaType: .video).first else { return }
+        let out = AVAssetReaderTrackOutput(track: track, outputSettings: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+            kCVPixelBufferMetalCompatibilityKey as String: true, kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any]()])
+        reader.add(out)
+        reader.startReading()
+        var pictures: [CVPixelBuffer] = []
+        while pictures.count < 24, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
+        let scalers: [LambentLiftProcessor.Scaler] = [.neural(fast: false), .neural(fast: true), fsr, ravu, .catmullRom]
+        if let device = MTLCreateSystemDefaultDevice() { _ = LambentNeuralScaler.loadNow("neural-low", student: true, device: device) }
+        iPadCapacity(scalers, pictures, label: "1080p")
+        // A 720p title: 1.86x to the screen, where the prescalers run (RAVU-lite from 1.41x, FSRCNNX from 1.3x).
+        let small = pictures.compactMap { resized($0, 1280, 720) }
+        let saved = runSize
+        runSize = LambentClientUpscale.outputSize(picture: (1280, 720), bounds: bounds.size, scale: screen.nativeScale, maxHeight: 2160)
+        iPadCapacity(scalers, small, label: "720p -> \(runSize.0)x\(runSize.1)")
+        runSize = saved
+        if ProcessInfo.processInfo.environment["LIFT_CAPACITY"] != nil { print("BENCH done"); return }
+        for clip in ["sdr1080p24", "sdr1080p30", "sdr1080p60"] {
+            runs.append((clip, "player's own ladder", nil))
+            for sc in scalers { runs.append((clip, "\(sc)", [sc])) }
+        }
+        next()
+    }
+
+    private func resized(_ picture: CVPixelBuffer, _ w: Int, _ h: Int) -> CVPixelBuffer? {
+        var session: VTPixelTransferSession?
+        VTPixelTransferSessionCreate(allocator: nil, pixelTransferSessionOut: &session)
+        var made: CVPixelBuffer?
+        let attrs: [String: Any] = [kCVPixelBufferMetalCompatibilityKey as String: true, kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any]()]
+        CVPixelBufferCreate(nil, w, h, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, attrs as CFDictionary, &made)
+        guard let session, let made, VTPixelTransferSessionTransferImage(session, from: picture, to: made) == noErr else { return nil }
+        CVBufferPropagateAttachments(picture, made)
+        return made
+    }
+
+    private func iPadCapacity(_ scalers: [LambentLiftProcessor.Scaler], _ pictures: [CVPixelBuffer], label: String) {
+        for sc in scalers {
+            guard let p = LambentLiftProcessor() else { continue }
+            p.reset(deepen: false)
+            p.hdr = false
+            p.force(sc)
+            guard p.ladder == [sc] else { print("BENCH iPad capacity \(sc): not available here"); continue }
+            p.outputSize = runSize
+            for i in 0..<48 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
+            _ = p.takeReport()
+            let start = CACurrentMediaTime()
+            for i in 0..<240 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
+            let wall = (CACurrentMediaTime() - start) * 1000 / 240
+            var r = p.takeReport()
+            print(String(format: "BENCH iPad capacity %@ %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms p95 %.2f, Neural Engine %.2f ms, thermal %d",
+                         label, r.scaler, wall, 1000 / wall, r.meanMs, r.p95Ms, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
+            guard sc.isNeural else { continue }
+            // Pipelined, as the player runs it: pack N + 2, network N + 1 and finish N at once.
+            p.pipelined = true
+            let pk = DispatchQueue(label: "cap.pack"), a = DispatchQueue(label: "cap.a"), b = DispatchQueue(label: "cap.b")
+            let gate = DispatchSemaphore(value: LambentNeuralScaler.slotCount), group = DispatchGroup()
+            let t0 = CACurrentMediaTime()
+            for i in 0..<240 {
+                gate.wait()
+                group.enter()
+                let pic = pictures[i % pictures.count]
+                pk.async {
+                    let packed = p.pack(pic)
+                    a.async {
+                        let prepared = packed.flatMap { p.infer($0) }
+                        b.async { _ = p.process(pic, deadline: .infinity, prepared: prepared); gate.signal(); group.leave() }
+                    }
+                }
+            }
+            group.wait()
+            let piped = (CACurrentMediaTime() - t0) * 1000 / 240
+            r = p.takeReport()
+            print(String(format: "BENCH iPad capacity %@ %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, pack wall %.2f ms, thermal %d",
+                         label, r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
+        }
     }
 
     private func capacity(_ scalers: [LambentLiftProcessor.Scaler]) {
@@ -335,11 +427,11 @@ final class PlayerHost: UIView {
         guard let url = Bundle.main.url(forResource: "Videos/\(clip)", withExtension: "mp4"), let processor = LambentLiftProcessor() else {
             print("BENCH \(label): missing clip or processor"); return next()
         }
-        processor.reset(deepen: !name.contains("SDR out"))
-        processor.hdr = !name.contains("SDR out")
+        processor.reset(deepen: runHDR && !name.contains("SDR out"))
+        processor.hdr = runHDR && !name.contains("SDR out")
         processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }
-        processor.outputSize = (3840, 2160)
+        processor.outputSize = runSize
         processor.frameRate = clip.hasSuffix("60") ? 59.94 : clip.hasSuffix("30") ? 29.97 : 23.976
         self.processor = processor
         let item = AVPlayerItem(url: url)
