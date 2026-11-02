@@ -7,6 +7,11 @@ class AggregatedLibrary {
   final Map<String, dynamic>? imageTags;
   final List<String>? backdropImageTags;
 
+  /// Lambent Server's own kind for the library (`movies`, `tvshows`,
+  /// `homevideos`, `folders`), which tells libraries apart that Jellyfin's
+  /// CollectionType files under one kind.
+  final String? lambentKind;
+
   const AggregatedLibrary({
     required this.id,
     required this.name,
@@ -15,5 +20,6 @@ class AggregatedLibrary {
     this.primaryImageAspectRatio,
     this.imageTags,
     this.backdropImageTags,
+    this.lambentKind,
   });
 }

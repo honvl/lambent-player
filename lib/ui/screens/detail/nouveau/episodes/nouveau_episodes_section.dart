@@ -101,7 +101,8 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
   }
 
   List<AggregatedItem> get _sourceEpisodes {
-    if (_isSeason) {
+    // An episode's page lists its season, as Plex's does.
+    if (_isSeason || _vm.item?.type == 'Episode') {
       return _vm.episodes;
     }
 
@@ -535,6 +536,11 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
       return true;
     }
 
+    // Plex's TV rows have one stop per episode: down leaves the row.
+    if (PlatformDetection.isTV) {
+      return widget.onNavigateDown?.call() ?? false;
+    }
+
     final card = _episodeCardKey(episode).currentState;
 
     if (card == null) {
@@ -679,9 +685,13 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
 
     final imageHeight = cardWidth * 9 / 16;
 
-    final contentHeight = textScaler.scale(82).clamp(82.0, 118.0);
+    // On TV the card's caption is its title alone (see NouveauLandscapeMediaCard).
+    final contentHeight = PlatformDetection.isTV
+        ? textScaler.scale(32).clamp(32.0, 44.0)
+        : textScaler.scale(82).clamp(82.0, 118.0);
 
-    final railHeight = imageHeight + contentHeight + 16;
+    final railHeight =
+        imageHeight + contentHeight + (PlatformDetection.isTV ? 12 : 16);
 
     return _EpisodeLayout(
       viewportWidth: availableWidth,
@@ -894,6 +904,8 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
 
         final selectorToEpisodes = compact
             ? 18.0
+            : PlatformDetection.isTV
+            ? NouveauSpacing.tvSeasonSelectorToEpisodes
             : NouveauSpacing.seasonSelectorToEpisodes;
 
         if (reservingInitialLoad) {
@@ -1090,6 +1102,14 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
   }
 
   AggregatedItem? _resolveNextUpEpisode(List<AggregatedItem> episodes) {
+    // On an episode's page the row starts at that episode.
+    final current = _vm.item;
+    if (current?.type == 'Episode') {
+      for (final episode in episodes) {
+        if (episode.id == current!.id) return episode;
+      }
+    }
+
     for (final episode in episodes) {
       if (!episode.isPlayed) {
         return episode;

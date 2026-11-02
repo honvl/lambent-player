@@ -6,7 +6,6 @@ import os, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-CAT, FONT = sys.argv[1], sys.argv[2]
 SKY = [(0.0, (4, 6, 17)), (0.5, (14, 19, 42)), (1.0, (55, 48, 69))]   # top to horizon
 SEA = [(0.0, (55, 48, 69)), (0.35, (19, 23, 44)), (1.0, (10, 16, 35))]  # horizon to bottom
 
@@ -74,7 +73,7 @@ def icon_layers(w, h):
         return mark(W, H, s, W / 2 - 512 * s, oy)
     return supersampled(back, w, h), supersampled(front, w, h)
 
-def shelf(w, h):
+def shelf(w, h, FONT):
     def draw(W, H):
         s, oy, horizon = layout(W, H, 0.34)
         img = sky(W, H, horizon)
@@ -90,15 +89,17 @@ def shelf(w, h):
         return img
     return supersampled(draw, w, h).convert("RGB")
 
-B = os.path.join(CAT, "AppIcon.brandassets")
-for stack, name, sizes in [("App Icon.imagestack", "App-Icon-Small", [(400, 240), (800, 480)]),
-                           ("App Icon - App Store.imagestack", "App-Icon-Large", [(1280, 768), (2560, 1536)])]:
-    for scale, (w, h) in zip((1, 2), sizes):
-        back, front = icon_layers(w, h)
-        back.convert("RGB").save(os.path.join(B, stack, "Back.imagestacklayer/Content.imageset", f"{name}-{scale}x.png"))
-        front.save(os.path.join(B, stack, "Front.imagestacklayer/Content.imageset", f"{name}-{scale}x.png"))
-for folder, name, sizes in [("Top Shelf Image.imageset", "Top-Shelf", [(1920, 720), (3840, 1440)]),
-                            ("Top Shelf Image Wide.imageset", "Top-Shelf-Wide", [(2320, 720), (4640, 1440)])]:
-    for scale, (w, h) in zip((1, 2), sizes):
-        shelf(w, h).save(os.path.join(B, folder, f"{name}-{scale}x.png"))
-print("done")
+if __name__ == "__main__":
+    CAT, FONT = sys.argv[1], sys.argv[2]
+    B = os.path.join(CAT, "AppIcon.brandassets")
+    for stack, name, sizes in [("App Icon.imagestack", "App-Icon-Small", [(400, 240), (800, 480)]),
+                               ("App Icon - App Store.imagestack", "App-Icon-Large", [(1280, 768), (2560, 1536)])]:
+        for scale, (w, h) in zip((1, 2), sizes):
+            back, front = icon_layers(w, h)
+            back.convert("RGB").save(os.path.join(B, stack, "Back.imagestacklayer/Content.imageset", f"{name}-{scale}x.png"))
+            front.save(os.path.join(B, stack, "Front.imagestacklayer/Content.imageset", f"{name}-{scale}x.png"))
+    for folder, name, sizes in [("Top Shelf Image.imageset", "Top-Shelf", [(1920, 720), (3840, 1440)]),
+                                ("Top Shelf Image Wide.imageset", "Top-Shelf-Wide", [(2320, 720), (4640, 1440)])]:
+        for scale, (w, h) in zip((1, 2), sizes):
+            shelf(w, h, FONT).save(os.path.join(B, folder, f"{name}-{scale}x.png"))
+    print("done")

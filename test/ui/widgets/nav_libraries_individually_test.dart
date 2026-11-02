@@ -109,8 +109,8 @@ Widget _host(Widget chrome, {List<String>? opened}) {
   );
 }
 
-final _movies = find.byIcon(Icons.movie_rounded);
-final _shows = find.byIcon(Icons.tv_rounded);
+final _movies = find.byIcon(Icons.movie_outlined);
+final _shows = find.byIcon(Icons.tv_outlined);
 
 FocusNode _buttonFocus(WidgetTester tester, Finder icon) => tester
     .widget<Focus>(

@@ -49,8 +49,28 @@ void bindLambentEnhancementDefaults(UserPreferences prefs) {
     final now = prefs.get(UserPreferences.lambentEnhanceOnPc);
     if (now != enhanceOn) {
       enhanceOn = now;
-      LambentEnhancement.enhancementOff = !now;
+      // Without Enhance the setting has nothing to turn on.
+      if (!LambentEnhancement.compareOnly) {
+        LambentEnhancement.enhancementOff = !now;
+      }
     }
     LambentEnhancement.screenDefaults = lambentScreenDefaults(prefs);
   });
+}
+
+/// Follows the server's Lambent Enhance licence. Without Enhance or a trial
+/// the PC may only show its picture beside the original: playback opens on
+/// the original file, and turning enhancement on in the player opens the
+/// split-screen compare. Buying (or a trial) gives back the screen's own
+/// "Enhance on PC" setting.
+void applyLambentLicence({
+  required bool compareOnly,
+  required UserPreferences prefs,
+}) {
+  if (compareOnly == LambentEnhancement.compareOnly) return;
+  LambentEnhancement.compareOnly = compareOnly;
+  LambentEnhancement.enhancementOff =
+      compareOnly ||
+      !prefs.get(UserPreferences.lambentEnhanceOnPc) ||
+      const bool.fromEnvironment('LAMBENT_ORIGINAL');
 }

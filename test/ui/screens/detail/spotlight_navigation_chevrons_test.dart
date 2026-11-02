@@ -73,6 +73,9 @@ void main() {
       UserPreferences.detailScreenStyle,
       DetailScreenStyle.spotlight,
     );
+    // The chevrons are measured against the full width; Lambent's left
+    // sidebar default would take part of the 500 px test window.
+    await prefs.set(UserPreferences.navbarPosition, NavbarPosition.top);
 
     GetIt.instance.registerSingleton<UserPreferences>(prefs);
 

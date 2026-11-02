@@ -121,16 +121,20 @@ IconData libraryIcon(AggregatedLibrary library) {
   if (isGameLibrary(library.id, library.collectionType, library.name)) {
     return gameLibraryIcon;
   }
-  return switch (library.collectionType.toLowerCase()) {
-    'movies' => Icons.movie_rounded,
-    'tvshows' => Icons.tv_rounded,
-    'music' => Icons.music_note_rounded,
-    'books' || 'audiobooks' => Icons.menu_book_rounded,
-    'livetv' => Icons.live_tv_rounded,
-    'homevideos' || 'photos' => Icons.photo_library_rounded,
-    'boxsets' => Icons.collections_bookmark_rounded,
+  // Thin outlines, as Plex's sidebar draws them. Lambent Server names its
+  // home-video and PC-folder libraries apart from movies.
+  return switch ((library.lambentKind ?? library.collectionType).toLowerCase()) {
+    'movies' => Icons.movie_outlined,
+    'tvshows' => Icons.tv_outlined,
+    'music' => Icons.music_note_outlined,
+    'books' || 'audiobooks' => Icons.menu_book_outlined,
+    'livetv' => Icons.live_tv_outlined,
+    'homevideos' => Icons.videocam_outlined,
+    'photos' => Icons.photo_library_outlined,
+    'folders' => Icons.folder_outlined,
+    'boxsets' => Icons.collections_bookmark_outlined,
     'playlists' => Icons.playlist_play_rounded,
-    _ => Icons.video_library_rounded,
+    _ => Icons.video_library_outlined,
   };
 }
 

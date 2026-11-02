@@ -648,7 +648,10 @@ void main() {
       );
       await pumpContent(tester, vm, initialFocusNode: play, size: tvSize);
 
+      // The TV page follows Plex: Cast & Crew comes before the chapters.
       await focusPlay(tester);
+      await press(tester, LogicalKeyboardKey.arrowDown);
+      expect(focusIn<NouveauPeopleSection>(), isTrue);
       await press(tester, LogicalKeyboardKey.arrowDown);
       expect(focusIn<NouveauChaptersSection>(), isTrue);
 
@@ -683,7 +686,8 @@ void main() {
       expect(focusIn<NouveauDetailsSection>(), isTrue);
     });
 
-    testWidgets('reviews join the chain when they land after the page', (
+    // Lambent's TV page follows Plex without its Ratings & Reviews row.
+    testWidgets('reviews stay off the TV page when they land after it', (
       tester,
     ) async {
       useTv(tester);
@@ -700,32 +704,9 @@ void main() {
         data: itemData('Movie', people: [actor]),
       );
       await pumpContent(tester, vm, initialFocusNode: play, size: tvSize);
-      expect(find.byType(NouveauReviewsSection), findsNothing);
 
       vm.deliverReviews(const [review, review]);
       await tester.pump(const Duration(milliseconds: 500));
-      expect(
-        find.byKey(const ValueKey('nouveau-section-reviews')),
-        findsOneWidget,
-      );
-
-      await focusPlay(tester);
-      await press(tester, LogicalKeyboardKey.arrowDown);
-      expect(focusIn<NouveauReviewsSection>(), isTrue);
-
-      await press(tester, LogicalKeyboardKey.arrowRight);
-      expect(focusIn<NouveauReviewsSection>(), isTrue);
-
-      await press(tester, LogicalKeyboardKey.arrowDown);
-      expect(focusIn<NouveauPeopleSection>(), isTrue);
-
-      await press(tester, LogicalKeyboardKey.arrowUp);
-      expect(focusIn<NouveauReviewsSection>(), isTrue);
-
-      await press(tester, LogicalKeyboardKey.arrowUp);
-      expect(play.hasPrimaryFocus, isTrue);
-
-      await hide(tester, vm, 'reviews');
       expect(find.byType(NouveauReviewsSection), findsNothing);
 
       await focusPlay(tester);

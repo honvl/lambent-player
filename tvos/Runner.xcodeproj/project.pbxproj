@@ -693,7 +693,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -720,7 +720,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -746,7 +746,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -834,7 +834,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -916,7 +916,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -943,7 +943,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.honver.lambent.tv.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;

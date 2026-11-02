@@ -339,6 +339,17 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             }
             .store(in: &cancellables)
 
+        // The software path's picture size settles after the first frame, and
+        // the subtitle canvas is laid out against it (softwareVideoRect).
+        engine.$softwareDisplaySize
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.subtitleOverlay.refreshVideoGeometry()
+                self?.secondarySubtitleOverlay.refreshVideoGeometry()
+            }
+            .store(in: &cancellables)
+
         engine.$duration
             .receive(on: DispatchQueue.main)
             .sink { [weak self] value in
@@ -810,7 +821,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         let root: CALayer? = playerView.layer
         guard let root, let rect = Self.firstPlayerLayer(in: root)?.videoRect,
             !rect.isEmpty
-        else { return .zero }
+        else { return softwareVideoRect() }
         #if canImport(UIKit)
             return rect
         #else
@@ -820,6 +831,32 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 x: rect.minX, y: playerView.bounds.height - rect.maxY,
                 width: rect.width, height: rect.height)
         #endif
+    }
+
+    /// The software path draws through a sample-buffer layer that measures no
+    /// video rect, so the picture's box is worked out from the size the engine
+    /// presents at and the fill mode. Without it the subtitle canvas fell back to
+    /// the whole view: harmless on a 16:9 TV, but a portrait iPad squeezed a
+    /// 1920x1080 script into 834x1194 and dropped it below the picture.
+    private func softwareVideoRect() -> CGRect {
+        guard let engine = Self.sharedEngine(),
+            let size = engine.softwareDisplaySize,
+            size.width > 0, size.height > 0
+        else { return .zero }
+        let box = playerView.bounds
+        guard box.width > 0, box.height > 0 else { return .zero }
+        switch engine.videoGravity {
+        case .resize:
+            return box
+        case .resizeAspectFill:
+            let scale = max(box.width / size.width, box.height / size.height)
+            let fitted = CGSize(width: size.width * scale, height: size.height * scale)
+            return CGRect(
+                x: box.midX - fitted.width / 2, y: box.midY - fitted.height / 2,
+                width: fitted.width, height: fitted.height)
+        default:
+            return AVMakeRect(aspectRatio: size, insideRect: box)
+        }
     }
 
     /// Searched for rather than read off a known sublayer, so moving where the

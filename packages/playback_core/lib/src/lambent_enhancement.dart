@@ -72,6 +72,11 @@ class LambentEnhancement {
   /// Lambent Server answers with direct play.
   static bool enhancementOff = false;
 
+  /// The server's household has neither Lambent Enhance nor a trial running:
+  /// the PC may enhance only next to the original, so every enhanced stream
+  /// is a compare (`cmp=1`), and PlaybackInfo says so (`Lambent.Compare`).
+  static bool compareOnly = false;
+
   /// This screen's own defaults, sent as PlaybackInfo's `Lambent` object
   /// (`RtxHdr`, `DeepenBlacks`, `DolbyVision`, `Saturation`, `Contrast`,
   /// `Brightness`, `Peak`, `Hue`, `Gamut`). A member left out follows the
@@ -85,7 +90,8 @@ class LambentEnhancement {
   static Map<String, dynamic> decoratePlaybackInfo(Map<String, dynamic> body) {
     body['LambentPlay'] = true;
     if (enhancementOff) body['EnableTranscoding'] = false;
-    if (screenDefaults.isNotEmpty) body['Lambent'] = screenDefaults;
+    final lambent = {...screenDefaults, if (compareOnly) 'Compare': true};
+    if (lambent.isNotEmpty) body['Lambent'] = lambent;
     return body;
   }
 
@@ -137,9 +143,10 @@ class LambentEnhancement {
   }
 
   /// [url] with [overrides] written over its query, when it is an enhanced
-  /// stream. Anything else comes back untouched.
+  /// stream, and compare forced on under [compareOnly]. Anything else comes
+  /// back untouched.
   static String applyOverrides(String url) {
-    if (!isEnhancedUrl(url) || overrides == none) return url;
+    if (!isEnhancedUrl(url) || (overrides == none && !compareOnly)) return url;
     final uri = Uri.parse(url);
     final query = Map<String, String>.of(uri.queryParameters);
     final o = overrides;
@@ -158,6 +165,7 @@ class LambentEnhancement {
     // Off is the server's default, so it leaves the query as it was.
     if (o.compare == true) query['cmp'] = '1';
     if (o.compare == false) query.remove('cmp');
+    if (compareOnly) query['cmp'] = '1';
     number('gamut', o.wideColour, wideColourRange);
     // Dolby Vision rides on RTX HDR, so it is off whenever HDR is.
     final hdrOn = (query['hdr'] ?? '0') == '1';

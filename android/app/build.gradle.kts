@@ -27,16 +27,8 @@ fun loadAndroidTvVersionName(rootDir: File, fallback: String): String {
 
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
-    // Applied only for a normal build. google-services.json lists clients for
-    // the real application ids, so a test build under MOONFIN_TEST_ID_SUFFIX
-    // (see productFlavors) would fail with "No matching client found". Skipping
-    // it there is safe because push messaging bails immediately on TV anyway -
-    // push_messaging_service.dart:38 returns unless PlatformDetection.isMobile,
-    // and the initializeApp call is try/caught regardless.
-    id("com.google.gms.google-services")
-        .apply(System.getenv("MOONFIN_TEST_ID_SUFFIX").isNullOrEmpty())
-    // END: FlutterFire Configuration
+    // No google-services plugin: Moonfin's Firebase project is not Lambent's,
+    // and push messaging is off (LambentBrand.enablePushMessaging).
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -79,7 +71,9 @@ android {
 
     flavorDimensions += "device"
     productFlavors {
-        val baseAppId = "org.moonfin.androidtv"
+        // One Play package for phones, tablets and Android TV (ENTITLEMENTS.md
+        // section 1), so Lambent Enhance bought on one covers the others.
+        val baseAppId = "app.getlambent.player"
         val baseAppName = "Lambent"
         // Optional application-id suffix for on-device testing, set through the
         // environment so an unset build is byte-identical to before:

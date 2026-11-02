@@ -10144,6 +10144,18 @@ abstract class AppLocalizations {
   /// **'Similar'**
   String get similar;
 
+  /// Detail page row of other titles from the same studio, as Plex titles it
+  ///
+  /// In en, this message translates to:
+  /// **'More from {name}'**
+  String moreFromStudio(String name);
+
+  /// Detail page row of other titles with the same actor, as Plex titles it
+  ///
+  /// In en, this message translates to:
+  /// **'More with {name}'**
+  String moreWithPerson(String name);
+
   /// Section title for recommended media
   ///
   /// In en, this message translates to:

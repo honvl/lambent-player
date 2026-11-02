@@ -521,6 +521,20 @@ class _NavigationLayoutState extends State<NavigationLayout>
             child: Stack(
               children: [
                 Positioned.fill(child: content),
+                // Plex dims the page while its sidebar is open.
+                if (PlatformDetection.isTV && AppColorScheme.isGlass)
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: LeftSidebar.isFocusedNotifier,
+                        builder: (context, open, _) => AnimatedOpacity(
+                          opacity: open ? 1 : 0,
+                          duration: const Duration(milliseconds: 150),
+                          child: const ColoredBox(color: Color(0xA6000000)),
+                        ),
+                      ),
+                    ),
+                  ),
                 Positioned(
                   top: 0,
                   left: 0,

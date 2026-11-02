@@ -190,6 +190,8 @@ dependencies:
   flutter_markdown_plus: ^1.0.12
   markdown: ^7.3.1
   multicast_dns: ^0.3.3+1
+  in_app_purchase: ^3.3.1
+  in_app_purchase_android: ^0.5.5
 
 dev_dependencies:
   flutter_test:
@@ -307,6 +309,24 @@ flutter:
         - asset: assets/fonts/Roboto-Medium.ttf
           weight: 500
         - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+    # Lambent's glass skin: Inter Display for text, as Plex's TV app uses, and
+    # Figtree (an open geometric sans) for headings. Both OFL; the licences
+    # sit next to the files.
+    - family: InterDisplay
+      fonts:
+        - asset: assets/fonts/InterDisplay-Regular.ttf
+        - asset: assets/fonts/InterDisplay-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/InterDisplay-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/InterDisplay-Bold.ttf
+          weight: 700
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree-Bold.ttf
           weight: 700
     - family: NeonPulseDisplay
       fonts:

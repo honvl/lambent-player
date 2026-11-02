@@ -1803,7 +1803,7 @@ class UserPreferences extends ChangeNotifier {
   /// because it syncs to that server's profile.
   static final detailScreenStyle = EnumPreference(
     key: 'pref_detail_screen_style',
-    defaultValue: DetailScreenStyle.modern,
+    defaultValue: DetailScreenStyle.nouveau,
     values: DetailScreenStyle.values,
   );
 
@@ -2051,7 +2051,10 @@ class UserPreferences extends ChangeNotifier {
 
   static final navbarPosition = EnumPreference(
     key: 'pref_navbar_position',
-    defaultValue: NavbarPosition.top,
+    // The glass sidebar is a TV's; phones and tablets keep Moonfin's top bar.
+    defaultValue: PlatformDetection.isTV
+        ? NavbarPosition.left
+        : NavbarPosition.top,
     values: NavbarPosition.values,
   );
 

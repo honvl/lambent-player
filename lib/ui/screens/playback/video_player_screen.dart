@@ -70,6 +70,8 @@ import 'hdr_overlay_capture.dart';
 import '../../../util/focus/back_key_release.dart';
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/gamepad/gamepad_key_synthesizer.dart';
+import '../../../data/services/lambent_enhance_service.dart';
+import '../../../util/form_factor.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/playback_time_label.dart';
 import '../../../util/server_url.dart';
@@ -821,12 +823,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _scheduleHide();
     _startEndsAtTicker();
     setImmersive(true);
-    if (PlatformDetection.isMobile) {
+    // Phones turn sideways for video. A tablet, an unfolded foldable or a
+    // window in Split View or multi-window is left as it is held: locking it
+    // would letterbox the window or spin the whole iPad.
+    _onPhoneScreen = _isPhoneScreen;
+    if (PlatformDetection.isMobile && _onPhoneScreen) {
       _forcedLandscape = true;
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
+    } else if (PlatformDetection.isMobile) {
+      SystemChrome.setPreferredOrientations([]);
     } else if (!PlatformDetection.isTV) {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -1560,6 +1568,38 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       }
     }
   }
+
+  /// What the player last laid out for, so a foldable opening or closing
+  /// mid-video (or a window resized into or out of phone size) moves the
+  /// landscape lock with it.
+  bool _onPhoneScreen = false;
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    if (!PlatformDetection.isMobile || _isInPiP) return;
+    final phone = _isPhoneScreen;
+    if (phone == _onPhoneScreen) return;
+    _onPhoneScreen = phone;
+    if (phone) {
+      // Folded shut: back to the phone's sideways picture.
+      _forcedLandscape = true;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Unfolded: the big screen plays the way it is held.
+      _forcedLandscape = false;
+      SystemChrome.setPreferredOrientations([]);
+    }
+    if (mounted) setState(() {});
+  }
+
+  bool get _isPhoneScreen =>
+      FormFactor.ofView(WidgetsBinding.instance.platformDispatcher.implicitView ??
+              WidgetsBinding.instance.platformDispatcher.views.first)
+          .isPhone;
 
   void _toggleOrientationLock() {
     setState(() => _forcedLandscape = !_forcedLandscape);
@@ -5181,6 +5221,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // With the transport in the middle of the picture the bottom
+                // row is all icons, so the chip (the touch way into the
+                // enhancement panel, and to the compare) sits over the
+                // seekbar's end.
+                if (!_transportDocked && _enhancementChipLabel != null)
+                  // A Row, so the chip keeps its own width at the end.
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.spaceXs),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        EnhancementChip(
+                          label: _enhancementChipLabel!,
+                          height: 40.0 * _osdButtonScale,
+                          accent: AppColorScheme.accent,
+                          fontSize: AppTypography.fontSizeSm,
+                          onPressed: _showEnhancementPanel,
+                        ),
+                      ],
+                    ),
+                  ),
                 _buildSeekbar(),
                 const SizedBox(height: AppSpacing.spaceXs),
                 if (_transportDocked)
@@ -5882,13 +5943,31 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// The transport leads the bottom row the way it does on TV. A phone held
   /// upright hasn't the width for both, so there it sits on its own line.
   Widget _buildDockedControlsRow() {
-    if (PlatformDetection.useMobileUi &&
-        MediaQuery.of(context).orientation == Orientation.portrait) {
+    final chipLabel = _enhancementChipLabel;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    // The touch way into the enhancement panel: the same chip the TV bar
+    // shows, at the end of the controls.
+    final chip = chipLabel == null
+        ? null
+        : EnhancementChip(
+            label: chipLabel,
+            height: (isLandscape ? 48.0 : 44.0) * _osdButtonScale,
+            accent: AppColorScheme.accent,
+            fontSize: AppTypography.fontSizeSm,
+            onPressed: _showEnhancementPanel,
+          );
+    if (PlatformDetection.useMobileUi && !isLandscape) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildDockedTransportRow(),
           _buildSecondaryControlsRow(),
+          if (chip != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.spaceXs),
+              child: chip,
+            ),
         ],
       );
     }
@@ -5898,6 +5977,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         _buildDockedTransportRow(),
         const SizedBox(width: AppSpacing.spaceXs),
         Expanded(child: _buildSecondaryControlsRow()),
+        if (chip != null) ...[
+          const SizedBox(width: AppSpacing.spaceSm),
+          chip,
+        ],
       ],
     );
   }
@@ -6212,12 +6295,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   /// "4K HDR" and the like for a Lambent Server enhanced stream, otherwise
-  /// null: the chip shows only on the glass TV bar, and only when the server
-  /// says the stream is enhanced.
+  /// null: the chip shows on the glass TV bar and on touch screens' controls,
+  /// and only when the server says the stream is enhanced.
   String? get _enhancementChipLabel {
-    if (!_useTvGlassOverlay) return null;
+    if (PlatformDetection.isTV && !_useTvGlassOverlay) return null;
     final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
-    if (label != null) return label;
+    // Without Lambent Enhance or a trial the enhanced picture only ever
+    // shows beside the original; the chip says so.
+    if (label != null) {
+      return LambentEnhancement.compareOnly ? '$label · Compare' : label;
+    }
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
     return LambentEnhancement.enhancementOff ? 'Original' : null;
@@ -6479,7 +6566,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                     )
                   : l10n.playerZoomMode,
             ),
-          if (PlatformDetection.isMobile && shows(OsdButton.orientation))
+          if (PlatformDetection.isMobile &&
+              FormFactor.of(context).isPhone &&
+              shows(OsdButton.orientation))
             OsdButton.orientation: _controlButton(
               _forcedLandscape
                   ? Icons.screen_lock_landscape_outlined
@@ -8618,6 +8707,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     unawaited(
       showEnhancementPanel(
         context,
+        status: LambentEnhanceService.instance.current?.licence?.headline,
+        compareOnly: LambentEnhancement.compareOnly,
         current: current,
         enhanced: enhanced,
         onSetEnhancement: (on) {

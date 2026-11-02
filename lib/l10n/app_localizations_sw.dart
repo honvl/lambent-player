@@ -5741,6 +5741,16 @@ class AppLocalizationsSw extends AppLocalizations {
   String get similar => 'Sawa';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'Mapendekezo';
 
   @override

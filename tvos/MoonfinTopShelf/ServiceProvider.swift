@@ -1,7 +1,7 @@
 import TVServices
 
 private enum TopShelfShared {
-    static let appGroupIdentifier = "group.com.honver.lambent.tv"
+    static let appGroupIdentifier = "group.app.getlambent.player"
     static let cacheFileName = "topshelf_cache.json"
 
     static var cacheFileURL: URL? {

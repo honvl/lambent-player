@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+<!-- Lambent holds none of Moonfin's restricted entitlements: no multicast (the
+     system's Bonjour finds Lambent Server, AppDelegate's BonjourChannel), no
+     CarPlay audio, and no push (Firebase is off, LambentBrand.enablePushMessaging). -->
 <dict>
-	<key>com.apple.developer.networking.multicast</key>
-	<true/>
-	<key>com.apple.developer.carplay-audio</key>
-	<true/>
-	<key>aps-environment</key>
-	<string>development</string>
 </dict>
 </plist>

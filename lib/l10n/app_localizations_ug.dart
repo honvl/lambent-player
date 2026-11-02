@@ -5722,6 +5722,16 @@ class AppLocalizationsUg extends AppLocalizations {
   String get similar => 'مۇشۇنىڭغا ئوخشاش';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => 'تەۋسىيە';
 
   @override

@@ -61,8 +61,12 @@ abstract final class NouveauSpacing {
 
   // Episodes
   static const double seasonSelectorToEpisodes = 24;
+  // Plex's TV pages keep the hero, the season pills and a whole row of
+  // stills on the first screen.
+  static const double tvHeroToSection = 28;
+  static const double tvSeasonSelectorToEpisodes = 16;
   static const double episodeVisibleItemCount = 4.15;
-  static const double tvEpisodeVisibleItemCount = 3.25;
+  static const double tvEpisodeVisibleItemCount = 3.6;
 
   static const NouveauRailMetrics compactEpisodes = NouveauRailMetrics(
     gap: compactWideRailItemGap,
@@ -114,8 +118,11 @@ abstract final class NouveauSpacing {
   static const double compactPeopleMinAvatarSize = 82;
   static const double compactPeopleMaxAvatarSize = 108;
 
-  static const int tvPeopleVisibleCards = 8;
-  static const double tvPeopleAvatarWidthFactor = 0.84;
+  // Plex's TV cast row: about 6.6 large photos across, 20 apart, with the
+  // name and the role on one line each.
+  static const double tvPeopleVisibleCards = 6.6;
+  static const double tvPeopleAvatarWidthFactor = 0.9;
+  static const double tvPeopleItemGap = 20;
 
   // Details footer
   static const double detailsVerticalPadding = 44;

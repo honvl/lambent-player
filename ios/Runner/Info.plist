@@ -123,6 +123,7 @@
 	<array>
 		<string>_jellyfin._tcp</string>
 		<string>_emby._tcp</string>
+		<string>_vbridge._tcp</string>
 		<string>_googlecast._tcp</string>
 		<string>_CC1AD845._googlecast._tcp</string>
 	</array>

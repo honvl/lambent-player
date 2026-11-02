@@ -8,7 +8,7 @@ import XCTest
 final class Driver: XCTestCase {
     func testDrive() throws {
         let env = ProcessInfo.processInfo.environment
-        let app = XCUIApplication(bundleIdentifier: env["DRIVE_APP"] ?? "com.honver.lambent.tv")
+        let app = XCUIApplication(bundleIdentifier: env["DRIVE_APP"] ?? "app.getlambent.player")
         if env["DRIVE_LAUNCH"] == "1" { app.launch() } else { app.activate() }
         let out = URL(fileURLWithPath: env["DRIVE_OUT"] ?? NSTemporaryDirectory())
         let remote = XCUIRemote.shared

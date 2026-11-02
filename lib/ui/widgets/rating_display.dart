@@ -6,6 +6,7 @@ import '../../data/models/aggregated_item.dart';
 import '../../data/services/rating_icon_provider.dart';
 import '../../preference/preference_constants.dart';
 import '../../preference/user_preferences.dart';
+import '../../util/server_scores.dart';
 import '../../util/tv_ui_scale.dart';
 
 final _textShadows = [
@@ -67,6 +68,20 @@ class RatingsRow extends StatelessWidget {
     required UserPreferences prefs,
   }) {
     if (!prefs.effectiveShowDetailRatings) return null;
+
+    // Lambent Server's scores are the server's own, so they show without the
+    // extra-ratings setting, and its community score is one of them.
+    if (hasServerScores(item.rawData)) {
+      if (extraRatings.isEmpty && item.personalRating == null) return null;
+      return RatingsRow(
+        ratings: extraRatings,
+        personalRating: item.personalRating,
+        enableAdditionalRatings: true,
+        enabledRatings: prefs.get(UserPreferences.enabledRatings),
+        showLabels: prefs.get(UserPreferences.showRatingLabels),
+        showBadges: prefs.get(UserPreferences.showRatingBadges),
+      );
+    }
 
     final community = _inScale(item.communityRating, 10);
     final critic = _inScale(item.criticRating?.toDouble(), 100);

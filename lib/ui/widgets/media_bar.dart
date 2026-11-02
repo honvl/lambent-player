@@ -2460,7 +2460,11 @@ class _MediaBarState extends State<MediaBar>
                     ),
                   if (currentItem != null)
                     Positioned(
-                      left: isMobile ? 0 : 50,
+                      // On a TV the glass hero lines up with the rows below it,
+                      // clear of the sidebar's capsule.
+                      left: isMobile
+                          ? 0
+                          : (glassHero && PlatformDetection.isTV ? 88 : 50),
                       right: isMobile ? 0 : null,
                       bottom: isMobile
                           ? 24

@@ -415,6 +415,19 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
                 "isTvDevice" -> {
                     result.success(isTvDevice())
                 }
+                // The tick a view makes as the remote moves focus. AudioManager
+                // skips it while System sounds is off.
+                "playNavigationSound" -> {
+                    val effect = when (call.arguments as? String) {
+                        "up" -> AudioManager.FX_FOCUS_NAVIGATION_UP
+                        "down" -> AudioManager.FX_FOCUS_NAVIGATION_DOWN
+                        "left" -> AudioManager.FX_FOCUS_NAVIGATION_LEFT
+                        "right" -> AudioManager.FX_FOCUS_NAVIGATION_RIGHT
+                        else -> AudioManager.FX_KEY_CLICK
+                    }
+                    (getSystemService(Context.AUDIO_SERVICE) as AudioManager).playSoundEffect(effect)
+                    result.success(null)
+                }
                 "displayHdrTypes" -> result.success(getDisplayHdrTypes())
                 "displayCapabilities" -> {
                     // The caller stamps why it asked, so the probe log can tell

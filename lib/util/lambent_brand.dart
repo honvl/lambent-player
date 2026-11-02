@@ -23,4 +23,9 @@ class LambentBrand {
   /// library to Plex, so none of the Jellyfin admin endpoints behind these
   /// exist there and every one of them would fail.
   static const bool enableServerAdmin = false;
+
+  /// Push notifications through Firebase Cloud Messaging. Moonfin's Firebase
+  /// project is not Lambent's, so its config is gone from every build and the
+  /// service never starts; set up a Lambent project before turning this on.
+  static const bool enablePushMessaging = false;
 }

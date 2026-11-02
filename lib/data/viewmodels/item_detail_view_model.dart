@@ -23,6 +23,7 @@ import '../utils/blocked_ratings.dart';
 import '../utils/playlist_utils.dart';
 import '../../preference/seerr_preferences.dart';
 import '../../util/episode_playability.dart';
+import '../../util/server_scores.dart';
 import '../services/plugin_sync_service.dart';
 import '../services/user_data_sync.dart';
 import '../services/seerr/seerr_api_models.dart';
@@ -141,6 +142,9 @@ enum SimilarSource { jellyfin, moonfin, tmdb }
 // How many cards the More Like This row draws, so every source is asked for
 // the same count.
 const int _similarLimit = 20;
+
+/// A row of [ItemDetailViewModel.moreRows]: titles from [studio], or with [person].
+typedef MoreRow = ({String? studio, String? person, List<AggregatedItem> items});
 
 /// Slots [missing] into [library] by release date without reordering the
 /// library entries, so a collection keeps whatever order the server gave it
@@ -1056,6 +1060,7 @@ class ItemDetailViewModel extends ChangeNotifier {
       futures.add(_loadFeatures());
       futures.add(_loadParentCollection());
       unawaited(_loadUpcomingEpisode());
+      unawaited(_loadMoreRows());
     } else if (type == 'Season') {
       futures.add(_loadRatings());
       futures.add(_loadEpisodes());
@@ -1092,7 +1097,10 @@ class ItemDetailViewModel extends ChangeNotifier {
       if (type != 'MusicVideo') {
         futures.add(_loadParentCollection());
       }
-      if (type == 'Movie') unawaited(_loadReviews());
+      if (type == 'Movie') {
+        unawaited(_loadReviews());
+        unawaited(_loadMoreRows());
+      }
     } else {
       futures.add(_loadRatings());
       futures.add(_loadSimilar());
@@ -2402,6 +2410,51 @@ class ItemDetailViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<MoreRow> _moreRows = const [];
+
+  /// Plex's "More from" the studio and "More with" each of the first two
+  /// actors, each without this title; rows with nothing in them are left out.
+  List<MoreRow> get moreRows => _moreRows;
+
+  Future<void> _loadMoreRows() async {
+    final item = _item;
+    _moreRows = const [];
+    if (item == null) return;
+    final studio = item.studios.map((s) => s['Name']?.toString()).whereType<String>().firstOrNull;
+    final rows = <MoreRow>[];
+    if (studio != null) {
+      final items = await moreLike(studio: studio);
+      if (items.isNotEmpty) rows.add((studio: studio, person: null, items: items));
+    }
+    for (final actor in actors.where((p) => p['Id'] != null && p['Name'] != null).take(2)) {
+      final items = await moreLike(personId: actor['Id'].toString());
+      if (items.isNotEmpty) rows.add((studio: null, person: actor['Name'].toString(), items: items));
+    }
+    if (_item?.id != item.id || _isDisposed || rows.isEmpty) return;
+    _moreRows = rows;
+    notifyListeners();
+  }
+
+  /// Titles sharing this one's studio ([studio], by name) or a person ([personId]), as Plex's "More from C2C" and "More with
+  /// Ai Kakuma" rows. Leaves out this title; empty when the server has none or fails.
+  Future<List<AggregatedItem>> moreLike({String? studio, String? personId}) async {
+    final item = _item;
+    if (item == null || (studio == null && personId == null)) return const [];
+    try {
+      final data = await _client.itemsApi.getItems(
+        recursive: true,
+        includeItemTypes: const ['Movie', 'Series'],
+        studios: studio == null ? null : [studio],
+        personIds: personId == null ? null : [personId],
+        limit: _similarLimit + 1,
+      );
+      final items = (data['Items'] as List?) ?? const [];
+      return _mapItems(items).where((other) => other.id != item.id).take(_similarLimit).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
   Future<void> _loadSimilar() async {
     try {
       final item = _item;
@@ -2485,6 +2538,14 @@ class ItemDetailViewModel extends ChangeNotifier {
   Future<void> _loadRatings() async {
     final item = _item;
     if (item == null) return;
+
+    // Lambent Server passes on Plex's scores, so nothing is fetched.
+    final served = serverScores(item.rawData);
+    if (served.isNotEmpty || hasServerScores(item.rawData)) {
+      _ratings = served;
+      notifyListeners();
+      return;
+    }
 
     if (item.type == 'Episode') {
       if (!GetIt.instance<UserPreferences>().canFetchEpisodeRatings) return;

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../../../../util/platform_detection.dart';
 import '../../../../navigation/destinations.dart';
 import '../../../../widgets/offline_aware_image.dart';
 import '../../../../widgets/seerr/seerr_image_urls.dart';
@@ -91,6 +92,8 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
 
     return id != null && id.isNotEmpty;
   }
+
+  bool get _tv => PlatformDetection.isTV;
 
   String get _name {
     final value = widget.person['Name']?.toString().trim();
@@ -240,6 +243,8 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
                 SizedBox(
                   height: phonePortrait
                       ? 10
+                      : _tv
+                      ? 10
                       : NouveauSpacing.peopleAvatarToName,
                 ),
 
@@ -258,6 +263,7 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
                               color: foreground.withValues(
                                 alpha: _active ? 1.0 : 0.88,
                               ),
+                              fontSize: _tv ? 14 : null,
                               fontWeight: _active
                                   ? FontWeight.w700
                                   : FontWeight.w600,
@@ -267,7 +273,7 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
                   child: Text(
                     _name,
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: _tv ? 1 : 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -276,13 +282,15 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
                   SizedBox(
                     height: phonePortrait
                         ? 4
+                        : _tv
+                        ? 2
                         : NouveauSpacing.peopleNameToRole,
                   ),
 
                   Text(
                     _role!,
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: _tv ? 1 : 2,
                     overflow: TextOverflow.ellipsis,
                     style: phonePortrait
                         ? theme.textTheme.bodySmall?.copyWith(
@@ -295,6 +303,7 @@ class _NouveauPeopleCardState extends State<NouveauPeopleCard> {
                             color: foreground.withValues(
                               alpha: _active ? 0.70 : 0.52,
                             ),
+                            fontSize: _tv ? 12.5 : null,
                             fontWeight: FontWeight.w400,
                             height: 1.2,
                           ),

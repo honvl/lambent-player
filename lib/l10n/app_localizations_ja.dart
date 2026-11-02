@@ -5629,6 +5629,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get similar => '似ている';
 
   @override
+  String moreFromStudio(String name) {
+    return 'More from $name';
+  }
+
+  @override
+  String moreWithPerson(String name) {
+    return 'More with $name';
+  }
+
+  @override
   String get recommendations => '推奨事項';
 
   @override

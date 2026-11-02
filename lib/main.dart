@@ -32,6 +32,7 @@ import 'data/services/media_server_client_factory.dart';
 import 'data/services/crash_report_service.dart';
 import 'data/services/log_service.dart';
 import 'data/services/storage_path_service.dart';
+import 'util/lambent_brand.dart';
 import 'util/scroll_sensitivity_binding.dart';
 import 'util/webview_environment.dart';
 import 'data/services/theme_store_service.dart';
@@ -59,6 +60,7 @@ import 'util/device_performance.dart';
 import 'ui/navigation/app_router.dart';
 import 'ui/screensaver/screensaver_controller.dart';
 import 'ui/widgets/reader/epub_js_view.dart';
+import 'util/focus/navigation_sounds.dart';
 import 'util/platform_detection.dart';
 import 'util/process_exit_reporter.dart';
 import 'util/system_ui.dart';
@@ -949,14 +951,17 @@ void main() async {
 
     // Registered before runApp so a background/terminated push can be handled.
     // The handler itself is a no-op; the OS draws these notifications.
-    try {
-      FirebaseMessaging.onBackgroundMessage(pushBackgroundHandler);
-    } catch (_) {}
+    if (LambentBrand.enablePushMessaging) {
+      try {
+        FirebaseMessaging.onBackgroundMessage(pushBackgroundHandler);
+      } catch (_) {}
+    }
   }
 
   await configureDependencies();
   _installCrashHandlers();
   if (PlatformDetection.isAndroid) _startProcessExitReporter();
+  if (PlatformDetection.isAndroid && PlatformDetection.isTV) NavigationSounds.install();
   // When the system runs the auto-download refresh task against this
   // engine, the native side retries its call until this handler is bound.
   if (AutoDownloadService.isSupportedPlatform) {
