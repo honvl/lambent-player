@@ -65,6 +65,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var hdr = true
     /// The title's video bitrate (bits a second, 0: unknown), for the AI upscaler's network.
     var sourceBitrate: Int64 = 0
+    /// `prepare` runs on its own queue for every picture (the player): `process` never runs the network itself.
+    var pipelined = false
     /// The ladder was set by `force` (a bench): the AI upscaler runs at any frame rate.
     private var forced = false
     private var engineMs: [Double] = []
@@ -73,6 +75,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private var outPool: CVPixelBufferPool?
     private var outPoolSize = (0, 0)
     private var cache: CVMetalTextureCache?
+    /// `prepare`'s own, as it runs on another queue.
+    private var prepareCache: CVMetalTextureCache?
     private var pool: CVPixelBufferPool?
     private var poolSize = (0, 0)
     private let curve: [Float]
@@ -116,6 +120,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         // A TV's stream (docs/HDR_FALLBACK.md in Lambent): 1000-nit peak, contrast 100, middle grey 50.
         curve = LambentToneParams(peak: 1000).table
         CVMetalTextureCacheCreate(nil, nil, device, nil, &cache)
+        CVMetalTextureCacheCreate(nil, nil, device, nil, &prepareCache)
     }
 
     /// Before the first frame of a session (nothing is queued yet).
@@ -178,7 +183,36 @@ final class LambentLiftProcessor: @unchecked Sendable {
         stepLate = 0
     }
 
-    func process(_ picture: CVPixelBuffer, deadline: CFTimeInterval) -> CVPixelBuffer? {
+    /// A picture through the AI upscaler's network, ready for its finish: `prepare`'s result.
+    struct NeuralPrepared: @unchecked Sendable {
+        let scaler: LambentNeuralScaler
+        let slot: LambentNeuralScaler.Slot
+    }
+
+    /// The first stage of a picture, on its own queue: when the AI upscaler is the scaler, the picture packed and run through the network
+    /// on the Neural Engine (waited for); nil otherwise, or while the model loads. `process` then finishes it on the GPU. Run this
+    /// stage for picture N + 1 while `process` runs for picture N, at most two pictures in flight (the network has two slots): the
+    /// Neural Engine and the GPU then work at once. `process` alone does both, one after the other.
+    func prepare(_ picture: CVPixelBuffer) -> NeuralPrepared? {
+        let w = CVPixelBufferGetWidth(picture), h = CVPixelBufferGetHeight(picture)
+        guard scaler == .neural, scales(w, h), LambentNeuralScaler.fits(w, h) else { return nil }
+        if network == nil {
+            let net = LambentNeuralScaler.network(bitrate: sourceBitrate, width: w, height: h, frameRate: frameRate)
+            network = net
+            NSLog("[LambentHDR] AI upscaler network %@ (%lld bit/s, %dx%d at %.3f fps)", net, sourceBitrate, w, h, frameRate)
+        }
+        guard let net = network, let neural = LambentNeuralScaler.scaler(net, device: device) else { return nil }
+        let tenBit = CVPixelBufferGetPixelFormatType(picture) == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
+        let formats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
+        guard let a = texture(picture, 0, formats.0, prepareCache), let b = texture(picture, 1, formats.1, prepareCache),
+            let inY = CVMetalTextureGetTexture(a), let inC = CVMetalTextureGetTexture(b),
+            let slot = try? neural.run(inY: inY, inC: inC, codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
+        else { return nil }
+        withExtendedLifetime((a, b)) {}
+        return NeuralPrepared(scaler: neural, slot: slot)
+    }
+
+    func process(_ picture: CVPixelBuffer, deadline: CFTimeInterval, prepared: NeuralPrepared? = nil) -> CVPixelBuffer? {
         let w = CVPixelBufferGetWidth(picture), h = CVPixelBufferGetHeight(picture)
         let pixelFormat = CVPixelBufferGetPixelFormatType(picture)
         let tenBit = pixelFormat == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
@@ -188,7 +222,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         }
         frameIndex += 1
         if let (ow, oh) = outputSize, scales(w, h) {
-            return scale(picture, tenBit: tenBit, from: (w, h), to: (ow & ~1, oh & ~1), deadline: deadline)
+            return scale(picture, tenBit: tenBit, from: (w, h), to: (ow & ~1, oh & ~1), deadline: deadline, prepared: prepared)
         }
         // Upscaling only, and the ladder has stepped down to none: the picture as it is.
         if !hdr { return picture }
@@ -242,7 +276,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
 
     /// The picture pass, the prescaler and the scale-and-lift pass, in one command buffer.
     private func scale(
-        _ picture: CVPixelBuffer, tenBit: Bool, from src: (Int, Int), to dst: (Int, Int), deadline: CFTimeInterval
+        _ picture: CVPixelBuffer, tenBit: Bool, from src: (Int, Int), to dst: (Int, Int), deadline: CFTimeInterval,
+        prepared: NeuralPrepared?
     ) -> CVPixelBuffer? {
         let started = CACurrentMediaTime()
         format = "\(src.0)x\(src.1) \(tenBit ? "10" : "8")-bit -> \(dst.0)x\(dst.1)"
@@ -292,17 +327,12 @@ final class LambentLiftProcessor: @unchecked Sendable {
         var used = scaler
         if used == .neural {
             let net = network ?? LambentNeuralScaler.network(bitrate: sourceBitrate, width: src.0, height: src.1, frameRate: frameRate)
-            if network == nil {
-                network = net
-                NSLog("[LambentHDR] AI upscaler network %@ (%lld bit/s, %dx%d at %.3f fps)", net, sourceBitrate, src.0, src.1, frameRate)
-            }
-            if let neural = LambentNeuralScaler.scaler(net, device: device), LambentNeuralScaler.fits(src.0, src.1),
-                (try? neural.run(inY: inY, inC: inC, codeScale: params.codeScale)) != nil,
-                let (l, c) = neural.encodeFinish(buffer, lift: params.lift, knee: params.knee)
+            if let ready = prepared ?? (pipelined ? nil : prepare(picture)), ready.scaler.network == net,
+                let (l, c) = ready.scaler.encodeFinish(ready.slot, buffer, lift: params.lift, knee: params.knee)
             {
                 (luma, chroma) = (l, c)
-                packMs = neural.packMs
-                engineMs.append(neural.engineMs)
+                packMs = ready.slot.packMs
+                engineMs.append(ready.slot.engineMs)
             } else {
                 // Still loading (or it cannot take this picture): the next scaler down, uncounted.
                 used = ladder.count > step + 1 ? ladder[step + 1] : .catmullRom
@@ -361,10 +391,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
         return r
     }
 
-    private func texture(_ buffer: CVPixelBuffer, _ plane: Int, _ format: MTLPixelFormat) -> CVMetalTexture? {
+    private func texture(_ buffer: CVPixelBuffer, _ plane: Int, _ format: MTLPixelFormat, _ from: CVMetalTextureCache? = nil) -> CVMetalTexture? {
         var texture: CVMetalTexture?
         CVMetalTextureCacheCreateTextureFromImage(
-            nil, cache!, buffer, nil, format, CVPixelBufferGetWidthOfPlane(buffer, plane),
+            nil, from ?? cache!, buffer, nil, format, CVPixelBufferGetWidthOfPlane(buffer, plane),
             CVPixelBufferGetHeightOfPlane(buffer, plane), plane, &texture)
         return texture
     }
@@ -599,11 +629,13 @@ private let liftSource = """
                            constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
         if (gid.x >= outC.get_width() || gid.y >= outC.get_height()) return;
         float2 size = float2(outY.get_width(), outY.get_height());
+        // The doubled luma already at the screen's size (1080p -> 2160p): Catmull-Rom at its own pixel centres is the pixel itself.
+        bool same = luma.get_width() == outY.get_width() && luma.get_height() == outY.get_height();
         float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size).rg;
         float2 sum = 0;
         for (uint n = 0; n < 4; n++) {
             uint2 at = gid * 2 + uint2(n & 1, n >> 1);
-            float yy = saturate(catrom(luma, (float2(at) + 0.5) / size));
+            float yy = saturate(same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size));
             float3 rgb = clamp(float3(yy + 1.5748 * c.y, yy - 0.187324 * c.x - 0.468124 * c.y, yy + 1.8556 * c.x), 0.0, 1.0);
             float3 e = expand(rgb, p, curve);
             float yp = dot(e, float3(0.2627, 0.6780, 0.0593));
@@ -620,10 +652,12 @@ private let liftSource = """
                           constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
         if (gid.x >= outC.get_width() || gid.y >= outC.get_height()) return;
         float2 size = float2(outY.get_width(), outY.get_height());
+        // The doubled luma already at the screen's size (1080p -> 2160p): Catmull-Rom at its own pixel centres is the pixel itself.
+        bool same = luma.get_width() == outY.get_width() && luma.get_height() == outY.get_height();
         float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size).rg;
         for (uint n = 0; n < 4; n++) {
             uint2 at = gid * 2 + uint2(n & 1, n >> 1);
-            float yy = saturate(catrom(luma, (float2(at) + 0.5) / size));
+            float yy = saturate(same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size));
             outY.write(float4((yy * 876.0 + 64.0) * 64.0 / 65535.0), at);
         }
         outC.write(float4((clamp(c, -0.5, 0.5) * 896.0 + 512.0) * 64.0 / 65535.0, 0, 0), gid);

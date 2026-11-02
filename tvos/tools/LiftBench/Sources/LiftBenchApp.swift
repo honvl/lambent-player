@@ -34,6 +34,8 @@ final class PlayerHost: UIView {
     private var player: AVPlayer?
     private var processor: LambentLiftProcessor?
     private let queue = DispatchQueue(label: "bench", qos: .userInteractive)
+    private let neuralQueue = DispatchQueue(label: "bench.neural", qos: .userInteractive)
+    private let inFlight = OSAllocatedUnfairLock(initialState: 0)
     private var runs: [(String, String, [LambentLiftProcessor.Scaler]?)] = []
     /// Runs whose pictures are processed but not shown: an iPhone's compositor scales and tone-maps every 4K HDR picture to its own
     /// screen, which an Apple TV showing 4K on a 4K panel does not.
@@ -49,7 +51,9 @@ final class PlayerHost: UIView {
         (shown.layer as! AVSampleBufferDisplayLayer).videoGravity = .resizeAspect
         addSubview(shown)
         let ravu = LambentLiftProcessor.Scaler.prescaler("ravu-lite-ar-r3"), fsr = LambentLiftProcessor.Scaler.prescaler("FSRCNNX_x2_8-0-4-1")
-        print("BENCH device \(MTLCreateSystemDefaultDevice()?.name ?? "?") apple10 \(MTLCreateSystemDefaultDevice()?.supportsFamily(.apple10) ?? false)")
+        // The screen must not lock mid-run: a backgrounded app's GPU work is throttled.
+        UIApplication.shared.isIdleTimerDisabled = true
+        print("BENCH device \(MTLCreateSystemDefaultDevice()?.name ?? "?") apple10 \(MTLCreateSystemDefaultDevice()?.supportsFamily(.apple10) ?? false) low power \(ProcessInfo.processInfo.isLowPowerModeEnabled)")
         if let p = LambentLiftProcessor() { print("BENCH ladder \(p.ladder) failures \(LambentPrescaler.failures)") }
         let ai = LambentLiftProcessor.Scaler.neural
         if let device = MTLCreateSystemDefaultDevice() {
@@ -59,6 +63,10 @@ final class PlayerHost: UIView {
                 print(String(format: "BENCH AI upscaler %@ %@ in %.0f ms %@", n, s != nil ? "loaded" : "did not load",
                              (CACurrentMediaTime() - t) * 1000, LambentNeuralScaler.failures[n] ?? ""))
             }
+        }
+        if let device = MTLCreateSystemDefaultDevice(), let s = LambentNeuralScaler.loadNow("neural-low", device: device) {
+            _ = s.timeNetwork(10)
+            print(String(format: "BENCH AI upscaler network alone, back to back: %.2f ms", s.timeNetwork(100)))
         }
         // LIFT_NEURAL in the environment: the AI upscaler only (capacity, playback at 24 and 60 fps, SDR out, a long run).
         if ProcessInfo.processInfo.environment["LIFT_NEURAL"] != nil {
@@ -121,7 +129,31 @@ final class PlayerHost: UIView {
             let start = CACurrentMediaTime()
             for i in 0..<240 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
             let wall = (CACurrentMediaTime() - start) * 1000 / 240
-            let r = p.takeReport()
+            var r = p.takeReport()
+            if sc == .neural {
+                print(String(format: "BENCH capacity %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms",
+                             r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs))
+                // Pipelined, as the player runs it: the network for picture N + 1 while the GPU finishes picture N.
+                p.pipelined = true
+                let a = DispatchQueue(label: "cap.a"), b = DispatchQueue(label: "cap.b"), gate = DispatchSemaphore(value: 2)
+                let group = DispatchGroup()
+                let t0 = CACurrentMediaTime()
+                for i in 0..<240 {
+                    gate.wait()
+                    group.enter()
+                    let pic = pictures[i % pictures.count]
+                    a.async {
+                        let prepared = p.prepare(pic)
+                        b.async { _ = p.process(pic, deadline: .infinity, prepared: prepared); gate.signal(); group.leave() }
+                    }
+                }
+                group.wait()
+                let piped = (CACurrentMediaTime() - t0) * 1000 / 240
+                r = p.takeReport()
+                print(String(format: "BENCH capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
+                             r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
+                continue
+            }
             print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
                          r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
         }
@@ -158,6 +190,7 @@ final class PlayerHost: UIView {
         }
         processor.reset(deepen: !name.contains("SDR out"))
         processor.hdr = !name.contains("SDR out")
+        processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }
         processor.outputSize = (3840, 2160)
         processor.frameRate = clip.hasSuffix("60") ? 59.94 : 23.976
@@ -204,8 +237,19 @@ final class PlayerHost: UIView {
         let t = output.itemTime(forHostTime: target)
         if output.hasNewPixelBuffer(forItemTime: t), let source = output.copyPixelBuffer(forItemTime: t, itemTimeForDisplay: nil) {
             let renderer = (shown.layer as! AVSampleBufferDisplayLayer).sampleBufferRenderer
-            queue.async { [weak self] in
-                guard let lifted = processor.process(source, deadline: target) else { return }
+            // As the player does it: the network a picture ahead on its own queue, at most two pictures in flight.
+            let taken = inFlight.withLock { n -> Bool in
+                guard n < 2 else { return false }
+                n += 1
+                return true
+            }
+            guard taken else { return }
+            let queue = queue, inFlight = inFlight
+            neuralQueue.async { [weak self] in
+              let prepared = processor.prepare(source)
+              queue.async { [weak self] in
+                defer { inFlight.withLock { $0 -= 1 } }
+                guard let lifted = processor.process(source, deadline: target, prepared: prepared) else { return }
                 var format: CMVideoFormatDescription?
                 CMVideoFormatDescriptionCreateForImageBuffer(allocator: nil, imageBuffer: lifted, formatDescriptionOut: &format)
                 var timing = CMSampleTimingInfo(duration: .invalid, presentationTimeStamp: CMTime(seconds: target, preferredTimescale: 1_000_000_000), decodeTimeStamp: .invalid)
@@ -213,6 +257,7 @@ final class PlayerHost: UIView {
                 CMSampleBufferCreateReadyWithImageBuffer(allocator: nil, imageBuffer: lifted, formatDescription: format!, sampleTiming: &timing, sampleBufferOut: &sample)
                 if let sample, !(self?.hiddenNow ?? false) { renderer.enqueue(sample) }
                 DispatchQueue.main.async { self?.enqueued += 1 }
+              }
             }
         }
         let now = CACurrentMediaTime()
