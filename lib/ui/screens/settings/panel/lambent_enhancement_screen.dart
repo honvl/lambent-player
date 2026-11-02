@@ -58,6 +58,14 @@ class _LambentEnhancementScreen extends StatelessWidget {
                           subtitle: 'Bends a washed-out black floor down to black.',
                           icon: Icons.contrast,
                         ),
+                      SwitchPreferenceTile(
+                        preference: UserPreferences.lambentClientUpscale,
+                        title: 'Upscale on this TV',
+                        subtitle:
+                            'A title smaller than the screen is upscaled here, '
+                            'with Lambent\'s AI upscaler where this device keeps up.',
+                        icon: Icons.photo_size_select_large,
+                      ),
                     ],
                   ),
                 ],

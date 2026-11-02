@@ -31,6 +31,7 @@
 		AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */; };
 		8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */; };
 		78881C895CCFB1BC9086906F /* LambentPrescaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */; };
+		A1B2C3D4E5F60718293A4B5C /* LambentNeuralScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */; };
 		3D00B478F423220BCE6A25AF /* LambentLiftProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596507BBC79F31BB7CFECFAC /* LambentLiftProcessor.swift */; };
 		7A8BDAB827D12F39CAF7401E /* AetherEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 7AFE3931A7703B48EA41DA54 /* AetherEngine */; };
 		81DCCA41EF933CEC711C17AF /* genesis_plus_gx_libretro.framework in Embed Libretro Cores */ = {isa = PBXBuildFile; fileRef = 3D25A3FF43C9B94D5ED8A397 /* genesis_plus_gx_libretro.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -166,6 +167,7 @@
 		EC66562038A8BA35AC8B1733 /* MoonfinTopShelf.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MoonfinTopShelf.entitlements; sourceTree = "<group>"; };
 		596507BBC79F31BB7CFECFAC /* LambentLiftProcessor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentLiftProcessor.swift; path = Lambent/LambentLiftProcessor.swift; sourceTree = "<group>"; };
 		613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentPrescaler.swift; path = Lambent/LambentPrescaler.swift; sourceTree = "<group>"; };
+		0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentNeuralScaler.swift; path = Lambent/LambentNeuralScaler.swift; sourceTree = "<group>"; };
 		1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentHDRLift.swift; path = Lambent/LambentHDRLift.swift; sourceTree = "<group>"; };
 		C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentTrueHDRTables.swift; path = Lambent/LambentTrueHDRTables.swift; sourceTree = "<group>"; };
 		F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AssRenderer.swift; path = Aether/AssRenderer.swift; sourceTree = "<group>"; };
@@ -263,6 +265,7 @@
 				C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */,
 				1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */,
 				613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */,
+				0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */,
 				596507BBC79F31BB7CFECFAC /* LambentLiftProcessor.swift */,
 				DDC62E8B96B51BBBCBA1EC23 /* EngineTrustPolicy.swift */,
 				81BEA439F41D2A8701F2EC3E /* ClientIdentityStore.swift */,
@@ -605,6 +608,7 @@
 				AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */,
 				8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */,
 				78881C895CCFB1BC9086906F /* LambentPrescaler.swift in Sources */,
+				A1B2C3D4E5F60718293A4B5C /* LambentNeuralScaler.swift in Sources */,
 				3D00B478F423220BCE6A25AF /* LambentLiftProcessor.swift in Sources */,
 				6A5B8E29CBD0D987A4C5E44A /* EngineTrustPolicy.swift in Sources */,
 				583F601A53A8E8037B41AB76 /* ClientIdentityStore.swift in Sources */,

@@ -6,6 +6,7 @@ import CoreVideo
 import Metal
 import QuartzCore
 import UIKit
+import os
 
 /// Lambent's Auto HDR on the Apple TV: an SDR title direct-plays, and the
 /// Apple TV turns it into HDR10 itself, so the PC needs no transcode.
@@ -16,19 +17,26 @@ import UIKit
 /// BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid over the hidden
 /// `AVPlayerLayer`. The panel is asked for HDR10 at the film's rate.
 ///
-/// On by default whenever Enhance on PC is off (the server then direct-plays);
-/// Settings > Lambent enhancement > HDR on this TV turns it off. Flutter stores
-/// both as `flutter.pref_lambent_enhance_on_pc` / `flutter.pref_lambent_client_hdr`. Logs `[LambentHDR]`
-/// lines every 2 s.
+/// A picture smaller than the screen is upscaled on the way (the AI upscaler on
+/// the Neural Engine, else a shader; LambentLiftProcessor.swift). With HDR on this
+/// TV off and Upscale on this TV on, only the upscaling runs and the picture keeps
+/// its SDR colours; a picture already at the screen's size is then left to AVPlayer.
+/// HDR and Dolby Vision titles are never touched.
+///
+/// On by default whenever Enhance on PC is off (the server then direct-plays, so
+/// no stream reaching it was enhanced by the PC); Settings > Lambent enhancement >
+/// HDR on this TV / Upscale on this TV turn it off. Flutter stores them as
+/// `flutter.pref_lambent_enhance_on_pc` / `flutter.pref_lambent_client_hdr` /
+/// `flutter.pref_lambent_client_upscale`. Logs `[LambentHDR]` lines every 2 s.
 @MainActor
 final class LambentHDRLift {
     /// On while Enhance on PC is off (Flutter's defaults: Enhance on PC on, HDR on this TV on, so an unset key is true).
     static var isEnabled: Bool {
-        let defaults = UserDefaults.standard
-        let enhanceOnPc = defaults.object(forKey: "flutter.pref_lambent_enhance_on_pc") as? Bool ?? true
-        let clientHdr = defaults.object(forKey: "flutter.pref_lambent_client_hdr") as? Bool ?? true
-        return !enhanceOnPc && clientHdr
+        let enhanceOnPc = UserDefaults.standard.object(forKey: "flutter.pref_lambent_enhance_on_pc") as? Bool ?? true
+        return !enhanceOnPc && (clientHdr || clientUpscale)
     }
+    static var clientHdr: Bool { UserDefaults.standard.object(forKey: "flutter.pref_lambent_client_hdr") as? Bool ?? true }
+    static var clientUpscale: Bool { UserDefaults.standard.object(forKey: "flutter.pref_lambent_client_upscale") as? Bool ?? true }
     static var deepenBlacks: Bool { UserDefaults.standard.bool(forKey: "flutter.pref_lambent_client_blacks") }
 
     private weak var playerLayer: AVPlayerLayer?
@@ -43,6 +51,14 @@ final class LambentHDRLift {
     private var frameRate: Double = 24
     private var lastReport = CACurrentMediaTime()
     private var requestedHDR = false
+    private var started = false
+    private var hdr = true
+    private var upscale = true
+    /// How far ahead of the next vsync a picture is fetched and shown, so the AI upscaler's time does not put the picture behind the
+    /// sound (0 when a picture fits before the next vsync).
+    private var lead: CFTimeInterval = 0
+    /// Pictures handed to the queue and not yet shown; a new one is dropped at 2, so a slow picture never queues the next ones behind it.
+    private let inFlight = OSAllocatedUnfairLock(initialState: 0)
 
     init?() {
         guard let processor = LambentLiftProcessor() else { return nil }
@@ -72,7 +88,14 @@ final class LambentHDRLift {
         self.playerLayer = layer
         host = view
         frameRate = engine.sourceVideoFrameRate ?? 24
-        processor.reset(deepen: Self.deepenBlacks)
+        hdr = Self.clientHdr
+        upscale = Self.clientUpscale
+        started = false
+        lead = 0
+        processor.reset(deepen: hdr && Self.deepenBlacks)
+        processor.hdr = hdr
+        processor.sourceBitrate = engine.sourceVideoBitrate
+        processor.outputSize = nil
 
         displayLayer.videoGravity = layer.videoGravity
         liftView.frame = view.bounds
@@ -93,7 +116,8 @@ final class LambentHDRLift {
         let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
         link.add(to: .main, forMode: .common)
         self.link = link
-        NSLog("[LambentHDR] started fps %.3f deepen %@", frameRate, Self.deepenBlacks ? "on" : "off")
+        NSLog("[LambentHDR] started fps %.3f hdr %@ upscale %@ deepen %@ bitrate %lld", frameRate, hdr ? "on" : "off",
+            upscale ? "on" : "off", hdr && Self.deepenBlacks ? "on" : "off", engine.sourceVideoBitrate)
         return true
     }
 
@@ -111,6 +135,7 @@ final class LambentHDRLift {
             window.avDisplayManager.preferredDisplayCriteria = nil
         }
         requestedHDR = false
+        started = false
         host = nil
     }
 
@@ -136,12 +161,13 @@ final class LambentHDRLift {
 
     @objc private func tick(_ link: CADisplayLink) {
         guard let output else { return }
-        let target = link.targetTimestamp
+        let target = link.targetTimestamp + lead
         let itemTime = output.itemTime(forHostTime: target)
         if output.hasNewPixelBuffer(forItemTime: itemTime),
             let source = output.copyPixelBuffer(forItemTime: itemTime, itemTimeForDisplay: nil)
         {
-            if !requestedHDR {
+            if !started {
+                started = true
                 // The first picture: a stream that is already HDR (an enhanced one, or a source the probe called SDR) is
                 // left to AVPlayer; otherwise the panel goes to HDR10 at the picture's size.
                 let transfer = CVBufferCopyAttachment(source, kCVImageBufferTransferFunctionKey, nil) as? String
@@ -153,40 +179,63 @@ final class LambentHDRLift {
                     return
                 }
                 let w = CVPixelBufferGetWidth(source), h = CVPixelBufferGetHeight(source)
-                if let view = host {
-                    requestHDR10(in: view, width: w, height: h)
-                    // Upscaled here to its place on the screen, in the screen's own pixels (3840 x 2160 on a 4K panel).
-                    if let screen = view.window?.screen {
-                        let native = screen.nativeBounds.size
-                        let k = min(native.width / CGFloat(w), native.height / CGFloat(h))
-                        processor.outputSize = (Int(CGFloat(w) * k), Int(CGFloat(h) * k))
-                    }
+                // Upscaled here to its place on the screen, in the screen's own pixels (3840 x 2160 on a 4K panel).
+                if upscale, let screen = host?.window?.screen {
+                    let native = screen.nativeBounds.size
+                    let k = min(native.width / CGFloat(w), native.height / CGFloat(h))
+                    processor.outputSize = (Int(CGFloat(w) * k), Int(CGFloat(h) * k))
                 }
                 processor.frameRate = frameRate
-                NSLog("[LambentHDR] first picture %dx%d, HDR10 requested at %.3f Hz, shown at %@, scaler %@", w, h, frameRate,
+                if !hdr && !processor.scales(w, h) {
+                    NSLog("[LambentHDR] %dx%d: nothing to upscale and HDR on this TV is off: AVPlayer shows it", w, h)
+                    stop()
+                    return
+                }
+                if hdr, let view = host { requestHDR10(in: view, width: w, height: h) }
+                updateLead(link)
+                NSLog("[LambentHDR] first picture %dx%d, %@ at %.3f Hz, shown at %@, scaler %@", w, h, hdr ? "HDR10" : "SDR", frameRate,
                     processor.outputSize.map { "\($0.0)x\($0.1)" } ?? "its own size", "\(processor.scaler)")
             }
             let renderer = displayLayer.sampleBufferRenderer
             let processor = processor
-            queue.async {
-                guard let lifted = processor.process(source, deadline: target),
-                    let sample = Self.sampleBuffer(lifted, at: target)
-                else { return }
-                renderer.enqueue(sample)
+            let inFlight = inFlight
+            let taken = inFlight.withLock { n -> Bool in
+                guard n < 2 else { return false }
+                n += 1
+                return true
+            }
+            if taken {
+                queue.async {
+                    defer { inFlight.withLock { $0 -= 1 } }
+                    guard let lifted = processor.process(source, deadline: target),
+                        let sample = Self.sampleBuffer(lifted, at: target)
+                    else { return }
+                    renderer.enqueue(sample)
+                }
             }
         }
         let now = CACurrentMediaTime()
         if now - lastReport >= 2 {
             lastReport = now
+            updateLead(link)
             let headroom = host?.window?.screen.currentEDRHeadroom ?? 0
             let switching = host?.window?.avDisplayManager.isDisplayModeSwitchInProgress ?? false
             queue.async { [processor] in
                 let r = processor.takeReport()
                 NSLog(
-                    "[LambentHDR] frames %d late %d gpu_ms mean %.3f p95 %.3f floor %.3f lift %.3f edr_headroom %.2f switching %@ %@ %@",
-                    r.frames, r.late, r.meanMs, r.p95Ms, r.floor, r.lift, headroom, switching ? "yes" : "no", r.format, r.scaler)
+                    "[LambentHDR] frames %d late %d gpu_ms mean %.3f p95 %.3f ane_ms %.3f floor %.3f lift %.3f edr_headroom %.2f switching %@ %@ %@",
+                    r.frames, r.late, r.meanMs, r.p95Ms, r.engineMs, r.floor, r.lift, headroom, switching ? "yes" : "no", r.format, r.scaler)
             }
         }
+    }
+
+    /// The AI upscaler takes about 25 ms a picture on an A16 (Neural Engine and GPU, one after the other): a vsync ahead when the
+    /// display's is shorter (60 Hz, before or without the mode switch), none at 24-30 Hz. Changes only with the display's rate or the
+    /// scaler (one picture is skipped then).
+    private func updateLead(_ link: CADisplayLink) {
+        let d = max(link.duration, 1.0 / 120)
+        let want = processor.scaler == .neural ? d * max(0, ceil(0.030 / d) - 1) : 0
+        if abs(want - lead) > 0.001 { lead = want }
     }
 
     private nonisolated static func sampleBuffer(_ buffer: CVPixelBuffer, at hostTime: CFTimeInterval) -> CMSampleBuffer? {

@@ -2233,6 +2233,15 @@ class UserPreferences extends ChangeNotifier {
     key: 'pref_lambent_client_hdr',
     defaultValue: true,
   );
+  /// Apple TV only, while [lambentEnhanceOnPc] is off: a title smaller than
+  /// the screen is upscaled on the device, by Lambent's AI upscaler on the
+  /// Neural Engine (A15 and later, up to 30 fps; an A19 at any rate) or a
+  /// shader. With [lambentClientHdr] off it keeps its SDR colours. Read by
+  /// tvos/Runner/Playback/Lambent/LambentHDRLift.swift.
+  static final lambentClientUpscale = Preference(
+    key: 'pref_lambent_client_upscale',
+    defaultValue: true,
+  );
   static final lambentClientDeepenBlacks = Preference(
     key: 'pref_lambent_client_blacks',
     defaultValue: false,

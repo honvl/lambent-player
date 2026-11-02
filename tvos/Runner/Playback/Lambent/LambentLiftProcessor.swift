@@ -3,12 +3,15 @@ import Foundation
 import Metal
 import QuartzCore
 
-/// The GPU work, off the main thread: 8- or 10-bit 4:2:0 BT.709 in, P010 BT.2020 PQ out.
+/// The GPU work, off the main thread: 8- or 10-bit 4:2:0 BT.709 in, P010 BT.2020 PQ out (or, with `hdr` off, P010 with the picture's own
+/// SDR colours: upscaling only).
 ///
 /// A picture as big as its place on the screen gets one Metal kernel: Deepen blacks' bend and the lift. A smaller one (a 1080p title on
 /// a 4K screen) is upscaled here rather than by tvOS's own scaler (bilinear in the simulator, docs/SHADER_UPSCALE.md in Lambent): a
 /// pass at the picture's size bends the blacks and writes Y' and chroma, a luma prescaler doubles Y' (FSRCNNX 8-0-4-1 on an Apple GPU of
 /// family 10 or later, an A19; RAVU-lite before it), and a last pass at the screen's size scales (Catmull-Rom), lifts and writes PQ.
+/// Above them all, on an A15 or later with the models in the bundle, the AI upscaler (LambentNeuralScaler.swift: NVIDIA's VSR low
+/// network on the Neural Engine) doubles the whole picture in place of the picture pass and the prescaler; at most 30 fps before an A19.
 /// When a scaler cannot keep up with the film (pictures taking longer than a frame, start to finish), the next one down takes over:
 /// FSRCNNX, RAVU-lite, Catmull-Rom, then none (tvOS scales). Measured on an A16 (docs/CLIENT_HDR.md in Lambent), 1080p -> 4K with
 /// the lift, back to back: Catmull-Rom 4.1 ms, RAVU-lite 8.4 ms, FSRCNNX 34 ms. GPU time alone does not decide: an A-series GPU lowers
@@ -20,16 +23,21 @@ final class LambentLiftProcessor: @unchecked Sendable {
         var floor: Float = -1, lift: Float = 0
         var format = ""
         var scaler = ""
+        /// The AI upscaler's Neural Engine time (mean, ms), 0 when it did not run.
+        var engineMs = 0.0
     }
 
     /// How the picture reaches the screen's size, best first.
     enum Scaler: Equatable, CustomStringConvertible {
+        /// The AI upscaler; its network follows the title's bits per pixel (`LambentNeuralScaler.network`).
+        case neural
         case prescaler(String)
         case catmullRom
         case none
 
         var description: String {
             switch self {
+            case .neural: return "AI upscaler"
             case .prescaler(let name): return name
             case .catmullRom: return "catmull-rom"
             case .none: return "none (tvOS scales)"
@@ -42,6 +50,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private let pipeline: MTLComputePipelineState
     private let prepPipeline: MTLComputePipelineState
     private let scalePipeline: MTLComputePipelineState
+    private let scaleSDRPipeline: MTLComputePipelineState
     private var prescalers: [String: LambentPrescaler] = [:]
     /// The scalers to try, best first; the first one stays until its GPU time does not fit.
     private(set) var ladder: [Scaler]
@@ -52,6 +61,13 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var outputSize: (Int, Int)?
     /// The film's rate: a picture has one frame of it, start to finish.
     var frameRate: Double = 24
+    /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off).
+    var hdr = true
+    /// The title's video bitrate (bits a second, 0: unknown), for the AI upscaler's network.
+    var sourceBitrate: Int64 = 0
+    /// The ladder was set by `force` (a bench): the AI upscaler runs at any frame rate.
+    private var forced = false
+    private var engineMs: [Double] = []
     private var lumaTex: MTLTexture?
     private var chromaTex: MTLTexture?
     private var outPool: CVPixelBufferPool?
@@ -73,16 +89,21 @@ final class LambentLiftProcessor: @unchecked Sendable {
             let function = library.makeFunction(name: "lift"),
             let pipeline = try? device.makeComputePipelineState(function: function),
             let prep = library.makeFunction(name: "prep").flatMap({ try? device.makeComputePipelineState(function: $0) }),
-            let scale = library.makeFunction(name: "scale_lift").flatMap({ try? device.makeComputePipelineState(function: $0) })
+            let scale = library.makeFunction(name: "scale_lift").flatMap({ try? device.makeComputePipelineState(function: $0) }),
+            let scaleSDR = library.makeFunction(name: "scale_sdr").flatMap({ try? device.makeComputePipelineState(function: $0) })
         else { return nil }
         self.device = device
         self.queue = queue
         self.pipeline = pipeline
         prepPipeline = prep
         scalePipeline = scale
+        scaleSDRPipeline = scaleSDR
         // FSRCNNX 8-0-4-1 took 29 ms a 1080p -> 4K picture on an A16 (docs/SHADER_UPSCALE.md in Lambent): only an A19-class GPU (Apple
         // family 10) is expected to fit it in a film's frame. RAVU-lite took 5.2 ms there.
         var ladder: [Scaler] = []
+        // NVIDIA's VSR low network took 15-17 ms a 1080p picture on an A16's Neural Engine, plus about 4 ms on its GPU: real time at
+        // 24-30 fps from the A15 (Apple family 8, the 3rd-gen Apple TV 4K) on.
+        if device.supportsFamily(.apple8), LambentNeuralScaler.available { ladder.append(.neural) }
         if device.supportsFamily(.apple10) { ladder.append(.prescaler("FSRCNNX_x2_8-0-4-1")) }
         ladder += [.prescaler("ravu-lite-ar-r3"), .catmullRom, .none]
         var loaded: [String: LambentPrescaler] = [:]
@@ -91,6 +112,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         }
         prescalers = loaded
         self.ladder = ladder.filter { if case .prescaler(let n) = $0 { return loaded[n] != nil } else { return true } }
+        if self.ladder.first == .neural { _ = LambentNeuralScaler.scaler("neural-low", device: device) }
         // A TV's stream (docs/HDR_FALLBACK.md in Lambent): 1000-nit peak, contrast 100, middle grey 50.
         curve = LambentToneParams(peak: 1000).table
         CVMetalTextureCacheCreate(nil, nil, device, nil, &cache)
@@ -104,6 +126,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         step = 0
         stepPictures = 0
         stepLate = 0
+        network = nil
     }
 
     /// Overrides the ladder (a bench, or a test): the scaler named, alone.
@@ -114,13 +137,29 @@ final class LambentLiftProcessor: @unchecked Sendable {
         for case .prescaler(let name) in ladder where prescalers[name] == nil {
             prescalers[name] = LambentPrescaler(device: device, name: name)
         }
-        self.ladder = ladder.filter { if case .prescaler(let n) = $0 { return prescalers[n] != nil } else { return true } }
+        self.ladder = ladder.filter {
+            switch $0 {
+            case .prescaler(let n): return prescalers[n] != nil
+            case .neural: return LambentNeuralScaler.available
+            default: return true
+            }
+        }
+        forced = true
         step = 0
         stepPictures = 0
         stepLate = 0
     }
 
     var scaler: Scaler { ladder[min(step, ladder.count - 1)] }
+
+    /// A picture of this size is upscaled here (rather than shown at its own size, tvOS scaling it).
+    func scales(_ w: Int, _ h: Int) -> Bool {
+        guard let (ow, oh) = outputSize else { return false }
+        return scaler != .none && ow > w * 6 / 5 && oh > h * 6 / 5
+    }
+
+    /// The AI upscaler's network for the title, once its first picture has been seen.
+    private(set) var network: String?
 
     /// Every 96 pictures with one scaler: when more than 5 of them took longer than a frame, the next one down. The first 24 after a
     /// change are not counted (the GPU's clock and the pools settle).
@@ -148,9 +187,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
             blacks.measure(picture, tenBit: tenBit, at: CACurrentMediaTime())
         }
         frameIndex += 1
-        if let (ow, oh) = outputSize, scaler != .none, ow > w * 6 / 5, oh > h * 6 / 5 {
+        if let (ow, oh) = outputSize, scales(w, h) {
             return scale(picture, tenBit: tenBit, from: (w, h), to: (ow & ~1, oh & ~1), deadline: deadline)
         }
+        // Upscaling only, and the ladder has stepped down to none: the picture as it is.
+        if !hdr { return picture }
         if pool == nil || poolSize != (w, h) {
             let attrs: [String: Any] = [
                 kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange,
@@ -205,6 +246,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
     ) -> CVPixelBuffer? {
         let started = CACurrentMediaTime()
         format = "\(src.0)x\(src.1) \(tenBit ? "10" : "8")-bit -> \(dst.0)x\(dst.1)"
+        if scaler == .neural, !forced, frameRate > 30.5, !device.supportsFamily(.apple10), step < ladder.count - 1 {
+            NSLog("[LambentHDR] AI upscaler: %.3f fps is over 30 on this chip: %@", frameRate, "\(ladder[step + 1])")
+            step += 1
+            stepPictures = 0
+        }
         if outPool == nil || outPoolSize != dst {
             let attrs: [String: Any] = [
                 kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange,
@@ -231,29 +277,52 @@ final class LambentLiftProcessor: @unchecked Sendable {
         guard let outPool, CVPixelBufferPoolCreatePixelBuffer(nil, outPool, &made) == kCVReturnSuccess, let out = made,
             let lumaTex, let chromaTex
         else { return nil }
-        attachHDR10(out)
+        if hdr { attachHDR10(out) } else { CVBufferPropagateAttachments(picture, out) }
         let inFormats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
         guard let a = texture(picture, 0, inFormats.0), let b = texture(picture, 1, inFormats.1),
             let c = texture(out, 0, .r16Unorm), let d = texture(out, 1, .rg16Unorm),
             let inY = CVMetalTextureGetTexture(a), let inC = CVMetalTextureGetTexture(b),
             let outY = CVMetalTextureGetTexture(c), let outC = CVMetalTextureGetTexture(d),
-            let buffer = queue.makeCommandBuffer(), let encoder = buffer.makeComputeCommandEncoder()
+            let buffer = queue.makeCommandBuffer()
         else { return nil }
         var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0, saturation: 1, lift: deepen ? blacks.lift : 0, knee: 0.5)
-        encoder.setComputePipelineState(prepPipeline)
-        encoder.setTextures([inY, inC, lumaTex, chromaTex], range: 0..<4)
-        encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
-        encoder.dispatchThreads(
-            MTLSize(width: chromaTex.width, height: chromaTex.height, depth: 1), threadsPerThreadgroup: MTLSize(width: 16, height: 16, depth: 1))
-        encoder.endEncoding()
-        let used = scaler
         var luma: MTLTexture = lumaTex
+        var chroma: MTLTexture = chromaTex
+        var packMs = 0.0
+        var used = scaler
+        if used == .neural {
+            let net = network ?? LambentNeuralScaler.network(bitrate: sourceBitrate, width: src.0, height: src.1, frameRate: frameRate)
+            if network == nil {
+                network = net
+                NSLog("[LambentHDR] AI upscaler network %@ (%lld bit/s, %dx%d at %.3f fps)", net, sourceBitrate, src.0, src.1, frameRate)
+            }
+            if let neural = LambentNeuralScaler.scaler(net, device: device), LambentNeuralScaler.fits(src.0, src.1),
+                (try? neural.run(inY: inY, inC: inC, codeScale: params.codeScale)) != nil,
+                let (l, c) = neural.encodeFinish(buffer, lift: params.lift, knee: params.knee)
+            {
+                (luma, chroma) = (l, c)
+                packMs = neural.packMs
+                engineMs.append(neural.engineMs)
+            } else {
+                // Still loading (or it cannot take this picture): the next scaler down, uncounted.
+                used = ladder.count > step + 1 ? ladder[step + 1] : .catmullRom
+            }
+        }
+        if used != .neural {
+            guard let encoder = buffer.makeComputeCommandEncoder() else { return nil }
+            encoder.setComputePipelineState(prepPipeline)
+            encoder.setTextures([inY, inC, lumaTex, chromaTex], range: 0..<4)
+            encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
+            encoder.dispatchThreads(
+                MTLSize(width: chromaTex.width, height: chromaTex.height, depth: 1), threadsPerThreadgroup: MTLSize(width: 16, height: 16, depth: 1))
+            encoder.endEncoding()
+        }
         if case .prescaler(let name) = used, let prescaler = prescalers[name] {
             luma = prescaler.encode(buffer, luma: lumaTex, output: dst)
         }
         guard let final = buffer.makeComputeCommandEncoder() else { return nil }
-        final.setComputePipelineState(scalePipeline)
-        final.setTextures([luma, chromaTex, outY, outC], range: 0..<4)
+        final.setComputePipelineState(hdr ? scalePipeline : scaleSDRPipeline)
+        final.setTextures([luma, chroma, outY, outC], range: 0..<4)
         final.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
         curve.withUnsafeBytes { final.setBytes($0.baseAddress!, length: $0.count, index: 1) }
         final.dispatchThreads(
@@ -263,10 +332,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
         buffer.waitUntilCompleted()
         withExtendedLifetime((a, b, c, d)) {}
         guard buffer.error == nil else { return nil }
-        gpuMs.append((buffer.gpuEndTime - buffer.gpuStartTime) * 1000)
+        gpuMs.append((buffer.gpuEndTime - buffer.gpuStartTime) * 1000 + packMs)
         let now = CACurrentMediaTime()
         if now > deadline { late += 1 }
-        checkBudget(late: now - started > 1 / max(frameRate, 1))
+        if used == scaler { checkBudget(late: now - started > 1 / max(frameRate, 1)) }
         return out
     }
 
@@ -279,8 +348,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
     }
 
     func takeReport() -> Report {
-        defer { gpuMs.removeAll(keepingCapacity: true); late = 0 }
-        var r = Report(frames: gpuMs.count, late: late, floor: blacks.floor, lift: blacks.lift, format: format, scaler: "\(scaler)")
+        defer { gpuMs.removeAll(keepingCapacity: true); engineMs.removeAll(keepingCapacity: true); late = 0 }
+        var r = Report(
+            frames: gpuMs.count, late: late, floor: blacks.floor, lift: blacks.lift, format: format,
+            scaler: scaler == .neural ? "AI upscaler (\(network ?? "?"))" : "\(scaler)")
+        if !engineMs.isEmpty { r.engineMs = engineMs.reduce(0, +) / Double(engineMs.count) }
         if !gpuMs.isEmpty {
             let sorted = gpuMs.sorted()
             r.meanMs = sorted.reduce(0, +) / Double(sorted.count)
@@ -539,5 +611,21 @@ private let liftSource = """
             outY.write(float4((yp * 876.0 + 64.0) * 64.0 / 65535.0), at);
         }
         outC.write(float4((sum * 0.25 * 896.0 + 512.0) * 64.0 / 65535.0, 0, 0), gid);
+    }
+
+    // `scale_lift` without the lift (HDR on this TV off): Y' by Catmull-Rom, the block's chroma bilinear, written back as the picture's
+    // own video-range Y'CbCr in P010.
+    kernel void scale_sdr(texture2d<float> luma [[texture(0)]], texture2d<float> chroma [[texture(1)]],
+                          texture2d<float, access::write> outY [[texture(2)]], texture2d<float, access::write> outC [[texture(3)]],
+                          constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
+        if (gid.x >= outC.get_width() || gid.y >= outC.get_height()) return;
+        float2 size = float2(outY.get_width(), outY.get_height());
+        float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size).rg;
+        for (uint n = 0; n < 4; n++) {
+            uint2 at = gid * 2 + uint2(n & 1, n >> 1);
+            float yy = saturate(catrom(luma, (float2(at) + 0.5) / size));
+            outY.write(float4((yy * 876.0 + 64.0) * 64.0 / 65535.0), at);
+        }
+        outC.write(float4((clamp(c, -0.5, 0.5) * 896.0 + 512.0) * 64.0 / 65535.0, 0, 0), gid);
     }
     """

@@ -40,6 +40,7 @@ final class PlayerHost: UIView {
     private var hideOutput = false
     private var runStart = 0.0, lastReport = 0.0, enqueued = 0
     private var label = ""
+    private var endObserver: NSObjectProtocol?
 
     func run() {
         backgroundColor = .black
@@ -50,9 +51,26 @@ final class PlayerHost: UIView {
         let ravu = LambentLiftProcessor.Scaler.prescaler("ravu-lite-ar-r3"), fsr = LambentLiftProcessor.Scaler.prescaler("FSRCNNX_x2_8-0-4-1")
         print("BENCH device \(MTLCreateSystemDefaultDevice()?.name ?? "?") apple10 \(MTLCreateSystemDefaultDevice()?.supportsFamily(.apple10) ?? false)")
         if let p = LambentLiftProcessor() { print("BENCH ladder \(p.ladder) failures \(LambentPrescaler.failures)") }
-        capacity([.none, .catmullRom, ravu, fsr])
+        let ai = LambentLiftProcessor.Scaler.neural
+        if let device = MTLCreateSystemDefaultDevice() {
+            for n in LambentNeuralScaler.networks {
+                let t = CACurrentMediaTime()
+                let s = LambentNeuralScaler.loadNow(n, device: device)
+                print(String(format: "BENCH AI upscaler %@ %@ in %.0f ms %@", n, s != nil ? "loaded" : "did not load",
+                             (CACurrentMediaTime() - t) * 1000, LambentNeuralScaler.failures[n] ?? ""))
+            }
+        }
+        // LIFT_NEURAL in the environment: the AI upscaler only (capacity, playback at 24 and 60 fps, SDR out, a long run).
+        if ProcessInfo.processInfo.environment["LIFT_NEURAL"] != nil {
+            capacity([ai, ravu])
+            runs = [("sdr1080p24", "AI upscaler", [ai]), ("sdr1080p24", "AI upscaler SDR out", [ai]),
+                    ("sdr1080p60", "AI upscaler hidden", [ai]), ("sdr1080p24", "player's own ladder", nil),
+                    ("sdr1080p60", "player's own ladder hidden", nil), ("sdr1080p24", "AI upscaler long", [ai])]
+            return next()
+        }
+        capacity([.none, .catmullRom, ravu, fsr, ai])
         for clip in ["sdr1080p24", "sdr1080p60"] {
-            for sc in [LambentLiftProcessor.Scaler.none, .catmullRom, ravu, fsr] { runs.append((clip, "\(sc)", [sc])) }
+            for sc in [LambentLiftProcessor.Scaler.none, .catmullRom, ravu, fsr, ai] { runs.append((clip, "\(sc)", [sc])) }
             runs.append((clip, "ladder from FSRCNNX", [fsr, ravu, .catmullRom, .none]))
             runs.append((clip, "player's own ladder", nil))
         }
@@ -90,10 +108,13 @@ final class PlayerHost: UIView {
             if sc == .catmullRom && catrom == nil { catrom = o; continue }
             print(String(format: "BENCH fingerprint %@: %@", "\(sc)", fingerprint(o, catrom)))
         }
-        for sc in scalers {
+        // The AI upscaler twice: its network for a low bitrate (neural-low) and for a high one (neural-hb).
+        let timed = scalers.flatMap { sc -> [(LambentLiftProcessor.Scaler, Int64)] in sc == .neural ? [(sc, Int64(0)), (sc, Int64(200_000_000))] : [(sc, Int64(0))] }
+        for (sc, bitrate) in timed {
             guard let p = LambentLiftProcessor() else { continue }
             p.reset(deepen: true)
             p.force(sc)
+            p.sourceBitrate = bitrate
             p.outputSize = (3840, 2160)
             for i in 0..<48 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
             _ = p.takeReport()
@@ -101,8 +122,8 @@ final class PlayerHost: UIView {
             for i in 0..<240 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
             let wall = (CACurrentMediaTime() - start) * 1000 / 240
             let r = p.takeReport()
-            print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, thermal %d", "\(sc)", wall,
-                         1000 / wall, r.meanMs, ProcessInfo.processInfo.thermalState.rawValue))
+            print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
+                         r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
         }
     }
 
@@ -135,7 +156,8 @@ final class PlayerHost: UIView {
         guard let url = Bundle.main.url(forResource: "Videos/\(clip)", withExtension: "mp4"), let processor = LambentLiftProcessor() else {
             print("BENCH \(label): missing clip or processor"); return next()
         }
-        processor.reset(deepen: true)
+        processor.reset(deepen: !name.contains("SDR out"))
+        processor.hdr = !name.contains("SDR out")
         if let ladder { processor.force(ladder: ladder) }
         processor.outputSize = (3840, 2160)
         processor.frameRate = clip.hasSuffix("60") ? 59.94 : 23.976
@@ -157,6 +179,15 @@ final class PlayerHost: UIView {
         CMTimebaseSetTime(timebase!, time: CMClockGetTime(CMClockGetHostTimeClock()))
         CMTimebaseSetRate(timebase!, rate: 1)
         layer.controlTimebase = timebase
+        if let endObserver { NotificationCenter.default.removeObserver(endObserver) }
+        endObserver = nil
+        if name.hasSuffix("long") {
+            // The 20 s clip again and again, for a sustained run.
+            player.actionAtItemEnd = .none
+            endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) {
+                [weak player] _ in player?.seek(to: .zero)
+            }
+        }
         player.play()
         runStart = CACurrentMediaTime(); lastReport = runStart; enqueued = 0
         let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
@@ -193,10 +224,11 @@ final class PlayerHost: UIView {
             let label = label
             queue.async {
                 let r = processor.takeReport()
-                print(String(format: "BENCH %@: %@ gpu_ms mean %.2f p95 %.2f late %d shown %.1f fps (%@) thermal %d", label, r.format, r.meanMs, r.p95Ms,
-                             r.late, Double(shownCount) / secs, r.scaler, ProcessInfo.processInfo.thermalState.rawValue))
+                print(String(format: "BENCH %@: %@ gpu_ms mean %.2f p95 %.2f ane_ms %.2f late %d shown %.1f fps (%@) thermal %d", label, r.format,
+                             r.meanMs, r.p95Ms, r.engineMs, r.late, Double(shownCount) / secs, r.scaler, ProcessInfo.processInfo.thermalState.rawValue))
             }
         }
-        if now - runStart > ((ProcessInfo.processInfo.environment["LIFT_QUICK"] != nil) ? 15 : 12) { next() }
+        let length: Double = label.hasSuffix("long") ? 300 : (ProcessInfo.processInfo.environment["LIFT_QUICK"] != nil) ? 15 : 12
+        if now - runStart > length { next() }
     }
 }
