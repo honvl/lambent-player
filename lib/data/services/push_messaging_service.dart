@@ -9,6 +9,7 @@ import 'package:server_core/server_core.dart';
 import '../../firebase_options.dart';
 import '../../ui/navigation/app_router.dart';
 import '../../ui/widgets/server_messages_dialog.dart';
+import '../../util/lambent_brand.dart';
 import '../../util/platform_detection.dart';
 import 'plugin_sync_service.dart';
 
@@ -35,7 +36,9 @@ class PushMessagingService {
   Future<void> initialize() => _initFuture ??= _doInitialize();
 
   Future<void> _doInitialize() async {
-    if (!PlatformDetection.isMobile) return;
+    if (!PlatformDetection.isMobile || !LambentBrand.enablePushMessaging) {
+      return;
+    }
 
     try {
       await Firebase.initializeApp(

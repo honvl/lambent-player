@@ -43,7 +43,7 @@
       <key>CFBundleTypeRole</key>
       <string>Viewer</string>
       <key>CFBundleURLName</key>
-      <string>com.honver.lambent.tv</string>
+      <string>app.getlambent.player</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>moonfin</string>

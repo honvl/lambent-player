@@ -5882,13 +5882,31 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// The transport leads the bottom row the way it does on TV. A phone held
   /// upright hasn't the width for both, so there it sits on its own line.
   Widget _buildDockedControlsRow() {
-    if (PlatformDetection.useMobileUi &&
-        MediaQuery.of(context).orientation == Orientation.portrait) {
+    final chipLabel = _enhancementChipLabel;
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+    // The touch way into the enhancement panel: the same chip the TV bar
+    // shows, at the end of the controls.
+    final chip = chipLabel == null
+        ? null
+        : EnhancementChip(
+            label: chipLabel,
+            height: (isLandscape ? 48.0 : 44.0) * _osdButtonScale,
+            accent: AppColorScheme.accent,
+            fontSize: AppTypography.fontSizeSm,
+            onPressed: _showEnhancementPanel,
+          );
+    if (PlatformDetection.useMobileUi && !isLandscape) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildDockedTransportRow(),
           _buildSecondaryControlsRow(),
+          if (chip != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.spaceXs),
+              child: chip,
+            ),
         ],
       );
     }
@@ -5898,6 +5916,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         _buildDockedTransportRow(),
         const SizedBox(width: AppSpacing.spaceXs),
         Expanded(child: _buildSecondaryControlsRow()),
+        if (chip != null) ...[
+          const SizedBox(width: AppSpacing.spaceSm),
+          chip,
+        ],
       ],
     );
   }
@@ -6212,10 +6234,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   /// "4K HDR" and the like for a Lambent Server enhanced stream, otherwise
-  /// null: the chip shows only on the glass TV bar, and only when the server
-  /// says the stream is enhanced.
+  /// null: the chip shows on the glass TV bar and on touch screens' controls,
+  /// and only when the server says the stream is enhanced.
   String? get _enhancementChipLabel {
-    if (!_useTvGlassOverlay) return null;
+    if (PlatformDetection.isTV && !_useTvGlassOverlay) return null;
     final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
     if (label != null) return label;
     // Turned off from the chip or in settings: the chip stays, so there is a

@@ -125,9 +125,11 @@ class ServerDiscoveryService {
   /// Browses Bonjour for Lambent Server, calling [found] for each one that
   /// resolves to an IPv4 address. Lambent Server answers as a Jellyfin server.
   Future<void> _discoverLambent(void Function(DiscoveredServer) found) async {
-    // Apple TV only lets the system's Bonjour browse (the app holds no
+    // Apple TV and iOS only let the system's Bonjour browse (the app holds no
     // multicast entitlement), so the native side does it there.
-    if (PlatformDetection.isAppleTV) return _discoverLambentNative(found);
+    if (PlatformDetection.isAppleTV || PlatformDetection.isIOS) {
+      return _discoverLambentNative(found);
+    }
     final client = MDnsClient();
     try {
       // Wi-Fi drops multicast on Android unless the app holds a lock.

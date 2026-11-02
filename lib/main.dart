@@ -32,6 +32,7 @@ import 'data/services/media_server_client_factory.dart';
 import 'data/services/crash_report_service.dart';
 import 'data/services/log_service.dart';
 import 'data/services/storage_path_service.dart';
+import 'util/lambent_brand.dart';
 import 'util/scroll_sensitivity_binding.dart';
 import 'util/webview_environment.dart';
 import 'data/services/theme_store_service.dart';
@@ -950,9 +951,11 @@ void main() async {
 
     // Registered before runApp so a background/terminated push can be handled.
     // The handler itself is a no-op; the OS draws these notifications.
-    try {
-      FirebaseMessaging.onBackgroundMessage(pushBackgroundHandler);
-    } catch (_) {}
+    if (LambentBrand.enablePushMessaging) {
+      try {
+        FirebaseMessaging.onBackgroundMessage(pushBackgroundHandler);
+      } catch (_) {}
+    }
   }
 
   await configureDependencies();

@@ -73,6 +73,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   private let dlnaEventStreamHandler = NativeDlnaEventStreamHandler()
   private let airPlayEventStreamHandler = NativeAirPlayEventStreamHandler()
   fileprivate let dlnaController = DlnaController()
+  private var bonjourChannel: BonjourChannel?
   fileprivate let airPlayController = AirPlayController()
   fileprivate var castEventSink: FlutterEventSink?
 
@@ -292,6 +293,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   private func setUpPlatformChannels(messenger: FlutterBinaryMessenger) {
     setUpBackgroundRefreshChannel(messenger: messenger)
     setUpDeviceStorageChannel(messenger: messenger)
+    bonjourChannel = BonjourChannel(messenger: messenger)
 
     let storageChannel = FlutterMethodChannel(
       name: "com.moonfin/ios_storage",
@@ -1324,4 +1326,90 @@ extension AppDelegate: GCKDiscoveryManagerListener {
   func didUpdateDeviceList() {
     emitDiscoveredGoogleCastDevices()
   }
+}
+
+/// Bonjour browsing for Dart's server discovery, ported from the Apple TV
+/// runner. The multicast_dns package sends its own multicast packets, which
+/// iOS only allows an app holding Apple's multicast entitlement; the system's
+/// Bonjour needs only the service type in NSBonjourServices. `browse` collects
+/// what resolves within the timeout: name, IPv4 host, port and TXT fields.
+final class BonjourChannel: NSObject, NetServiceBrowserDelegate, NetServiceDelegate {
+    private let channel: FlutterMethodChannel
+    private var browser: NetServiceBrowser?
+    private var resolving: [NetService] = []
+    private var found: [String: [String: Any]] = [:]
+    private var pending: FlutterResult?
+
+    init(messenger: FlutterBinaryMessenger) {
+        channel = FlutterMethodChannel(name: "org.moonfin/bonjour", binaryMessenger: messenger)
+        super.init()
+        channel.setMethodCallHandler { [weak self] call, result in
+            self?.handle(call, result: result)
+        }
+    }
+
+    private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard call.method == "browse",
+            let args = call.arguments as? [String: Any],
+            let type = args["type"] as? String
+        else {
+            result(FlutterMethodNotImplemented)
+            return
+        }
+        // One browse at a time; a second caller gets what the first finds.
+        if pending != nil {
+            result([])
+            return
+        }
+        pending = result
+        found = [:]
+        let browser = NetServiceBrowser()
+        browser.delegate = self
+        self.browser = browser
+        browser.searchForServices(ofType: type.hasSuffix(".") ? type : type + ".", inDomain: "local.")
+        let seconds = Double(args["timeoutMs"] as? Int ?? 2000) / 1000
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { [weak self] in self?.finish() }
+    }
+
+    private func finish() {
+        browser?.stop()
+        browser = nil
+        resolving.forEach { $0.stop() }
+        resolving = []
+        pending?(Array(found.values))
+        pending = nil
+    }
+
+    func netServiceBrowser(_ browser: NetServiceBrowser, didFind service: NetService, moreComing: Bool) {
+        service.delegate = self
+        resolving.append(service)
+        service.resolve(withTimeout: 2)
+    }
+
+    func netServiceDidResolveAddress(_ sender: NetService) {
+        guard let host = Self.ipv4(of: sender) else { return }
+        var txt: [String: String] = [:]
+        if let record = sender.txtRecordData() {
+            for (key, value) in NetService.dictionary(fromTXTRecord: record) {
+                txt[key] = String(data: value, encoding: .utf8)
+            }
+        }
+        found[sender.name] = ["name": sender.name, "host": host, "port": sender.port, "txt": txt]
+    }
+
+    private static func ipv4(of service: NetService) -> String? {
+        for address in service.addresses ?? [] {
+            let host: String? = address.withUnsafeBytes { raw in
+                guard raw.count >= MemoryLayout<sockaddr_in>.size,
+                    raw.load(as: sockaddr.self).sa_family == sa_family_t(AF_INET)
+                else { return nil }
+                var addr = raw.load(as: sockaddr_in.self).sin_addr
+                var buffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+                guard inet_ntop(AF_INET, &addr, &buffer, socklen_t(INET_ADDRSTRLEN)) != nil else { return nil }
+                return String(cString: buffer)
+            }
+            if let host { return host }
+        }
+        return nil
+    }
 }

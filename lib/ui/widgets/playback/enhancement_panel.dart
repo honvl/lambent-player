@@ -4,6 +4,7 @@ import 'package:moonfin_design/moonfin_design.dart';
 import 'package:playback_core/playback_core.dart';
 
 import '../../../util/focus/dpad_keys.dart';
+import '../../../util/platform_detection.dart';
 import '../focus/focus_theme.dart';
 import '../focusable_dialog_row.dart';
 import '../track_selector_dialog.dart';
@@ -70,6 +71,13 @@ typedef _Range = ({int min, int max});
 
 double _fraction(int value, _Range range) =>
     (value - range.min) / (range.max - range.min);
+
+/// The value at [fraction] of [range], on the [step] grid from its bottom.
+int _valueAt(double fraction, int step, _Range range) {
+  final span = range.max - range.min;
+  final steps = (fraction.clamp(0.0, 1.0) * span / step).round();
+  return (range.min + steps * step).clamp(range.min, range.max);
+}
 
 class _EnhancementPanelBody extends StatefulWidget {
   const _EnhancementPanelBody({
@@ -145,12 +153,18 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           value: _fraction(value!, range),
           origin: _fraction(origin ?? range.min, range),
         ),
+        stepper: true,
         onStep: (dir, wrap) {
           if (!enabled) return;
           setState(() {
             _pending = set(_stepped(value, dir, step, range, wrap));
           });
         },
+        onSlide: enabled
+            ? (fraction) => setState(() {
+                _pending = set(_valueAt(fraction, step, range));
+              })
+            : null,
       );
     }
 
@@ -179,6 +193,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           autofocus: autofocusNext(),
           label: 'Upscaling quality',
           value: _qualityNames[pending.quality ?? 4] ?? '4',
+          stepper: true,
           onStep: (dir, wrap) => setState(() {
             _pending = pending.copyWith(
               quality: _stepped(
@@ -381,6 +396,8 @@ class _EnhancementRow extends StatefulWidget {
     this.autofocus = false,
     this.dimmed = false,
     this.slider,
+    this.stepper = false,
+    this.onSlide,
   });
 
   final String label;
@@ -396,6 +413,15 @@ class _EnhancementRow extends StatefulWidget {
   final bool autofocus;
   final bool dimmed;
 
+  /// A value with more than two settings. On a touch screen it gets minus
+  /// and plus buttons, and a tap on the row no longer steps it, so a stray
+  /// tap cannot wrap it from the top to the bottom.
+  final bool stepper;
+
+  /// Sets the value from a fraction of the track, for a drag or a tap on the
+  /// slider on a touch screen. Null when the value cannot change.
+  final void Function(double fraction)? onSlide;
+
   @override
   State<_EnhancementRow> createState() => _EnhancementRowState();
 }
@@ -410,8 +436,26 @@ class _EnhancementRowState extends State<_EnhancementRow> {
   final DateTime _born = DateTime.now();
   static const _settle = Duration(milliseconds: 500);
 
+  /// Touch screens get buttons and draggable sliders; a remote keeps stepping
+  /// with left, right and select.
+  static bool get _touch => !PlatformDetection.isTV;
+
+  Widget _stepButton(IconData icon, int dir, Color color) => SizedBox(
+    width: 44,
+    height: 44,
+    child: IconButton(
+      onPressed: widget.dimmed ? null : () => widget.onStep(dir, false),
+      icon: Icon(icon, size: 22),
+      color: color,
+      disabledColor: color.withValues(alpha: 0.3),
+      padding: EdgeInsets.zero,
+      tooltip: dir < 0 ? 'Decrease' : 'Increase',
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
+    final touchStepper = _touch && widget.stepper;
     final foreground = _focused
         ? FocusTheme.solidFocusForeground
         : AppColorScheme.onSurface.withValues(
@@ -444,12 +488,15 @@ class _EnhancementRowState extends State<_EnhancementRow> {
         return KeyEventResult.ignored;
       },
       child: GestureDetector(
-        onTap: () => widget.onStep(1, true),
+        onTap: touchStepper ? null : () => widget.onStep(1, true),
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
           margin: const EdgeInsets.symmetric(vertical: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: touchStepper ? 6 : 14,
+          ),
           decoration: FocusTheme.solidFocusDecoration(
             active: _focused,
             radius: 22,
@@ -469,6 +516,8 @@ class _EnhancementRowState extends State<_EnhancementRow> {
                       ),
                     ),
                   ),
+                  if (touchStepper)
+                    _stepButton(Icons.remove_rounded, -1, foreground),
                   Text(
                     widget.value,
                     style: TextStyle(
@@ -476,17 +525,31 @@ class _EnhancementRowState extends State<_EnhancementRow> {
                       fontSize: 15,
                     ),
                   ),
+                  if (touchStepper)
+                    _stepButton(Icons.add_rounded, 1, foreground),
                 ],
               ),
               if (widget.slider case final slider?) ...[
-                const SizedBox(height: 10),
-                _SliderTrack(
-                  value: slider.value,
-                  origin: slider.origin,
-                  color: foreground,
-                  focused: _focused,
-                  dimmed: widget.dimmed,
-                ),
+                SizedBox(height: touchStepper ? 2 : 10),
+                _touch && widget.onSlide != null
+                    ? _DraggableTrack(
+                        onSlide: widget.onSlide!,
+                        child: _SliderTrack(
+                          value: slider.value,
+                          origin: slider.origin,
+                          color: foreground,
+                          focused: _focused,
+                          dimmed: widget.dimmed,
+                        ),
+                      )
+                    : _SliderTrack(
+                        value: slider.value,
+                        origin: slider.origin,
+                        color: foreground,
+                        focused: _focused,
+                        dimmed: widget.dimmed,
+                      ),
+                if (touchStepper) const SizedBox(height: 8),
               ],
             ],
           ),
@@ -494,6 +557,32 @@ class _EnhancementRowState extends State<_EnhancementRow> {
       ),
     );
   }
+}
+
+/// Turns taps and horizontal drags on a [_SliderTrack] into fractions of its
+/// width. The hit area is taller than the track so a finger finds it.
+class _DraggableTrack extends StatelessWidget {
+  const _DraggableTrack({required this.onSlide, required this.child});
+
+  final void Function(double fraction) onSlide;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      void at(Offset local) => onSlide(local.dx / constraints.maxWidth);
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: (d) => at(d.localPosition),
+        onHorizontalDragStart: (d) => at(d.localPosition),
+        onHorizontalDragUpdate: (d) => at(d.localPosition),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: child,
+        ),
+      );
+    },
+  );
 }
 
 /// A thin track with a round thumb at [value], filled from [origin], both as
