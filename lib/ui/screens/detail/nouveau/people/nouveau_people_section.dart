@@ -221,7 +221,12 @@ class NouveauPeopleSectionState extends State<NouveauPeopleSection> {
         ? textScaler.scale(18).clamp(18.0, 28.0)
         : textScaler.scale(30).clamp(30.0, 48.0);
 
-    final cardHeight = avatarSize + 12 + nameHeight + roleHeight;
+    // The gaps the card itself leaves: on a tablet or desktop they come to
+    // 22, more than the 12 once reserved here, which overflowed the rail.
+    final gaps = tv
+        ? 12.0
+        : NouveauSpacing.peopleAvatarToName + NouveauSpacing.peopleNameToRole;
+    final cardHeight = avatarSize + gaps + nameHeight + roleHeight;
 
     return _PeopleLayout(
       viewportWidth: availableWidth,

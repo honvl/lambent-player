@@ -5193,6 +5193,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // With the transport in the middle of the picture the bottom
+                // row is all icons, so the chip (the touch way into the
+                // enhancement panel, and to the compare) sits over the
+                // seekbar's end.
+                if (!_transportDocked && _enhancementChipLabel != null)
+                  // A Row, so the chip keeps its own width at the end.
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.spaceXs),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        EnhancementChip(
+                          label: _enhancementChipLabel!,
+                          height: 40.0 * _osdButtonScale,
+                          accent: AppColorScheme.accent,
+                          fontSize: AppTypography.fontSizeSm,
+                          onPressed: _showEnhancementPanel,
+                        ),
+                      ],
+                    ),
+                  ),
                 _buildSeekbar(),
                 const SizedBox(height: AppSpacing.spaceXs),
                 if (_transportDocked)
