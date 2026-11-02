@@ -22,6 +22,9 @@ final class LambentPrescaler {
     private var own: [String: MTLTexture] = [:]
     private var scratch: [String: MTLTexture] = [:]
 
+    /// Why a shader did not load, by name (for logs and the bench).
+    nonisolated(unsafe) static var failures: [String: String] = [:]
+
     static var bundleDirectory: URL? { Bundle.main.resourceURL?.appendingPathComponent("Shaders", isDirectory: true) }
 
     init?(device: MTLDevice, name: String, directory: URL? = LambentPrescaler.bundleDirectory) {
@@ -32,6 +35,7 @@ final class LambentPrescaler {
             let source = try? String(contentsOf: directory.appendingPathComponent("\(name).metal"), encoding: .utf8)
         else {
             NSLog("[LambentHDR] no shader %@", name)
+            Self.failures[name] = "missing"
             return nil
         }
         let options = MTLCompileOptions()
@@ -39,6 +43,7 @@ final class LambentPrescaler {
         let library: MTLLibrary
         do { library = try device.makeLibrary(source: source, options: options) } catch {
             NSLog("[LambentHDR] shader %@ did not compile: %@", name, "\(error)")
+            Self.failures[name] = "did not compile: \(error)"
             return nil
         }
         var passes: [Pass] = []
@@ -48,6 +53,7 @@ final class LambentPrescaler {
                 let pipeline = try? device.makeComputePipelineState(function: function)
             else {
                 NSLog("[LambentHDR] shader %@: a pass cannot run", name)
+                Self.failures[name] = "pass \(p["kernel"] ?? "?") cannot run"
                 return nil
             }
             passes.append(

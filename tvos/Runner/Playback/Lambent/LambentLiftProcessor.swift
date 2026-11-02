@@ -9,8 +9,10 @@ import QuartzCore
 /// a 4K screen) is upscaled here rather than by tvOS's own scaler (bilinear in the simulator, docs/SHADER_UPSCALE.md in Lambent): a
 /// pass at the picture's size bends the blacks and writes Y' and chroma, a luma prescaler doubles Y' (FSRCNNX 8-0-4-1 on an Apple GPU of
 /// family 10 or later, an A19; RAVU-lite before it), and a last pass at the screen's size scales (Catmull-Rom), lifts and writes PQ.
-/// When a scaler's GPU time does not fit the film's frame, the next one down takes over: FSRCNNX, RAVU-lite, Catmull-Rom, then none
-/// (tvOS scales).
+/// When a scaler cannot keep up with the film (pictures taking longer than a frame, start to finish), the next one down takes over:
+/// FSRCNNX, RAVU-lite, Catmull-Rom, then none (tvOS scales). Measured on an A16 (docs/CLIENT_HDR.md in Lambent), 1080p -> 4K with
+/// the lift, back to back: Catmull-Rom 4.1 ms, RAVU-lite 8.4 ms, FSRCNNX 34 ms. GPU time alone does not decide: an A-series GPU lowers
+/// its clock when it has room, so a scaler's GPU time stretches toward the frame (RAVU-lite read 12 to 25 ms at 24 fps while keeping up).
 final class LambentLiftProcessor: @unchecked Sendable {
     struct Report {
         var frames = 0, late = 0
@@ -44,10 +46,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
     /// The scalers to try, best first; the first one stays until its GPU time does not fit.
     private(set) var ladder: [Scaler]
     private var step = 0
-    private var stepMs: [Double] = []
+    private var stepPictures = 0
+    private var stepLate = 0
     /// Where the picture is shown, in screen pixels; nil: at its own size.
     var outputSize: (Int, Int)?
-    /// The film's frame time, which a scaler's GPU time has to fit (with room for the rest of the GPU's work).
+    /// The film's rate: a picture has one frame of it, start to finish.
     var frameRate: Double = 24
     private var lumaTex: MTLTexture?
     private var chromaTex: MTLTexture?
@@ -99,7 +102,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
         blacks.reset()
         frameIndex = 0
         step = 0
-        stepMs = []
+        stepPictures = 0
+        stepLate = 0
     }
 
     /// Overrides the ladder (a bench, or a test): the scaler named, alone.
@@ -107,25 +111,32 @@ final class LambentLiftProcessor: @unchecked Sendable {
 
     /// Overrides the ladder (a bench): these scalers, best first, stepping down as usual.
     func force(ladder: [Scaler]) {
-        self.ladder = ladder
+        for case .prescaler(let name) in ladder where prescalers[name] == nil {
+            prescalers[name] = LambentPrescaler(device: device, name: name)
+        }
+        self.ladder = ladder.filter { if case .prescaler(let n) = $0 { return prescalers[n] != nil } else { return true } }
         step = 0
-        stepMs = []
+        stepPictures = 0
+        stepLate = 0
     }
 
     var scaler: Scaler { ladder[min(step, ladder.count - 1)] }
 
-    /// After 48 pictures with one scaler: when its GPU time is over 60% of the frame, the next one down.
-    private func checkBudget(_ ms: Double) {
-        stepMs.append(ms)
-        guard stepMs.count >= 48 else { return }
-        let mean = stepMs.reduce(0, +) / Double(stepMs.count)
-        let budget = 600 / max(frameRate, 1)
-        if mean > budget, step < ladder.count - 1 {
-            NSLog("[LambentHDR] %@ took %.2f ms a picture, over %.1f ms at %.3f fps: %@", "\(scaler)", mean, budget, frameRate,
-                "\(ladder[step + 1])")
+    /// Every 96 pictures with one scaler: when more than 5 of them took longer than a frame, the next one down. The first 24 after a
+    /// change are not counted (the GPU's clock and the pools settle).
+    private func checkBudget(late wasLate: Bool) {
+        stepPictures += 1
+        guard stepPictures > 24 else { return }
+        if wasLate { stepLate += 1 }
+        guard stepPictures >= 24 + 96 else { return }
+        if stepLate > 5, step < ladder.count - 1 {
+            NSLog("[LambentHDR] %@: %d of 96 pictures over a frame at %.3f fps: %@", "\(scaler)", stepLate, frameRate, "\(ladder[step + 1])")
             step += 1
+            stepPictures = 0
+        } else {
+            stepPictures = 24
         }
-        stepMs = []
+        stepLate = 0
     }
 
     func process(_ picture: CVPixelBuffer, deadline: CFTimeInterval) -> CVPixelBuffer? {
@@ -192,6 +203,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private func scale(
         _ picture: CVPixelBuffer, tenBit: Bool, from src: (Int, Int), to dst: (Int, Int), deadline: CFTimeInterval
     ) -> CVPixelBuffer? {
+        let started = CACurrentMediaTime()
         format = "\(src.0)x\(src.1) \(tenBit ? "10" : "8")-bit -> \(dst.0)x\(dst.1)"
         if outPool == nil || outPoolSize != dst {
             let attrs: [String: Any] = [
@@ -251,10 +263,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
         buffer.waitUntilCompleted()
         withExtendedLifetime((a, b, c, d)) {}
         guard buffer.error == nil else { return nil }
-        let ms = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000
-        gpuMs.append(ms)
-        if CACurrentMediaTime() > deadline { late += 1 }
-        checkBudget(ms)
+        gpuMs.append((buffer.gpuEndTime - buffer.gpuStartTime) * 1000)
+        let now = CACurrentMediaTime()
+        if now > deadline { late += 1 }
+        checkBudget(late: now - started > 1 / max(frameRate, 1))
         return out
     }
 
