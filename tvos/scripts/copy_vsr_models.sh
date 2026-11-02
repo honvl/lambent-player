@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Lambent's AI upscaler on the Apple TV (Runner/Playback/Lambent/LambentNeuralScaler.swift): copies NVIDIA's VSR low networks, compiled
-# for Core ML at 1920 x 1088, with their licence and notice, from a Lambent checkout into Runner/Shaders/vsr (git-ignored; the app and
-# tools/LiftBench bundle the Shaders folder). Builds them there first with companion/shaders/vsr/build_coreml.sh when they are missing.
+# Lambent's AI upscaler on the Apple TV (Runner/Playback/Lambent/LambentNeuralScaler.swift): copies NVIDIA's VSR low networks and
+# their Neural Engine students, compiled for Core ML at 1920 x 1088, with their licence and notice, from a Lambent checkout into
+# Runner/Shaders/vsr (git-ignored; the app and tools/LiftBench bundle the Shaders folder). Builds them there first with
+# companion/shaders/vsr/build_coreml.sh when they are missing.
 #
 #   tvos/scripts/copy_vsr_models.sh <Lambent checkout>
 #
@@ -19,6 +20,8 @@ rm -rf "$out"
 mkdir -p "$out"
 for net in neural-low neural-hb; do
   cp -R "$built/$net-1920x1088.mlmodelc" "$out/"
+  # Its Neural Engine student, where Lambent has one (the AI upscaler above 30 fps; LambentNeuralScaler.swift).
+  [ -d "$built/$net-student-1920x1088.mlmodelc" ] && cp -R "$built/$net-student-1920x1088.mlmodelc" "$out/"
 done
 cp "$src/LICENSE-NVIDIA-Open-Model.pdf" "$src/NOTICE.txt" "$out/"
 echo "$out"

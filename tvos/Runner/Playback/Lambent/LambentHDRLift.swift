@@ -254,7 +254,7 @@ final class LambentHDRLift {
     private func updateLead(_ link: CADisplayLink) {
         let d = max(link.duration, 1.0 / 120)
         var took = latency.withLock { $0 }
-        if took == 0 { took = processor.scaler == .neural ? 0.060 : 0 }
+        if took == 0 { took = processor.scaler.isNeural ? 0.060 : 0 }
         let want = d * min(8, max(0, ceil((took + 0.003) / d) - 1))
         if abs(want - lead) > 0.001 { lead = want }
     }

@@ -56,13 +56,15 @@ final class PlayerHost: UIView {
         UIApplication.shared.isIdleTimerDisabled = true
         print("BENCH device \(MTLCreateSystemDefaultDevice()?.name ?? "?") apple10 \(MTLCreateSystemDefaultDevice()?.supportsFamily(.apple10) ?? false) low power \(ProcessInfo.processInfo.isLowPowerModeEnabled)")
         if let p = LambentLiftProcessor() { print("BENCH ladder \(p.ladder) failures \(LambentPrescaler.failures)") }
-        let ai = LambentLiftProcessor.Scaler.neural
+        // LIFT_STUDENT in the environment: the AI upscaler's Neural Engine student (`<network>-student`) wherever the bench says "AI upscaler".
+        let student = ProcessInfo.processInfo.environment["LIFT_STUDENT"] != nil
+        let ai = LambentLiftProcessor.Scaler.neural(fast: student)
         if let device = MTLCreateSystemDefaultDevice() {
             for int8 in [false, true] {
                 LambentNeuralScaler.preferInt8 = int8
                 for n in LambentNeuralScaler.networks {
                     let t = CACurrentMediaTime()
-                    let s = LambentNeuralScaler.loadNow(n, device: device)
+                    let s = LambentNeuralScaler.loadNow(n, student: student && !int8, device: device)
                     print(String(format: "BENCH AI upscaler %@ %@ %@ in %.0f ms %@", n, s.map { $0.int8 ? "int8" : "fp16" } ?? "", s != nil ? "loaded" : "did not load",
                                  (CACurrentMediaTime() - t) * 1000, LambentNeuralScaler.failures[n] ?? ""))
                 }
@@ -71,9 +73,10 @@ final class PlayerHost: UIView {
         if let device = MTLCreateSystemDefaultDevice() {
             for int8 in [false, true] {
                 LambentNeuralScaler.preferInt8 = int8
-                guard let s = LambentNeuralScaler.loadNow("neural-low", device: device) else { continue }
+                guard let s = LambentNeuralScaler.loadNow("neural-low", student: student && !int8, device: device) else { continue }
                 _ = s.timeNetwork(10)
-                print(String(format: "BENCH AI upscaler network alone, back to back, %@: %.2f ms", s.int8 ? "int8" : "fp16", s.timeNetwork(100)))
+                print(String(format: "BENCH AI upscaler network alone, back to back, %@: %.2f ms", s.f == 4 ? "student" : s.int8 ? "int8" : "fp16",
+                             s.timeNetwork(100)))
             }
             // LIFT_FP16 in the environment: the fp16 models for everything after this.
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
@@ -113,6 +116,12 @@ final class PlayerHost: UIView {
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
             if ProcessInfo.processInfo.environment["LIFT_LADDER"] == nil { capacity([ai, ravu]) }
             // LIFT_LADDER in the environment: the step-down alone (60 fps from the AI upscaler; 30 fps, the player's own ladder, five minutes).
+            // LIFT_SIXTY: the player's own ladder at 60 fps, shown (the AI upscaler's student above 30 fps), and the student forced.
+            if ProcessInfo.processInfo.environment["LIFT_SIXTY"] != nil {
+                runs = [("sdr1080p60", "player's own ladder", nil), ("sdr1080p60", "AI upscaler (fast)", [.neural(fast: true)]),
+                        ("sdr1080p30", "player's own ladder", nil), ("sdr1080p60", "player's own ladder long", nil)]
+                return next()
+            }
             if ProcessInfo.processInfo.environment["LIFT_LADDER"] != nil {
                 runs = [("sdr1080p60", "ladder from AI upscaler hidden", [ai, ravu, .catmullRom, .none]), ("sdr1080p30", "player's own ladder long", nil)]
                 return next()
@@ -175,9 +184,14 @@ final class PlayerHost: UIView {
             guard let o = p.process(pictures[0], deadline: .infinity) else { continue }
             if sc == .catmullRom && catrom == nil { catrom = o; continue }
             print(String(format: "BENCH fingerprint %@: %@", "\(sc)", fingerprint(o, catrom)))
+            // The AI upscaler at exactly 2x takes the fused finish-and-last-pass kernel; the exact lift takes the two passes.
+            if sc.isNeural, let q = LambentLiftProcessor() {
+                q.force(sc); q.outputSize = (3840, 2160); q.exactLift = true
+                if let o2 = q.process(pictures[0], deadline: .infinity) { print("BENCH fused vs two passes (exact lift): \(codeDiff(o, o2))") }
+            }
         }
         // The AI upscaler twice: its network for a low bitrate (neural-low) and for a high one (neural-hb).
-        let timed = scalers.flatMap { sc -> [(LambentLiftProcessor.Scaler, Int64)] in sc == .neural ? [(sc, Int64(0)), (sc, Int64(200_000_000))] : [(sc, Int64(0))] }
+        let timed = scalers.flatMap { sc -> [(LambentLiftProcessor.Scaler, Int64)] in sc.isNeural ? [(sc, Int64(0)), (sc, Int64(200_000_000))] : [(sc, Int64(0))] }
         for (sc, bitrate) in timed {
             guard let p = LambentLiftProcessor() else { continue }
             p.reset(deepen: true)
@@ -190,7 +204,7 @@ final class PlayerHost: UIView {
             for i in 0..<240 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
             let wall = (CACurrentMediaTime() - start) * 1000 / 240
             var r = p.takeReport()
-            if sc == .neural {
+            if sc.isNeural {
                 print(String(format: "BENCH capacity %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms",
                              r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs))
                 // Pipelined, as the player runs it: pack N + 2, network N + 1 and finish N at once.

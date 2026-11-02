@@ -60,7 +60,8 @@ enum VariantBench {
         var models: [(String, MLModel, MLFeatureProvider)] = []
         for n in names {
             guard let m = try? MLModel(contentsOf: dir.appendingPathComponent(n), configuration: config),
-                let x = try? MLMultiArray(shape: [1, 16, 544, 960], dataType: .float16),
+                let shape = m.modelDescription.inputDescriptionsByName["x"]?.multiArrayConstraint?.shape,
+                let x = try? MLMultiArray(shape: shape, dataType: .float16),
                 let f = try? MLDictionaryFeatureProvider(dictionary: ["x": MLFeatureValue(multiArray: x)])
             else { print("BENCH variant \(n): did not load"); continue }
             for i in 0..<x.count { x[i] = NSNumber(value: Float((i * 7919) % 2001) / 1000 - 1) }
