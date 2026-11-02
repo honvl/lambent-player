@@ -2051,7 +2051,10 @@ class UserPreferences extends ChangeNotifier {
 
   static final navbarPosition = EnumPreference(
     key: 'pref_navbar_position',
-    defaultValue: NavbarPosition.left,
+    // The glass sidebar is a TV's; phones and tablets keep Moonfin's top bar.
+    defaultValue: PlatformDetection.isTV
+        ? NavbarPosition.left
+        : NavbarPosition.top,
     values: NavbarPosition.values,
   );
 

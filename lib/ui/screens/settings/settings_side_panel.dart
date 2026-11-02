@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:jellyfin_preference/jellyfin_preference.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,6 +16,7 @@ import 'package:server_core/server_core.dart' hide ImageType;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/services/achievements_service.dart';
+import '../../../data/services/lambent_enhance_service.dart';
 import '../../../data/services/auto_download_service.dart';
 import '../../../data/services/plugin_sync_service.dart';
 import '../../../data/services/custom_external_lists_service.dart';

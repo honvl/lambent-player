@@ -1,0 +1,245 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
+import 'lambent_licence.dart';
+
+/// What a store purchase is doing, independent of the store plugin.
+enum StoreTransactionStatus { pending, purchased, restored, error, canceled }
+
+/// One purchase update from the store. [proof] is what Lambent Server needs to
+/// verify it; [handle] is the plugin's own object, given back to [finish].
+@immutable
+class StoreTransaction {
+  const StoreTransaction({
+    required this.productId,
+    required this.status,
+    this.proof,
+    this.needsFinish = false,
+    this.handle,
+  });
+
+  final String productId;
+  final StoreTransactionStatus status;
+  final StoreProof? proof;
+
+  /// The store holds this transaction open until [EnhanceStore.finish].
+  final bool needsFinish;
+  final Object? handle;
+}
+
+/// One way to pay for Lambent Enhance: monthly or yearly.
+@immutable
+class EnhanceProduct {
+  const EnhanceProduct({
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.yearly,
+    this.handle,
+  });
+
+  final String id;
+  final String title;
+
+  /// The store's own price text, in the buyer's currency.
+  final String price;
+  final bool yearly;
+  final Object? handle;
+}
+
+/// The store side of an Enhance purchase: the App Store or Google Play behind
+/// `in_app_purchase` in the app, a fake in tests.
+abstract class EnhanceStore {
+  /// Every purchase update, including ones the store re-delivers at launch
+  /// because they were never finished.
+  Stream<List<StoreTransaction>> get updates;
+
+  Future<bool> isAvailable();
+  Future<List<EnhanceProduct>> products();
+  Future<void> buy(EnhanceProduct product);
+
+  /// Asks the store to deliver the purchases it already knows about again.
+  Future<void> restore();
+
+  /// Tells the store the purchase has been delivered. Only after Lambent
+  /// Server has confirmed it, so an unconfirmed purchase stays open and comes
+  /// back on the next launch (ENTITLEMENTS.md section 7).
+  Future<void> finish(StoreTransaction transaction);
+}
+
+/// Lambent Enhance on this screen: the server's licence, the store's products,
+/// and every purchase passed to the server before the store is told it is
+/// done.
+class EnhancePurchases extends ChangeNotifier {
+  EnhancePurchases({required this.client, this.store});
+
+  final LambentLicenceClient client;
+
+  /// Null for builds that may not sell through a store (sideloaded Android,
+  /// unsigned iOS, Apple TV): those show the server's buy page instead.
+  final EnhanceStore? store;
+
+  StreamSubscription<List<StoreTransaction>>? _sub;
+
+  LambentLicence? _licence;
+  LambentLicence? get licence => _licence;
+
+  /// False once the server answered that it has no licence route: not a
+  /// Lambent Server, so there is nothing to show.
+  bool _isLambent = true;
+  bool get isLambentServer => _isLambent;
+
+  List<EnhanceProduct> _products = const [];
+  List<EnhanceProduct> get products => _products;
+
+  bool _busy = false;
+
+  /// A purchase is under way or being confirmed with the server.
+  bool get busy => _busy;
+
+  String? _message;
+
+  /// A line for the person about the last purchase, or null.
+  String? get message => _message;
+
+  /// Purchases the server has not confirmed yet. Kept open in the store.
+  final List<StoreTransaction> _unconfirmed = [];
+  int get unconfirmedCount => _unconfirmed.length;
+
+  bool get canBuyInApp => store != null && _products.isNotEmpty;
+
+  /// Starts listening to the store and loads the licence and the products.
+  /// The store re-delivers unfinished purchases on its own once listened to.
+  Future<void> start() async {
+    final store = this.store;
+    if (store != null) {
+      _sub ??= store.updates.listen(_onUpdates);
+    }
+    await refresh();
+    if (store != null && _isLambent) {
+      try {
+        if (await store.isAvailable()) {
+          _products = await store.products();
+          notifyListeners();
+        }
+      } catch (e) {
+        debugPrint('EnhancePurchases: products failed: $e');
+      }
+    }
+  }
+
+  /// Asks the server for the licence again.
+  Future<void> refresh() async {
+    try {
+      final licence = await client.fetch();
+      _isLambent = licence != null;
+      _licence = licence;
+    } on LicenceException catch (e) {
+      debugPrint('EnhancePurchases: licence fetch failed: $e');
+    }
+    notifyListeners();
+  }
+
+  Future<void> buy(EnhanceProduct product) async {
+    final store = this.store;
+    if (store == null) return;
+    _busy = true;
+    _message = null;
+    notifyListeners();
+    try {
+      await store.buy(product);
+    } catch (e) {
+      _busy = false;
+      _message = "The store couldn't start the purchase.";
+      notifyListeners();
+    }
+  }
+
+  Future<void> restore() async {
+    final store = this.store;
+    if (store == null) return;
+    _message = null;
+    notifyListeners();
+    await store.restore();
+  }
+
+  /// Sends every purchase the server has not confirmed yet again, for a
+  /// launch after the server or the licence service was unreachable.
+  Future<void> retryUnconfirmed() async {
+    final pending = List.of(_unconfirmed);
+    _unconfirmed.clear();
+    await _onUpdates(pending);
+  }
+
+  Future<void> _onUpdates(List<StoreTransaction> updates) async {
+    for (final t in updates) {
+      switch (t.status) {
+        case StoreTransactionStatus.pending:
+          _busy = true;
+          _message = 'Waiting for the store to finish the purchase.';
+        case StoreTransactionStatus.purchased:
+        case StoreTransactionStatus.restored:
+          await _confirm(t);
+        case StoreTransactionStatus.error:
+          _busy = false;
+          _message = "The purchase didn't go through.";
+          await _finishQuietly(t);
+        case StoreTransactionStatus.canceled:
+          _busy = false;
+          _message = null;
+          await _finishQuietly(t);
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> _confirm(StoreTransaction t) async {
+    final proof = t.proof;
+    if (proof == null) {
+      // Nothing the server could check; leave it open for the next launch.
+      _unconfirmed.add(t);
+      _busy = false;
+      return;
+    }
+    _busy = true;
+    notifyListeners();
+    try {
+      _licence = await client.forward(proof);
+      _isLambent = true;
+      _unconfirmed.removeWhere((u) => identical(u.handle, t.handle));
+      await _finishQuietly(t);
+      _message = t.status == StoreTransactionStatus.purchased
+          ? 'Lambent Enhance is on for your server.'
+          : null;
+    } on LicenceException catch (e) {
+      // Not finished: the store keeps it and hands it back on the next
+      // launch, and retryUnconfirmed can try again before then.
+      if (!_unconfirmed.any((u) => identical(u.handle, t.handle))) {
+        _unconfirmed.add(t);
+      }
+      _message = e.transient
+          ? "Your purchase is safe, but your Lambent Server couldn't confirm "
+                "it yet. It will try again the next time Lambent opens."
+          : 'Your Lambent Server refused the purchase'
+                '${e.message == null ? '.' : ': ${e.message}'}';
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<void> _finishQuietly(StoreTransaction t) async {
+    if (!t.needsFinish) return;
+    try {
+      await store?.finish(t);
+    } catch (e) {
+      debugPrint('EnhancePurchases: finish failed: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+}

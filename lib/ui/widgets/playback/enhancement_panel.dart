@@ -24,12 +24,14 @@ Future<void> showEnhancementPanel(
   required void Function(LambentEnhancement chosen) onApply,
   required VoidCallback onReset,
   required VoidCallback onShowStreamInfo,
+  String? status,
   bool useRootNavigator = false,
 }) {
   return showStyledPlayerDialog<void>(
     context,
     title: 'Lambent enhancement',
-    subtitle: 'Made live on your PC while you watch',
+    // The server's Lambent Enhance status when it is known.
+    subtitle: status ?? 'Made live on your PC while you watch',
     sidePanel: true,
     maxWidth: 480,
     useRootNavigator: useRootNavigator,

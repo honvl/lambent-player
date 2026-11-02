@@ -70,6 +70,9 @@ import 'hdr_overlay_capture.dart';
 import '../../../util/focus/back_key_release.dart';
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/gamepad/gamepad_key_synthesizer.dart';
+import '../../../data/services/lambent_enhance_service.dart';
+import '../../../data/services/lambent_licence.dart';
+import '../../../util/form_factor.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/playback_time_label.dart';
 import '../../../util/server_url.dart';
@@ -821,12 +824,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _scheduleHide();
     _startEndsAtTicker();
     setImmersive(true);
-    if (PlatformDetection.isMobile) {
+    // Phones turn sideways for video. A tablet, an unfolded foldable or a
+    // window in Split View or multi-window is left as it is held: locking it
+    // would letterbox the window or spin the whole iPad.
+    if (PlatformDetection.isMobile && _isPhoneScreen) {
       _forcedLandscape = true;
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
         DeviceOrientation.landscapeRight,
       ]);
+    } else if (PlatformDetection.isMobile) {
+      SystemChrome.setPreferredOrientations([]);
     } else if (!PlatformDetection.isTV) {
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -1560,6 +1568,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       }
     }
   }
+
+  bool get _isPhoneScreen =>
+      FormFactor.ofView(WidgetsBinding.instance.platformDispatcher.implicitView ??
+              WidgetsBinding.instance.platformDispatcher.views.first)
+          .isPhone;
 
   void _toggleOrientationLock() {
     setState(() => _forcedLandscape = !_forcedLandscape);
@@ -6239,7 +6252,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   String? get _enhancementChipLabel {
     if (PlatformDetection.isTV && !_useTvGlassOverlay) return null;
     final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
-    if (label != null) return label;
+    // Without Lambent Enhance the server still enhances the first five
+    // minutes of each title (ENTITLEMENTS.md section 6.2); the chip says so.
+    if (label != null) {
+      final licence = LambentEnhanceService.instance.current?.licence;
+      return licence?.enhance == EnhanceState.preview
+          ? '$label · Preview'
+          : label;
+    }
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
     return LambentEnhancement.enhancementOff ? 'Original' : null;
@@ -6501,7 +6521,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                     )
                   : l10n.playerZoomMode,
             ),
-          if (PlatformDetection.isMobile && shows(OsdButton.orientation))
+          if (PlatformDetection.isMobile &&
+              FormFactor.of(context).isPhone &&
+              shows(OsdButton.orientation))
             OsdButton.orientation: _controlButton(
               _forcedLandscape
                   ? Icons.screen_lock_landscape_outlined
@@ -8640,6 +8662,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     unawaited(
       showEnhancementPanel(
         context,
+        status: LambentEnhanceService.instance.current?.licence?.headline,
         current: current,
         enhanced: enhanced,
         onSetEnhancement: (on) {

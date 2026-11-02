@@ -1,4 +1,5 @@
-import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
+import 'dart:ui'
+    show DisplayFeature, DisplayFeatureState, DisplayFeatureType, FlutterView;
 
 import 'package:flutter/widgets.dart';
 

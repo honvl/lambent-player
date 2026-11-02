@@ -20,6 +20,7 @@ import 'package:playback_core/playback_core.dart';
 import 'package:server_core/server_core.dart' hide ImageType;
 import 'package:window_manager/window_manager.dart';
 
+import '../../../data/services/lambent_enhance_service.dart';
 import '../../../data/models/aggregated_item.dart';
 import '../../../data/models/home_row.dart';
 import '../../../data/repositories/mdblist_repository.dart';
@@ -215,6 +216,9 @@ class _HomeShellState extends State<_HomeShell>
   void initState() {
     super.initState();
     _viewModel = GetIt.instance<HomeViewModel>();
+    // Loads the server's Lambent Enhance status and, in store builds, starts
+    // taking the store's purchase updates (unfinished ones come back now).
+    LambentEnhanceService.instance.current;
     WidgetsBinding.instance.addObserver(this);
     appRouter.routerDelegate.addListener(_onRouteChanged);
     _lastObservedPath = appRouter.routerDelegate.currentConfiguration.uri.path;

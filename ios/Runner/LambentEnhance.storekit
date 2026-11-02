@@ -1,0 +1,93 @@
+{
+  "identifier" : "4C1E7A52",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_compatibilityTimeRate" : {
+      "3" : 6
+    },
+    "_developerTeamID" : "T6355X8JD5",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 6
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21500001",
+      "localizations" : [
+
+      ],
+      "name" : "Lambent Enhance",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "21500002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Live PC enhancement for every screen on your Lambent Server",
+              "displayName" : "Lambent Enhance",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.getlambent.player.enhance.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Lambent Enhance monthly",
+          "subscriptionGroupID" : "21500001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "21500003",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Live PC enhancement for every screen on your Lambent Server",
+              "displayName" : "Lambent Enhance",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "app.getlambent.player.enhance.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Lambent Enhance yearly",
+          "subscriptionGroupID" : "21500001",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

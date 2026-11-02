@@ -26,6 +26,7 @@ class _LambentEnhancementScreen extends StatelessWidget {
             final custom = prefs.get(UserPreferences.lambentCustomPicture);
             return ListView(
               children: [
+                const _EnhanceSubscriptionSection(),
                 adaptiveListSection(
                   children: [
                     SwitchPreferenceTile(
@@ -140,6 +141,111 @@ class _LambentEnhancementScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+/// Lambent Enhance on the signed-in server (ENTITLEMENTS.md section 7): what
+/// the server says, the store's subscriptions in store builds, and the
+/// server's own buy page in sideloaded Android builds. Shows nothing for a
+/// server that is not Lambent Server.
+class _EnhanceSubscriptionSection extends StatelessWidget {
+  const _EnhanceSubscriptionSection();
+
+  /// Sideloaded Android may send people to the server's checkout page; store
+  /// builds sell only through their store, and iOS and Apple TV builds
+  /// without a store link out to nothing.
+  static bool get _mayLinkOut =>
+      PlatformDetection.isAndroid &&
+      switch (AppDistribution.channel) {
+        DistributionChannel.aab || DistributionChannel.androidTvAab => false,
+        _ => true,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final purchases = LambentEnhanceService.instance.current;
+    if (purchases == null) return const SizedBox.shrink();
+    return ListenableBuilder(
+      listenable: purchases,
+      builder: (context, _) {
+        if (!purchases.isLambentServer) return const SizedBox.shrink();
+        final licence = purchases.licence;
+        final locale = Localizations.localeOf(context).toLanguageTag();
+        String date(DateTime d) => DateFormat.yMMMd(locale).format(d);
+        final needsEnhance = licence == null || !licence.enhanced;
+        final buyUrl = licence?.buyUrl;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const _SectionHeader('Lambent Enhance'),
+            adaptiveListSection(
+              children: [
+                ListTile(
+                  leading: Icon(
+                    licence?.enhanced == true
+                        ? Icons.verified_rounded
+                        : Icons.auto_awesome_outlined,
+                  ),
+                  title: Text(
+                    licence?.headline ?? 'Checking your Lambent Server…',
+                  ),
+                  subtitle: switch (licence?.detail(date)) {
+                    final d? => Text(d),
+                    null => null,
+                  },
+                  trailing: purchases.busy
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : null,
+                ),
+                if (needsEnhance && purchases.canBuyInApp)
+                  for (final product in purchases.products)
+                    ListTile(
+                      leading: const Icon(Icons.shopping_bag_outlined),
+                      title: Text(
+                        product.yearly
+                            ? 'Lambent Enhance, yearly'
+                            : 'Lambent Enhance, monthly',
+                      ),
+                      subtitle: Text(
+                        '${product.price} '
+                        '${product.yearly ? 'a year' : 'a month'}, for '
+                        'every screen on your server',
+                      ),
+                      enabled: !purchases.busy,
+                      onTap: () => purchases.buy(product),
+                    ),
+                if (purchases.store != null)
+                  ListTile(
+                    leading: const Icon(Icons.restore_rounded),
+                    title: const Text('Restore purchases'),
+                    enabled: !purchases.busy,
+                    onTap: purchases.restore,
+                  ),
+                if (needsEnhance && _mayLinkOut && buyUrl != null)
+                  ListTile(
+                    leading: const Icon(Icons.open_in_new_rounded),
+                    title: const Text('Get Lambent Enhance'),
+                    subtitle: const Text('Opens the checkout for your server'),
+                    onTap: () => launchUrl(
+                      buyUrl,
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  ),
+                if (purchases.message case final message?)
+                  ListTile(
+                    leading: const Icon(Icons.info_outline_rounded),
+                    title: Text(message),
+                  ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
