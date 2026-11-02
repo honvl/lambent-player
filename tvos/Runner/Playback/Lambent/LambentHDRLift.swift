@@ -58,9 +58,6 @@ final class LambentHDRLift {
     private var lastReport = CACurrentMediaTime()
     private var requestedHDR = false
     private var started = false
-    /// The first picture's size, and whether the panel was sent back to SDR after the lift was dropped.
-    private var pictureSize = (0, 0)
-    private var backToSDR = false
     private var hdr = true
     private var upscale = true
     /// How far ahead of the next vsync a picture is fetched and shown, so the processing time does not put the picture behind the
@@ -155,20 +152,11 @@ final class LambentHDRLift {
     /// criteria for an SDR source at load; this replaces them.
     private func requestHDR10(in view: UIView, width: Int, height: Int) {
         requestedHDR = true
-        request(in: view, width: width, height: height, hdr: true)
-    }
-
-    /// The panel's mode for the film's rate: HDR10, or SDR (BT.709) once the lift was dropped to keep the AI upscaler.
-    private func request(in view: UIView, width: Int, height: Int, hdr: Bool) {
         guard let window = view.window else { return }
-        let extensions: [CFString: Any] = hdr ? [
+        let extensions: [CFString: Any] = [
             kCMFormatDescriptionExtension_ColorPrimaries: kCMFormatDescriptionColorPrimaries_ITU_R_2020,
             kCMFormatDescriptionExtension_TransferFunction: kCMFormatDescriptionTransferFunction_SMPTE_ST_2084_PQ,
             kCMFormatDescriptionExtension_YCbCrMatrix: kCMFormatDescriptionYCbCrMatrix_ITU_R_2020,
-        ] : [
-            kCMFormatDescriptionExtension_ColorPrimaries: kCMFormatDescriptionColorPrimaries_ITU_R_709_2,
-            kCMFormatDescriptionExtension_TransferFunction: kCMFormatDescriptionTransferFunction_ITU_R_709_2,
-            kCMFormatDescriptionExtension_YCbCrMatrix: kCMFormatDescriptionYCbCrMatrix_ITU_R_709_2,
         ]
         var description: CMVideoFormatDescription?
         CMVideoFormatDescriptionCreate(
@@ -212,8 +200,6 @@ final class LambentHDRLift {
                     stop()
                     return
                 }
-                pictureSize = (w, h)
-                backToSDR = false
                 if hdr, let view = host { requestHDR10(in: view, width: w, height: h) }
                 updateLead(link)
                 NSLog("[LambentHDR] first picture %dx%d, %@ at %.3f Hz, shown at %@, scaler %@", w, h, hdr ? "HDR10" : "SDR", frameRate,
@@ -251,12 +237,6 @@ final class LambentHDRLift {
         if now - lastReport >= 2 {
             lastReport = now
             updateLead(link)
-            if requestedHDR, !backToSDR, processor.liftDropped, let view = host {
-                // The AI upscaler could not keep up with the lift: the lift went, so the panel goes back to SDR (once a title).
-                backToSDR = true
-                NSLog("[LambentHDR] the HDR lift was dropped to keep the AI upscaler: SDR at %.3f Hz", frameRate)
-                request(in: view, width: pictureSize.0, height: pictureSize.1, hdr: false)
-            }
             let headroom = host?.window?.screen.currentEDRHeadroom ?? 0
             let switching = host?.window?.avDisplayManager.isDisplayModeSwitchInProgress ?? false
             queue.async { [processor] in

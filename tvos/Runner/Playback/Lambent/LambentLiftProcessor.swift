@@ -51,6 +51,12 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private let prepPipeline: MTLComputePipelineState
     private let scalePipeline: MTLComputePipelineState
     private let scaleSDRPipeline: MTLComputePipelineState
+    private let exactPipeline: MTLComputePipelineState, exactScalePipeline: MTLComputePipelineState
+    /// The lift baked into a 65^3 table over R'G'B' (Deepen blacks' bend comes before it, the curve and saturation are fixed): on an A16
+    /// one trilinear read a pixel instead of `expand`'s powers.
+    private var lut: MTLTexture!
+    /// `expand` itself instead of the table (a bench, to compare).
+    var exactLift = false
     private var prescalers: [String: LambentPrescaler] = [:]
     /// The scalers to try, best first; the first one stays until its GPU time does not fit.
     private(set) var ladder: [Scaler]
@@ -61,10 +67,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var outputSize: (Int, Int)?
     /// The film's rate: a picture has one frame of it, start to finish.
     var frameRate: Double = 24
-    /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off, or the lift was dropped).
+    /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off).
     var hdr = true
-    /// The HDR lift was dropped to keep the AI upscaler (`checkBudget`): pictures are SDR from then on.
-    private(set) var liftDropped = false
     /// The title's video bitrate (bits a second, 0: unknown), for the AI upscaler's network.
     var sourceBitrate: Int64 = 0
     /// `prepare` runs on its own queue for every picture (the player): `process` never runs the network itself.
@@ -92,19 +96,26 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private var format = ""
 
     init?() {
+        func make(_ library: MTLLibrary, _ name: String, exact: Bool) -> MTLComputePipelineState? {
+            let constants = MTLFunctionConstantValues()
+            var flag = exact
+            constants.setConstantValue(&flag, type: .bool, index: 0)
+            return (try? library.makeFunction(name: name, constantValues: constants)).flatMap { try? library.device.makeComputePipelineState(function: $0) }
+        }
         guard let device = MTLCreateSystemDefaultDevice(), let queue = device.makeCommandQueue(),
             let library = try? device.makeLibrary(source: liftSource, options: nil),
-            let function = library.makeFunction(name: "lift"),
-            let pipeline = try? device.makeComputePipelineState(function: function),
-            let prep = library.makeFunction(name: "prep").flatMap({ try? device.makeComputePipelineState(function: $0) }),
-            let scale = library.makeFunction(name: "scale_lift").flatMap({ try? device.makeComputePipelineState(function: $0) }),
-            let scaleSDR = library.makeFunction(name: "scale_sdr").flatMap({ try? device.makeComputePipelineState(function: $0) })
+            let pipeline = make(library, "lift", exact: false), let exactPipeline = make(library, "lift", exact: true),
+            let prep = make(library, "prep", exact: false),
+            let scale = make(library, "scale_lift", exact: false), let exactScale = make(library, "scale_lift", exact: true),
+            let scaleSDR = make(library, "scale_sdr", exact: false), let bake = make(library, "bake_lut", exact: true)
         else { return nil }
         self.device = device
         self.queue = queue
         self.pipeline = pipeline
+        self.exactPipeline = exactPipeline
         prepPipeline = prep
         scalePipeline = scale
+        exactScalePipeline = exactScale
         scaleSDRPipeline = scaleSDR
         // FSRCNNX 8-0-4-1 took 29 ms a 1080p -> 4K picture on an A16 (docs/SHADER_UPSCALE.md in Lambent): only an A19-class GPU (Apple
         // family 10) is expected to fit it in a film's frame. RAVU-lite took 5.2 ms there.
@@ -123,6 +134,25 @@ final class LambentLiftProcessor: @unchecked Sendable {
         if self.ladder.first == .neural { _ = LambentNeuralScaler.scaler("neural-low", device: device) }
         // A TV's stream (docs/HDR_FALLBACK.md in Lambent): 1000-nit peak, contrast 100, middle grey 50.
         curve = LambentToneParams(peak: 1000).table
+        let lutDescriptor = MTLTextureDescriptor()
+        lutDescriptor.textureType = .type3D
+        lutDescriptor.pixelFormat = .rgba16Float
+        (lutDescriptor.width, lutDescriptor.height, lutDescriptor.depth) = (65, 65, 65)
+        lutDescriptor.usage = [.shaderRead, .shaderWrite]
+        lutDescriptor.storageMode = .private
+        guard let lut = device.makeTexture(descriptor: lutDescriptor), let buffer = queue.makeCommandBuffer(),
+            let encoder = buffer.makeComputeCommandEncoder()
+        else { return nil }
+        var params = LiftParams(codeScale: 0, saturation: 1, lift: 0, knee: 0.5)
+        encoder.setComputePipelineState(bake)
+        encoder.setTexture(lut, index: 0)
+        encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
+        curve.withUnsafeBytes { encoder.setBytes($0.baseAddress!, length: $0.count, index: 1) }
+        encoder.dispatchThreads(MTLSize(width: 65, height: 65, depth: 65), threadsPerThreadgroup: MTLSize(width: 4, height: 4, depth: 4))
+        encoder.endEncoding()
+        buffer.commit()
+        buffer.waitUntilCompleted()
+        self.lut = lut
         CVMetalTextureCacheCreate(nil, nil, device, nil, &cache)
         CVMetalTextureCacheCreate(nil, nil, device, nil, &prepareCache)
     }
@@ -136,7 +166,6 @@ final class LambentLiftProcessor: @unchecked Sendable {
         stepPictures = 0
         stepLate = 0
         network = nil
-        liftDropped = false
     }
 
     /// Overrides the ladder (a bench, or a test): the scaler named, alone.
@@ -172,20 +201,14 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private(set) var network: String?
 
     /// Every 96 pictures with one scaler: when more than 5 of them took longer than a frame, the next one down. The first 24 after a
-    /// change are not counted (the GPU's clock and the pools settle). The AI upscaler with the HDR lift first drops the lift (the
-    /// owner's order: the upscaler before HDR): SDR out from then on, `liftDropped` tells the player to switch the TV back, and only if
-    /// it still does not keep up does the next scaler take over, still in SDR.
+    /// change are not counted (the GPU's clock and the pools settle). The HDR lift is never dropped to keep a scaler: that would switch
+    /// the TV out of HDR10 mid-title.
     private func checkBudget(late wasLate: Bool) {
         stepPictures += 1
         guard stepPictures > 24 else { return }
         if wasLate { stepLate += 1 }
         guard stepPictures >= 24 + 96 else { return }
-        if stepLate > 5, hdr, scaler == .neural {
-            NSLog("[LambentHDR] AI upscaler: %d of 96 pictures over a frame at %.3f fps: the HDR lift goes, the upscaler stays", stepLate, frameRate)
-            hdr = false
-            liftDropped = true
-            stepPictures = 0
-        } else if stepLate > 5, step < ladder.count - 1 {
+        if stepLate > 5, step < ladder.count - 1 {
             NSLog("[LambentHDR] %@: %d of 96 pictures over a frame at %.3f fps: %@", "\(scaler)", stepLate, frameRate, "\(ladder[step + 1])")
             step += 1
             stepPictures = 0
@@ -280,8 +303,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
         else { return nil }
         // Normalised sample to a 10-bit code: P010 keeps the code in the top 10 of 16 bits; 8-bit codes are a quarter of 10-bit ones.
         var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0, saturation: 1, lift: deepen ? blacks.lift : 0, knee: 0.5)
-        encoder.setComputePipelineState(pipeline)
-        encoder.setTextures([inY, inC, outY, outC], range: 0..<4)
+        encoder.setComputePipelineState(exactLift ? exactPipeline : pipeline)
+        encoder.setTextures([inY, inC, outY, outC, lut], range: 0..<5)
         encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
         curve.withUnsafeBytes { encoder.setBytes($0.baseAddress!, length: $0.count, index: 1) }
         encoder.dispatchThreads(
@@ -376,8 +399,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
             luma = prescaler.encode(buffer, luma: lumaTex, output: dst)
         }
         guard let final = buffer.makeComputeCommandEncoder() else { return nil }
-        final.setComputePipelineState(hdr ? scalePipeline : scaleSDRPipeline)
-        final.setTextures([luma, chroma, outY, outC], range: 0..<4)
+        final.setComputePipelineState(hdr ? (exactLift ? exactScalePipeline : scalePipeline) : scaleSDRPipeline)
+        final.setTextures([luma, chroma, outY, outC, lut], range: 0..<5)
         final.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
         curve.withUnsafeBytes { final.setBytes($0.baseAddress!, length: $0.count, index: 1) }
         final.dispatchThreads(
@@ -410,8 +433,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         defer { gpuMs.removeAll(keepingCapacity: true); engineMs.removeAll(keepingCapacity: true); late = 0 }
         var r = Report(
             frames: gpuMs.count, late: late, floor: blacks.floor, lift: blacks.lift, format: format,
-            scaler: (scaler == .neural ? "AI upscaler (\(network ?? "?")\(neuralInt8 ? ", int8" : ""))" : "\(scaler)")
-                + (liftDropped ? ", lift dropped" : ""))
+            scaler: scaler == .neural ? "AI upscaler (\(network ?? "?")\(neuralInt8 ? ", int8" : ""))" : "\(scaler)")
         if !engineMs.isEmpty { r.engineMs = engineMs.reduce(0, +) / Double(engineMs.count) }
         if !packWallMs.isEmpty { r.packWallMs = packWallMs.reduce(0, +) / Double(packWallMs.count) }
         packWallMs.removeAll(keepingCapacity: true)
@@ -587,8 +609,25 @@ private let liftSource = """
         return pq(to2020 * out);
     }
 
+    // The lift as a 65 x 65 x 65 table over R'G'B' (`bake_lut`), read with the hardware's trilinear filter: one texture read a pixel instead
+    // of `expand`'s powers. `exact` (a function constant) takes `expand` itself (a bench, to compare).
+    constant bool exact [[function_constant(0)]];
+    constexpr sampler lutSampler(coord::normalized, filter::linear, address::clamp_to_edge);
+
+    inline float3 lifted(float3 rgb, constant Params& p, constant float* curve, texture3d<float> lut) {
+        if (exact) return expand(rgb, p, curve);
+        return lut.sample(lutSampler, rgb * (64.0 / 65.0) + 0.5 / 65.0).rgb;
+    }
+
+    kernel void bake_lut(texture3d<float, access::write> lut [[texture(0)]], constant Params& p [[buffer(0)]],
+                         constant float* curve [[buffer(1)]], uint3 gid [[thread_position_in_grid]]) {
+        if (any(gid >= 65)) return;
+        lut.write(float4(expand(float3(gid) / 64.0, p, curve), 1.0), gid);
+    }
+
     kernel void lift(texture2d<float> inY [[texture(0)]], texture2d<float> inC [[texture(1)]],
                      texture2d<float, access::write> outY [[texture(2)]], texture2d<float, access::write> outC [[texture(3)]],
+                     texture3d<float> lut [[texture(4)]],
                      constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
         if (gid.x >= outC.get_width() || gid.y >= outC.get_height()) return;
         float ys[4];
@@ -609,7 +648,7 @@ private let liftSource = """
         for (uint n = 0; n < 4; n++) {
             float yy = ys[n];
             float3 rgb = clamp(float3(yy + 1.5748 * c.y, yy - 0.187324 * c.x - 0.468124 * c.y, yy + 1.8556 * c.x), 0.0, 1.0);
-            float3 e = expand(rgb, p, curve);
+            float3 e = lifted(rgb, p, curve, lut);
             float yp = dot(e, float3(0.2627, 0.6780, 0.0593));
             sum += float2((e.b - yp) / 1.8814, (e.r - yp) / 1.4746);
             outY.write(float4((yp * 876.0 + 64.0) * 64.0 / 65535.0), gid * 2 + uint2(n & 1, n >> 1));
@@ -658,7 +697,7 @@ private let liftSource = """
     // chroma bilinear, then the lift as in `lift`.
     kernel void scale_lift(texture2d<float> luma [[texture(0)]], texture2d<float> chroma [[texture(1)]],
                            texture2d<float, access::write> outY [[texture(2)]], texture2d<float, access::write> outC [[texture(3)]],
-                           constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
+                           texture3d<float> lut [[texture(4)]], constant Params& p [[buffer(0)]], constant float* curve [[buffer(1)]], uint2 gid [[thread_position_in_grid]]) {
         if (gid.x >= outC.get_width() || gid.y >= outC.get_height()) return;
         float2 size = float2(outY.get_width(), outY.get_height());
         // The doubled luma already at the screen's size (1080p -> 2160p): Catmull-Rom at its own pixel centres is the pixel itself.
@@ -669,7 +708,7 @@ private let liftSource = """
             uint2 at = gid * 2 + uint2(n & 1, n >> 1);
             float yy = saturate(same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size));
             float3 rgb = clamp(float3(yy + 1.5748 * c.y, yy - 0.187324 * c.x - 0.468124 * c.y, yy + 1.8556 * c.x), 0.0, 1.0);
-            float3 e = expand(rgb, p, curve);
+            float3 e = lifted(rgb, p, curve, lut);
             float yp = dot(e, float3(0.2627, 0.6780, 0.0593));
             sum += float2((e.b - yp) / 1.8814, (e.r - yp) / 1.4746);
             outY.write(float4((yp * 876.0 + 64.0) * 64.0 / 65535.0), at);

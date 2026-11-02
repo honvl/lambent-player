@@ -95,7 +95,7 @@ final class PlayerHost: UIView {
             if ProcessInfo.processInfo.environment["LIFT_LADDER"] == nil { capacity([ai]) }
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
             if ProcessInfo.processInfo.environment["LIFT_LADDER"] == nil { capacity([ai, ravu]) }
-            // LIFT_LADDER in the environment: the step-down alone (60 fps, the AI upscaler first: the lift goes, then the upscaler).
+            // LIFT_LADDER in the environment: the step-down alone (60 fps from the AI upscaler; 30 fps, the player's own ladder, five minutes).
             if ProcessInfo.processInfo.environment["LIFT_LADDER"] != nil {
                 runs = [("sdr1080p60", "ladder from AI upscaler hidden", [ai, ravu, .catmullRom, .none]), ("sdr1080p30", "player's own ladder long", nil)]
                 return next()
@@ -135,6 +135,19 @@ final class PlayerHost: UIView {
         var pictures: [CVPixelBuffer] = []
         while pictures.count < 24, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
         LiftKernelBench.run(pictures[min(12, pictures.count - 1)])
+        // The lift's table against the lift itself: 10-bit code differences of the whole output, on three pictures of the clip and on
+        // a ramp through every hue and level, at the picture's size and upscaled.
+        if let ramp = colourRamp() {
+            for (name, pic) in [("clip 0", pictures[0]), ("clip 8", pictures[8]), ("clip 16", pictures[16]), ("ramp", ramp)] {
+                for size: (Int, Int)? in [nil, (3840, 2160)] {
+                    guard let a = LambentLiftProcessor(), let b = LambentLiftProcessor() else { continue }
+                    for q in [a, b] { q.force(.catmullRom); q.outputSize = size; q.reset(deepen: false) }
+                    b.exactLift = true
+                    guard let oa = a.process(pic, deadline: .infinity), let ob = b.process(pic, deadline: .infinity) else { continue }
+                    print("BENCH lift table vs exact, \(name)\(size == nil ? "" : " upscaled"): \(codeDiff(oa, ob))")
+                }
+            }
+        }
         // A fingerprint of each scaler's output on the first picture (mean Y' code, and mean |difference| from Catmull-Rom's), to
         // compare with the same on a Mac: a prescaler that skipped passes would not match.
         var catrom: CVPixelBuffer?
@@ -188,8 +201,9 @@ final class PlayerHost: UIView {
                              r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
                 // Experiments (LIFT_EXP): the network's stage with no GPU stage beside it, and the GPU stage with SDR output.
                 if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
-                    for variant in ["no GPU stage", "SDR out"] {
+                    for variant in ["no GPU stage", "SDR out", "exact lift"] {
                         p.hdr = variant != "SDR out"
+                        p.exactLift = variant == "exact lift"
                         var ane: [Double] = [], packs: [Double] = []
                         let t1 = CACurrentMediaTime()
                         for i in 0..<120 {
@@ -215,12 +229,50 @@ final class PlayerHost: UIView {
                                      ane.reduce(0, +) / Double(max(ane.count, 1)), packs.reduce(0, +) / Double(max(packs.count, 1)), gpu))
                     }
                     p.hdr = true
+                    p.exactLift = false
                 }
                 continue
             }
             print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
                          r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
         }
+    }
+
+    /// A 1920 x 1080 8-bit picture whose 2 x 2 blocks run through every Y' (across) and Cb, Cr (down, in 32 x 32 tiles of chroma).
+    func colourRamp() -> CVPixelBuffer? {
+        var buffer: CVPixelBuffer?
+        let attrs: [String: Any] = [kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](), kCVPixelBufferMetalCompatibilityKey as String: true]
+        CVPixelBufferCreate(nil, 1920, 1080, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, attrs as CFDictionary, &buffer)
+        guard let pic = buffer else { return nil }
+        CVPixelBufferLockBaseAddress(pic, [])
+        let y = CVPixelBufferGetBaseAddressOfPlane(pic, 0)!.assumingMemoryBound(to: UInt8.self), ry = CVPixelBufferGetBytesPerRowOfPlane(pic, 0)
+        let c = CVPixelBufferGetBaseAddressOfPlane(pic, 1)!.assumingMemoryBound(to: UInt8.self), rc = CVPixelBufferGetBytesPerRowOfPlane(pic, 1)
+        for j in 0..<1080 { for i in 0..<1920 { y[j * ry + i] = UInt8(16 + (i * 219) / 1919) } }
+        for j in 0..<540 { for i in 0..<960 {
+            c[j * rc + 2 * i] = UInt8(16 + ((j / 17) * 224) / 31)
+            c[j * rc + 2 * i + 1] = UInt8(16 + (((i / 30) % 32) * 224) / 31)
+        } }
+        CVPixelBufferUnlockBaseAddress(pic, [])
+        return pic
+    }
+
+    /// Mean and largest |difference| of two P010 pictures in 10-bit codes, Y' and CbCr.
+    func codeDiff(_ a: CVPixelBuffer, _ b: CVPixelBuffer) -> String {
+        CVPixelBufferLockBaseAddress(a, .readOnly); CVPixelBufferLockBaseAddress(b, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(a, .readOnly); CVPixelBufferUnlockBaseAddress(b, .readOnly) }
+        var out: [String] = []
+        for plane in 0..<2 {
+            let pa = CVPixelBufferGetBaseAddressOfPlane(a, plane)!, pb = CVPixelBufferGetBaseAddressOfPlane(b, plane)!
+            let ra = CVPixelBufferGetBytesPerRowOfPlane(a, plane), rb = CVPixelBufferGetBytesPerRowOfPlane(b, plane)
+            let w = CVPixelBufferGetWidthOfPlane(a, plane) * (plane == 0 ? 1 : 2), h = CVPixelBufferGetHeightOfPlane(a, plane)
+            var sum = 0.0, most = 0, n = 0.0, over2 = 0
+            for j in 0..<h { for i in 0..<w {
+                let d = abs(Int(pa.load(fromByteOffset: j * ra + i * 2, as: UInt16.self) >> 6) - Int(pb.load(fromByteOffset: j * rb + i * 2, as: UInt16.self) >> 6))
+                sum += Double(d); most = max(most, d); n += 1; if d > 2 { over2 += 1 }
+            } }
+            out.append(String(format: "%@ mean %.3f max %d (>2: %.4f%%)", plane == 0 ? "Y'" : "CbCr", sum / n, most, Double(over2) * 100 / n))
+        }
+        return out.joined(separator: ", ")
     }
 
     func fingerprint(_ a: CVPixelBuffer, _ b: CVPixelBuffer?) -> String {
