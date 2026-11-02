@@ -120,16 +120,9 @@ final class LambentLiftProcessor: @unchecked Sendable {
         scalePipeline = scale
         exactScalePipeline = exactScale
         scaleSDRPipeline = scaleSDR
-        // FSRCNNX 8-0-4-1 took 29 ms a 1080p -> 4K picture on an A16 (docs/SHADER_UPSCALE.md in Lambent): only an A19-class GPU (Apple
-        // family 10) is expected to fit it in a film's frame. RAVU-lite took 5.2 ms there.
-        var ladder: [Scaler] = []
-        // NVIDIA's VSR low network took 15-17 ms a 1080p picture on an A16's Neural Engine, plus about 4 ms on its GPU: real time at
-        // 24-30 fps from the A15 (Apple family 8, the 3rd-gen Apple TV 4K) on.
-        if device.supportsFamily(.apple8), LambentNeuralScaler.available(student: false) { ladder.append(.neural(fast: false)) }
-        // Its student took 13 ms a picture on an A16 with the lift (77 fps): the AI upscaler for 50 / 60 fps titles there.
-        if device.supportsFamily(.apple8), LambentNeuralScaler.available(student: true) { ladder.append(.neural(fast: true)) }
-        if device.supportsFamily(.apple10) { ladder.append(.prescaler("FSRCNNX_x2_8-0-4-1")) }
-        ladder += [.prescaler("ravu-lite-ar-r3"), .catmullRom, .none]
+        // Picked by the GPU's Apple family, the same on the Apple TV and the iPad (LambentClientUpscale.ladder says why).
+        let ladder = LambentClientUpscale.ladder(
+            supports: { device.supportsFamily($0) }, neuralModels: { LambentNeuralScaler.available(student: $0) })
         var loaded: [String: LambentPrescaler] = [:]
         for case .prescaler(let name) in ladder {
             if let p = LambentPrescaler(device: device, name: name) { loaded[name] = p }
@@ -195,6 +188,13 @@ final class LambentLiftProcessor: @unchecked Sendable {
     }
 
     var scaler: Scaler { ladder[min(step, ladder.count - 1)] }
+
+    /// Steps past the AI upscaler for this title: its network was trained on SDR video, and an iPad may be upscaling the PC's HDR10.
+    func skipNeural() {
+        while scaler.isNeural, step < ladder.count - 1 { step += 1 }
+        stepPictures = 0
+        stepLate = 0
+    }
 
     /// A picture of this size is upscaled here (rather than shown at its own size, tvOS scaling it).
     func scales(_ w: Int, _ h: Int) -> Bool {

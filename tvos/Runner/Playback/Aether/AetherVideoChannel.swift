@@ -32,6 +32,10 @@ final class AetherVideoChannel: NSObject, FlutterStreamHandler {
         created.onNowPlayingCommand = { [weak self] payload in
             self?.send(payload)
         }
+        // The plan's client upscale running here, for the player's chip and panel.
+        created.onLambentUpscale = { [weak self] label in
+            self?.send(["event": "lambentUpscale", "label": label ?? NSNull()])
+        }
         self.playerCreated = true
         return created
     }()

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:playback_core/playback_core.dart';
 
 /// The label for the "enhanced" chip in the TV player, or null when
 /// [streamUrl] isn't a Lambent Server enhanced stream.
@@ -28,6 +29,19 @@ String? lambentEnhancementLabel(String? streamUrl) {
       : '${height}p';
   final parts = [?resolution, if (hdr) 'HDR'];
   return parts.isEmpty ? 'Enhanced' : parts.join(' ');
+}
+
+/// [label] with the plan's upscale on this device after it ("1080p HDR ·
+/// AI upscale"), while [deviceUpscale] runs and the stream's plan asks for
+/// it (`cup`; LambentEnhancement.clientUpscaleLines). Otherwise [label].
+String? withDeviceUpscale(
+  String? label,
+  String? streamUrl,
+  String? deviceUpscale,
+) {
+  if (label == null || deviceUpscale == null) return label;
+  if (LambentEnhancement.clientUpscaleLines(streamUrl) == null) return label;
+  return '$label · $deviceUpscale';
 }
 
 /// The capsule on the glass player bar that says the stream is enhanced:

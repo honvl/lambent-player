@@ -26,6 +26,7 @@ Future<void> showEnhancementPanel(
   required VoidCallback onShowStreamInfo,
   String? status,
   bool compareOnly = false,
+  String? deviceUpscale,
   bool useRootNavigator = false,
 }) {
   return showStyledPlayerDialog<void>(
@@ -43,6 +44,7 @@ Future<void> showEnhancementPanel(
         current: current,
         enhanced: enhanced,
         compareOnly: compareOnly,
+        deviceUpscale: deviceUpscale,
         onSetEnhancement: (on) {
           close();
           onSetEnhancement(on);
@@ -92,9 +94,15 @@ class _EnhancementPanelBody extends StatefulWidget {
     required this.onReset,
     required this.onShowStreamInfo,
     this.compareOnly = false,
+    this.deviceUpscale,
   });
 
   final LambentEnhancement current;
+
+  /// The plan's upscale on this device ("AI upscale", "Shader upscale",
+  /// "Starting"), null when the plan does not give this device one. Shown,
+  /// not set: the plan decides where each step runs.
+  final String? deviceUpscale;
 
   /// The server has no Lambent Enhance and no trial: enhancement exists only
   /// as the split-screen compare, so the on/off row is the compare.
@@ -245,6 +253,12 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           label: 'Compare with original',
           value: pending.compare ?? false,
           set: (on) => pending.copyWith(compare: on),
+        ),
+      if (widget.deviceUpscale != null)
+        _EnhancementRow(
+          label: 'Upscale on this device',
+          value: widget.deviceUpscale!,
+          onStep: (_, _) {},
         ),
     ];
 

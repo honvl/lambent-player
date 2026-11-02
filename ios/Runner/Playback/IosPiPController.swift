@@ -244,6 +244,7 @@ extension IosPiPController: AVPictureInPictureControllerDelegate {
     ) {
         Task { @MainActor in
             prepareNativeSubtitles(for: pictureInPictureController)
+            (AetherPlayerWrapper.activePlaybackOwner ?? wrapperProvider())?.setLambentUpscaleSuspended(true)
         }
     }
 
@@ -264,6 +265,7 @@ extension IosPiPController: AVPictureInPictureControllerDelegate {
             guard pipController === pictureInPictureController else { return }
             AetherPlayerWrapper.sharedEngine()?.pictureInPictureActive = false
             restoreInlineSubtitles()
+            (AetherPlayerWrapper.activePlaybackOwner ?? wrapperProvider())?.setLambentUpscaleSuspended(false)
             wrapperProvider()?.nowPlaying.reclaim()
             channel.invokeMethod("onPiPChanged", arguments: false)
         }

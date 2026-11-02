@@ -54,6 +54,7 @@ class LambentEnhancement {
   /// Split screen: the left half is the original, as this screen would play
   /// it without the PC, and the right half is enhanced.
   final bool? compare;
+
   /// Wide colour, 0 (off) to 100: how far vivid colours are pushed from SDR's
   /// range toward the wider P3 range of graded HDR; skin, greys and soft
   /// colours stay. RTX HDR only. Lambent Server starts at 100; the URL names
@@ -110,6 +111,25 @@ class LambentEnhancement {
     final uri = Uri.tryParse(url);
     return uri != null && uri.path.contains(_path);
   }
+
+  /// The plan's step for this device (docs/MONETIZATION.md 5.1 in Lambent):
+  /// upscale here, to at most this many lines (`cup=<lines>` in the enhanced
+  /// stream's query, which the server signs). Null when the plan does not ask:
+  /// no `cup`, or a stream that is not Lambent's enhanced one. Without Lambent
+  /// Enhance or a trial the plan never asks, so the device never upscales; the
+  /// client keeps no paywall of its own. The iPad's player
+  /// (LambentClientUpscale.swift) reads the same member.
+  static int? clientUpscaleLines(String? url) {
+    if (!isEnhancedUrl(url)) return null;
+    final value = _query(url!).entries
+        .where((e) => e.key.toLowerCase() == clientUpscaleKey)
+        .map((e) => e.value)
+        .lastOrNull;
+    final lines = int.tryParse(value?.trim() ?? '');
+    return lines != null && lines > 0 ? lines : null;
+  }
+
+  static const clientUpscaleKey = 'cup';
 
   /// The settings [url] carries.
   static LambentEnhancement fromUrl(String url) {

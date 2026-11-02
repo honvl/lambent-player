@@ -64,6 +64,24 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     /// "message": ...}`.
     var onPlayerError: (([String: Any]) -> Void)?
 
+    /// What upscales on this device right now (`LambentClientUpscale.label`: "AI upscale", "Shader upscale"), nil when nothing does.
+    var onLambentUpscale: ((String?) -> Void)?
+
+    #if os(iOS)
+        /// The plan's client upscale for the stream playing (`play`), so it comes back after PiP.
+        private var lambentUpscalePlan: (lines: Int, compare: Bool)?
+
+        /// PiP shows AVPlayer's own picture, which the upscale hides: the upscale stops while PiP is on.
+        func setLambentUpscaleSuspended(_ suspended: Bool) {
+            if suspended {
+                hdrLift?.stop()
+                return
+            }
+            guard let plan = lambentUpscalePlan, ownsEngine, let engine = Self.sharedEngine() else { return }
+            _ = hdrLift?.start(engine: engine, in: playerView, planHeight: plan.lines, compare: plan.compare)
+        }
+    #endif
+
     // MARK: - Engine
 
     /// One engine for the app's lifetime. It owns the audio-session
@@ -93,9 +111,14 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     #endif
 
     private let playerView = AetherPlayerView()
-    #if os(tvOS)
-        /// Lambent's Auto HDR on the device (Playback/Lambent/LambentHDRLift.swift), for SDR titles.
-        private lazy var hdrLift = LambentHDRLift()
+    #if os(tvOS) || os(iOS)
+        /// Lambent's Auto HDR on the device (Playback/Lambent/LambentHDRLift.swift), for SDR titles; on the iPad, the client's
+        /// upscale when the plan asks for it.
+        private lazy var hdrLift: LambentHDRLift? = {
+            let lift = LambentHDRLift()
+            lift?.onUpscale = { [weak self] label in self?.onLambentUpscale?(label) }
+            return lift
+        }()
     #endif
     let subtitleOverlay = SubtitleOverlay()
     let secondarySubtitleOverlay = SubtitleOverlay()
@@ -1044,7 +1067,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         #endif
         endNativePrimaryBridge(restoreNative: false)
         nativePrimaryBridgeFailure = nil
-        #if os(tvOS)
+        #if os(tvOS) || os(iOS)
             hdrLift?.stop()
         #endif
         // A load from a healthy or just ended session goes straight to
@@ -1174,6 +1197,17 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 if !audioOnly, LambentHDRLift.isEnabled {
                     _ = hdrLift?.start(engine: engine, in: playerView)
                 }
+            #elseif os(iOS)
+                // Only when Lambent Server's plan gives this device the upscale (`cup`; LambentClientUpscale.swift).
+                lambentUpscalePlan = nil
+                if !audioOnly, let lines = LambentClientUpscale.planHeight(url) {
+                    let compare = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
+                        .contains { $0.name == "cmp" && $0.value == "1" } ?? false
+                    lambentUpscalePlan = (lines, compare)
+                    if !engine.pictureInPictureActive {
+                        _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, compare: compare)
+                    }
+                }
             #endif
             seatDeclaredSubtitles(engine)
             if forceSubtitlesDisabledOnStart {
@@ -1269,7 +1303,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func stop() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
-        #if os(tvOS)
+        #if os(tvOS) || os(iOS)
             hdrLift?.stop()
         #endif
         #if os(iOS)
@@ -1292,7 +1326,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func shutdown() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
-        #if os(tvOS)
+        #if os(tvOS) || os(iOS)
             hdrLift?.stop()
         #endif
         stopObservingForegroundReturn()

@@ -19,6 +19,7 @@ import 'package:volume_controller/volume_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../../data/utils/chapter_markers.dart';
+import '../../../playback/lambent_device_upscale.dart';
 import '../../../playback/subtitle_style.dart';
 import '../../../playback/subtitle_view_config.dart';
 import '../../../playback/system_volume.dart';
@@ -750,6 +751,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _configureCinemaSkip();
     _syncCinemaSkip();
     _cinemaSkip.addListener(_onCinemaSkipChanged);
+    lambentDeviceUpscale.addListener(_onDeviceUpscaleChanged);
     _cinemaSkipDurationSub = _state.durationStream.listen(
       (_) => _syncCinemaSkip(),
     );
@@ -1009,6 +1011,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   @override
   void dispose() {
+    lambentDeviceUpscale.removeListener(_onDeviceUpscaleChanged);
     _quietReopenTimeout?.cancel();
     if (kIsWeb) unawaited(BrowserContextMenu.enableContextMenu());
     _cancelPopAfterBackKeyUp?.call();
@@ -6271,7 +6274,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// and only when the server says the stream is enhanced.
   String? get _enhancementChipLabel {
     if (PlatformDetection.isTV && !_useTvGlassOverlay) return null;
-    final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
+    final url = _manager.currentResolution?.streamUrl;
+    final label = withDeviceUpscale(
+      lambentEnhancementLabel(url),
+      url,
+      lambentDeviceUpscale.value,
+    );
     // Without Lambent Enhance or a trial the enhanced picture only ever
     // shows beside the original; the chip says so.
     if (label != null) {
@@ -6280,6 +6288,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
     return LambentEnhancement.enhancementOff ? 'Original' : null;
+  }
+
+  /// The plan's upscale on this device started, stepped down or stopped.
+  void _onDeviceUpscaleChanged() {
+    if (mounted) setState(() {});
   }
 
   /// Compare (`cmp=1`): the PC draws the original on the left half and a
@@ -8683,6 +8696,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         compareOnly: LambentEnhancement.compareOnly,
         current: current,
         enhanced: enhanced,
+        deviceUpscale: LambentEnhancement.clientUpscaleLines(url) == null
+            ? null
+            : lambentDeviceUpscale.value ?? 'Starting',
         onSetEnhancement: (on) {
           LambentEnhancement.enhancementOff = !on;
           _startQuietReopen();

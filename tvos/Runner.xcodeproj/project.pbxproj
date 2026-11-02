@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16638F3C916615F7C9744D86 /* LambentClientUpscale.swift in Sources */ = {isa = PBXBuildFile; fileRef = A33AF9064DD1EFFDE6FC13CE /* LambentClientUpscale.swift */; };
 		039843062E60277649E9EA5D /* pcsx_rearmed_libretro.framework in Embed Libretro Cores */ = {isa = PBXBuildFile; fileRef = 408735DC25E7BC9A0E23AF66 /* pcsx_rearmed_libretro.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0520DB98CE279F2BA3B6E562 /* MoonfinTvosStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B47F49C774D38D5782E3CF3 /* MoonfinTvosStubs.swift */; };
 		0891769C67B4C60864B42A13 /* GameVideoOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26AF6C4FDC95C4A3E0FE6876 /* GameVideoOutput.swift */; };
@@ -106,6 +107,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A33AF9064DD1EFFDE6FC13CE /* LambentClientUpscale.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentClientUpscale.swift; path = Lambent/LambentClientUpscale.swift; sourceTree = "<group>"; };
 		06981437AF8387C9BD61CC96 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		0BA87242020D32A77511E6D3 /* AetherPlayerWrapper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AetherPlayerWrapper.swift; path = Aether/AetherPlayerWrapper.swift; sourceTree = "<group>"; };
 		112802CD31173650976CCFDD /* GameInputController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GameInputController.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 				613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */,
 				0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */,
 				596507BBC79F31BB7CFECFAC /* LambentLiftProcessor.swift */,
+				A33AF9064DD1EFFDE6FC13CE /* LambentClientUpscale.swift */,
 				DDC62E8B96B51BBBCBA1EC23 /* EngineTrustPolicy.swift */,
 				81BEA439F41D2A8701F2EC3E /* ClientIdentityStore.swift */,
 				1263D42B138D48499CB25F10 /* MoonfinURLSession.swift */,
@@ -610,6 +613,7 @@
 				78881C895CCFB1BC9086906F /* LambentPrescaler.swift in Sources */,
 				A1B2C3D4E5F60718293A4B5C /* LambentNeuralScaler.swift in Sources */,
 				3D00B478F423220BCE6A25AF /* LambentLiftProcessor.swift in Sources */,
+				16638F3C916615F7C9744D86 /* LambentClientUpscale.swift in Sources */,
 				6A5B8E29CBD0D987A4C5E44A /* EngineTrustPolicy.swift in Sources */,
 				583F601A53A8E8037B41AB76 /* ClientIdentityStore.swift in Sources */,
 				5DA743B4851DEB574E7EA6E6 /* MoonfinURLSession.swift in Sources */,

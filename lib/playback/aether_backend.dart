@@ -17,6 +17,7 @@ import 'device_profile_builder.dart';
 import 'dolby_vision_av1.dart';
 import 'engine_trust.dart';
 import 'known_defects.dart';
+import 'lambent_device_upscale.dart';
 import 'letterbox_croppers.dart';
 import 'lossless_audio_bridge.dart';
 import 'server_transcode_capabilities.dart';
@@ -190,6 +191,10 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
       case 'completed':
         _completed = _toBool(map['completed']);
         _completedStream.add(_completed);
+      case 'lambentUpscale':
+        final label = map['label'];
+        lambentDeviceUpscale.value =
+            label is String && label.isNotEmpty ? label : null;
       case 'engineLog':
         _logEngineLine(map['line']);
       case 'play':
@@ -790,6 +795,7 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
     _audioDelayDebounce?.cancel();
     _stopStallWatchdog();
     _eventSub?.cancel();
+    lambentDeviceUpscale.value = null;
     _positionStream.close();
     _durationStream.close();
     _bufferStream.close();
