@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../preference/user_preferences.dart';
+import '../../util/lambent_enhancement_defaults.dart';
 import '../../util/platform_detection.dart';
 import 'enhance_purchases.dart';
 import 'enhance_store_iap.dart';
@@ -41,6 +43,11 @@ class LambentEnhanceService {
       store: _store,
     );
     _current = purchases;
+    // A server is held to its licence only once it has answered with one.
+    _applyLicence(null);
+    purchases.addListener(() {
+      if (identical(_current, purchases)) _applyLicence(purchases.licence);
+    });
     purchases.start().then((_) {
       // Play hands back purchases it still holds only when asked; StoreKit
       // re-delivers unfinished ones by itself. Forwarding one the server
@@ -53,5 +60,15 @@ class LambentEnhanceService {
       }
     });
     return purchases;
+  }
+
+  /// Without Lambent Enhance or a trial the player may only compare
+  /// (LambentLicence.mayPlayEnhanced).
+  void _applyLicence(LambentLicence? licence) {
+    if (!GetIt.instance.isRegistered<UserPreferences>()) return;
+    applyLambentLicence(
+      compareOnly: licence != null && !licence.mayPlayEnhanced,
+      prefs: GetIt.instance<UserPreferences>(),
+    );
   }
 }

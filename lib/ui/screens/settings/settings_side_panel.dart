@@ -12,6 +12,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:jellyfin_preference/jellyfin_preference.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:playback_core/playback_core.dart' show LambentEnhancement;
 import 'package:server_core/server_core.dart' hide ImageType;
 import 'package:url_launcher/url_launcher.dart';
 

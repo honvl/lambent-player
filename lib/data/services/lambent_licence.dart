@@ -52,9 +52,14 @@ class LambentLicence {
   /// The server's own checkout page, for builds that may not sell in-app.
   final Uri? buyUrl;
 
-  /// Whether the server enhances this screen's pictures without a time limit.
+  /// Whether the household has Enhance, bought or on trial.
   bool get enhanced =>
       enhance == EnhanceState.active || enhance == EnhanceState.trial;
+
+  /// Whether the player may play a title enhanced full screen. Without
+  /// Enhance or a trial it may only compare it with the original side by
+  /// side.
+  bool get mayPlayEnhanced => enhanced;
 
   /// The settings line: "Enhanced by your Lambent Server" or why not.
   String get headline => switch (enhance) {
@@ -72,7 +77,8 @@ class LambentLicence {
         'Renews or ends ${formatDate(until)}',
       EnhanceState.trial when until != null =>
         'Trial ends ${formatDate(until)}',
-      EnhanceState.preview => 'Each title plays enhanced for 5 minutes',
+      EnhanceState.preview || EnhanceState.none =>
+        'Compare enhanced with the original, side by side, in the player',
       _ => null,
     };
   }

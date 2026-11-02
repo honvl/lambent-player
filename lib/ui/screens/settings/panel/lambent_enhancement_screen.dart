@@ -20,25 +20,32 @@ class _LambentEnhancementScreen extends StatelessWidget {
       Scaffold(
         appBar: buildSettingsAppBar(context, const Text('Lambent enhancement')),
         body: ListenableBuilder(
-          listenable: prefs,
+          // The licence decides whether "Enhance on PC" is offered.
+          listenable: Listenable.merge([
+            prefs,
+            ?LambentEnhanceService.instance.current,
+          ]),
           builder: (context, _) {
             final on = prefs.get(UserPreferences.lambentEnhanceOnPc);
             final custom = prefs.get(UserPreferences.lambentCustomPicture);
             return ListView(
               children: [
                 const _EnhanceSubscriptionSection(),
-                adaptiveListSection(
-                  children: [
-                    SwitchPreferenceTile(
-                      preference: UserPreferences.lambentEnhanceOnPc,
-                      title: 'Enhance on PC',
-                      subtitle:
-                          'Off plays the original file from Plex. The 4K HDR '
-                          'chip in the player can still turn it on for a title.',
-                      icon: Icons.auto_awesome,
-                    ),
-                  ],
-                ),
+                // Without Enhance or a trial titles always open on the
+                // original; the player's chip offers the compare.
+                if (!LambentEnhancement.compareOnly)
+                  adaptiveListSection(
+                    children: [
+                      SwitchPreferenceTile(
+                        preference: UserPreferences.lambentEnhanceOnPc,
+                        title: 'Enhance on PC',
+                        subtitle:
+                            'Off plays the original file from Plex. The 4K HDR '
+                            'chip in the player can still turn it on for a title.',
+                        icon: Icons.auto_awesome,
+                      ),
+                    ],
+                  ),
                 if (on) ...[
                   const _SectionHeader('HDR'),
                   adaptiveListSection(

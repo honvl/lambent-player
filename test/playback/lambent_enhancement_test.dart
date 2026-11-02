@@ -10,6 +10,35 @@ void main() {
     LambentEnhancement.overrides = LambentEnhancement.none;
     LambentEnhancement.enhancementOff = false;
     LambentEnhancement.screenDefaults = const {};
+    LambentEnhancement.compareOnly = false;
+  });
+
+  group('compareOnly (no Enhance, no trial)', () {
+    test('every enhanced stream is a compare', () {
+      LambentEnhancement.compareOnly = true;
+      final url = LambentEnhancement.applyOverrides(_url);
+      expect(Uri.parse(url).queryParameters['cmp'], '1');
+    });
+
+    test('the viewer cannot turn the compare off', () {
+      LambentEnhancement.compareOnly = true;
+      LambentEnhancement.overrides = const LambentEnhancement(compare: false);
+      final url = LambentEnhancement.applyOverrides('$_url&cmp=1');
+      expect(Uri.parse(url).queryParameters['cmp'], '1');
+    });
+
+    test('tells the server in PlaybackInfo', () {
+      LambentEnhancement.compareOnly = true;
+      LambentEnhancement.screenDefaults = {'RtxHdr': true};
+      final body = LambentEnhancement.decoratePlaybackInfo({});
+      expect(body['Lambent'], {'RtxHdr': true, 'Compare': true});
+    });
+
+    test('leaves the original file alone', () {
+      LambentEnhancement.compareOnly = true;
+      const original = 'http://host/Videos/1/stream?static=true';
+      expect(LambentEnhancement.applyOverrides(original), original);
+    });
   });
 
   group('decoratePlaybackInfo', () {

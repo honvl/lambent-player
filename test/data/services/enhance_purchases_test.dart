@@ -196,6 +196,16 @@ void main() {
     });
   });
 
+  test('only active and trial may play enhanced full screen', () {
+    LambentLicence of(String state) => LambentLicence.fromJson({
+      'enhance': {'state': state},
+    });
+    expect(of('active').mayPlayEnhanced, isTrue);
+    expect(of('trial').mayPlayEnhanced, isTrue);
+    expect(of('preview').mayPlayEnhanced, isFalse);
+    expect(of('none').mayPlayEnhanced, isFalse);
+  });
+
   test('loads the licence and products, sending the session token', () async {
     await purchases.start();
     expect(purchases.isLambentServer, isTrue);

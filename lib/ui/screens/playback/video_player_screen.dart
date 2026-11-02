@@ -71,7 +71,6 @@ import '../../../util/focus/back_key_release.dart';
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/gamepad/gamepad_key_synthesizer.dart';
 import '../../../data/services/lambent_enhance_service.dart';
-import '../../../data/services/lambent_licence.dart';
 import '../../../util/form_factor.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/playback_time_label.dart';
@@ -6252,13 +6251,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   String? get _enhancementChipLabel {
     if (PlatformDetection.isTV && !_useTvGlassOverlay) return null;
     final label = lambentEnhancementLabel(_manager.currentResolution?.streamUrl);
-    // Without Lambent Enhance the server still enhances the first five
-    // minutes of each title (ENTITLEMENTS.md section 6.2); the chip says so.
+    // Without Lambent Enhance or a trial the enhanced picture only ever
+    // shows beside the original; the chip says so.
     if (label != null) {
-      final licence = LambentEnhanceService.instance.current?.licence;
-      return licence?.enhance == EnhanceState.preview
-          ? '$label · Preview'
-          : label;
+      return LambentEnhancement.compareOnly ? '$label · Compare' : label;
     }
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
@@ -8663,6 +8659,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       showEnhancementPanel(
         context,
         status: LambentEnhanceService.instance.current?.licence?.headline,
+        compareOnly: LambentEnhancement.compareOnly,
         current: current,
         enhanced: enhanced,
         onSetEnhancement: (on) {

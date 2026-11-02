@@ -25,6 +25,7 @@ Future<void> showEnhancementPanel(
   required VoidCallback onReset,
   required VoidCallback onShowStreamInfo,
   String? status,
+  bool compareOnly = false,
   bool useRootNavigator = false,
 }) {
   return showStyledPlayerDialog<void>(
@@ -41,6 +42,7 @@ Future<void> showEnhancementPanel(
       return _EnhancementPanelBody(
         current: current,
         enhanced: enhanced,
+        compareOnly: compareOnly,
         onSetEnhancement: (on) {
           close();
           onSetEnhancement(on);
@@ -89,9 +91,14 @@ class _EnhancementPanelBody extends StatefulWidget {
     required this.onApply,
     required this.onReset,
     required this.onShowStreamInfo,
+    this.compareOnly = false,
   });
 
   final LambentEnhancement current;
+
+  /// The server has no Lambent Enhance and no trial: enhancement exists only
+  /// as the split-screen compare, so the on/off row is the compare.
+  final bool compareOnly;
 
   /// Whether the stream is the PC-enhanced one. When it is not, the panel
   /// offers only the way back on.
@@ -232,8 +239,8 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           set: (on) => pending.copyWith(deepenBlacks: on),
         ),
       // The server only names `cmp` while it is on, so any enhanced stream
-      // offers it.
-      if (cur.quality != null)
+      // offers it. Under compareOnly it is the on/off row instead.
+      if (cur.quality != null && !widget.compareOnly)
         toggle(
           label: 'Compare with original',
           value: pending.compare ?? false,
@@ -305,7 +312,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
     // Acts at once rather than waiting for Apply: it swaps the whole stream.
     final enhancementRow = _EnhancementRow(
       autofocus: autofocusNext(),
-      label: 'PC enhancement',
+      label: widget.compareOnly ? 'Compare with original' : 'PC enhancement',
       value: widget.enhanced ? 'On' : 'Off · original file',
       onStep: (_, _) => widget.onSetEnhancement(!widget.enhanced),
     );
