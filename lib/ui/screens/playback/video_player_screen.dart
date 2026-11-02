@@ -826,7 +826,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     // Phones turn sideways for video. A tablet, an unfolded foldable or a
     // window in Split View or multi-window is left as it is held: locking it
     // would letterbox the window or spin the whole iPad.
-    if (PlatformDetection.isMobile && _isPhoneScreen) {
+    _onPhoneScreen = _isPhoneScreen;
+    if (PlatformDetection.isMobile && _onPhoneScreen) {
       _forcedLandscape = true;
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -1566,6 +1567,33 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         _isRestoringPosition = false;
       }
     }
+  }
+
+  /// What the player last laid out for, so a foldable opening or closing
+  /// mid-video (or a window resized into or out of phone size) moves the
+  /// landscape lock with it.
+  bool _onPhoneScreen = false;
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    if (!PlatformDetection.isMobile || _isInPiP) return;
+    final phone = _isPhoneScreen;
+    if (phone == _onPhoneScreen) return;
+    _onPhoneScreen = phone;
+    if (phone) {
+      // Folded shut: back to the phone's sideways picture.
+      _forcedLandscape = true;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    } else {
+      // Unfolded: the big screen plays the way it is held.
+      _forcedLandscape = false;
+      SystemChrome.setPreferredOrientations([]);
+    }
+    if (mounted) setState(() {});
   }
 
   bool get _isPhoneScreen =>

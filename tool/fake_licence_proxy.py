@@ -46,18 +46,33 @@ class Handler(BaseHTTPRequestHandler):
                 req.add_header(k, v)
         try:
             resp = urllib.request.urlopen(req, timeout=60)
-            status, headers, data = resp.status, resp.headers, resp.read()
+            status, headers = resp.status, resp.headers
         except urllib.error.HTTPError as e:
-            status, headers, data = e.code, e.headers, e.read()
-        # The server names its own address in some answers; the app should keep using this one.
-        data = data.replace(args.upstream.encode(), f"http://{self.headers.get('Host')}".encode())
+            resp, status, headers = e, e.code, e.headers
+        kind = (headers.get("Content-Type") or "").lower()
+        if "json" in kind or "xml" in kind or "text" in kind:
+            # The server names its own address in some answers; the app should keep using this one.
+            data = resp.read().replace(args.upstream.encode(), f"http://{self.headers.get('Host')}".encode())
+            self.send_response(status)
+            for k, v in headers.items():
+                if k.lower() not in ("content-length", "transfer-encoding", "connection"):
+                    self.send_header(k, v)
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+        # Media is passed through as it arrives: a player asks for open-ended ranges of
+        # multi-gigabyte files, which must never be read into memory first.
         self.send_response(status)
         for k, v in headers.items():
-            if k.lower() not in ("content-length", "transfer-encoding", "connection"):
+            if k.lower() not in ("transfer-encoding", "connection"):
                 self.send_header(k, v)
-        self.send_header("Content-Length", str(len(data)))
         self.end_headers()
-        self.wfile.write(data)
+        try:
+            while chunk := resp.read(256 * 1024):
+                self.wfile.write(chunk)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # the player seeked or stopped
 
     def do_GET(self):
         if self.path.split("?")[0] == "/v1/licence":
