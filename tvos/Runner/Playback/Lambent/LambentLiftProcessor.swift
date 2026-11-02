@@ -61,8 +61,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var outputSize: (Int, Int)?
     /// The film's rate: a picture has one frame of it, start to finish.
     var frameRate: Double = 24
-    /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off).
+    /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off, or the lift was dropped).
     var hdr = true
+    /// The HDR lift was dropped to keep the AI upscaler (`checkBudget`): pictures are SDR from then on.
+    private(set) var liftDropped = false
     /// The title's video bitrate (bits a second, 0: unknown), for the AI upscaler's network.
     var sourceBitrate: Int64 = 0
     /// `prepare` runs on its own queue for every picture (the player): `process` never runs the network itself.
@@ -134,6 +136,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         stepPictures = 0
         stepLate = 0
         network = nil
+        liftDropped = false
     }
 
     /// Overrides the ladder (a bench, or a test): the scaler named, alone.
@@ -169,13 +172,20 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private(set) var network: String?
 
     /// Every 96 pictures with one scaler: when more than 5 of them took longer than a frame, the next one down. The first 24 after a
-    /// change are not counted (the GPU's clock and the pools settle).
+    /// change are not counted (the GPU's clock and the pools settle). The AI upscaler with the HDR lift first drops the lift (the
+    /// owner's order: the upscaler before HDR): SDR out from then on, `liftDropped` tells the player to switch the TV back, and only if
+    /// it still does not keep up does the next scaler take over, still in SDR.
     private func checkBudget(late wasLate: Bool) {
         stepPictures += 1
         guard stepPictures > 24 else { return }
         if wasLate { stepLate += 1 }
         guard stepPictures >= 24 + 96 else { return }
-        if stepLate > 5, step < ladder.count - 1 {
+        if stepLate > 5, hdr, scaler == .neural {
+            NSLog("[LambentHDR] AI upscaler: %d of 96 pictures over a frame at %.3f fps: the HDR lift goes, the upscaler stays", stepLate, frameRate)
+            hdr = false
+            liftDropped = true
+            stepPictures = 0
+        } else if stepLate > 5, step < ladder.count - 1 {
             NSLog("[LambentHDR] %@: %d of 96 pictures over a frame at %.3f fps: %@", "\(scaler)", stepLate, frameRate, "\(ladder[step + 1])")
             step += 1
             stepPictures = 0
@@ -380,7 +390,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
         gpuMs.append((buffer.gpuEndTime - buffer.gpuStartTime) * 1000 + packMs)
         let now = CACurrentMediaTime()
         if now > deadline { late += 1 }
-        if used == scaler { checkBudget(late: now - started > 1 / max(frameRate, 1)) }
+        // Late: the picture's slowest stage took longer than a frame. Run one after the other (`prepared` nil), that is the whole picture;
+        // in the player's three stages, the pack, the network or this GPU stage, each a picture apart.
+        var slowest = now - started
+        if let prepared { slowest = max(slowest, prepared.slot.packWallMs / 1000, prepared.slot.engineMs / 1000) }
+        if used == scaler { checkBudget(late: slowest > 1 / max(frameRate, 1)) }
         return out
     }
 
@@ -396,7 +410,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
         defer { gpuMs.removeAll(keepingCapacity: true); engineMs.removeAll(keepingCapacity: true); late = 0 }
         var r = Report(
             frames: gpuMs.count, late: late, floor: blacks.floor, lift: blacks.lift, format: format,
-            scaler: scaler == .neural ? "AI upscaler (\(network ?? "?")\(neuralInt8 ? ", int8" : ""))" : "\(scaler)")
+            scaler: (scaler == .neural ? "AI upscaler (\(network ?? "?")\(neuralInt8 ? ", int8" : ""))" : "\(scaler)")
+                + (liftDropped ? ", lift dropped" : ""))
         if !engineMs.isEmpty { r.engineMs = engineMs.reduce(0, +) / Double(engineMs.count) }
         if !packWallMs.isEmpty { r.packWallMs = packWallMs.reduce(0, +) / Double(packWallMs.count) }
         packWallMs.removeAll(keepingCapacity: true)

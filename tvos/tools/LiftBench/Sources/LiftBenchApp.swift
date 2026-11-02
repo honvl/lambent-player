@@ -92,9 +92,14 @@ final class PlayerHost: UIView {
         // LIFT_NEURAL in the environment: the AI upscaler only (capacity, playback at 24 and 60 fps, SDR out, a long run).
         if ProcessInfo.processInfo.environment["LIFT_NEURAL"] != nil {
             LambentNeuralScaler.preferInt8 = false
-            capacity([ai])
+            if ProcessInfo.processInfo.environment["LIFT_LADDER"] == nil { capacity([ai]) }
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
-            capacity([ai, ravu])
+            if ProcessInfo.processInfo.environment["LIFT_LADDER"] == nil { capacity([ai, ravu]) }
+            // LIFT_LADDER in the environment: the step-down alone (60 fps, the AI upscaler first: the lift goes, then the upscaler).
+            if ProcessInfo.processInfo.environment["LIFT_LADDER"] != nil {
+                runs = [("sdr1080p60", "ladder from AI upscaler hidden", [ai, ravu, .catmullRom, .none]), ("sdr1080p30", "player's own ladder long", nil)]
+                return next()
+            }
             runs = [("sdr1080p24", "AI upscaler", [ai]), ("sdr1080p30", "AI upscaler", [ai]), ("sdr1080p30", "AI upscaler SDR out", [ai]),
                     ("sdr1080p60", "AI upscaler hidden", [ai]), ("sdr1080p30", "player's own ladder", nil),
                     ("sdr1080p60", "player's own ladder hidden", nil), ("sdr1080p30", "AI upscaler long", [ai])]
