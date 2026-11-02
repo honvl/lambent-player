@@ -85,6 +85,7 @@ final class PlayerHost: UIView {
             // LIFT_FP16 in the environment: the fp16 models for everything after this.
             LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
         }
+        if ProcessInfo.processInfo.environment["LIFT_COMPARE"] != nil { return compare() }
         if ProcessInfo.processInfo.environment["LIFT_IPAD"] != nil { return iPad(ravu: ravu, fsr: fsr) }
         if ProcessInfo.processInfo.environment["LIFT_IO"] != nil {
             IOBench.run()
@@ -188,6 +189,66 @@ final class PlayerHost: UIView {
         next()
     }
 
+    /// The AI upscaler, its student and Catmull-Rom on real titles at the iPad's 1.24x (`Videos/cmp-*.mp4`, 1080p, made by the
+    /// comparison script from 4K masters): each one's first 12 pictures at 2388 x 1342, SDR out, as raw 8-bit 4:2:0 in Documents
+    /// (`<clip>.<scaler>.yuv`), for VMAF against the master on the Mac.
+    private func compare() {
+        let size = (2388, 1342)
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let clips = (Bundle.main.urls(forResourcesWithExtension: "mp4", subdirectory: "Videos") ?? [])
+            .filter { $0.lastPathComponent.hasPrefix("cmp-") }.sorted { $0.path < $1.path }
+        if let device = MTLCreateSystemDefaultDevice() {
+            _ = LambentNeuralScaler.loadNow("neural-low", device: device)
+            _ = LambentNeuralScaler.loadNow("neural-low", student: true, device: device)
+        }
+        for clip in clips {
+            let asset = AVURLAsset(url: clip)
+            guard let reader = try? AVAssetReader(asset: asset), let track = asset.tracks(withMediaType: .video).first else { continue }
+            let out = AVAssetReaderTrackOutput(track: track, outputSettings: [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+                kCVPixelBufferMetalCompatibilityKey as String: true, kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any]()])
+            reader.add(out)
+            reader.startReading()
+            var pictures: [CVPixelBuffer] = []
+            while pictures.count < 12, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
+            let name = clip.deletingPathExtension().lastPathComponent
+            for (tag, sc) in [("ai", LambentLiftProcessor.Scaler.neural(fast: false)), ("student", .neural(fast: true)), ("catrom", .catmullRom)] {
+                guard let p = LambentLiftProcessor() else { continue }
+                p.reset(deepen: false)
+                p.hdr = false
+                p.force(sc)
+                p.neuralAnyScale = true
+                p.outputSize = size
+                // The network's network choice and its first pictures settle before the pictures that are kept.
+                for _ in 0..<3 { _ = p.process(pictures[0], deadline: .infinity) }
+                var data = Data()
+                for pic in pictures {
+                    guard let o = p.process(pic, deadline: .infinity) else { continue }
+                    data.append(yuv420p8(o))
+                }
+                try? data.write(to: docs.appendingPathComponent("\(name).\(tag).yuv"))
+                print("BENCH compare \(name) \(tag): \(p.takeReport().scaler) \(data.count / (size.0 * size.1 * 3 / 2)) pictures")
+            }
+        }
+        print("BENCH done")
+    }
+
+    /// A P010 picture as 8-bit planar 4:2:0 (Y', Cb, Cr), rounded.
+    private func yuv420p8(_ b: CVPixelBuffer) -> Data {
+        CVPixelBufferLockBaseAddress(b, .readOnly); defer { CVPixelBufferUnlockBaseAddress(b, .readOnly) }
+        let w = CVPixelBufferGetWidth(b), h = CVPixelBufferGetHeight(b)
+        var y = [UInt8](repeating: 0, count: w * h), cb = [UInt8](repeating: 0, count: w / 2 * (h / 2)), cr = cb
+        let py = CVPixelBufferGetBaseAddressOfPlane(b, 0)!, ry = CVPixelBufferGetBytesPerRowOfPlane(b, 0)
+        let pc = CVPixelBufferGetBaseAddressOfPlane(b, 1)!, rc = CVPixelBufferGetBytesPerRowOfPlane(b, 1)
+        func eight(_ v: UInt16) -> UInt8 { UInt8(min(255, (Int(v >> 6) + 2) >> 2)) }
+        for j in 0..<h { for i in 0..<w { y[j * w + i] = eight(py.load(fromByteOffset: j * ry + i * 2, as: UInt16.self)) } }
+        for j in 0..<(h / 2) { for i in 0..<(w / 2) {
+            cb[j * (w / 2) + i] = eight(pc.load(fromByteOffset: j * rc + i * 4, as: UInt16.self))
+            cr[j * (w / 2) + i] = eight(pc.load(fromByteOffset: j * rc + i * 4 + 2, as: UInt16.self))
+        } }
+        return Data(y) + Data(cb) + Data(cr)
+    }
+
     private func resized(_ picture: CVPixelBuffer, _ w: Int, _ h: Int) -> CVPixelBuffer? {
         var session: VTPixelTransferSession?
         VTPixelTransferSessionCreate(allocator: nil, pixelTransferSessionOut: &session)
@@ -205,6 +266,7 @@ final class PlayerHost: UIView {
             p.reset(deepen: false)
             p.hdr = false
             p.force(sc)
+            p.neuralAnyScale = true
             guard p.ladder == [sc] else { print("BENCH iPad capacity \(sc): not available here"); continue }
             p.outputSize = runSize
             for i in 0..<48 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
@@ -431,6 +493,8 @@ final class PlayerHost: UIView {
         processor.hdr = runHDR && !name.contains("SDR out")
         processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }
+        // A scaler forced is timed at the run's size, under 1.4x too; the player's own ladder keeps its rule.
+        processor.neuralAnyScale = ladder != nil
         processor.outputSize = runSize
         processor.frameRate = clip.hasSuffix("60") ? 59.94 : clip.hasSuffix("30") ? 29.97 : 23.976
         self.processor = processor

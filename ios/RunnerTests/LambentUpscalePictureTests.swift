@@ -112,6 +112,34 @@ final class LambentUpscalePictureTests: XCTestCase {
     try check(.neural(fast: true), mean: 3)
   }
 
+  /// Under 1.4x the AI upscaler steps aside for the shaders (to Catmull-Rom); at 2x it stays.
+  func testTheAIUpscalerStepsAsideUnder1_4x() throws {
+    guard let device = MTLCreateSystemDefaultDevice(), LambentNeuralScaler.available(student: false) else {
+      throw XCTSkip("no AI upscaler models in the bundle")
+    }
+    XCTAssertNotNil(LambentNeuralScaler.loadNow("neural-low", device: device))
+    let processor = try XCTUnwrap(LambentLiftProcessor())
+    processor.force(ladder: [.neural(fast: false), .catmullRom, .none])
+    processor.reset(deepen: false)
+    processor.hdr = false
+    processor.outputSize = (1194, 671)  // 1.24x: a 1080p title full screen on an 11-inch iPad Pro
+    let source = try picture()
+    XCTAssertNil(processor.pack(source))
+    let out = try XCTUnwrap(processor.process(source, deadline: .infinity))
+    XCTAssertEqual(CVPixelBufferGetWidth(out), 1194)
+    XCTAssertFalse(processor.scaler.isNeural, "\(processor.scaler)")
+    XCTAssertEqual(LambentClientUpscale.label(processor.scaler), "Shader upscale")
+
+    let twice = try XCTUnwrap(LambentLiftProcessor())
+    twice.force(ladder: [.neural(fast: false), .catmullRom, .none])
+    twice.reset(deepen: false)
+    twice.hdr = false
+    twice.outputSize = Self.dst
+    XCTAssertNotNil(twice.pack(source))
+    _ = twice.process(source, deadline: .infinity)
+    XCTAssertTrue(twice.scaler.isNeural, "\(twice.scaler)")
+  }
+
   /// Nothing to upscale (the picture already fills its place): the picture comes back as it is.
   func testAPictureAtItsSizeIsLeftAlone() throws {
     let processor = try XCTUnwrap(LambentLiftProcessor())

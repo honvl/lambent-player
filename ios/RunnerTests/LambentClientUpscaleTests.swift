@@ -73,6 +73,18 @@ final class LambentClientUpscaleTests: XCTestCase {
     XCTAssertEqual(mine.last, LambentLiftProcessor.Scaler.none)
   }
 
+  func testTheAIUpscalerRunsFrom1_4x() {
+    // A 1080p title full screen: 11-inch iPad Pro 1.24x, iPad mini 1.18x: the shaders.
+    XCTAssertFalse(LambentClientUpscale.neuralPays(picture: (1920, 1080), output: (2388, 1343)))
+    XCTAssertFalse(LambentClientUpscale.neuralPays(picture: (1920, 1080), output: (2266, 1274)))
+    // 13-inch iPad Pro 1.43x, a 720p title on the 11-inch 1.86x, a 1080p title on a 4K TV 2x: the network.
+    XCTAssertTrue(LambentClientUpscale.neuralPays(picture: (1920, 1080), output: (2752, 1548)))
+    XCTAssertTrue(LambentClientUpscale.neuralPays(picture: (1280, 720), output: (2388, 1343)))
+    XCTAssertTrue(LambentClientUpscale.neuralPays(picture: (1920, 1080), output: (3840, 2160)))
+    // The smaller of the two scales decides (a wide title fit to the width).
+    XCTAssertFalse(LambentClientUpscale.neuralPays(picture: (1920, 800), output: (3840, 1100)))
+  }
+
   // MARK: - Where it is shown
 
   func testAnIPadPro11ShowsA1080pTitleAtItsWidth() {

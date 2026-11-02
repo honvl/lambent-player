@@ -78,6 +78,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var pipelined = false
     /// The ladder was set by `force` (a bench): the AI upscaler runs at any frame rate.
     private var forced = false
+    /// The AI upscaler runs at any scale, under `LambentClientUpscale.neuralMinimumScale` too (a bench, to compare).
+    var neuralAnyScale = false
     private var engineMs: [Double] = []
     private var neuralInt8 = false
     private var packWallMs: [Double] = []
@@ -248,7 +250,9 @@ final class LambentLiftProcessor: @unchecked Sendable {
     /// three slots), so the Neural Engine never waits for a pack. `process` alone does all three, one after the other.
     func pack(_ picture: CVPixelBuffer) -> NeuralPrepared? {
         let w = CVPixelBufferGetWidth(picture), h = CVPixelBufferGetHeight(picture)
-        guard case .neural(let fast) = scaler, scales(w, h), LambentNeuralScaler.fits(w, h) else { return nil }
+        guard case .neural(let fast) = scaler, scales(w, h), LambentNeuralScaler.fits(w, h),
+            neuralAnyScale || LambentClientUpscale.neuralPays(picture: (w, h), output: outputSize ?? (w, h))
+        else { return nil }
         if network == nil {
             let net = LambentNeuralScaler.network(bitrate: sourceBitrate, width: w, height: h, frameRate: frameRate)
             network = net
@@ -338,6 +342,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
             NSLog("[LambentHDR] AI upscaler: %.3f fps is over 30 on this chip: %@", frameRate, "\(ladder[step + 1])")
             step += 1
             stepPictures = 0
+        }
+        if scaler.isNeural, !neuralAnyScale, !LambentClientUpscale.neuralPays(picture: src, output: dst) {
+            NSLog("[LambentHDR] AI upscaler: %dx%d -> %dx%d is under %.1fx: the shaders", src.0, src.1, dst.0, dst.1, LambentClientUpscale.neuralMinimumScale)
+            skipNeural()
         }
         if outPool == nil || outPoolSize != dst {
             let attrs: [String: Any] = [
