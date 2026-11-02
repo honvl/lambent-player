@@ -23,8 +23,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
         var floor: Float = -1, lift: Float = 0
         var format = ""
         var scaler = ""
-        /// The AI upscaler's Neural Engine time (mean, ms), 0 when it did not run.
-        var engineMs = 0.0
+        /// The AI upscaler's Neural Engine time and its pack's wall time (mean, ms), 0 when it did not run.
+        var engineMs = 0.0, packWallMs = 0.0
     }
 
     /// How the picture reaches the screen's size, best first.
@@ -70,6 +70,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
     /// The ladder was set by `force` (a bench): the AI upscaler runs at any frame rate.
     private var forced = false
     private var engineMs: [Double] = []
+    private var neuralInt8 = false
+    private var packWallMs: [Double] = []
     private var lumaTex: MTLTexture?
     private var chromaTex: MTLTexture?
     private var outPool: CVPixelBufferPool?
@@ -332,7 +334,9 @@ final class LambentLiftProcessor: @unchecked Sendable {
             {
                 (luma, chroma) = (l, c)
                 packMs = ready.slot.packMs
+                neuralInt8 = ready.scaler.int8
                 engineMs.append(ready.slot.engineMs)
+                packWallMs.append(ready.slot.packWallMs)
             } else {
                 // Still loading (or it cannot take this picture): the next scaler down, uncounted.
                 used = ladder.count > step + 1 ? ladder[step + 1] : .catmullRom
@@ -381,8 +385,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
         defer { gpuMs.removeAll(keepingCapacity: true); engineMs.removeAll(keepingCapacity: true); late = 0 }
         var r = Report(
             frames: gpuMs.count, late: late, floor: blacks.floor, lift: blacks.lift, format: format,
-            scaler: scaler == .neural ? "AI upscaler (\(network ?? "?"))" : "\(scaler)")
+            scaler: scaler == .neural ? "AI upscaler (\(network ?? "?")\(neuralInt8 ? ", int8" : ""))" : "\(scaler)")
         if !engineMs.isEmpty { r.engineMs = engineMs.reduce(0, +) / Double(engineMs.count) }
+        if !packWallMs.isEmpty { r.packWallMs = packWallMs.reduce(0, +) / Double(packWallMs.count) }
+        packWallMs.removeAll(keepingCapacity: true)
         if !gpuMs.isEmpty {
             let sorted = gpuMs.sorted()
             r.meanMs = sorted.reduce(0, +) / Double(sorted.count)

@@ -57,19 +57,37 @@ final class PlayerHost: UIView {
         if let p = LambentLiftProcessor() { print("BENCH ladder \(p.ladder) failures \(LambentPrescaler.failures)") }
         let ai = LambentLiftProcessor.Scaler.neural
         if let device = MTLCreateSystemDefaultDevice() {
-            for n in LambentNeuralScaler.networks {
-                let t = CACurrentMediaTime()
-                let s = LambentNeuralScaler.loadNow(n, device: device)
-                print(String(format: "BENCH AI upscaler %@ %@ in %.0f ms %@", n, s != nil ? "loaded" : "did not load",
-                             (CACurrentMediaTime() - t) * 1000, LambentNeuralScaler.failures[n] ?? ""))
+            for int8 in [false, true] {
+                LambentNeuralScaler.preferInt8 = int8
+                for n in LambentNeuralScaler.networks {
+                    let t = CACurrentMediaTime()
+                    let s = LambentNeuralScaler.loadNow(n, device: device)
+                    print(String(format: "BENCH AI upscaler %@ %@ %@ in %.0f ms %@", n, s.map { $0.int8 ? "int8" : "fp16" } ?? "", s != nil ? "loaded" : "did not load",
+                                 (CACurrentMediaTime() - t) * 1000, LambentNeuralScaler.failures[n] ?? ""))
+                }
             }
         }
-        if let device = MTLCreateSystemDefaultDevice(), let s = LambentNeuralScaler.loadNow("neural-low", device: device) {
-            _ = s.timeNetwork(10)
-            print(String(format: "BENCH AI upscaler network alone, back to back: %.2f ms", s.timeNetwork(100)))
+        if let device = MTLCreateSystemDefaultDevice() {
+            for int8 in [false, true] {
+                LambentNeuralScaler.preferInt8 = int8
+                guard let s = LambentNeuralScaler.loadNow("neural-low", device: device) else { continue }
+                _ = s.timeNetwork(10)
+                print(String(format: "BENCH AI upscaler network alone, back to back, %@: %.2f ms", s.int8 ? "int8" : "fp16", s.timeNetwork(100)))
+            }
+            // LIFT_FP16 in the environment: the fp16 models for everything after this.
+            LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
+        }
+        // LIFT_KERNELS in the environment: the lift kernels alone.
+        if ProcessInfo.processInfo.environment["LIFT_KERNELS"] != nil {
+            capacity([])
+            print("BENCH done")
+            return
         }
         // LIFT_NEURAL in the environment: the AI upscaler only (capacity, playback at 24 and 60 fps, SDR out, a long run).
         if ProcessInfo.processInfo.environment["LIFT_NEURAL"] != nil {
+            LambentNeuralScaler.preferInt8 = false
+            capacity([ai])
+            LambentNeuralScaler.preferInt8 = ProcessInfo.processInfo.environment["LIFT_FP16"] == nil
             capacity([ai, ravu])
             runs = [("sdr1080p24", "AI upscaler", [ai]), ("sdr1080p24", "AI upscaler SDR out", [ai]),
                     ("sdr1080p60", "AI upscaler hidden", [ai]), ("sdr1080p24", "player's own ladder", nil),
@@ -105,6 +123,7 @@ final class PlayerHost: UIView {
         reader.startReading()
         var pictures: [CVPixelBuffer] = []
         while pictures.count < 24, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
+        LiftKernelBench.run(pictures[min(12, pictures.count - 1)])
         // A fingerprint of each scaler's output on the first picture (mean Y' code, and mean |difference| from Catmull-Rom's), to
         // compare with the same on a Mac: a prescaler that skipped passes would not match.
         var catrom: CVPixelBuffer?
@@ -150,8 +169,8 @@ final class PlayerHost: UIView {
                 group.wait()
                 let piped = (CACurrentMediaTime() - t0) * 1000 / 240
                 r = p.takeReport()
-                print(String(format: "BENCH capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",
-                             r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, ProcessInfo.processInfo.thermalState.rawValue))
+                print(String(format: "BENCH capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, pack wall %.2f ms, thermal %d",
+                             r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
                 continue
             }
             print(String(format: "BENCH capacity %@: %.2f ms a picture back to back (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, thermal %d",

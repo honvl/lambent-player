@@ -33,15 +33,26 @@ final class LambentNeuralScaler {
 
     static var directory: URL? { LambentPrescaler.bundleDirectory?.appendingPathComponent("vsr", isDirectory: true) }
 
-    static func modelURL(_ network: String) -> URL? {
-        guard let url = directory?.appendingPathComponent("\(network)-\(modelSize.0)x\(modelSize.1).mlmodelc"),
-            FileManager.default.fileExists(atPath: url.path)
-        else { return nil }
-        return url
+    /// The network's model: its int8 one (`<network>-w8a8-<size>`, int8 weights and activations) when `int8` and it is in the bundle,
+    /// else the fp16 one.
+    static func modelURL(_ network: String, int8: Bool = preferInt8) -> URL? {
+        for name in int8 ? ["\(network)-w8a8", network] : [network] {
+            if let url = directory?.appendingPathComponent("\(name)-\(modelSize.0)x\(modelSize.1).mlmodelc"),
+                FileManager.default.fileExists(atPath: url.path)
+            {
+                return url
+            }
+        }
+        return nil
     }
 
+    /// Int8 models (where the bundle has them) instead of fp16. Off: on an A16 they saved about 1 ms of a 31 ms picture inside the
+    /// player (the network alone 14.7 against 15.4 ms), for 0.1 VMAF on compressed SDR in Lambent's tests (docs/SHADER_UPSCALE.md).
+    /// A bench sets it.
+    nonisolated(unsafe) static var preferInt8 = false
+
     /// Both models are in the bundle.
-    static var available: Bool { networks.allSatisfy { modelURL($0) != nil } }
+    static var available: Bool { networks.allSatisfy { modelURL($0, int8: false) != nil } }
 
     /// Loaded scalers by network, kept for the app's life: loading a model on the Neural Engine takes a while the first time.
     private static let loaded = OSAllocatedUnfairLock(initialState: [String: LambentNeuralScaler]())
@@ -51,15 +62,17 @@ final class LambentNeuralScaler {
 
     /// The scaler for `network` if it has loaded; otherwise nil, and it starts loading in the background.
     static func scaler(_ network: String, device: MTLDevice) -> LambentNeuralScaler? {
-        if let s = loaded.withLock({ $0[network] }) { return s }
-        let start = loading.withLock { $0.insert(network).inserted }
+        let int8 = preferInt8
+        let key = network + (int8 ? " int8" : "")
+        if let s = loaded.withLock({ $0[key] }) { return s }
+        let start = loading.withLock { $0.insert(key).inserted }
         if start {
             loadQueue.async {
                 let t = CACurrentMediaTime()
                 do {
-                    let s = try LambentNeuralScaler(device: device, network: network)
-                    loaded.withLock { $0[network] = s }
-                    NSLog("[LambentHDR] AI upscaler %@ loaded in %.0f ms", network, (CACurrentMediaTime() - t) * 1000)
+                    let s = try LambentNeuralScaler(device: device, network: network, int8: int8)
+                    loaded.withLock { $0[key] = s }
+                    NSLog("[LambentHDR] AI upscaler %@ (%@) loaded in %.0f ms", network, s.int8 ? "int8" : "fp16", (CACurrentMediaTime() - t) * 1000)
                 } catch {
                     failures[network] = "\(error)"
                     NSLog("[LambentHDR] AI upscaler %@ did not load: %@", network, "\(error)")
@@ -73,7 +86,7 @@ final class LambentNeuralScaler {
     static func loadNow(_ network: String, device: MTLDevice) -> LambentNeuralScaler? {
         _ = scaler(network, device: device)
         loadQueue.sync {}
-        return loaded.withLock { $0[network] }
+        return loaded.withLock { $0[network + (preferInt8 ? " int8" : "")] }
     }
 
     struct Failure: Error, CustomStringConvertible {
@@ -82,6 +95,8 @@ final class LambentNeuralScaler {
     }
 
     let network: String
+    /// The int8 (W8A8) model.
+    let int8: Bool
     private let device: MTLDevice
     private let queue: MTLCommandQueue
     private let packPipeline: MTLComputePipelineState
@@ -96,8 +111,9 @@ final class LambentNeuralScaler {
         let features: MLFeatureProvider
         let options = MLPredictionOptions()
         var base: MTLTexture?, luma: MTLTexture?, chroma: MTLTexture?
-        /// This picture's Neural Engine and pack milliseconds.
-        var engineMs = 0.0, packMs = 0.0
+        /// This picture's Neural Engine and pack milliseconds, and the pack's wall time (commit to done, waiting behind other GPU work
+        /// included).
+        var engineMs = 0.0, packMs = 0.0, packWallMs = 0.0
 
         init(device: MTLDevice) throws {
             let (w2, h2) = (LambentNeuralScaler.modelSize.0 / 2, LambentNeuralScaler.modelSize.1 / 2)
@@ -121,8 +137,9 @@ final class LambentNeuralScaler {
     private let slots: [Slot]
     private var next = 0
 
-    private init(device: MTLDevice, network: String) throws {
-        guard let url = Self.modelURL(network) else { throw Failure("no model \(network) (tvos/scripts/copy_vsr_models.sh)") }
+    private init(device: MTLDevice, network: String, int8: Bool) throws {
+        guard let url = Self.modelURL(network, int8: int8) else { throw Failure("no model \(network) (tvos/scripts/copy_vsr_models.sh)") }
+        self.int8 = url.lastPathComponent.contains("-w8a8-")
         guard let queue = device.makeCommandQueue() else { throw Failure("no command queue") }
         self.device = device
         self.queue = queue
@@ -181,9 +198,11 @@ final class LambentNeuralScaler {
             MTLSize(width: Self.modelSize.0 / 2, height: Self.modelSize.1 / 2, depth: 1),
             threadsPerThreadgroup: MTLSize(width: 16, height: 16, depth: 1))
         encoder.endEncoding()
+        let committed = CACurrentMediaTime()
         buffer.commit()
         buffer.waitUntilCompleted()
         if let error = buffer.error { throw error }
+        slot.packWallMs = (CACurrentMediaTime() - committed) * 1000
         slot.packMs = (buffer.gpuEndTime - buffer.gpuStartTime) * 1000
         let started = CACurrentMediaTime()
         _ = try model.prediction(from: slot.features, options: slot.options)
