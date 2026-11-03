@@ -136,6 +136,7 @@ import '../../../util/subtitle_track_logic.dart';
 import '../../../util/audio_track_logic.dart';
 import '../../../util/artwork_request_size.dart';
 import '../../../util/platform_detection.dart';
+import '../../../util/lambent_server.dart';
 import 'detail_layout_metrics.dart';
 import 'play_item_on_screen.dart';
 
@@ -11960,7 +11961,7 @@ class _DownloadButtonState extends State<_DownloadButton> {
     int? audioStreamIndex,
   }) async {
     final isMulti = _isBatchType(item.type);
-    if (!service.canDownloadTranscoded ||
+    if (!service.canTranscodeDownload(item) ||
         (!isMulti && !_supportsTranscoding(item.type))) {
       _startDownload(
         context,
@@ -12013,6 +12014,10 @@ class _DownloadButtonState extends State<_DownloadButton> {
     String? note,
     Widget? header,
   }) {
+    // Lambent Server downloads only originals: no choice to offer.
+    if (isLambentServerId(item.serverId)) {
+      return Future.value(DownloadQuality.original);
+    }
     final isMulti = _isBatchType(item.type);
     final supportsTranscoding = isMulti || _supportsTranscoding(item.type);
     final batchItems = items;

@@ -42,6 +42,7 @@ import 'media_server_client_factory.dart';
 import 'media_store_service.dart';
 import 'storage_path_service.dart';
 import 'web_download_helper.dart';
+import '../../util/lambent_server.dart';
 
 class DownloadProgress {
   final String itemId;
@@ -2226,6 +2227,13 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
   /// downloads originals.
   bool get canDownloadTranscoded => _client.serverType != ServerType.plex;
 
+  /// Whether [item] may be downloaded transcoded. Lambent Server never
+  /// encodes a download (docs/DOWNLOADS.md): a transcode would arrive at
+  /// encode speed and could not resume, and the device enhances the original
+  /// when it plays.
+  bool canTranscodeDownload(AggregatedItem item) =>
+      canDownloadTranscoded && !isLambentServerId(item.serverId);
+
   /// [mediaSourceId] picks one version of a multi-version item, the server's
   /// default when null. [audioStreamIndex] picks the audio track a transcode
   /// keeps, the audio language settings' choice when null.
@@ -2236,7 +2244,7 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
     String? mediaSourceId,
     int? audioStreamIndex,
   }) {
-    if (!canDownloadTranscoded) quality = DownloadQuality.original;
+    if (!canTranscodeDownload(item)) quality = DownloadQuality.original;
     // Browser downloads are delegated to the platform and do not have a
     // process-owned transfer to schedule.
     if (PlatformDetection.isWeb) {
