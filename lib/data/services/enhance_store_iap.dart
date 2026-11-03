@@ -75,7 +75,11 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
       proof: proof,
       needsFinish: p.pendingCompletePurchase,
       handle: p,
-      id: p.purchaseID,
+      // Play may leave the order id out (test purchases do); its purchase
+      // token names the purchase on its own.
+      id: PlatformDetection.isAndroid && data.isNotEmpty
+          ? data
+          : p.purchaseID,
     );
   }
 
