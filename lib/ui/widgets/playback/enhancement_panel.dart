@@ -256,7 +256,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         ),
       if (widget.deviceUpscale != null)
         _EnhancementRow(
-          label: 'Upscale on this device',
+          label: 'On this device',
           value: widget.deviceUpscale!,
           onStep: (_, _) {},
         ),

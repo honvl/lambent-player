@@ -34,6 +34,54 @@ final class LambentClientUpscaleTests: XCTestCase {
     XCTAssertNil(LambentClientUpscale.planHeight(URL(string: "file:///var/mobile/Downloads/film.mkv?cup=2160")))
   }
 
+  func testThePlanGivesTheLiftWithChdr() {
+    XCTAssertTrue(LambentClientUpscale.planLift(URL(string: enhanced + "&chdr=1")))
+    XCTAssertTrue(LambentClientUpscale.planLift(URL(string: enhanced + "&CHDR=1&cup=2160")))
+    XCTAssertFalse(LambentClientUpscale.planLift(URL(string: enhanced)))
+    XCTAssertFalse(LambentClientUpscale.planLift(URL(string: enhanced + "&chdr=0")))
+    XCTAssertFalse(LambentClientUpscale.planLift(URL(string: "http://192.168.1.20:47800/Videos/i_42/stream?static=true&chdr=1")))
+  }
+
+  // MARK: - Only what is worth the iPad's power
+
+  private func work(
+    lift: Bool = false, hdrSource: Bool = false, headroom: CGFloat = 2, lowPower: Bool = false, cup: Bool = true,
+    picture: (Int, Int) = (1920, 1080), fitted: (Int, Int) = (2388, 1343)
+  ) -> LambentClientUpscale.Work? {
+    LambentClientUpscale.iPadWork(
+      liftAsked: lift, sourceHDR: hdrSource, headroom: headroom, lowPower: lowPower, upscaleAsked: cup, picture: picture,
+      fitted: fitted)
+  }
+
+  func testA1080pTitleFullScreenIsLeftToAVPlayer() {
+    // 1.24x on an 11-inch iPad Pro: nothing worth the Metal path.
+    XCTAssertNil(work())
+    // A 720p title there is 1.86x: upscaled.
+    XCTAssertEqual(work(picture: (1280, 720)), .init(hdr: false, size: (2388, 1343)))
+  }
+
+  func testTheLiftRunsWhenThePlanAsksAndTheScreenHasTheHeadroom() {
+    // With the lift running anyway, its last pass scales too.
+    XCTAssertEqual(work(lift: true), .init(hdr: true, size: (2388, 1343)))
+    // Without `cup` the lifted picture keeps its size.
+    XCTAssertEqual(work(lift: true, cup: false), .init(hdr: true, size: nil))
+  }
+
+  func testNoLiftWithoutHeadroomInLowPowerModeOrForAnHDRPicture() {
+    XCTAssertNil(work(lift: true, headroom: 1, cup: false))
+    XCTAssertNil(work(lift: true, lowPower: true, cup: false))
+    XCTAssertNil(work(lift: true, hdrSource: true, cup: false))
+    // The PC's HDR10 is still upscaled where that pays.
+    XCTAssertEqual(work(lift: true, hdrSource: true, picture: (1280, 720)), .init(hdr: false, size: (2388, 1343)))
+  }
+
+  func testWorkLabels() {
+    XCTAssertEqual(LambentClientUpscale.label(hdr: true, scaler: nil), "Auto HDR")
+    XCTAssertEqual(LambentClientUpscale.label(hdr: true, scaler: .catmullRom), "Auto HDR · Shader upscale")
+    XCTAssertEqual(LambentClientUpscale.label(hdr: false, scaler: .neural(fast: false)), "AI upscale")
+    XCTAssertNil(LambentClientUpscale.label(hdr: false, scaler: LambentLiftProcessor.Scaler.none))
+  }
+
   // MARK: - Device selection
 
   /// A GPU of Apple family `family` (7: A14, M1; 8: A15, A16, M2; 9: A17 Pro, M3, M4; 10: A19, M5).

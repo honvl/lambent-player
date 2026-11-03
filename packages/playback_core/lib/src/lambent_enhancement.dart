@@ -131,6 +131,25 @@ class LambentEnhancement {
 
   static const clientUpscaleKey = 'cup';
 
+  /// The plan's HDR step for this device: lift the SDR picture to HDR10 here
+  /// (`chdr=1` in the enhanced stream's query). The iPad's player
+  /// (LambentClientUpscale.swift) reads the same member, and lifts only where
+  /// the screen has the headroom and Low Power Mode is off.
+  static bool clientLift(String? url) {
+    if (!isEnhancedUrl(url)) return false;
+    final value = _query(url!).entries
+        .where((e) => e.key.toLowerCase() == clientLiftKey)
+        .map((e) => e.value)
+        .lastOrNull;
+    return value?.trim() == '1';
+  }
+
+  static const clientLiftKey = 'chdr';
+
+  /// The plan gives this device any step of its own (`cup` or `chdr`).
+  static bool clientSteps(String? url) =>
+      clientUpscaleLines(url) != null || clientLift(url);
+
   /// The settings [url] carries.
   static LambentEnhancement fromUrl(String url) {
     final query = _query(url);

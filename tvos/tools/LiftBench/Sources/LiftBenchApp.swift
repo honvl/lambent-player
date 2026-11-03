@@ -190,7 +190,13 @@ final class PlayerHost: UIView {
             let r = p.takeReport()
             print(String(format: "BENCH iPad HDR lift %@: %.2f ms a picture, GPU %.2f ms p95 %.2f (%@)", what, wall, r.meanMs, r.p95Ms, r.format))
         }
-        if ProcessInfo.processInfo.environment["LIFT_HDR"] != nil { print("BENCH done"); return }
+        if ProcessInfo.processInfo.environment["LIFT_HDR"] != nil {
+            // The lift shown (Catmull-Rom in its last pass, as the iPad runs it with `cup`), and at the picture's own size: the
+            // screen's current EDR headroom in each report says whether the display layer shows it as HDR.
+            runHDR = true
+            runs = [("sdr1080p24", "HDR lift shown", [.catmullRom]), ("sdr1080p24", "HDR lift at its size shown", [LambentLiftProcessor.Scaler.none])]
+            return next()
+        }
         let scalers: [LambentLiftProcessor.Scaler] = [.neural(fast: false), .neural(fast: true), fsr, ravu, .catmullRom]
         if let device = MTLCreateSystemDefaultDevice() { _ = LambentNeuralScaler.loadNow("neural-low", student: true, device: device) }
         iPadCapacity(scalers, pictures, label: "1080p")
@@ -514,7 +520,7 @@ final class PlayerHost: UIView {
         if let ladder { processor.force(ladder: ladder) }
         // A scaler forced is timed at the run's size, under 1.4x too; the player's own ladder keeps its rule.
         processor.neuralAnyScale = ladder != nil
-        processor.outputSize = runSize
+        processor.outputSize = name.contains("at its size") ? nil : runSize
         processor.frameRate = clip.hasSuffix("60") ? 59.94 : clip.hasSuffix("30") ? 29.97 : 23.976
         self.processor = processor
         let item = AVPlayerItem(url: url)
@@ -592,8 +598,10 @@ final class PlayerHost: UIView {
             let shownCount = enqueued
             enqueued = 0
             let label = label
+            let edr = window?.windowScene?.screen.currentEDRHeadroom ?? 0
             queue.async {
                 let r = processor.takeReport()
+                if label.contains("HDR lift") { print(String(format: "BENCH %@: current EDR headroom %.2f", label, edr)) }
                 print(String(format: "BENCH %@: %@ gpu_ms mean %.2f p95 %.2f ane_ms %.2f late %d shown %.1f fps (%@) thermal %d", label, r.format,
                              r.meanMs, r.p95Ms, r.engineMs, r.late, Double(shownCount) / secs, r.scaler, ProcessInfo.processInfo.thermalState.rawValue))
             }

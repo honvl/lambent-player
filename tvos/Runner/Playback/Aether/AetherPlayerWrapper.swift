@@ -64,12 +64,13 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     /// "message": ...}`.
     var onPlayerError: (([String: Any]) -> Void)?
 
-    /// What upscales on this device right now (`LambentClientUpscale.label`: "AI upscale", "Shader upscale"), nil when nothing does.
+    /// What runs on this device right now (`LambentClientUpscale.label`: "Auto HDR", "AI upscale", "Auto HDR · Shader upscale"), nil
+    /// when nothing does.
     var onLambentUpscale: ((String?) -> Void)?
 
     #if os(iOS)
-        /// The plan's client upscale for the stream playing (`play`), so it comes back after PiP.
-        private var lambentUpscalePlan: (lines: Int, compare: Bool)?
+        /// The plan's client steps for the stream playing (`play`), so they come back after PiP.
+        private var lambentUpscalePlan: (lines: Int?, lift: Bool, compare: Bool)?
 
         /// PiP shows AVPlayer's own picture, which the upscale hides: the upscale stops while PiP is on.
         func setLambentUpscaleSuspended(_ suspended: Bool) {
@@ -78,7 +79,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 return
             }
             guard let plan = lambentUpscalePlan, ownsEngine, let engine = Self.sharedEngine() else { return }
-            _ = hdrLift?.start(engine: engine, in: playerView, planHeight: plan.lines, compare: plan.compare)
+            _ = hdrLift?.start(engine: engine, in: playerView, planHeight: plan.lines, lift: plan.lift, compare: plan.compare)
         }
     #endif
 
@@ -1198,14 +1199,16 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                     _ = hdrLift?.start(engine: engine, in: playerView)
                 }
             #elseif os(iOS)
-                // Only when Lambent Server's plan gives this device the upscale (`cup`; LambentClientUpscale.swift).
+                // Only when Lambent Server's plan gives this device the upscale (`cup`) or the HDR lift (`chdr=1`;
+                // LambentClientUpscale.swift).
                 lambentUpscalePlan = nil
-                if !audioOnly, let lines = LambentClientUpscale.planHeight(url) {
+                let lines = LambentClientUpscale.planHeight(url), lift = LambentClientUpscale.planLift(url)
+                if !audioOnly, lines != nil || lift {
                     let compare = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
                         .contains { $0.name == "cmp" && $0.value == "1" } ?? false
-                    lambentUpscalePlan = (lines, compare)
+                    lambentUpscalePlan = (lines, lift, compare)
                     if !engine.pictureInPictureActive {
-                        _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, compare: compare)
+                        _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, lift: lift, compare: compare)
                     }
                 }
             #endif

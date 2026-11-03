@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:moonfin/playback/lambent_device_upscale.dart';
 import 'package:moonfin/ui/widgets/playback/enhancement_chip.dart';
 import 'package:playback_core/playback_core.dart';
 
@@ -65,7 +66,49 @@ void main() {
     });
   });
 
+  group('the plan gives the HDR lift to the device', () {
+    test('with chdr=1', () {
+      expect(LambentEnhancement.clientLift('$_enhanced&chdr=1'), isTrue);
+      expect(LambentEnhancement.clientSteps('$_enhanced&chdr=1'), isTrue);
+      expect(LambentEnhancement.clientSteps('$_enhanced&cup=2160'), isTrue);
+    });
+
+    test('not otherwise', () {
+      expect(LambentEnhancement.clientLift(_enhanced), isFalse);
+      expect(LambentEnhancement.clientLift('$_enhanced&chdr=0'), isFalse);
+      expect(LambentEnhancement.clientSteps(_enhanced), isFalse);
+      expect(
+        LambentEnhancement.clientLift(
+          'http://192.168.1.118:47800/Videos/i_1/stream?static=true&chdr=1',
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('the chip', () {
+    test('names the HDR lift running on the device', () {
+      const sdr =
+          'http://192.168.1.118:47800/v1/enhanced/plex-694844/index.m3u8'
+          '?tv=1&q=4&hdr=0&dv=0&blacks=0&maxh=1080&audio=0&chdr=1';
+      expect(
+        withDeviceUpscale(lambentEnhancementLabel(sdr), sdr, 'Auto HDR'),
+        '1080p · Auto HDR',
+      );
+    });
+
+    test('leaves out a step the device found not worth its power', () {
+      final url = '$_enhanced&cup=2160';
+      expect(
+        withDeviceUpscale(
+          lambentEnhancementLabel(url),
+          url,
+          lambentDeviceNotNeeded,
+        ),
+        '1080p HDR',
+      );
+    });
+
     test('names the upscale running on the device', () {
       final url = '$_enhanced&cup=2160';
       expect(

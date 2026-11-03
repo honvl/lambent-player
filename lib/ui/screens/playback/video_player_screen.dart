@@ -8696,7 +8696,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         compareOnly: LambentEnhancement.compareOnly,
         current: current,
         enhanced: enhanced,
-        deviceUpscale: LambentEnhancement.clientUpscaleLines(url) == null
+        deviceUpscale: !LambentEnhancement.clientSteps(url)
             ? null
             : lambentDeviceUpscale.value ?? 'Starting',
         onSetEnhancement: (on) {

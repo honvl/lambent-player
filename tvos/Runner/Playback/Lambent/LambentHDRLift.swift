@@ -29,10 +29,11 @@ import os
 /// `flutter.pref_lambent_enhance_on_pc` / `flutter.pref_lambent_client_hdr` /
 /// `flutter.pref_lambent_client_upscale`. Logs `[LambentHDR]` lines every 2 s.
 ///
-/// On the iPad it only upscales, and only when Lambent Server's plan asks (`cup` in the enhanced stream's URL;
-/// LambentClientUpscale.swift): the picture keeps the PC's colours, SDR or HDR10, an HDR10 one through the shaders (the AI upscaler's
-/// network was trained on SDR), and a Dolby Vision stream is left to AVPlayer, which keeps its metadata. In a compare (`cmp=1`, the
-/// PC's original on the left half) only the right half is upscaled here, over AVPlayer's own picture.
+/// On the iPad it runs only when Lambent Server's plan asks (LambentClientUpscale.swift): `cup` in the enhanced stream's URL upscales
+/// (the picture keeps the PC's colours, SDR or HDR10, an HDR10 one through the shaders: the AI upscaler's network was trained on SDR),
+/// `chdr=1` lifts an SDR picture to HDR10; each only where it is worth the iPad's power (`LambentClientUpscale.iPadWork`), else
+/// AVPlayer shows the picture itself. A Dolby Vision stream is left to AVPlayer, which keeps its metadata. In a compare (`cmp=1`, the
+/// PC's original on the left half) only the right half is done here, over AVPlayer's own picture.
 @MainActor
 final class LambentHDRLift {
     /// On while Enhance on PC is off (Flutter's defaults: Enhance on PC on, HDR on this TV on, so an unset key is true).
@@ -67,6 +68,8 @@ final class LambentHDRLift {
     private var upscale = true
     /// The plan's most lines for the client's upscale (the iPad); nil: the screen's size.
     private var maxHeight: Int?
+    /// The plan gives the iPad the HDR lift (`chdr=1`).
+    private var liftAsked = false
     /// A compare stream: the left half stays AVPlayer's.
     private var compare = false
     /// What the player's chip and panel call the upscale running here (`LambentClientUpscale.label`), nil when none is; called on the
@@ -88,12 +91,12 @@ final class LambentHDRLift {
     var isRunning: Bool { output != nil }
 
     /// Starts on the engine's AVPlayer once its item exists. On the Apple TV only for SDR. On the iPad only when the plan asks
-    /// (`planHeight`, its `cup`), and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
-    func start(engine: AetherEngine, in view: UIView, planHeight: Int? = nil, compare: Bool = false) -> Bool {
+    /// (`planHeight`, its `cup`; `lift`, its `chdr=1`), and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
+    func start(engine: AetherEngine, in view: UIView, planHeight: Int? = nil, lift: Bool = false, compare: Bool = false) -> Bool {
         #if os(tvOS)
             guard engine.sourceVideoFormat == .sdr else { return false }
         #else
-            guard planHeight != nil, engine.sourceVideoFormat != .dolbyVision else { return false }
+            guard planHeight != nil || lift, engine.sourceVideoFormat != .dolbyVision else { return false }
         #endif
         guard output == nil, let layer = engine.nativePlayerLayer, let item = layer.player?.currentItem
         else { return false }
@@ -122,6 +125,7 @@ final class LambentHDRLift {
             upscale = true
         #endif
         maxHeight = planHeight
+        liftAsked = lift
         self.compare = compare
         liftView.rightHalfOnly = compare
         started = false
@@ -152,9 +156,9 @@ final class LambentHDRLift {
         let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
         link.add(to: .main, forMode: .common)
         self.link = link
-        NSLog("[LambentHDR] started fps %.3f hdr %@ upscale %@ deepen %@ bitrate %lld plan %@%@", frameRate, hdr ? "on" : "off",
+        NSLog("[LambentHDR] started fps %.3f hdr %@ upscale %@ deepen %@ bitrate %lld plan %@%@%@", frameRate, hdr ? "on" : "off",
             upscale ? "on" : "off", hdr && Self.deepenBlacks ? "on" : "off", engine.sourceVideoBitrate,
-            planHeight.map { "cup=\($0)" } ?? "none", compare ? " compare" : "")
+            planHeight.map { "cup=\($0)" } ?? "none", lift ? " chdr" : "", compare ? " compare" : "")
         return true
     }
 
@@ -236,15 +240,29 @@ final class LambentHDRLift {
                         processor.outputSize = (Int(CGFloat(w) * k), Int(CGFloat(h) * k))
                     }
                 #else
+                    // Only the work worth the iPad's power: the lift, the upscale (to the player's place on the screen, in pixels, up to
+                    // the plan's lines), both, or neither (AVPlayer shows it).
+                    guard let host, let screen = host.window?.screen else { stop(); return }
+                    let fitted = LambentClientUpscale.outputSize(
+                        picture: (w, h), bounds: host.bounds.size, scale: screen.nativeScale, maxHeight: maxHeight)
+                    guard let work = LambentClientUpscale.iPadWork(
+                        liftAsked: liftAsked, sourceHDR: alreadyHDR, headroom: screen.potentialEDRHeadroom,
+                        lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled, upscaleAsked: maxHeight != nil, picture: (w, h),
+                        fitted: fitted)
+                    else {
+                        NSLog("[LambentHDR] %dx%d to %dx%d, %@, headroom %.2f: nothing worth doing here: AVPlayer shows it", w, h,
+                            fitted.0, fitted.1, alreadyHDR ? "HDR" : "SDR", screen.potentialEDRHeadroom)
+                        stop()
+                        report(label: LambentClientUpscale.notNeeded)
+                        return
+                    }
+                    hdr = work.hdr
+                    processor.hdr = hdr
+                    processor.outputSize = work.size
                     // The PC's HDR10 keeps its colours (upscaling only); the shaders take it.
                     if alreadyHDR {
                         NSLog("[LambentHDR] the stream is HDR (%@): upscaling with the shaders", transfer ?? "")
                         processor.skipNeural()
-                    }
-                    // Upscaled to the player's place on the screen, in pixels, up to the plan's lines.
-                    if let host, let screen = host.window?.screen {
-                        processor.outputSize = LambentClientUpscale.outputSize(
-                            picture: (w, h), bounds: host.bounds.size, scale: screen.nativeScale, maxHeight: maxHeight)
                     }
                 #endif
                 processor.frameRate = frameRate
@@ -253,11 +271,11 @@ final class LambentHDRLift {
                     stop()
                     return
                 }
-                if hdr, let view = host { requestHDR10(in: view, width: w, height: h) }
+                if hdr, let view = self.host { requestHDR10(in: view, width: w, height: h) }
                 updateLead(link)
                 NSLog("[LambentHDR] first picture %dx%d, %@ at %.3f Hz, shown at %@, scaler %@", w, h, hdr ? "HDR10" : "SDR", frameRate,
                     processor.outputSize.map { "\($0.0)x\($0.1)" } ?? "its own size", "\(processor.scaler)")
-                report(label: processor.scales(w, h) ? LambentClientUpscale.label(processor.scaler) : nil)
+                report(label: LambentClientUpscale.label(hdr: hdr, scaler: processor.scales(w, h) ? processor.scaler : nil))
             }
             let renderer = displayLayer.sampleBufferRenderer
             let processor = processor
@@ -297,11 +315,13 @@ final class LambentHDRLift {
             #else
                 let switching = false
             #endif
+            let hdr = hdr
             queue.async { [processor] in
                 let r = processor.takeReport()
                 // The ladder may have stepped down (or to none) since the last report.
-                let label = r.frames > 0 && processor.outputSize != nil && r.format.contains("->")
-                    ? LambentClientUpscale.label(processor.scaler) : nil
+                let label = r.frames > 0
+                    ? LambentClientUpscale.label(
+                        hdr: hdr, scaler: processor.outputSize != nil && r.format.contains("->") ? processor.scaler : nil) : nil
                 DispatchQueue.main.async { [weak self] in
                     guard let self, self.output != nil else { return }
                     self.report(label: label)
