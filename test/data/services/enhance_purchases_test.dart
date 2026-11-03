@@ -88,8 +88,12 @@ class FakeStore implements EnhanceStore {
   @override
   Future<bool> isAvailable() async => true;
 
+  bool productsAvailable = true;
+
   @override
-  Future<List<EnhanceProduct>> products() async => const [
+  Future<List<EnhanceProduct>> products() async => !productsAvailable
+      ? const []
+      : const [
     EnhanceProduct(
       id: 'app.getlambent.player.enhance.monthly',
       title: 'Lambent Enhance',
@@ -115,13 +119,14 @@ class FakeStore implements EnhanceStore {
       finished.add(transaction);
 }
 
-StoreTransaction purchased(StoreProof proof, {Object? handle}) =>
+StoreTransaction purchased(StoreProof proof, {Object? handle, String? id}) =>
     StoreTransaction(
       productId: 'app.getlambent.player.enhance.monthly',
       status: StoreTransactionStatus.purchased,
       proof: proof,
       needsFinish: true,
       handle: handle ?? Object(),
+      id: id,
     );
 
 /// Lets the listener run its awaits to the end.
@@ -215,6 +220,16 @@ void main() {
     expect(server.tokens.first, 'tok');
   });
 
+  test('products the store lacked at launch load on a later try', () async {
+    store.productsAvailable = false;
+    await purchases.start();
+    expect(purchases.products, isEmpty);
+    store.productsAvailable = true;
+    await purchases.loadProducts();
+    expect(purchases.products, hasLength(2));
+    expect(purchases.canBuyInApp, isTrue);
+  });
+
   test('a server without the licence route is not a Lambent Server', () async {
     server.hasLicenceRoute = false;
     await purchases.start();
@@ -293,6 +308,29 @@ void main() {
     await settle();
     expect(store.finished, isEmpty);
     expect(purchases.message, contains('not for this app'));
+  });
+
+  test('a purchase delivered twice at once is forwarded once, '
+      'and both copies are finished', () async {
+    await purchases.start();
+    store.deliver([purchased(const AppStoreProof('jws-5'), id: '1000')]);
+    store.deliver([purchased(const AppStoreProof('jws-5'), id: '1000')]);
+    await settle();
+    expect(server.forwarded, hasLength(1));
+    expect(store.finished, hasLength(2));
+    expect(purchases.licence?.enhance, EnhanceState.active);
+  });
+
+  test('a copy of a purchase the server refused is forwarded again', () async {
+    await purchases.start();
+    server.storeStatus = 502;
+    store.deliver([purchased(const AppStoreProof('jws-6'), id: '1001')]);
+    await settle();
+    server.storeStatus = 200;
+    store.deliver([purchased(const AppStoreProof('jws-6'), id: '1001')]);
+    await settle();
+    expect(server.forwarded, hasLength(2));
+    expect(store.finished, hasLength(1));
   });
 
   test('a store re-delivering the same open purchase is counted once', () async {

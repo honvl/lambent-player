@@ -17,6 +17,7 @@ class StoreTransaction {
     this.proof,
     this.needsFinish = false,
     this.handle,
+    this.id,
   });
 
   final String productId;
@@ -26,6 +27,9 @@ class StoreTransaction {
   /// The store holds this transaction open until [EnhanceStore.finish].
   final bool needsFinish;
   final Object? handle;
+
+  /// The store's transaction id, when it gives one.
+  final String? id;
 }
 
 /// One way to pay for Lambent Enhance: monthly or yearly.
@@ -117,7 +121,19 @@ class EnhancePurchases extends ChangeNotifier {
       _sub ??= store.updates.listen(_onUpdates);
     }
     await refresh();
-    if (store != null && _isLambent) {
+    await loadProducts();
+  }
+
+  Future<void>? _loadingProducts;
+
+  /// Loads the store's products, unless they are loaded or loading. The
+  /// settings screen calls it again in case the store had nothing at launch.
+  Future<void> loadProducts() {
+    final store = this.store;
+    if (store == null || !_isLambent || _products.isNotEmpty) {
+      return Future.value();
+    }
+    return _loadingProducts ??= () async {
       try {
         if (await store.isAvailable()) {
           _products = await store.products();
@@ -125,8 +141,10 @@ class EnhancePurchases extends ChangeNotifier {
         }
       } catch (e) {
         debugPrint('EnhancePurchases: products failed: $e');
+      } finally {
+        _loadingProducts = null;
       }
-    }
+    }();
   }
 
   /// Asks the server for the licence again.
@@ -194,6 +212,11 @@ class EnhancePurchases extends ChangeNotifier {
     }
   }
 
+  /// Forwards by transaction id, each completing with whether the server
+  /// confirmed it. StoreKit 2 delivers a purchase twice, as the purchase's
+  /// result and as a transaction update; the second copy waits for the first.
+  final Map<String, Future<bool>> _forwards = {};
+
   Future<void> _confirm(StoreTransaction t) async {
     final proof = t.proof;
     if (proof == null) {
@@ -202,10 +225,19 @@ class EnhancePurchases extends ChangeNotifier {
       _busy = false;
       return;
     }
+    final id = t.id;
+    final earlier = id == null ? null : _forwards[id];
+    if (earlier != null) {
+      if (await earlier) await _finishQuietly(t);
+      return;
+    }
+    final confirmed = Completer<bool>();
+    if (id != null) _forwards[id] = confirmed.future;
     _busy = true;
     notifyListeners();
     try {
       _licence = await client.forward(proof);
+      confirmed.complete(true);
       _isLambent = true;
       _unconfirmed.removeWhere((u) => identical(u.handle, t.handle));
       await _finishQuietly(t);
@@ -213,6 +245,9 @@ class EnhancePurchases extends ChangeNotifier {
           ? 'Lambent Enhance is on for your server.'
           : null;
     } on LicenceException catch (e) {
+      confirmed.complete(false);
+      // A later retry forwards it again.
+      _forwards.remove(id);
       // Not finished: the store keeps it and hands it back on the next
       // launch, and retryUnconfirmed can try again before then.
       if (!_unconfirmed.any((u) => identical(u.handle, t.handle))) {

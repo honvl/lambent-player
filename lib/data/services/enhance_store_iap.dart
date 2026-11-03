@@ -75,6 +75,7 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
       proof: proof,
       needsFinish: p.pendingCompletePurchase,
       handle: p,
+      id: p.purchaseID,
     );
   }
 

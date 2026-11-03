@@ -156,9 +156,16 @@ class _LambentEnhancementScreen extends StatelessWidget {
 /// the server says, the store's subscriptions in store builds, and the
 /// server's own buy page in sideloaded Android builds. Shows nothing for a
 /// server that is not Lambent Server.
-class _EnhanceSubscriptionSection extends StatelessWidget {
+class _EnhanceSubscriptionSection extends StatefulWidget {
   const _EnhanceSubscriptionSection();
 
+  @override
+  State<_EnhanceSubscriptionSection> createState() =>
+      _EnhanceSubscriptionSectionState();
+}
+
+class _EnhanceSubscriptionSectionState
+    extends State<_EnhanceSubscriptionSection> {
   /// Sideloaded Android may send people to the server's checkout page; store
   /// builds sell only through their store, and iOS and Apple TV builds
   /// without a store link out to nothing.
@@ -168,6 +175,14 @@ class _EnhanceSubscriptionSection extends StatelessWidget {
         DistributionChannel.aab || DistributionChannel.androidTvAab => false,
         _ => true,
       };
+
+  @override
+  void initState() {
+    super.initState();
+    // The store may have had nothing to offer at launch (offline, or not
+    // signed in to the App Store yet).
+    LambentEnhanceService.instance.current?.loadProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
