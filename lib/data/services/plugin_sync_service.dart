@@ -23,6 +23,7 @@ import '../../preference/preference_constants.dart' as prefs;
 import '../../preference/seerr_preferences.dart';
 import '../../preference/seerr_row_config.dart';
 import '../../preference/user_preferences.dart';
+import '../../util/lambent_features.dart';
 import '../../util/platform_detection.dart';
 
 enum _PluginAvailabilityStatus { available, unavailable, unknown }
@@ -79,7 +80,9 @@ class PluginSyncService extends ChangeNotifier {
   bool _seerrEnabled = false;
   bool get seerrEnabled => _seerrEnabled;
   bool get seerrAvailable =>
-      _pluginAvailable && _seerrEnabled && _prefs.get(UserPreferences.seerrEnabled);
+      lambentShowsSeerr &&
+      _pluginAvailable &&
+      _seerrEnabled && _prefs.get(UserPreferences.seerrEnabled);
   bool _seerrInfoAvailable = false;
   bool get seerrInfoAvailable => _seerrInfoAvailable;
 

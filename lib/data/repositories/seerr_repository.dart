@@ -6,6 +6,7 @@ import '../services/seerr/seerr_api_models.dart';
 import '../services/seerr/seerr_discover_sliders.dart';
 import '../services/seerr/seerr_http_client.dart';
 import '../services/seerr/seerr_models.dart';
+import '../../util/lambent_features.dart';
 
 class SeerrRepository {
   final PreferenceStore _store;
@@ -50,7 +51,7 @@ class SeerrRepository {
   int _discoverSlidersAtMs = 0;
   static const _discoverSlidersCacheDurationMs = 5 * 60 * 1000;
 
-  bool get isAvailable => _isAvailable;
+  bool get isAvailable => lambentShowsSeerr && _isAvailable;
   bool get isMoonfinMode => _isMoonfinMode;
 
   /// Whether the server has Seerr configured and enabled, regardless of whether

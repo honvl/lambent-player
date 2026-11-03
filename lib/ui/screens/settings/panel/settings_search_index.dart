@@ -2046,6 +2046,7 @@ List<_SettingsSearchEntry> _buildSettingsSearchIndex({
       'letterboxd',
       'reorder',
     ]),
+    if (lambentShowsSeerr)
     seerr.screen(keywords: [
       'requests',
       'jellyseerr',
