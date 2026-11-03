@@ -6,6 +6,7 @@ import 'package:server_core/server_core.dart';
 import '../../../data/services/plugin_sync_service.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/focus/input_mode_tracker.dart';
+import '../../../util/lambent_features.dart';
 import '../../widgets/adaptive/adaptive_dialog.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/settings/clean_settings_typography.dart';
@@ -250,7 +251,7 @@ class _PluginSettingsSectionState extends State<PluginSettingsSection> {
     final services = <String>[
       if (_syncService.mdblistAvailable) 'MDBList',
       if (_syncService.tmdbAvailable) 'TMDB',
-      if (_syncService.seerrEnabled) 'Seerr',
+      if (lambentShowsSeerr && _syncService.seerrEnabled) 'Seerr',
     ];
 
     return _SyncCard(

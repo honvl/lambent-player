@@ -35,6 +35,7 @@ import '../../../playback/display_hdr_probe.dart';
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/gamepad/gamepad_navigation_scope.dart';
 import '../../../util/lambent_brand.dart';
+import '../../../util/lambent_features.dart';
 import '../../../util/language_codes.dart';
 import '../../../util/live_tv_library.dart';
 import '../../../util/locale_names.dart';
@@ -391,7 +392,9 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                 onTap: () =>
                     context.pushSettingsScreen(const ScreensaverSettingsScreen()),
               ),
-            if (advanced)
+            if (advanced &&
+                (lambentShowsSeerr ||
+                    GetIt.instance<AchievementsService>().available))
             _PanelEntry(
               icon: Icons.hub,
               title: l10n.integrations,

@@ -63,6 +63,7 @@ class _ServicesScreenState extends State<_ServicesScreen> {
       children: [
         adaptiveListSection(
           children: [
+            if (lambentShowsSeerr)
             _TvSettingsListTile(
               autofocus: true,
               leading: Image.asset(
@@ -77,6 +78,7 @@ class _ServicesScreenState extends State<_ServicesScreen> {
             ),
             if (achievements.available)
               _TvSettingsListTile(
+                autofocus: !lambentShowsSeerr,
                 leading: const Icon(
                   Icons.military_tech,
                   color: Color(0xFFFFC107),
