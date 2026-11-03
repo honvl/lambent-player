@@ -59,6 +59,10 @@ final class PlayerHost: UIView {
         // The screen must not lock mid-run: a backgrounded app's GPU work is throttled.
         UIApplication.shared.isIdleTimerDisabled = true
         print("BENCH device \(MTLCreateSystemDefaultDevice()?.name ?? "?") apple10 \(MTLCreateSystemDefaultDevice()?.supportsFamily(.apple10) ?? false) low power \(ProcessInfo.processInfo.isLowPowerModeEnabled)")
+        #if os(iOS)
+        let scr = window?.windowScene?.screen ?? UIScreen.main
+        print("BENCH screen EDR headroom potential \(scr.potentialEDRHeadroom) current \(scr.currentEDRHeadroom) HDR playback \(AVPlayer.eligibleForHDRPlayback)")
+        #endif
         if let p = LambentLiftProcessor() { print("BENCH ladder \(p.ladder) failures \(LambentPrescaler.failures)") }
         // LIFT_STUDENT in the environment: the AI upscaler's Neural Engine student (`<network>-student`) wherever the bench says "AI upscaler".
         let student = ProcessInfo.processInfo.environment["LIFT_STUDENT"] != nil
@@ -172,6 +176,21 @@ final class PlayerHost: UIView {
         reader.startReading()
         var pictures: [CVPixelBuffer] = []
         while pictures.count < 24, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
+        // The HDR lift on the iPad (SDR in, HDR10 out): at the picture's own size, and in Catmull-Rom's last pass at the screen's.
+        for (what, size, sc) in [("1080p at its size", nil, LambentLiftProcessor.Scaler.none), ("to the screen with Catmull-Rom", Optional(runSize), .catmullRom)] {
+            guard let p = LambentLiftProcessor() else { continue }
+            p.reset(deepen: true)
+            p.force(sc)
+            p.outputSize = size
+            for i in 0..<48 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
+            _ = p.takeReport()
+            let start = CACurrentMediaTime()
+            for i in 0..<240 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
+            let wall = (CACurrentMediaTime() - start) * 1000 / 240
+            let r = p.takeReport()
+            print(String(format: "BENCH iPad HDR lift %@: %.2f ms a picture, GPU %.2f ms p95 %.2f (%@)", what, wall, r.meanMs, r.p95Ms, r.format))
+        }
+        if ProcessInfo.processInfo.environment["LIFT_HDR"] != nil { print("BENCH done"); return }
         let scalers: [LambentLiftProcessor.Scaler] = [.neural(fast: false), .neural(fast: true), fsr, ravu, .catmullRom]
         if let device = MTLCreateSystemDefaultDevice() { _ = LambentNeuralScaler.loadNow("neural-low", student: true, device: device) }
         iPadCapacity(scalers, pictures, label: "1080p")
