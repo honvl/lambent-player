@@ -346,6 +346,24 @@ class ItemDetailViewModel extends ChangeNotifier {
   AggregatedItem? _nextUp;
   AggregatedItem? get nextUp => _nextUp;
 
+  /// The episode Plex's On Deck offers for a show: the latest one partly
+  /// watched, or else [nextUp]. What the show's Play / Resume button plays,
+  /// and where its episode row opens.
+  AggregatedItem? get seriesOnDeck {
+    final started = seriesEpisodes
+        .where((e) => (e.playbackPosition ?? Duration.zero) > Duration.zero)
+        .toList();
+    if (started.isNotEmpty) {
+      started.sort(
+        (a, b) => (b.lastPlayedDate ?? DateTime(0)).compareTo(
+          a.lastPlayedDate ?? DateTime(0),
+        ),
+      );
+      return started.first;
+    }
+    return _nextUp;
+  }
+
   Map<String, double> _ratings = const {};
   Map<String, double> get ratings => _ratings;
 

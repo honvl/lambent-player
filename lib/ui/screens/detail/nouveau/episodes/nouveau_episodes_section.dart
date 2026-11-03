@@ -410,6 +410,14 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
       return true;
     }
 
+    // On a TV, coming down from the buttons lands on the episodes, as Plex's
+    // page does; Up from them reaches the seasons.
+    if (PlatformDetection.isTV) {
+      row.requestFocusAt(row.focusedIndex.clamp(0, episodes.length - 1));
+
+      return true;
+    }
+
     final selector = _seasonSelectorKey.currentState;
 
     if (selector != null &&
@@ -423,6 +431,50 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
     row.requestFocusAt(row.focusedIndex.clamp(0, episodes.length - 1));
 
     return true;
+  }
+
+  bool _openedOnNextUp = false;
+
+  /// A TV show's page opens on its next episode, as Plex's does: once, when
+  /// the episodes first show, and only while focus is still on the page's
+  /// buttons (nobody has moved yet).
+  void _scheduleOpenOnNextUp(
+    List<AggregatedItem> episodes,
+    AggregatedItem? nextUp,
+  ) {
+    if (_openedOnNextUp ||
+        !PlatformDetection.isTV ||
+        !_isSeries ||
+        episodes.isEmpty) {
+      return;
+    }
+
+    _openedOnNextUp = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final focused = FocusManager.instance.primaryFocus?.context;
+
+      final onButtons =
+          focused == null ||
+          focused.findAncestorStateOfType<DetailActionButtonsState>() ==
+              widget.actionButtonsKey.currentState;
+
+      if (!onButtons) {
+        return;
+      }
+
+      final index = nextUp == null
+          ? 0
+          : episodes
+                .indexWhere((episode) => episode.id == nextUp.id)
+                .clamp(0, episodes.length - 1);
+
+      _episodeRowKey.currentState?.requestFocusAt(index);
+    });
   }
 
   bool focusBottom() {
@@ -638,6 +690,13 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
 
     if (selected != null && seasonNumbers.contains(selected)) {
       return selected;
+    }
+
+    // Until one is picked, the season of the show's On Deck episode (the one
+    // its Play / Resume button names), as Plex opens a show.
+    final nextUpSeason = _vm.seriesOnDeck?.parentIndexNumber;
+    if (nextUpSeason != null && seasonNumbers.contains(nextUpSeason)) {
+      return nextUpSeason;
     }
 
     return seasonNumbers.first;
@@ -927,6 +986,8 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
 
         final nextUpEpisode = _resolveNextUpEpisode(episodes);
 
+        _scheduleOpenOnNextUp(episodes, nextUpEpisode);
+
         final showSeasonSelector = _isSeries && seasonNumbers.isNotEmpty;
 
         int? selectedSeasonNumber;
@@ -1107,6 +1168,15 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
     if (current?.type == 'Episode') {
       for (final episode in episodes) {
         if (episode.id == current!.id) return episode;
+      }
+    }
+
+    // The show's On Deck episode (what Play / Resume starts), not the first
+    // unwatched one: an early season left unwatched is not next.
+    final nextUp = _vm.seriesOnDeck;
+    if (nextUp != null) {
+      for (final episode in episodes) {
+        if (episode.id == nextUp.id) return episode;
       }
     }
 
