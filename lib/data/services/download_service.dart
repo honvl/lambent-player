@@ -2508,8 +2508,8 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
         serverNeedsLegacyTls: _serverNeedsLegacyTls,
       );
 
-      // Before the first transfer: iOS drops notifications, the plugin's
-      // included, until the user has answered the permission prompt.
+      // Before the first transfer: iOS and Android 13+ drop notifications,
+      // the plugin's included, until the user has answered the prompt.
       await _notificationService.requestPermissionIfNeeded();
 
       _activeDownloads[item.id] = DownloadProgress(
