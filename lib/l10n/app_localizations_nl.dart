@@ -1541,6 +1541,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get queuedDownload => 'In de wachtrij';
 
   @override
+  String get downloadWaitingForServer =>
+      'Waiting for the server. The download picks up where it stopped.';
+
+  @override
   String queuedMoreCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
