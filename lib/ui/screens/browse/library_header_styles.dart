@@ -335,7 +335,7 @@ class CompactLibraryHeader extends StatelessWidget {
                   if (m.onGroupBy != null) ...[
                     gap,
                     _Pill(
-                    compact: true,
+                      compact: true,
                       icon: Icons.category_outlined,
                       label: l10n.groupByTitle,
                       value: m.groupLabel,
@@ -345,7 +345,7 @@ class CompactLibraryHeader extends StatelessWidget {
                   if (m.onShow != null) ...[
                     gap,
                     _Pill(
-                    compact: true,
+                      compact: true,
                       icon: Icons.filter_list,
                       label: l10n.libraryShowLabel,
                       value: m.showLabel,
@@ -705,14 +705,18 @@ class _AlphaLetterButtonState extends State<AlphaLetterButton>
   }
 }
 
+/// The back button. TV keeps the sidebar beside the library instead, so it
+/// draws none there.
 Widget _homeButton(LibraryHeaderModel m, double size, double iconSize) =>
-    FocusableToolbarButton(
-      focusNode: m.homeFocusNode,
-      icon: PlatformDetection.isTV ? Icons.home : Icons.arrow_back,
-      size: size,
-      iconSize: iconSize,
-      onTap: m.onHome,
-    );
+    PlatformDetection.isTV
+    ? const SizedBox.shrink()
+    : FocusableToolbarButton(
+        focusNode: m.homeFocusNode,
+        icon: Icons.arrow_back,
+        size: size,
+        iconSize: iconSize,
+        onTap: m.onHome,
+      );
 
 class _LibraryTitle extends StatelessWidget {
   const _LibraryTitle(

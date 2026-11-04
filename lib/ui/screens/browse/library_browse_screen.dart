@@ -27,6 +27,7 @@ import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/grid_focus_node_mixin.dart';
 import '../../../util/focus/grid_section_target.dart';
 import '../../../util/platform_detection.dart';
+import '../../widgets/navigation_layout.dart';
 import '../../navigation/destinations.dart';
 import '../../navigation/route_lifecycle_observer.dart';
 import '../../widgets/alphabet_scrub_rail.dart';
@@ -483,7 +484,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     switch (_prefs.get(UserPreferences.libraryStyle)) {
       case LibraryStyle.modern:
         if (key.isLeftKey) {
-          _homeButtonFocusNode.requestFocus();
+          _toolbarStart.requestFocus();
           return KeyEventResult.handled;
         }
         if (key.isRightKey) {
@@ -502,7 +503,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
       return KeyEventResult.handled;
     }
     if (event.logicalKey.isDownKey) {
-      _homeButtonFocusNode.requestFocus();
+      _toolbarStart.requestFocus();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
@@ -924,12 +925,20 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
       );
     }
     return RequestInitialFocus(
-      targetNode: _homeButtonFocusNode,
+      targetNode: _toolbarStart,
       child: screen,
     );
   }
 
   LibraryStyle get _libraryStyle => _prefs.get(UserPreferences.libraryStyle);
+
+  /// The toolbar's first control. On TV there is no home button (the sidebar
+  /// stays beside the library): the classic header gives the home node to its
+  /// Sort button, the others focus their own Sort button.
+  FocusNode get _toolbarStart =>
+      PlatformDetection.isTV && _libraryStyle != LibraryStyle.classic
+      ? _sortFocusNode
+      : _homeButtonFocusNode;
 
   bool get _usesDockedPanel =>
       _libraryStyle == LibraryStyle.docked && !_isCompact(context);
@@ -1051,7 +1060,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     if (_dockedPanelScope.focusedChild != null) {
       _dockedPanelScope.requestFocus();
     } else {
-      _homeButtonFocusNode.requestFocus();
+      _toolbarStart.requestFocus();
     }
   }
 
@@ -1217,9 +1226,12 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
         model != null &&
         _usesDockedBar &&
         MediaQuery.viewInsetsOf(context).bottom == 0;
-    return Scaffold(
-      backgroundColor: _navyBackground,
-      body: Stack(
+    // TV keeps the floating sidebar beside the library, as on Home and the
+    // details pages; the content moves right to clear it.
+    final tvSidebar =
+        PlatformDetection.isTV &&
+        _prefs.get(UserPreferences.navbarPosition) == NavbarPosition.left;
+    final body = Stack(
         children: [
           if (hasBackdrop)
             Positioned.fill(
@@ -1245,7 +1257,9 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
                 ),
               ),
             ),
-          content,
+          tvSidebar
+              ? Padding(padding: const EdgeInsets.only(left: 60), child: content)
+              : content,
           if (showDockedBar)
             Positioned(
               left: kDockedBarMargin + padding.left,
@@ -1254,7 +1268,12 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
               child: DockedLibraryBar(model: model),
             ),
         ],
-      ),
+      );
+    return Scaffold(
+      backgroundColor: _navyBackground,
+      body: PlatformDetection.isTV
+          ? NavigationLayout(showBackButton: false, child: body)
+          : body,
     );
   }
 
@@ -1775,7 +1794,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     } else if (_alphabetBarShown) {
       _allLetterFocusNode.requestFocus();
     } else {
-      _homeButtonFocusNode.requestFocus();
+      _toolbarStart.requestFocus();
     }
   }
 
@@ -2346,17 +2365,9 @@ class _LibraryHeader extends StatelessWidget {
                 ? MainAxisAlignment.center
                 : MainAxisAlignment.start,
             children: [
-              if (PlatformDetection.isTV)
-                FocusableToolbarButton(
-                  focusNode: homeFocusNode,
-                  icon: Icons.home,
-                  size: 30 * desktopScale,
-                  iconSize: 20 * desktopScale,
-                  unfocusedIconAlpha: 128,
-                  onTap: () => context.go(Destinations.home),
-                  onUpKey: _focusSearch,
-                )
-              else
+              // On TV the sidebar stays beside the library, so it, not a
+              // home button, is the way out; the toolbar starts at Sort.
+              if (!PlatformDetection.isTV) ...[
                 FocusableToolbarButton(
                   focusNode: homeFocusNode,
                   icon: Icons.arrow_back,
@@ -2366,8 +2377,10 @@ class _LibraryHeader extends StatelessWidget {
                   onTap: onBack,
                   onUpKey: _focusSearch,
                 ),
-              SizedBox(width: 2 * desktopScale),
+                SizedBox(width: 2 * desktopScale),
+              ],
               FocusableToolbarButton(
+                focusNode: PlatformDetection.isTV ? homeFocusNode : null,
                 icon: Icons.sort,
                 size: 30 * desktopScale,
                 iconSize: 20 * desktopScale,
