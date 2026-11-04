@@ -113,8 +113,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     private let playerView = AetherPlayerView()
     #if os(tvOS) || os(iOS)
-        /// Lambent's Auto HDR on the device (Playback/Lambent/LambentHDRLift.swift), for SDR titles; on the iPad, the client's
-        /// upscale when the plan asks for it.
+        /// Lambent Enhance's steps on the device when the plan asks: the upscale and the HDR lift (Playback/Lambent/LambentHDRLift.swift).
         private lazy var hdrLift: LambentHDRLift? = {
             let lift = LambentHDRLift()
             lift?.onUpscale = { [weak self] label in self?.onLambentUpscale?(label) }
@@ -1194,19 +1193,19 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 }
                 nowPlaying.setIntervalSkipsEnabled(!audioOnly)
             #endif
-            #if os(tvOS)
-                if !audioOnly, LambentHDRLift.isEnabled {
-                    _ = hdrLift?.start(engine: engine, in: playerView)
-                }
-            #elseif os(iOS)
+            #if os(tvOS) || os(iOS)
                 // Only when Lambent Server's plan gives this device the upscale (`cup`) or the HDR lift (`chdr=1`;
                 // LambentClientUpscale.swift).
-                lambentUpscalePlan = nil
+                #if os(iOS)
+                    lambentUpscalePlan = nil
+                #endif
                 let lines = LambentClientUpscale.planHeight(url), lift = LambentClientUpscale.planLift(url)
                 if !audioOnly, lines != nil || lift {
                     let compare = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
                         .contains { $0.name == "cmp" && $0.value == "1" } ?? false
-                    lambentUpscalePlan = (lines, lift, compare)
+                    #if os(iOS)
+                        lambentUpscalePlan = (lines, lift, compare)
+                    #endif
                     if !engine.pictureInPictureActive {
                         _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, lift: lift, compare: compare)
                     }

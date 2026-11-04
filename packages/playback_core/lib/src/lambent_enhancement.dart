@@ -117,7 +117,7 @@ class LambentEnhancement {
   /// stream's query, which the server signs). Null when the plan does not ask:
   /// no `cup`, or a stream that is not Lambent's enhanced one. Without Lambent
   /// Enhance or a trial the plan never asks, so the device never upscales; the
-  /// client keeps no paywall of its own. The iPad's player
+  /// client keeps no paywall of its own. The iPad's and Apple TV's player
   /// (LambentClientUpscale.swift) reads the same member.
   static int? clientUpscaleLines(String? url) {
     if (!isEnhancedUrl(url)) return null;
@@ -132,9 +132,9 @@ class LambentEnhancement {
   static const clientUpscaleKey = 'cup';
 
   /// The plan's HDR step for this device: lift the SDR picture to HDR10 here
-  /// (`chdr=1` in the enhanced stream's query). The iPad's player
-  /// (LambentClientUpscale.swift) reads the same member, and lifts only where
-  /// the screen has the headroom and Low Power Mode is off.
+  /// (`chdr=1` in the enhanced stream's query). The iPad's and Apple TV's
+  /// player (LambentClientUpscale.swift) reads the same member; the iPad lifts
+  /// only where the screen has the headroom and Low Power Mode is off.
   static bool clientLift(String? url) {
     if (!isEnhancedUrl(url)) return false;
     final value = _query(url!).entries

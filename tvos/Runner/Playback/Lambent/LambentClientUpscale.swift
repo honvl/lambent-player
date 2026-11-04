@@ -9,9 +9,9 @@ import Metal
 /// docs/ENTITLEMENTS.md 6.1), so without Lambent Enhance or a trial the plan has no `cup` and nothing is upscaled on the device. A
 /// direct play has no plan step at all. The client keeps no paywall of its own.
 ///
-/// On the iPad (`LambentHDRLift` on iOS) the plan has two steps: `cup` upscales (the picture keeps the colours the PC sent, SDR or
-/// HDR10) and `chdr=1` lifts an SDR picture to HDR10 here. Each runs only where it is worth the iPad's power (`iPadWork`). The Apple
-/// TV's own HDR lift stays an Apple TV setting.
+/// The plan has two steps for `LambentHDRLift`: `cup` upscales (the picture keeps the colours the PC sent, SDR or HDR10) and `chdr=1`
+/// lifts an SDR picture to HDR10 here. The Apple TV does what the plan asks (`appleTVWork`); the iPad only what is worth its power
+/// (`iPadWork`).
 enum LambentClientUpscale {
     /// The query member that carries the client's step.
     static let planKey = "cup"
@@ -42,7 +42,7 @@ enum LambentClientUpscale {
     /// mini-LED and OLED iPad Pros more; an iPad with less shows HDR10 squeezed back into SDR, so the lift would only cost power.
     static let liftHeadroom: CGFloat = 2
 
-    /// What the iPad does with the picture.
+    /// What the device does with the picture.
     struct Work: Equatable {
         /// Lifted to HDR10 here.
         var hdr: Bool
@@ -68,7 +68,17 @@ enum LambentClientUpscale {
         return Work(hdr: hdr, size: upscaleAsked && larger ? fitted : nil)
     }
 
-    /// What the panel says when the plan asked but nothing was worth the iPad's power (AVPlayer shows the picture); the chip leaves it
+    /// The Apple TV's work for a `picture`-sized picture whose place on the screen is `fitted` pixels (`outputSize`); nil when there is
+    /// none and AVPlayer shows the picture itself. It is plugged in, so no power rule: the lift when the plan asks and the picture is
+    /// SDR, the upscale when the plan asks and the screen is larger.
+    static func appleTVWork(liftAsked: Bool, sourceHDR: Bool, upscaleAsked: Bool, picture: (Int, Int), fitted: (Int, Int)) -> Work? {
+        let hdr = liftAsked && !sourceHDR
+        let larger = upscaleAsked && fitted.0 > picture.0 && fitted.1 > picture.1
+        guard hdr || larger else { return nil }
+        return Work(hdr: hdr, size: larger ? fitted : nil)
+    }
+
+    /// What the panel says when the plan asked but nothing was worth doing here (AVPlayer shows the picture); the chip leaves it
     /// out. Flutter's `lambentDeviceNotNeeded` is the same text.
     static let notNeeded = "Not needed"
 

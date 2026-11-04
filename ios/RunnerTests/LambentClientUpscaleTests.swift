@@ -121,6 +121,28 @@ final class LambentClientUpscaleTests: XCTestCase {
     XCTAssertEqual(mine.last, LambentLiftProcessor.Scaler.none)
   }
 
+  /// The Apple TV has no power rule: it does what the plan asks, and nothing the plan does not.
+  func testTheAppleTVDoesWhatThePlanAsks() {
+    let hd = (1920, 1080), uhd = (3840, 2160)
+    func work(lift: Bool, hdr: Bool = false, upscale: Bool, picture: (Int, Int) = (1920, 1080), fitted: (Int, Int) = (3840, 2160))
+      -> LambentClientUpscale.Work?
+    {
+      LambentClientUpscale.appleTVWork(liftAsked: lift, sourceHDR: hdr, upscaleAsked: upscale, picture: picture, fitted: fitted)
+    }
+    // No plan step: nothing runs, whatever the picture.
+    XCTAssertNil(work(lift: false, upscale: false))
+    // Each step alone, and both.
+    XCTAssertEqual(work(lift: false, upscale: true), .init(hdr: false, size: uhd))
+    XCTAssertEqual(work(lift: true, upscale: false), .init(hdr: true, size: nil))
+    XCTAssertEqual(work(lift: true, upscale: true), .init(hdr: true, size: uhd))
+    // The PC's HDR10 is never lifted again; it is still upscaled.
+    XCTAssertNil(work(lift: true, hdr: true, upscale: false))
+    XCTAssertEqual(work(lift: true, hdr: true, upscale: true), .init(hdr: false, size: uhd))
+    // A picture already at the screen's size has nothing to upscale.
+    XCTAssertNil(work(lift: false, upscale: true, picture: uhd))
+    XCTAssertEqual(work(lift: true, upscale: true, picture: hd, fitted: hd), .init(hdr: true, size: nil))
+  }
+
   func testTheAIUpscalerRunsFrom1_4x() {
     // A 1080p title full screen: 11-inch iPad Pro 1.24x, iPad mini 1.18x: the shaders.
     XCTAssertFalse(LambentClientUpscale.neuralPays(picture: (1920, 1080), output: (2388, 1343)))

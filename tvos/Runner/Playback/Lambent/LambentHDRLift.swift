@@ -8,8 +8,9 @@ import QuartzCore
 import UIKit
 import os
 
-/// Lambent's Auto HDR on the Apple TV: an SDR title direct-plays, and the
-/// Apple TV turns it into HDR10 itself, so the PC needs no transcode.
+/// Lambent Enhance's steps on the device: the upscale and the HDR lift, each only when Lambent Server's plan asks
+/// (LambentClientUpscale.swift). There is no setting: without Lambent Enhance or a trial, and on a direct play, the plan has no
+/// step and AVPlayer shows the picture.
 ///
 /// AetherEngine plays the title through AVPlayer as usual. Its frames are
 /// taken from an `AVPlayerItemVideoOutput`, lifted on the GPU (Lambent's
@@ -17,34 +18,14 @@ import os
 /// BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid over the hidden
 /// `AVPlayerLayer`. The panel is asked for HDR10 at the film's rate.
 ///
-/// A picture smaller than the screen is upscaled on the way (the AI upscaler on
-/// the Neural Engine, else a shader; LambentLiftProcessor.swift). With HDR on this
-/// TV off and Upscale on this TV on, only the upscaling runs and the picture keeps
-/// its SDR colours; a picture already at the screen's size is then left to AVPlayer.
-/// HDR and Dolby Vision titles are never touched.
-///
-/// On by default whenever Enhance on PC is off (the server then direct-plays, so
-/// no stream reaching it was enhanced by the PC); Settings > Lambent enhancement >
-/// HDR on this TV / Upscale on this TV turn it off. Flutter stores them as
-/// `flutter.pref_lambent_enhance_on_pc` / `flutter.pref_lambent_client_hdr` /
-/// `flutter.pref_lambent_client_upscale`. Logs `[LambentHDR]` lines every 2 s.
-///
-/// On the iPad it runs only when Lambent Server's plan asks (LambentClientUpscale.swift): `cup` in the enhanced stream's URL upscales
-/// (the picture keeps the PC's colours, SDR or HDR10, an HDR10 one through the shaders: the AI upscaler's network was trained on SDR),
-/// `chdr=1` lifts an SDR picture to HDR10; each only where it is worth the iPad's power (`LambentClientUpscale.iPadWork`), else
-/// AVPlayer shows the picture itself. A Dolby Vision stream is left to AVPlayer, which keeps its metadata. In a compare (`cmp=1`, the
-/// PC's original on the left half) only the right half is done here, over AVPlayer's own picture.
+/// `cup` in the enhanced stream's URL upscales (the AI upscaler on the Neural Engine, else a shader; LambentLiftProcessor.swift; the
+/// picture keeps the PC's colours, SDR or HDR10, an HDR10 one through the shaders: the AI upscaler's network was trained on SDR),
+/// `chdr=1` lifts an SDR picture to HDR10. The Apple TV does what the plan asks (`LambentClientUpscale.appleTVWork`); the iPad only
+/// what is worth its power (`LambentClientUpscale.iPadWork`); else AVPlayer shows the picture itself. A Dolby Vision stream is left
+/// to AVPlayer, which keeps its metadata. In a compare (`cmp=1`, the PC's original on the left half) only the right half is done
+/// here, over AVPlayer's own picture. Logs `[LambentHDR]` lines every 2 s.
 @MainActor
 final class LambentHDRLift {
-    /// On while Enhance on PC is off (Flutter's defaults: Enhance on PC on, HDR on this TV on, so an unset key is true).
-    static var isEnabled: Bool {
-        let enhanceOnPc = UserDefaults.standard.object(forKey: "flutter.pref_lambent_enhance_on_pc") as? Bool ?? true
-        return !enhanceOnPc && (clientHdr || clientUpscale)
-    }
-    static var clientHdr: Bool { UserDefaults.standard.object(forKey: "flutter.pref_lambent_client_hdr") as? Bool ?? true }
-    static var clientUpscale: Bool { UserDefaults.standard.object(forKey: "flutter.pref_lambent_client_upscale") as? Bool ?? true }
-    static var deepenBlacks: Bool { UserDefaults.standard.bool(forKey: "flutter.pref_lambent_client_blacks") }
-
     private weak var playerLayer: AVPlayerLayer?
     private weak var item: AVPlayerItem?
     private weak var host: UIView?
@@ -64,11 +45,10 @@ final class LambentHDRLift {
     private var lastReport = CACurrentMediaTime()
     private var requestedHDR = false
     private var started = false
-    private var hdr = true
-    private var upscale = true
-    /// The plan's most lines for the client's upscale (the iPad); nil: the screen's size.
+    private var hdr = false
+    /// The plan's most lines for the client's upscale (`cup`); nil: the plan does not ask.
     private var maxHeight: Int?
-    /// The plan gives the iPad the HDR lift (`chdr=1`).
+    /// The plan gives this device the HDR lift (`chdr=1`).
     private var liftAsked = false
     /// A compare stream: the left half stays AVPlayer's.
     private var compare = false
@@ -90,14 +70,10 @@ final class LambentHDRLift {
 
     var isRunning: Bool { output != nil }
 
-    /// Starts on the engine's AVPlayer once its item exists. On the Apple TV only for SDR. On the iPad only when the plan asks
-    /// (`planHeight`, its `cup`; `lift`, its `chdr=1`), and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
-    func start(engine: AetherEngine, in view: UIView, planHeight: Int? = nil, lift: Bool = false, compare: Bool = false) -> Bool {
-        #if os(tvOS)
-            guard engine.sourceVideoFormat == .sdr else { return false }
-        #else
-            guard planHeight != nil || lift, engine.sourceVideoFormat != .dolbyVision else { return false }
-        #endif
+    /// Starts on the engine's AVPlayer once its item exists, only when the plan asks (`planHeight`, its `cup`; `lift`, its `chdr=1`),
+    /// and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
+    func start(engine: AetherEngine, in view: UIView, planHeight: Int?, lift: Bool, compare: Bool) -> Bool {
+        guard planHeight != nil || lift, engine.sourceVideoFormat != .dolbyVision else { return false }
         guard output == nil, let layer = engine.nativePlayerLayer, let item = layer.player?.currentItem
         else { return false }
         let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
@@ -117,20 +93,14 @@ final class LambentHDRLift {
         self.playerLayer = layer
         host = view
         frameRate = engine.sourceVideoFrameRate ?? 24
-        #if os(tvOS)
-            hdr = Self.clientHdr
-            upscale = Self.clientUpscale
-        #else
-            hdr = false
-            upscale = true
-        #endif
+        hdr = false
         maxHeight = planHeight
         liftAsked = lift
         self.compare = compare
         liftView.rightHalfOnly = compare
         started = false
         lead = 0
-        processor.reset(deepen: hdr && Self.deepenBlacks)
+        processor.reset(deepen: false)
         processor.hdr = hdr
         processor.sourceBitrate = engine.sourceVideoBitrate
         processor.outputSize = nil
@@ -156,8 +126,7 @@ final class LambentHDRLift {
         let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
         link.add(to: .main, forMode: .common)
         self.link = link
-        NSLog("[LambentHDR] started fps %.3f hdr %@ upscale %@ deepen %@ bitrate %lld plan %@%@%@", frameRate, hdr ? "on" : "off",
-            upscale ? "on" : "off", hdr && Self.deepenBlacks ? "on" : "off", engine.sourceVideoBitrate,
+        NSLog("[LambentHDR] started fps %.3f bitrate %lld plan %@%@%@", frameRate, engine.sourceVideoBitrate,
             planHeight.map { "cup=\($0)" } ?? "none", lift ? " chdr" : "", compare ? " compare" : "")
         return true
     }
@@ -221,57 +190,53 @@ final class LambentHDRLift {
         {
             if !started {
                 started = true
-                // The first picture: a stream that is already HDR (an enhanced one, or a source the probe called SDR) is
-                // left to AVPlayer; otherwise the panel goes to HDR10 at the picture's size.
+                // The first picture says what the stream really is (the probe can call it SDR). A lift puts the panel in HDR10 at
+                // the picture's size.
                 let transfer = CVBufferCopyAttachment(source, kCVImageBufferTransferFunctionKey, nil) as? String
                 let alreadyHDR = transfer == (kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String)
                     || transfer == (kCVImageBufferTransferFunction_ITU_R_2100_HLG as String)
                 let w = CVPixelBufferGetWidth(source), h = CVPixelBufferGetHeight(source)
+                guard let host, let screen = host.window?.screen else { stop(); return }
                 #if os(tvOS)
-                    if alreadyHDR {
-                        NSLog("[LambentHDR] the stream is already HDR (%@): not lifting", transfer ?? "")
-                        stop()
-                        return
-                    }
-                    // Upscaled here to its place on the screen, in the screen's own pixels (3840 x 2160 on a 4K panel).
-                    if upscale, let screen = host?.window?.screen {
-                        let native = screen.nativeBounds.size
-                        let k = min(native.width / CGFloat(w), native.height / CGFloat(h))
-                        processor.outputSize = (Int(CGFloat(w) * k), Int(CGFloat(h) * k))
-                    }
+                    // What the plan asks: the lift, the upscale (to the screen, in its own pixels: 3840 x 2160 on a 4K panel, up to the
+                    // plan's lines), both, or neither (AVPlayer shows it).
+                    let fitted = LambentClientUpscale.outputSize(
+                        picture: (w, h), bounds: screen.nativeBounds.size, scale: 1, maxHeight: maxHeight)
+                    let work = LambentClientUpscale.appleTVWork(
+                        liftAsked: liftAsked, sourceHDR: alreadyHDR, upscaleAsked: maxHeight != nil, picture: (w, h), fitted: fitted)
                 #else
                     // Only the work worth the iPad's power: the lift, the upscale (to the player's place on the screen, in pixels, up to
                     // the plan's lines), both, or neither (AVPlayer shows it).
-                    guard let host, let screen = host.window?.screen else { stop(); return }
                     let fitted = LambentClientUpscale.outputSize(
                         picture: (w, h), bounds: host.bounds.size, scale: screen.nativeScale, maxHeight: maxHeight)
-                    guard let work = LambentClientUpscale.iPadWork(
+                    let work = LambentClientUpscale.iPadWork(
                         liftAsked: liftAsked, sourceHDR: alreadyHDR, headroom: screen.potentialEDRHeadroom,
                         lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled, upscaleAsked: maxHeight != nil, picture: (w, h),
                         fitted: fitted)
-                    else {
-                        NSLog("[LambentHDR] %dx%d to %dx%d, %@, headroom %.2f: nothing worth doing here: AVPlayer shows it", w, h,
-                            fitted.0, fitted.1, alreadyHDR ? "HDR" : "SDR", screen.potentialEDRHeadroom)
-                        stop()
-                        report(label: LambentClientUpscale.notNeeded)
-                        return
-                    }
-                    hdr = work.hdr
-                    processor.hdr = hdr
-                    processor.outputSize = work.size
-                    // The PC's HDR10 keeps its colours (upscaling only); the shaders take it.
-                    if alreadyHDR {
-                        NSLog("[LambentHDR] the stream is HDR (%@): upscaling with the shaders", transfer ?? "")
-                        processor.skipNeural()
-                    }
                 #endif
-                processor.frameRate = frameRate
-                if !hdr && !processor.scales(w, h) {
-                    NSLog("[LambentHDR] %dx%d: nothing to upscale and HDR on this TV is off: AVPlayer shows it", w, h)
+                guard let work else {
+                    NSLog("[LambentHDR] %dx%d to %dx%d, %@: nothing to do here: AVPlayer shows it", w, h, fitted.0, fitted.1,
+                        alreadyHDR ? "HDR" : "SDR")
                     stop()
+                    report(label: LambentClientUpscale.notNeeded)
                     return
                 }
-                if hdr, let view = self.host { requestHDR10(in: view, width: w, height: h) }
+                hdr = work.hdr
+                processor.hdr = hdr
+                processor.outputSize = work.size
+                // The PC's HDR10 keeps its colours (upscaling only); the shaders take it.
+                if alreadyHDR {
+                    NSLog("[LambentHDR] the stream is HDR (%@): upscaling with the shaders", transfer ?? "")
+                    processor.skipNeural()
+                }
+                processor.frameRate = frameRate
+                if !hdr && !processor.scales(w, h) {
+                    NSLog("[LambentHDR] %dx%d: no lift and nothing to upscale: AVPlayer shows it", w, h)
+                    stop()
+                    report(label: LambentClientUpscale.notNeeded)
+                    return
+                }
+                if hdr { requestHDR10(in: host, width: w, height: h) }
                 updateLead(link)
                 NSLog("[LambentHDR] first picture %dx%d, %@ at %.3f Hz, shown at %@, scaler %@", w, h, hdr ? "HDR10" : "SDR", frameRate,
                     processor.outputSize.map { "\($0.0)x\($0.1)" } ?? "its own size", "\(processor.scaler)")

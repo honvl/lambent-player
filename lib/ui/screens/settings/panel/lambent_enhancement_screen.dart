@@ -46,37 +46,6 @@ class _LambentEnhancementScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                // Apple TV only: other TV devices get HDR from the PC (Enhance on PC).
-                if (!on && PlatformDetection.isAppleTV) ...[
-                  const _SectionHeader('On this TV'),
-                  adaptiveListSection(
-                    children: [
-                      SwitchPreferenceTile(
-                        preference: UserPreferences.lambentClientHdr,
-                        title: 'HDR on this TV',
-                        subtitle:
-                            'SDR titles play as Plex\'s own file and this '
-                            'device turns them into HDR10, with Lambent\'s HDR curve.',
-                        icon: Icons.hdr_on,
-                      ),
-                      if (prefs.get(UserPreferences.lambentClientHdr))
-                        SwitchPreferenceTile(
-                          preference: UserPreferences.lambentClientDeepenBlacks,
-                          title: 'Deepen blacks',
-                          subtitle: 'Bends a washed-out black floor down to black.',
-                          icon: Icons.contrast,
-                        ),
-                      SwitchPreferenceTile(
-                        preference: UserPreferences.lambentClientUpscale,
-                        title: 'Upscale on this TV',
-                        subtitle:
-                            'A title smaller than the screen is upscaled here, '
-                            'with Lambent\'s AI upscaler where this device keeps up.',
-                        icon: Icons.photo_size_select_large,
-                      ),
-                    ],
-                  ),
-                ],
                 if (on) ...[
                   const _SectionHeader('HDR'),
                   adaptiveListSection(
