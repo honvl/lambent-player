@@ -96,7 +96,10 @@ echo "Resolving packages..."
 # prebuilt cores for a dev build. The default builds them from pinned sources
 # with no JIT for the App Store. Set IOS_CORES_FORCE=1 to reprovision.
 GAME_HOST_DIR="$REPO_ROOT/ios/game_host"
-if [ ! -f "$GAME_HOST_DIR/cores/fceumm_libretro.framework/fceumm_libretro" ] || [ "${IOS_CORES_FORCE:-0}" = "1" ]; then
+# Lambent carries no cores (LambentBrand.enableGames): several bar commercial use.
+if [ "${LAMBENT_BUNDLE_CORES:-0}" != "1" ]; then
+  echo "Skipping libretro cores."
+elif [ ! -f "$GAME_HOST_DIR/cores/fceumm_libretro.framework/fceumm_libretro" ] || [ "${IOS_CORES_FORCE:-0}" = "1" ]; then
   echo "Provisioning bundled libretro cores (mode: ${IOS_CORES_MODE:-build})..."
   if [ "${IOS_CORES_MODE:-build}" = "fetch" ]; then
     "$GAME_HOST_DIR/fetch_cores.sh"

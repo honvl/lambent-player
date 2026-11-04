@@ -28,4 +28,13 @@ class LambentBrand {
   /// project is not Lambent's, so its config is gone from every build and the
   /// service never starts; set up a Lambent project before turning this on.
   static const bool enablePushMessaging = false;
+
+  /// Retro games and their emulator cores. Several cores' licences bar
+  /// commercial use and Lambent is sold, so its builds carry none, download
+  /// none and show no game libraries. Not const so that the game code's tests
+  /// can run: `test/flutter_test_config.dart` turns it on.
+  static bool enableGames = false;
+
+  /// This app's own source, which GPL-2.0 has us publish.
+  static const String sourceUrl = 'https://github.com/honvl/lambent-player';
 }

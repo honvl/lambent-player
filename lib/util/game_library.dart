@@ -4,6 +4,7 @@ import 'package:server_core/server_core.dart';
 
 import '../data/models/aggregated_library.dart';
 import '../ui/navigation/destinations.dart';
+import 'lambent_brand.dart';
 
 /// Shared helpers for recognizing and navigating to retro-game (ROM) libraries so every
 /// entry point (home tiles, sidebar, top navbar, bottom nav) treats them consistently.
@@ -51,6 +52,7 @@ class GameLibraryRegistry {
   }
 
   Future<void> _refreshNow() async {
+    if (!LambentBrand.enableGames) return;
     if (!GetIt.instance.isRegistered<MediaServerClient>()) return;
     final gamesApi = GetIt.instance<MediaServerClient>().gamesApi;
     if (gamesApi == null) return;
@@ -69,6 +71,7 @@ class GameLibraryRegistry {
 }
 
 bool isGameLibrary(String id, String? collectionType, String? name) {
+  if (!LambentBrand.enableGames) return false;
   if (GetIt.instance.isRegistered<GameLibraryRegistry>()) {
     final registry = GetIt.instance<GameLibraryRegistry>();
     if (registry.loaded) return registry.contains(id);

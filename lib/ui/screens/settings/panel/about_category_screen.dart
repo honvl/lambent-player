@@ -40,10 +40,10 @@ class _AboutCategoryScreen extends StatelessWidget {
               _TvSettingsListTile(
                 leading: const Icon(Icons.code),
                 title: Text(l10n.sourceCode),
-                subtitle: Text(l10n.sourceCodeUrl),
+                subtitle: const Text(LambentBrand.sourceUrl),
                 onTap: () => showQrOrLaunch(
                   context,
-                  url: 'https://github.com/Moonfin-Client/Moonfin-Core',
+                  url: LambentBrand.sourceUrl,
                   title: l10n.sourceCode,
                 ),
               ),
@@ -117,8 +117,7 @@ class _AboutCategoryScreen extends StatelessWidget {
                 subtitle: Text(l10n.settingsOpenSourceLicenseNotices),
                 onTap: () => showQrOrLaunch(
                   context,
-                  url:
-                      'https://github.com/Moonfin-Client/Moonfin-Core/blob/main/LICENSE',
+                  url: '${LambentBrand.sourceUrl}/blob/main/LICENSE',
                   title: l10n.settingsLicenses,
                 ),
               ),

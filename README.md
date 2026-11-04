@@ -1,3 +1,13 @@
+<h1 align="center">Lambent</h1>
+
+Lambent is a video player for Lambent Server, Jellyfin, Emby and Plex on Android TV, Apple TV, phones and tablets. It is a modified version of [Moonfin](https://github.com/Moonfin-Client/Moonfin-Core) and is released under the same licence, [GPL-2.0](LICENSE). What changed is in [CHANGES.md](CHANGES.md). Please send problems with Lambent here, not to the Moonfin project.
+
+This repository is the source of the Lambent apps, with a tag for each release. Lambent Server, which runs on your computer, is a separate program and isn't part of it.
+
+Moonfin's own README follows. Some of it doesn't apply to Lambent: it has no retro games, for example, and its download links and support links are for Moonfin.
+
+---
+
 <h1 align="center">Moonfin</h1>
 <h3 align="center">Premium Jellyfin, Emby & Plex client for mobile, tablet, desktop, TV, and web</h3>
 

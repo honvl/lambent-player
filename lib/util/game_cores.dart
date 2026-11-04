@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:server_core/server_core.dart';
 
 import '../preference/user_preferences.dart';
+import 'lambent_brand.dart';
 import 'game_cores_abi_stub.dart'
     if (dart.library.io) 'game_cores_abi_io.dart';
 import 'game_storage.dart';
@@ -314,12 +315,14 @@ bool get emulatorJsAvailable =>
 /// Whether the user can choose between the two backends here, which decides if
 /// the settings toggle is shown.
 bool get canToggleGameBackend =>
+    LambentBrand.enableGames &&
     nativeGameBackendSupported && emulatorJsAvailable;
 
 /// Whether games play through the native libretro backend right now: forced on
 /// platforms with a single working backend, the user's choice everywhere else.
 /// The single source of truth for routing, save keys, and core support.
 bool get usesNativeGameBackend {
+  if (!LambentBrand.enableGames) return false;
   if (!nativeGameBackendSupported) return false;
   if (!emulatorJsAvailable) return true;
   if (!GetIt.instance.isRegistered<UserPreferences>()) return true;
@@ -333,6 +336,7 @@ bool get usesNativeGameBackend {
 /// stores forbid downloading executable code), so none show the download
 /// manager.
 bool get bundlesGameCores =>
+    LambentBrand.enableGames &&
     PlatformDetection.isAppleTV ||
     PlatformDetection.isIOS ||
     PlatformDetection.isMacOS;
@@ -342,6 +346,7 @@ bool get bundlesGameCores =>
 /// iOS do not. Android, Windows, and Linux download, and also need an
 /// architecture the libretro buildbot builds for.
 bool get supportsCoreDownloads =>
+    LambentBrand.enableGames &&
     !bundlesGameCores &&
     (PlatformDetection.isAndroid || PlatformDetection.isDesktop) &&
     currentBuildbotTarget() != null;

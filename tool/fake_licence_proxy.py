@@ -1,6 +1,6 @@
 """A stand-in for Lambent Server's licence routes, for trying the app's Lambent Enhance screens before the server has them.
 
-    python3 tool/fake_licence_proxy.py --upstream http://goldenchocobo.local:47800 --port 47801 --state none
+    python3 tool/fake_licence_proxy.py --upstream http://your-pc.local:47800 --port 47801 --state none
 
 Answers `GET /v1/licence` and `POST /v1/licence/store` (ENTITLEMENTS.md section 7) itself and passes every other request to
 the upstream Lambent Server, so the app can sign in and browse through it. A forwarded purchase turns the state to `active`
