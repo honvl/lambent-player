@@ -172,6 +172,14 @@ class ActiveDownloadsTab extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(l10n.queuedDownload, style: statusStyle),
                         ),
+                      if (active[index].isWaitingForServer)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            l10n.downloadWaitingForServer,
+                            style: statusStyle,
+                          ),
+                        ),
                     ],
                   ),
                 ),

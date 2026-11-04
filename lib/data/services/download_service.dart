@@ -25,6 +25,7 @@ import '../../util/download_grouping.dart' show downloadNotificationLabel;
 import '../../util/download_utils.dart';
 import '../../util/platform_detection.dart';
 import '../../util/server_url.dart';
+import 'connectivity_service.dart';
 import '../database/offline_database.dart';
 import '../models/aggregated_item.dart';
 import '../models/download_quality.dart';
@@ -42,6 +43,7 @@ import 'media_server_client_factory.dart';
 import 'media_store_service.dart';
 import 'storage_path_service.dart';
 import 'web_download_helper.dart';
+import '../../util/lambent_server.dart';
 
 class DownloadProgress {
   final String itemId;
@@ -56,6 +58,10 @@ class DownloadProgress {
   /// concurrency slot. The placeholder stays listed until the real transfer
   /// progress replaces it, so UIs can show (and cancel) the waiting item.
   final bool isQueued;
+
+  /// True while an original whose connection dropped (the server out of
+  /// reach, the device away from home) waits to resume where it stopped.
+  final bool isWaitingForServer;
 
   /// Queued or transferring: neither finished nor failed.
   bool get isInFlight => !isComplete && error == null;
@@ -81,6 +87,7 @@ class DownloadProgress {
     this.error,
     this.quality = DownloadQuality.original,
     this.isQueued = false,
+    this.isWaitingForServer = false,
     this.etaSeconds,
     this.totalBytes = 0,
     this.bytesPerSecond,
@@ -94,6 +101,7 @@ class DownloadProgress {
     double? progress,
     int? etaSeconds,
     bool clearRate = false,
+    bool? isWaitingForServer,
   }) => DownloadProgress(
     itemId: itemId,
     fileName: fileName,
@@ -103,6 +111,7 @@ class DownloadProgress {
     error: error,
     quality: quality,
     isQueued: isQueued,
+    isWaitingForServer: isWaitingForServer ?? this.isWaitingForServer,
     etaSeconds: clearRate ? null : (etaSeconds ?? this.etaSeconds),
     totalBytes: totalBytes,
     bytesPerSecond: clearRate ? null : bytesPerSecond,
@@ -145,6 +154,13 @@ class _MediaDownloadContext {
   /// Whether the native task ever reported anything past enqueued. While this
   /// is false the task is still sitting in the scheduler.
   bool sawStart = false;
+
+  /// Parked until the server can be reached again; see
+  /// [shouldWaitForServer].
+  bool waitingForServer = false;
+
+  /// How many times this transfer has been parked so far.
+  int serverWaits = 0;
 
   _MediaDownloadContext({
     required this.itemId,
@@ -272,6 +288,25 @@ bool looksLikeTlsError(bgd.TaskException? exception) {
       description.contains('cert path') ||
       description.contains('certpath');
 }
+
+/// How many times one transfer may park and resume before a dropped
+/// connection counts as a failure after all.
+const maxServerWaits = 50;
+
+/// Whether a failed native transfer should wait for the server and resume
+/// rather than fail and delete what it has: an original (a resumable static
+/// file) whose connection dropped, which is what leaving home mid-download
+/// looks like. An HTTP answer, a full disk, a bad URL or a refused
+/// certificate still fails at once, as does a transcode, which cannot resume.
+bool shouldWaitForServer({
+  required bool resumable,
+  required bgd.TaskException? exception,
+  required int waitsSoFar,
+}) =>
+    resumable &&
+    waitsSoFar < maxServerWaits &&
+    (exception == null || exception is bgd.TaskConnectionException) &&
+    !looksLikeTlsError(exception);
 
 /// The native task never left the queue, so the download should be retried on
 /// the legacy engine. Android runs a queued task only once the network has
@@ -1367,9 +1402,7 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
     final task = await _buildMediaTask(url: url, ctx: ctx, headers: headers);
     ctx.currentTaskId = task.taskId;
     _pluginContexts[item.id] = ctx;
-    cancelToken.whenCancel
-        .then((_) => bgd.FileDownloader().cancelTaskWithId(ctx.currentTaskId))
-        .ignore();
+    cancelToken.whenCancel.then((_) => _cancelPluginTask(ctx)).ignore();
     try {
       if (cancelToken.isCancelled) {
         throw cancelToken.cancelError ??
@@ -1519,6 +1552,22 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
             httpResponseCode,
           _ => update.responseStatusCode,
         };
+        if ((statusCode == null || statusCode <= 0) &&
+            shouldWaitForServer(
+              resumable: !ctx.quality.isTranscoded,
+              exception: exception,
+              waitsSoFar: ctx.serverWaits,
+            )) {
+          unawaited(
+            _waitForServerThenResume(
+              ctx,
+              update.task,
+              fail: () =>
+                  _failPluginDownload(ctx, update, statusCode: statusCode),
+            ),
+          );
+          return;
+        }
         _failPluginDownload(ctx, update, statusCode: statusCode);
       case bgd.TaskStatus.canceled:
         if (!ctx.completer.isCompleted) {
@@ -1585,6 +1634,87 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
         headers: headers,
       ),
     );
+  }
+
+  /// Cancels the native task of [ctx]. A task parked for the server is no
+  /// longer running, so the plugin reports nothing for it: the cancel is
+  /// delivered here instead.
+  void _cancelPluginTask(_MediaDownloadContext ctx) {
+    unawaited(bgd.FileDownloader().cancelTaskWithId(ctx.currentTaskId));
+    if (ctx.waitingForServer && !ctx.completer.isCompleted) {
+      ctx.completer.completeError(
+        DioException(
+          type: DioExceptionType.cancel,
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
+    }
+  }
+
+  /// Least time a parked transfer waits before it resumes, so a server that
+  /// still looks reachable from before the drop isn't hit again at once.
+  static const _serverWaitMinimum = Duration(seconds: 30);
+
+  /// Keeps a transfer whose connection dropped: the partial file and the
+  /// plugin's resume data stay, the row stays "downloading" with a waiting
+  /// line, and once the server can be reached again the plugin resumes from
+  /// the byte it stopped at (a Range request; the server answers 206).
+  /// Calls [fail] when the plugin holds no resume data for the task.
+  Future<void> _waitForServerThenResume(
+    _MediaDownloadContext ctx,
+    bgd.Task task, {
+    required void Function() fail,
+  }) async {
+    if (task is! bgd.DownloadTask ||
+        !await bgd.FileDownloader().taskCanResume(task)) {
+      fail();
+      return;
+    }
+    ctx.serverWaits++;
+    _setWaitingForServer(ctx, true);
+    await _untilServerReachable(ctx);
+    if (ctx.completer.isCompleted) return;
+    _setWaitingForServer(ctx, false);
+    if (!await bgd.FileDownloader().resume(task)) fail();
+  }
+
+  void _setWaitingForServer(_MediaDownloadContext ctx, bool waiting) {
+    ctx.waitingForServer = waiting;
+    final current = _activeDownloads[ctx.itemId];
+    if (current != null) {
+      _activeDownloads[ctx.itemId] = current.copyWith(
+        isWaitingForServer: waiting,
+        clearRate: true,
+      );
+    }
+    notifyListeners();
+  }
+
+  /// Completes once [_serverWaitMinimum] has passed and the connectivity
+  /// service can reach the server, or as soon as [ctx] ends (a cancel).
+  Future<void> _untilServerReachable(_MediaDownloadContext ctx) async {
+    final ended = ctx.completer.future.then<void>((_) {}, onError: (_) {});
+    await Future.any([Future<void>.delayed(_serverWaitMinimum), ended]);
+    final getIt = GetIt.instance;
+    if (ctx.completer.isCompleted ||
+        !getIt.isRegistered<ConnectivityService>()) {
+      return;
+    }
+    final connectivity = getIt<ConnectivityService>();
+    await connectivity.recheckNow();
+    final reachable = Completer<void>();
+    void check() {
+      if ((connectivity.canReachServer || ctx.completer.isCompleted) &&
+          !reachable.isCompleted) {
+        reachable.complete();
+      }
+    }
+
+    connectivity.addListener(check);
+    ended.whenComplete(check).ignore();
+    check();
+    await reachable.future;
+    connectivity.removeListener(check);
   }
 
   void _failPluginDownload(
@@ -2226,6 +2356,13 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
   /// downloads originals.
   bool get canDownloadTranscoded => _client.serverType != ServerType.plex;
 
+  /// Whether [item] may be downloaded transcoded. Lambent Server never
+  /// encodes a download (docs/DOWNLOADS.md): a transcode would arrive at
+  /// encode speed and could not resume, and the device enhances the original
+  /// when it plays.
+  bool canTranscodeDownload(AggregatedItem item) =>
+      canDownloadTranscoded && !isLambentServerId(item.serverId);
+
   /// [mediaSourceId] picks one version of a multi-version item, the server's
   /// default when null. [audioStreamIndex] picks the audio track a transcode
   /// keeps, the audio language settings' choice when null.
@@ -2236,7 +2373,7 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
     String? mediaSourceId,
     int? audioStreamIndex,
   }) {
-    if (!canDownloadTranscoded) quality = DownloadQuality.original;
+    if (!canTranscodeDownload(item)) quality = DownloadQuality.original;
     // Browser downloads are delegated to the platform and do not have a
     // process-owned transfer to schedule.
     if (PlatformDetection.isWeb) {
@@ -3872,6 +4009,38 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
       case bgd.TaskStatus.waitingToRetry:
         _adoptRunningTask(row, record);
         return true;
+      case bgd.TaskStatus.failed
+          when shouldWaitForServer(
+                resumable: !DownloadQuality.fromName(row.qualityPreset)
+                    .isTranscoded,
+                exception: record.exception,
+                waitsSoFar: 0,
+              ) &&
+              await bgd.FileDownloader().taskCanResume(record.task):
+        // A transfer the connection dropped before the app was closed:
+        // picked up again, waiting for the server like a live one.
+        _adoptRunningTask(row, record);
+        final ctx = _pluginContexts[row.itemId];
+        if (ctx == null) return false;
+        unawaited(
+          _waitForServerThenResume(
+            ctx,
+            record.task,
+            fail: () {
+              if (ctx.completer.isCompleted) return;
+              ctx.completer.completeError(
+                DioException(
+                  type: DioExceptionType.unknown,
+                  requestOptions: RequestOptions(path: record.task.url),
+                  message: friendlyDownloadFailure(
+                    record.exception?.description,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+        return true;
       case bgd.TaskStatus.failed:
       case bgd.TaskStatus.notFound:
         final savePath = _savePathForTask(record.task);
@@ -3995,9 +4164,7 @@ class DownloadService extends ChangeNotifier implements AutoDownloadDownloader {
 
     final cancelToken = CancelToken();
     _cancelTokens[itemId] = cancelToken;
-    cancelToken.whenCancel
-        .then((_) => bgd.FileDownloader().cancelTaskWithId(ctx.currentTaskId))
-        .ignore();
+    cancelToken.whenCancel.then((_) => _cancelPluginTask(ctx)).ignore();
 
     _activeDownloads[itemId] = DownloadProgress(
       itemId: itemId,

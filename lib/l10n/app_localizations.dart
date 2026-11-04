@@ -2752,6 +2752,12 @@ abstract class AppLocalizations {
   /// **'Queued'**
   String get queuedDownload;
 
+  /// Status under an active download whose connection to the server dropped; it resumes on its own once the server can be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the server. The download picks up where it stopped.'**
+  String get downloadWaitingForServer;
+
   /// Row under the active downloads list standing in for queued items not shown individually
   ///
   /// In en, this message translates to:
