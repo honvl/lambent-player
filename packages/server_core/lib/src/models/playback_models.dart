@@ -105,6 +105,13 @@ class PlaybackMediaSource {
   final bool supportsTranscoding;
   final String? transcodingUrl;
   final String? directStreamUrl;
+
+  /// Lambent Server's steps for this device on a direct play, for a paid
+  /// screen only: upscale to at most this many lines.
+  final int? lambentDeviceUpscale;
+
+  /// Lambent Server's step for this device on a direct play: lift SDR to HDR10.
+  final bool lambentDeviceLift;
   final String? liveStreamId;
   final PlayMethod? defaultPlayMethod;
   final List<Map<String, dynamic>> mediaStreams;
@@ -126,6 +133,8 @@ class PlaybackMediaSource {
     this.supportsTranscoding = false,
     this.transcodingUrl,
     this.directStreamUrl,
+    this.lambentDeviceUpscale,
+    this.lambentDeviceLift = false,
     this.liveStreamId,
     this.defaultPlayMethod,
     this.mediaStreams = const [],
@@ -149,6 +158,8 @@ class PlaybackMediaSource {
         supportsTranscoding: json['SupportsTranscoding'] as bool? ?? false,
         transcodingUrl: json['TranscodingUrl'] as String?,
         directStreamUrl: json['DirectStreamUrl'] as String?,
+        lambentDeviceUpscale: (json['LambentDevice'] as Map?)?['Upscale'] as int?,
+        lambentDeviceLift: (json['LambentDevice'] as Map?)?['Lift'] == true,
         liveStreamId: json['LiveStreamId'] as String?,
         mediaStreams: (json['MediaStreams'] as List?)
                 ?.cast<Map<String, dynamic>>() ??

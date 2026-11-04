@@ -54,6 +54,7 @@ class LambentEnhancement {
   /// Split screen: the left half is the original, as this screen would play
   /// it without the PC, and the right half is enhanced.
   final bool? compare;
+
   /// Wide colour, 0 (off) to 100: how far vivid colours are pushed from SDR's
   /// range toward the wider P3 range of graded HDR; skin, greys and soft
   /// colours stay. RTX HDR only. Lambent Server starts at 100; the URL names
@@ -110,6 +111,71 @@ class LambentEnhancement {
     final uri = Uri.tryParse(url);
     return uri != null && uri.path.contains(_path);
   }
+
+  /// A Lambent direct-play URL: the file itself, which carries the device's
+  /// steps when PlaybackInfo gave them (`LambentDevice`, [withDeviceSteps]).
+  static final _directPath = RegExp(r'/Videos/[^/]+/stream(\.\w+)?$');
+
+  static bool _carriesClientSteps(String? url) {
+    if (url == null) return false;
+    final uri = Uri.tryParse(url);
+    return uri != null &&
+        (uri.path.contains(_path) || _directPath.hasMatch(uri.path));
+  }
+
+  /// A direct-play [url] with the device's steps from PlaybackInfo's
+  /// `LambentDevice` (docs/ENTITLEMENTS.md 6.6 in Lambent), in the keys an
+  /// enhanced URL uses. Lambent Server's stream route ignores them.
+  static String withDeviceSteps(
+    String url, {
+    required int? upscale,
+    required bool lift,
+  }) {
+    final steps = [
+      if (upscale != null) '$clientUpscaleKey=$upscale',
+      if (lift) '$clientLiftKey=1',
+    ];
+    if (steps.isEmpty) return url;
+    return '$url${url.contains('?') ? '&' : '?'}${steps.join('&')}';
+  }
+
+  /// The plan's step for this device (docs/MONETIZATION.md 5.1 in Lambent):
+  /// upscale here, to at most this many lines (`cup=<lines>` in the enhanced
+  /// stream's query, which the server signs). Null when the plan does not ask:
+  /// no `cup`, or a stream that is not Lambent's. Without Lambent
+  /// Enhance or a trial the plan never asks, so the device never upscales; the
+  /// client keeps no paywall of its own. The iPad's and Apple TV's player
+  /// (LambentClientUpscale.swift) reads the same member.
+  static int? clientUpscaleLines(String? url) {
+    if (!_carriesClientSteps(url)) return null;
+    final value = _query(url!).entries
+        .where((e) => e.key.toLowerCase() == clientUpscaleKey)
+        .map((e) => e.value)
+        .lastOrNull;
+    final lines = int.tryParse(value?.trim() ?? '');
+    return lines != null && lines > 0 ? lines : null;
+  }
+
+  static const clientUpscaleKey = 'cup';
+
+  /// The plan's HDR step for this device: lift the SDR picture to HDR10 here
+  /// (`chdr=1` in the enhanced stream's query). The iPad's and Apple TV's
+  /// player (LambentClientUpscale.swift) reads the same member; the iPad lifts
+  /// only where the screen has the headroom and Low Power Mode is off.
+  static bool clientLift(String? url) {
+    if (!_carriesClientSteps(url)) return false;
+    final value = _query(url!).entries
+        .where((e) => e.key.toLowerCase() == clientLiftKey)
+        .map((e) => e.value)
+        .lastOrNull;
+    return value?.trim() == '1';
+  }
+
+  static const clientLiftKey = 'chdr';
+
+  /// The plan gives this device any step of its own (`cup` or `chdr`).
+  static bool clientSteps(String? url) =>
+      clientUpscaleLines(url) != null || clientLift(url);
 
   /// The settings [url] carries.
   static LambentEnhancement fromUrl(String url) {

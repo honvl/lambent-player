@@ -430,7 +430,12 @@ class JellyfinMediaStreamResolver implements MediaStreamResolver {
       case JellyfinStreamRoute.directPlay:
       case JellyfinStreamRoute.terminalDirectPlay:
         return (
-          _client.playbackApi.getStreamUrl(itemId, mediaSourceId: source.id, liveStreamId: source.liveStreamId),
+          // Lambent Server's steps for a paid screen, for the device's player.
+          LambentEnhancement.withDeviceSteps(
+            _client.playbackApi.getStreamUrl(itemId, mediaSourceId: source.id, liveStreamId: source.liveStreamId),
+            upscale: source.lambentDeviceUpscale,
+            lift: source.lambentDeviceLift,
+          ),
           StreamPlayMethod.directPlay,
         );
       case JellyfinStreamRoute.directStream:
