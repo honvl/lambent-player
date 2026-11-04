@@ -337,6 +337,12 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           mainAxisSize: MainAxisSize.min,
           children: [
             enhancementRow,
+            if (widget.deviceUpscale != null)
+              _EnhancementRow(
+                label: 'On this device',
+                value: widget.deviceUpscale!,
+                onStep: (_, _) {},
+              ),
             const SizedBox(height: 8),
             FocusableDialogRow(
               icon: Icons.info_outline_rounded,

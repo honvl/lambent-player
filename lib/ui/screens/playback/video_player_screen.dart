@@ -6287,7 +6287,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     }
     // Turned off from the chip or in settings: the chip stays, so there is a
     // way back on.
-    return LambentEnhancement.enhancementOff ? 'Original' : null;
+    if (!LambentEnhancement.enhancementOff) return null;
+    return withDeviceUpscale('Original', url, lambentDeviceUpscale.value);
   }
 
   /// The plan's upscale on this device started, stepped down or stopped.

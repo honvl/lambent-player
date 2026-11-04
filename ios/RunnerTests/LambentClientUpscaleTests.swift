@@ -30,7 +30,7 @@ final class LambentClientUpscaleTests: XCTestCase {
 
   func testOnlyLambentsEnhancedStreamCarriesThePlan() {
     // A direct play or Jellyfin's own transcode has no plan step, even with a `cup` in its query.
-    XCTAssertNil(LambentClientUpscale.planHeight(URL(string: "http://192.168.1.20:47800/Videos/i_42/stream?static=true&cup=2160")))
+    XCTAssertNil(LambentClientUpscale.planHeight(URL(string: "http://192.168.1.20:47800/Items/i_42/Download?static=true&cup=2160")))
     XCTAssertNil(LambentClientUpscale.planHeight(URL(string: "file:///var/mobile/Downloads/film.mkv?cup=2160")))
   }
 
@@ -39,7 +39,7 @@ final class LambentClientUpscaleTests: XCTestCase {
     XCTAssertTrue(LambentClientUpscale.planLift(URL(string: enhanced + "&CHDR=1&cup=2160")))
     XCTAssertFalse(LambentClientUpscale.planLift(URL(string: enhanced)))
     XCTAssertFalse(LambentClientUpscale.planLift(URL(string: enhanced + "&chdr=0")))
-    XCTAssertFalse(LambentClientUpscale.planLift(URL(string: "http://192.168.1.20:47800/Videos/i_42/stream?static=true&chdr=1")))
+    XCTAssertFalse(LambentClientUpscale.planLift(URL(string: "http://192.168.1.20:47800/Items/i_42/Download?static=true&chdr=1")))
   }
 
   // MARK: - Only what is worth the iPad's power
@@ -119,6 +119,20 @@ final class LambentClientUpscaleTests: XCTestCase {
     let mine = LambentClientUpscale.ladder(
       supports: { device.supportsFamily($0) }, neuralModels: { LambentNeuralScaler.available(student: $0) })
     XCTAssertEqual(mine.last, LambentLiftProcessor.Scaler.none)
+  }
+
+  /// A direct play carries the steps a paid screen was given; one without them, or another server's file, has none.
+  func testADirectPlayCarriesThePaidSteps() {
+    let paid = URL(string: "http://pc:47800/Videos/abc/stream?MediaSourceId=abc&Static=true&cup=2160&chdr=1")
+    XCTAssertEqual(LambentClientUpscale.planHeight(paid), 2160)
+    XCTAssertTrue(LambentClientUpscale.planLift(paid))
+    let unpaid = URL(string: "http://pc:47800/Videos/abc/stream?MediaSourceId=abc&Static=true")
+    XCTAssertNil(LambentClientUpscale.planHeight(unpaid))
+    XCTAssertFalse(LambentClientUpscale.planLift(unpaid))
+    XCTAssertEqual(LambentClientUpscale.planHeight(URL(string: "http://pc:47800/Videos/abc/stream.mkv?cup=1080")), 1080)
+    let other = URL(string: "http://pc:47800/Items/abc/Download?cup=2160&chdr=1")
+    XCTAssertNil(LambentClientUpscale.planHeight(other))
+    XCTAssertFalse(LambentClientUpscale.planLift(other))
   }
 
   /// The Apple TV has no power rule: it does what the plan asks, and nothing the plan does not.

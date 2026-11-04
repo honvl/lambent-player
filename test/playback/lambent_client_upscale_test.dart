@@ -2,12 +2,65 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moonfin/playback/lambent_device_upscale.dart';
 import 'package:moonfin/ui/widgets/playback/enhancement_chip.dart';
 import 'package:playback_core/playback_core.dart';
+import 'package:server_core/server_core.dart';
 
 const _enhanced =
     'http://192.168.1.118:47800/v1/enhanced/plex-694844/index.m3u8'
     '?tv=1&q=4&hdr=1&dv=0&blacks=0&maxh=1080&audio=0';
 
 void main() {
+  group('direct play steps', () {
+    const direct = 'http://pc:47800/Videos/abc/stream?Static=true';
+
+    test('a paid screen\'s steps go on the URL and read back', () {
+      final url = LambentEnhancement.withDeviceSteps(
+        direct,
+        upscale: 2160,
+        lift: true,
+      );
+      expect(url, '$direct&cup=2160&chdr=1');
+      expect(LambentEnhancement.clientUpscaleLines(url), 2160);
+      expect(LambentEnhancement.clientLift(url), isTrue);
+      expect(LambentEnhancement.isEnhancedUrl(url), isFalse);
+    });
+
+    test('an unpaid screen\'s URL stays as it is and asks for nothing', () {
+      final url = LambentEnhancement.withDeviceSteps(
+        direct,
+        upscale: null,
+        lift: false,
+      );
+      expect(url, direct);
+      expect(LambentEnhancement.clientSteps(url), isFalse);
+    });
+
+    test('other URLs do not carry steps', () {
+      const download = 'http://pc:47800/Items/abc/Download?cup=2160&chdr=1';
+      expect(LambentEnhancement.clientSteps(download), isFalse);
+    });
+
+    test('PlaybackInfo\'s member is read, and absent on an unpaid screen', () {
+      final paid = PlaybackMediaSource.fromJson({
+        'Id': 'abc',
+        'LambentDevice': {'Upscale': 2160, 'Lift': true},
+      });
+      expect(paid.lambentDeviceUpscale, 2160);
+      expect(paid.lambentDeviceLift, isTrue);
+      final unpaid = PlaybackMediaSource.fromJson({'Id': 'abc'});
+      expect(unpaid.lambentDeviceUpscale, isNull);
+      expect(unpaid.lambentDeviceLift, isFalse);
+    });
+
+    test('the chip names the work beside Original', () {
+      const url = '$direct&chdr=1';
+      expect(
+        withDeviceUpscale('Original', url, 'Auto HDR'),
+        'Original · Auto HDR',
+      );
+      expect(withDeviceUpscale('Original', direct, 'Auto HDR'), 'Original');
+    });
+  });
+
   tearDown(() {
     LambentEnhancement.overrides = LambentEnhancement.none;
     LambentEnhancement.compareOnly = false;
@@ -59,7 +112,7 @@ void main() {
       expect(LambentEnhancement.clientUpscaleLines(null), isNull);
       expect(
         LambentEnhancement.clientUpscaleLines(
-          'http://192.168.1.118:47800/Videos/i_1/stream?static=true&cup=2160',
+          'http://192.168.1.118:47800/Items/i_1/Download?static=true&cup=2160',
         ),
         isNull,
       );
@@ -79,7 +132,7 @@ void main() {
       expect(LambentEnhancement.clientSteps(_enhanced), isFalse);
       expect(
         LambentEnhancement.clientLift(
-          'http://192.168.1.118:47800/Videos/i_1/stream?static=true&chdr=1',
+          'http://192.168.1.118:47800/Items/i_1/Download?static=true&chdr=1',
         ),
         isFalse,
       );

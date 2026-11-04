@@ -7,7 +7,8 @@ import Metal
 /// The plan says where each step runs ("PC: RTX HDR, 1080p out; client: upscale to 4K"). The client's step travels in the plan's
 /// enhanced stream URL as `cup=<lines>`: upscale here, to at most that many lines. The query is the plan's own (the server signs it,
 /// docs/ENTITLEMENTS.md 6.1), so without Lambent Enhance or a trial the plan has no `cup` and nothing is upscaled on the device. A
-/// direct play has no plan step at all. The client keeps no paywall of its own.
+/// direct play has no plan URL: for a paid screen Flutter writes PlaybackInfo's `LambentDevice` onto the URL it opens, in the same
+/// keys (docs/ENTITLEMENTS.md 6.6). The client keeps no paywall of its own.
 ///
 /// The plan has two steps for `LambentHDRLift`: `cup` upscales (the picture keeps the colours the PC sent, SDR or HDR10) and `chdr=1`
 /// lifts an SDR picture to HDR10 here. The Apple TV does what the plan asks (`appleTVWork`); the iPad only what is worth its power
@@ -17,9 +18,9 @@ enum LambentClientUpscale {
     static let planKey = "cup"
 
     /// The plan's client step for the stream at `url`: the most lines this device may upscale to; nil when the plan does not ask (no
-    /// `cup`, a `cup` that is not a positive number, or a stream that is not Lambent's enhanced one).
+    /// `cup`, a `cup` that is not a positive number, or a stream that is not Lambent's).
     static func planHeight(_ url: URL?) -> Int? {
-        guard let url, url.path.contains("/v1/enhanced/"),
+        guard let url, carriesSteps(url),
             let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
             let value = items.last(where: { $0.name.lowercased() == planKey })?.value,
             let lines = Int(value.trimmingCharacters(in: .whitespaces)), lines > 0
@@ -27,12 +28,17 @@ enum LambentClientUpscale {
         return lines
     }
 
+    /// Lambent's enhanced stream, or a direct play of the file (`/Videos/<id>/stream[.ext]`).
+    private static func carriesSteps(_ url: URL) -> Bool {
+        url.path.contains("/v1/enhanced/") || url.path.range(of: #"/Videos/[^/]+/stream(\.\w+)?$"#, options: .regularExpression) != nil
+    }
+
     /// The query member that carries the client's HDR step: `chdr=1`, "client: Auto HDR here" (the PC sends the picture SDR).
     static let liftKey = "chdr"
 
-    /// The plan gives this device the HDR lift for the stream at `url` (`chdr=1` on Lambent's enhanced stream).
+    /// The plan gives this device the HDR lift for the stream at `url` (`chdr=1`).
     static func planLift(_ url: URL?) -> Bool {
-        guard let url, url.path.contains("/v1/enhanced/"),
+        guard let url, carriesSteps(url),
             let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
         else { return false }
         return items.last(where: { $0.name.lowercased() == liftKey })?.value?.trimmingCharacters(in: .whitespaces) == "1"
