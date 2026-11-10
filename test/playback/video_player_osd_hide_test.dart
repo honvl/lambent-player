@@ -25,6 +25,7 @@ import 'package:moonfin/playback/playback_lifecycle_handler.dart';
 import 'package:moonfin/preference/preference_constants.dart';
 import 'package:moonfin/preference/user_preferences.dart';
 import 'package:moonfin/ui/screens/playback/video_player_screen.dart';
+import 'package:moonfin/ui/widgets/playback/osd_fade.dart';
 import 'package:moonfin/ui/screensaver/screensaver_controller.dart';
 import 'package:moonfin/ui/widgets/marquee_text.dart';
 import 'package:moonfin/ui/widgets/playback/skip_segment_overlay.dart';
@@ -175,6 +176,13 @@ class _Manager extends PlaybackManager {
 }
 
 void main() {
+  // The controls fade out after they hide; wait for them to go. The fade
+  // starts on the frame after the hide, so allow it one more.
+  Future<void> pumpOsdFade(WidgetTester tester) async {
+    await tester.pump(OsdFade.fadeOut + const Duration(milliseconds: 20));
+    await tester.pump();
+  }
+
   late _Manager manager;
   late _Client client;
   late PipService pip;
@@ -233,10 +241,16 @@ void main() {
         return call.method.startsWith('is') ? false : null;
       },
     );
-    addTearDown(() => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('window_manager'), null));
-    await GetIt.instance<UserPreferences>()
-        .set(UserPreferences.cinemaModeSkipEnabled, true);
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        null,
+      ),
+    );
+    await GetIt.instance<UserPreferences>().set(
+      UserPreferences.cinemaModeSkipEnabled,
+      true,
+    );
     manager.queueService.setQueue([
       {'Id': 'trailer', '__moonfinIsPreroll': true, 'RunTimeTicks': 900000000},
     ]);
@@ -275,10 +289,16 @@ void main() {
         return call.method.startsWith('is') ? false : null;
       },
     );
-    addTearDown(() => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('window_manager'), null));
-    await GetIt.instance<UserPreferences>()
-        .set(UserPreferences.cinemaModeSkipEnabled, true);
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        null,
+      ),
+    );
+    await GetIt.instance<UserPreferences>().set(
+      UserPreferences.cinemaModeSkipEnabled,
+      true,
+    );
     manager.queueService.setQueue([
       {'Id': 'trailer', '__moonfinIsPreroll': true, 'RunTimeTicks': 900000000},
     ]);
@@ -311,15 +331,23 @@ void main() {
         return call.method.startsWith('is') ? false : null;
       },
     );
-    addTearDown(() => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('window_manager'), null));
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        null,
+      ),
+    );
     // Leaving playback resets the orientations, which waits on this channel.
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (_) async => null,
     );
-    addTearDown(() => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, null));
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
     manager.queueService.setQueue([
       {'Id': 'trailer', '__moonfinIsPreroll': true, 'RunTimeTicks': 900000000},
     ]);
@@ -442,7 +470,10 @@ void main() {
   ) async {
     final prefs = GetIt.instance<UserPreferences>();
     await prefs.set(UserPreferences.cinemaModeSkipEnabled, true);
-    await prefs.set(UserPreferences.mediaSegmentActions, 'intro:skip,outro:skip');
+    await prefs.set(
+      UserPreferences.mediaSegmentActions,
+      'intro:skip,outro:skip',
+    );
     (GetIt.instance<MediaServerClient>() as _Client).items.segments = [
       segmentJson(id: 'intro', type: 'Intro', startMs: 1000, endMs: 2000),
       segmentJson(id: 'outro', type: 'Outro', startMs: 3000, endMs: 4000),
@@ -455,7 +486,9 @@ void main() {
           'Id': 'short',
           '__moonfinIsPreroll': true,
           'RunTimeTicks': 50000000,
-          'Chapters': [{'StartPositionTicks': 0}],
+          'Chapters': [
+            {'StartPositionTicks': 0},
+          ],
         },
       ),
     ]);
@@ -499,6 +532,7 @@ void main() {
     manager.state.setPlaying(true);
     await tester.pump();
     await tester.pump(const Duration(seconds: 10));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
@@ -527,6 +561,7 @@ void main() {
     Navigator.of(player).pop();
     await tester.pump();
     await tester.pump(const Duration(seconds: 10));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
@@ -550,7 +585,8 @@ void main() {
               'ImageTag': 'abc',
             },
             {
-              'Name': 'Escape through the asteroid field with the cruiser behind',
+              'Name':
+                  'Escape through the asteroid field with the cruiser behind',
               'StartPositionTicks': 3600000000,
             },
           ],
@@ -613,6 +649,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 2500));
     expect(find.byType(Slider), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
@@ -622,6 +659,7 @@ void main() {
     await playWithHideDelay(tester, 1000);
 
     await tester.pump(const Duration(milliseconds: 1500));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
@@ -790,6 +828,7 @@ void main() {
       reason: 'a second tap could still make it a skip',
     );
     await tester.pump(kDoubleTapTimeout);
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.tapAt(const Offset(700, 300));
@@ -940,6 +979,7 @@ void main() {
     manager.state.setPlaying(true);
     await tester.pump();
     await tester.pump(const Duration(seconds: 10));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.tapAt(const Offset(100, 300));
@@ -973,7 +1013,8 @@ void main() {
 
     testWidgets('sit in the middle of the video by default', (tester) async {
       await mountPlayer(tester);
-      final height = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+      final height =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio;
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
       expect(playButtonY(tester), closeTo(height / 2, height * 0.1));
       await tester.pumpWidget(const SizedBox());
@@ -985,7 +1026,8 @@ void main() {
         PlayerTransportPosition.docked,
       );
       await mountPlayer(tester);
-      final height = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+      final height =
+          tester.view.physicalSize.height / tester.view.devicePixelRatio;
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
       expect(playButtonY(tester), greaterThan(height * 0.75));
       await tester.pumpWidget(const SizedBox());
@@ -1031,6 +1073,7 @@ void main() {
       expect(cardOpacity(tester), 0);
 
       await tester.pump(const Duration(seconds: 10));
+      await pumpOsdFade(tester);
       expect(find.byType(Slider), findsNothing);
       expect(cardOpacity(tester), 1);
 
@@ -1048,6 +1091,7 @@ void main() {
       expect(find.byType(Slider), findsOneWidget);
 
       await tester.pump(const Duration(milliseconds: 2100));
+      await pumpOsdFade(tester);
       expect(find.byType(Slider), findsNothing);
       expect(cardOpacity(tester), 1);
 
@@ -1070,10 +1114,12 @@ void main() {
     manager.state.setPlaying(true);
     await tester.pump();
     await tester.pump(const Duration(seconds: 10));
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
+    await pumpOsdFade(tester);
     expect(find.byType(Slider), findsNothing);
     expect(find.text('30 seconds'), findsOneWidget);
 
@@ -1166,6 +1212,7 @@ void main() {
       manager.state.setPlaying(true);
       await tester.pump();
       await tester.pump(const Duration(seconds: 10));
+      await pumpOsdFade(tester);
       expect(find.byType(Slider), findsNothing);
 
       manager.state.setPosition(const Duration(seconds: 5));

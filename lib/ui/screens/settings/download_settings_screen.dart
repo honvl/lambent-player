@@ -23,6 +23,7 @@ import '../../../di/providers.dart';
 import '../../../platform/background_refresh.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/download_utils.dart';
+import '../../../util/lambent_brand.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/relative_time_label.dart';
 import '../../../util/tv_image_cache_stub.dart'
@@ -202,7 +203,8 @@ class DownloadSettingsScreen extends ConsumerWidget {
                       },
                     ),
                   ),
-                  if (PlatformDetection.isAndroid)
+                  if (PlatformDetection.isAndroid &&
+                      LambentBrand.enablePublicDownloadsFolder)
                     DpadSwitchListTile(
                       useSettingsIconShell: true,
                       secondary: const Icon(Icons.folder_open),
@@ -212,7 +214,9 @@ class DownloadSettingsScreen extends ConsumerWidget {
                       onChanged: (v) => _toggleMediaStore(context, prefs, v),
                     ),
                   if (PlatformDetection.useDesktopUi ||
-                      (PlatformDetection.isAndroid && customPath != 'mediastore'))
+                      (PlatformDetection.isAndroid &&
+                          (customPath != 'mediastore' ||
+                              !LambentBrand.enablePublicDownloadsFolder)))
                     DpadListTile(
                       useSettingsIconShell: true,
                       leading: const Icon(Icons.folder_special),

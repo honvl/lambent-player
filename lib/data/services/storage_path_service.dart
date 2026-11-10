@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../preference/user_preferences.dart';
+import '../../util/lambent_brand.dart';
 import '../../util/platform_detection.dart';
 import '../database/offline_database_location.dart';
 import 'macos_download_dir.dart';
@@ -29,7 +30,9 @@ class StoragePathService {
       final prefs = GetIt.instance<UserPreferences>();
       final customPath = prefs.get(UserPreferences.customDownloadPath);
       if (customPath.isNotEmpty) {
-        if (PlatformDetection.isAndroid && customPath == 'mediastore') {
+        if (PlatformDetection.isAndroid &&
+            customPath == 'mediastore' &&
+            LambentBrand.enablePublicDownloadsFolder) {
           final msPath = await MediaStoreService.getMediaStorePath();
           _useMediaStore = true;
           _cachedRoot = Directory(msPath);

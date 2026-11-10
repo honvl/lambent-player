@@ -38,6 +38,7 @@ import '../../../util/scroll_sensitivity_binding.dart';
 import '../../widgets/image_source.dart';
 import '../../widgets/marquee_text.dart';
 import '../../widgets/player_volume_control.dart';
+import '../../widgets/playback/osd_fade.dart';
 import '../../widgets/playback/playback_time_row.dart';
 import '../../widgets/playback/player_logo.dart';
 import '../../widgets/playback/seek_icons.dart';
@@ -475,6 +476,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   final _tvSecondaryLastFocus = FocusNode(
     debugLabel: 'video_player_tv_secondary_last',
   );
+
   /// The glass TV bar opens compact (seek bar, transport, the enhancement
   /// chip and a "more" button) and only grows into the full row of buttons
   /// when "more" is pressed. It folds back each time the controls hide.
@@ -581,8 +583,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   bool get _isCurrentPreroll => _isPrerollQueueItem(_queue.currentItem);
 
-  bool get _isCinemaSkipVisible =>
-      _isCurrentPreroll && _cinemaSkip.visible;
+  bool get _isCinemaSkipVisible => _isCurrentPreroll && _cinemaSkip.visible;
 
   void _configureCinemaSkip() => _cinemaSkip.configure(
     enabled: _prefs.get(UserPreferences.cinemaModeSkipEnabled),
@@ -1331,9 +1332,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     }
     _lastCastErrorAt = now;
     _lastCastErrorMessage = message;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showThrottledPlaybackError(String message) {
@@ -1353,9 +1353,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
     _lastPlaybackErrorAt = now;
     _lastPlaybackErrorMessage = normalized;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(normalized)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(normalized)));
   }
 
   void _showBringupFailureIfAny(PlaybackBringupState state) {
@@ -1734,10 +1733,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     if (mounted) setState(() {});
   }
 
-  bool get _isPhoneScreen =>
-      FormFactor.ofView(WidgetsBinding.instance.platformDispatcher.implicitView ??
-              WidgetsBinding.instance.platformDispatcher.views.first)
-          .isPhone;
+  bool get _isPhoneScreen => FormFactor.ofView(
+    WidgetsBinding.instance.platformDispatcher.implicitView ??
+        WidgetsBinding.instance.platformDispatcher.views.first,
+  ).isPhone;
 
   void _toggleOrientationLock() {
     setState(() => _forcedLandscape = !_forcedLandscape);
@@ -2619,9 +2618,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       final series = AggregatedItem(
         id: seriesId,
         serverId: item.serverId,
-        rawData: await _clientForItem(
-          item,
-        ).itemsApi.getItem(seriesId, fields: 'ProviderIds'),
+        rawData: await _clientForItem(item).itemsApi
+            .getItem(seriesId, fields: 'ProviderIds'),
       );
       final info = await GetIt.instance<UpcomingEpisodeService>()
           .resolveUpcomingEpisode(
@@ -4271,7 +4269,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             onVerticalDragEnd: swipeGestures ? _onVerticalDragEnd : null,
             onVerticalDragCancel: swipeGestures ? _onVerticalDragCancel : null,
             onLongPressStart: holdForSpeed ? _onSurfaceLongPressStart : null,
-            onLongPressEnd: holdForSpeed ? (_) => _onSurfaceLongPressEnd() : null,
+            onLongPressEnd: holdForSpeed
+                ? (_) => _onSurfaceLongPressEnd()
+                : null,
             onLongPressCancel: holdForSpeed ? _onSurfaceLongPressEnd : null,
             behavior: HitTestBehavior.opaque,
             child: Listener(
@@ -4288,7 +4288,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                   ? _handleScrollSignal
                   : null,
               child: MouseRegion(
-                cursor: PlatformDetection.useDesktopUi &&
+                cursor:
+                    PlatformDetection.useDesktopUi &&
                         !_controlsVisible &&
                         !_isCinemaSkipVisible
                     ? SystemMouseCursors.none
@@ -4354,72 +4355,83 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                       _buildPausedDescriptionOverlay(),
                       // Compare's labels are the PC's (lambent#218): it names what each half
                       // really shows, which the stream's URL can't say.
-                      if (_controlsVisible &&
-                          !_isOsdLocked &&
-                          !hideOsdForPreroll)
-                        // Hidden rather than removed while the subtitle delay
-                        // is open, so closing it can hand focus back to the
-                        // button that opened it.
-                        Positioned.fill(
-                          child: _dimForHdr(
-                            Visibility(
-                              visible: !_subtitleDelayOpen,
-                              maintainState: true,
-                              maintainAnimation: true,
-                              maintainSize: true,
-                              maintainFocusability: true,
-                              child: Stack(
-                                children: [
-                                  if (_useTvGlassOverlay)
-                                    // Glass lays a light fade over the top and bottom
-                                    // edges instead of dimming the whole picture.
-                                    const Positioned.fill(
-                                      child: IgnorePointer(
-                                        child: DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.topCenter,
-                                              end: Alignment.bottomCenter,
-                                              colors: [
-                                                Color(0x80000000),
-                                                Color(0x00000000),
-                                                Color(0x00000000),
-                                                Color(0x8C000000),
-                                              ],
-                                              stops: [0.0, 0.22, 0.62, 1.0],
+                      // Fades in and out rather than popping.
+                      Positioned.fill(
+                        child: OsdFade(
+                          child:
+                              !_controlsVisible ||
+                                  _isOsdLocked ||
+                                  hideOsdForPreroll
+                              ? null
+                              // Hidden rather than removed while the subtitle
+                              // delay is open, so closing it can hand focus
+                              // back to the button that opened it.
+                              : _dimForHdr(
+                                  Visibility(
+                                    visible: !_subtitleDelayOpen,
+                                    maintainState: true,
+                                    maintainAnimation: true,
+                                    maintainSize: true,
+                                    maintainFocusability: true,
+                                    child: Stack(
+                                      children: [
+                                        if (_useTvGlassOverlay)
+                                          // Glass lays a light fade over the top and bottom
+                                          // edges instead of dimming the whole picture.
+                                          const Positioned.fill(
+                                            child: IgnorePointer(
+                                              child: DecoratedBox(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.bottomCenter,
+                                                    colors: [
+                                                      Color(0x80000000),
+                                                      Color(0x00000000),
+                                                      Color(0x00000000),
+                                                      Color(0x8C000000),
+                                                    ],
+                                                    stops: [
+                                                      0.0,
+                                                      0.22,
+                                                      0.62,
+                                                      1.0,
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        else
+                                          const Positioned.fill(
+                                            child: IgnorePointer(
+                                              child: ColoredBox(
+                                                color: Color(0x4D000000),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                  else
-                                    const Positioned.fill(
-                                      child: IgnorePointer(
-                                        child: ColoredBox(
-                                          color: Color(0x4D000000),
-                                        ),
-                                      ),
+                                        // The chrome stays in the tree while mpv owns
+                                        // its own window: both native windows are
+                                        // WS_EX_TRANSPARENT, so these widgets are still
+                                        // what gets hit-tested. Only their pixels are
+                                        // re-sent by HdrOverlayCapture.
+                                        _buildTopOverlay(context),
+                                        if (!PlatformDetection.useLeanbackUi &&
+                                            !_transportDocked &&
+                                            !_partyHoldsStart)
+                                          Positioned.fill(
+                                            child: Center(
+                                              child:
+                                                  _buildCenterTransportControls(),
+                                            ),
+                                          ),
+                                        _buildBottomOverlay(context),
+                                      ],
                                     ),
-                                  // The chrome stays in the tree while mpv owns
-                                  // its own window: both native windows are
-                                  // WS_EX_TRANSPARENT, so these widgets are still
-                                  // what gets hit-tested. Only their pixels are
-                                  // re-sent by HdrOverlayCapture.
-                                  _buildTopOverlay(context),
-                                  if (!PlatformDetection.useLeanbackUi &&
-                                      !_transportDocked &&
-                                      !_partyHoldsStart)
-                                    Positioned.fill(
-                                      child: Center(
-                                        child: _buildCenterTransportControls(),
-                                      ),
-                                    ),
-                                  _buildBottomOverlay(context),
-                                ],
-                              ),
-                            ),
-                          ),
+                                  ),
+                                ),
                         ),
+                      ),
                       // The controls carry the indicator while they're up.
                       // Once they hide it stays in the corner, since the wait
                       // can outlast the controls by minutes.
@@ -4469,26 +4481,34 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                         ),
                       if (_isCinemaSkipVisible)
                         SkipSegmentOverlay(
-                          key: ValueKey('cinema-preroll-${_cinemaSkip.generation}'),
+                          key: ValueKey(
+                            'cinema-preroll-${_cinemaSkip.generation}',
+                          ),
                           segment: MediaSegment(
                             id: '__cinema_preroll__${_cinemaSkip.generation}',
-                            itemId: _itemIdForQueueItem(_queue.currentItem) ?? '',
+                            itemId:
+                                _itemIdForQueueItem(_queue.currentItem) ?? '',
                             type: MediaSegmentType.preview,
                             start: Duration.zero,
                             end: _cinemaSkip.duration,
                           ),
-                          actionLabel: AppLocalizations.of(context).settingsSkip,
+                          actionLabel: AppLocalizations.of(context)
+                              .settingsSkip,
                           focusNode: _tvSkipSegmentFocus,
                           onSkip: _cinemaSkip.skip,
                           onDismiss: _dismissCinemaSkip,
                           positionStream: _state.positionStream,
                           initialPosition: _state.position,
-                          rightInset: 24.0 +
-                              (PlatformDetection.isMobile && !PlatformDetection.isTV
+                          rightInset:
+                              24.0 +
+                              (PlatformDetection.isMobile &&
+                                      !PlatformDetection.isTV
                                   ? MediaQuery.viewPaddingOf(context).right
                                   : 0),
-                          bottomInset: MediaQuery.viewPaddingOf(context).bottom +
-                              (PlatformDetection.isMobile && !PlatformDetection.isTV
+                          bottomInset:
+                              MediaQuery.viewPaddingOf(context).bottom +
+                              (PlatformDetection.isMobile &&
+                                      !PlatformDetection.isTV
                                   ? 16
                                   : 24),
                         ),
@@ -4502,13 +4522,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                               _nextUpItem!.primaryImageTag != null &&
                                   _prefs.get(UserPreferences.nextUpBehavior) !=
                                       NextUpBehavior.minimal
-                              ? _clientForItem(
-                                  _nextUpItem!,
-                                ).imageApi.getPrimaryImageUrl(
-                                  _nextUpItem!.id,
-                                  maxWidth: 400,
-                                  tag: _nextUpItem!.primaryImageTag,
-                                )
+                              ? _clientForItem(_nextUpItem!).imageApi
+                                    .getPrimaryImageUrl(
+                                      _nextUpItem!.id,
+                                      maxWidth: 400,
+                                      tag: _nextUpItem!.primaryImageTag,
+                                    )
                               : null,
                           timeoutMs: _prefs.get(UserPreferences.nextUpTimeout),
                           onPlayNext: _handleNextUpPlay,
@@ -4773,7 +4792,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _quietReopenTimeout = Timer(const Duration(seconds: 30), () {
       if (mounted) setState(() => _quietReopen = false);
     });
-    unawaited(_manager.reopenAtCurrentPosition().whenComplete(() => then?.call()));
+    unawaited(
+      _manager.reopenAtCurrentPosition().whenComplete(() => then?.call()),
+    );
   }
 
   Widget _buildQuietReopenPill() {
@@ -4849,9 +4870,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     return _withDisplayMatchFps((fps) {
       final label = fps == null
           ? _bringupLabel()
-          : AppLocalizations.of(
-              context,
-            ).playerMatchingDisplayRate(frameRateLabel(fps));
+          : AppLocalizations.of(context)
+                .playerMatchingDisplayRate(frameRateLabel(fps));
       return Positioned.fill(
         child: IgnorePointer(
           child: DecoratedBox(
@@ -4908,9 +4928,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             // While the TV switches to the video's rate, say so instead.
             final shown = fps == null
                 ? label
-                : AppLocalizations.of(
-                    context,
-                  ).playerMatchingDisplayRate(frameRateLabel(fps));
+                : AppLocalizations.of(context)
+                      .playerMatchingDisplayRate(frameRateLabel(fps));
             return pos == LoadingAnimationPosition.bouncing
                 ? BouncingPositionWrapper(
                     speed: _prefs.get(UserPreferences.loadingAnimationSpeed),
@@ -5181,7 +5200,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       child: Container(
         key: _topOverlayKey,
         padding: EdgeInsets.only(
-          top: padding.top +
+          top:
+              padding.top +
               (_useTvGlassOverlay ? AppSpacing.spaceXl : AppSpacing.spaceSm),
           left: _useTvGlassOverlay ? AppSpacing.spaceXl : AppSpacing.spaceLg,
           right: AppSpacing.spaceLg,
@@ -5286,7 +5306,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           ],
         ),
         child: const Center(
-          child: Icon(Icons.chevron_left_rounded, color: Color(0xFFF4F5F7), size: 32),
+          child: Icon(
+            Icons.chevron_left_rounded,
+            color: Color(0xFFF4F5F7),
+            size: 32,
+          ),
         ),
       ),
     );
@@ -5533,11 +5557,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       return null;
     }
 
-    return _clientForQueueItem(item).imageApi.getLogoImageUrl(
-      normalizedItemId,
-      maxWidth: 420,
-      tag: normalizedTag,
-    );
+    return _clientForQueueItem(item).imageApi
+        .getLogoImageUrl(normalizedItemId, maxWidth: 420, tag: normalizedTag);
   }
 
   String? _artworkUrlForQueueItem(dynamic item) {
@@ -5761,9 +5782,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RepaintBoundary(
-                  child: _buildSeekbar(compact: compact),
-                ),
+                RepaintBoundary(child: _buildSeekbar(compact: compact)),
                 SizedBox(height: compact ? 2 : AppSpacing.spaceXs),
                 if (compact)
                   _buildTvCompactControlsRow()
@@ -5908,105 +5927,107 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                           left: belowLeft,
                           right: belowRight,
                           child: MouseRegion(
-                          opaque: false,
-                          onHover: PlatformDetection.useDesktopUi
-                              ? (event) => _handleSeekbarHover(
-                                  event,
-                                  trackWidth: trackWidth,
-                                  duration: duration,
-                                )
-                              : null,
-                          onExit: PlatformDetection.useDesktopUi
-                              ? (_) => _clearSeekbarHover()
-                              : null,
-                          child: Focus(
-                            focusNode: _tvSeekbarFocus,
-                            onKeyEvent: (node, event) {
-                              if (!PlatformDetection.isTV ||
-                                  (event is! KeyDownEvent &&
-                                      event is! KeyRepeatEvent)) {
-                                return KeyEventResult.ignored;
-                              }
-                              switch (event.logicalKey) {
-                                case LogicalKeyboardKey.arrowLeft:
-                                  _seekRelativeAccumulate(
-                                    -_prefs.get(UserPreferences.skipBackLength),
-                                  );
-                                  return KeyEventResult.handled;
-                                case LogicalKeyboardKey.arrowRight:
-                                  _seekRelativeAccumulate(
-                                    _prefs.get(
-                                      UserPreferences.skipForwardLength,
-                                    ),
-                                  );
-                                  return KeyEventResult.handled;
-                                case LogicalKeyboardKey.arrowUp:
-                                  // The skip button sits just above the
-                                  // seek bar, so Up is how you get back to it.
-                                  _focusTvSkipSegment();
-                                  return KeyEventResult.handled;
-                                case LogicalKeyboardKey.arrowDown:
-                                  if (_primaryPlayFocus.context != null) {
-                                    _primaryPlayFocus.requestFocus();
-                                  }
-                                  return KeyEventResult.handled;
-                                case LogicalKeyboardKey.select:
-                                case LogicalKeyboardKey.enter:
-                                  _togglePlayPause();
-                                  _showControls(focusSeekbar: true);
-                                  return KeyEventResult.handled;
-                                default:
+                            opaque: false,
+                            onHover: PlatformDetection.useDesktopUi
+                                ? (event) => _handleSeekbarHover(
+                                    event,
+                                    trackWidth: trackWidth,
+                                    duration: duration,
+                                  )
+                                : null,
+                            onExit: PlatformDetection.useDesktopUi
+                                ? (_) => _clearSeekbarHover()
+                                : null,
+                            child: Focus(
+                              focusNode: _tvSeekbarFocus,
+                              onKeyEvent: (node, event) {
+                                if (!PlatformDetection.isTV ||
+                                    (event is! KeyDownEvent &&
+                                        event is! KeyRepeatEvent)) {
                                   return KeyEventResult.ignored;
-                              }
-                            },
-                            child: ExcludeFocus(
-                              excluding: PlatformDetection.isTV,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  _buildSeekSlider(
-                                    positionMs: positionMs,
-                                    durationMs: durationMs,
-                                    bufferMs: bufferMs,
-                                  ),
-                                  // Over the slider, so a mark stays visible
-                                  // where it crosses the played part.
-                                  ChapterMarkerTrack(
-                                    positionsMs: showChapterMarks
-                                        ? chapterMarkerPositions(
-                                            _chapters,
-                                            duration.inMilliseconds,
-                                          )
-                                        : const [],
-                                    durationMs: duration.inMilliseconds,
-                                  ),
-                                ],
+                                }
+                                switch (event.logicalKey) {
+                                  case LogicalKeyboardKey.arrowLeft:
+                                    _seekRelativeAccumulate(
+                                      -_prefs.get(
+                                        UserPreferences.skipBackLength,
+                                      ),
+                                    );
+                                    return KeyEventResult.handled;
+                                  case LogicalKeyboardKey.arrowRight:
+                                    _seekRelativeAccumulate(
+                                      _prefs.get(
+                                        UserPreferences.skipForwardLength,
+                                      ),
+                                    );
+                                    return KeyEventResult.handled;
+                                  case LogicalKeyboardKey.arrowUp:
+                                    // The skip button sits just above the
+                                    // seek bar, so Up is how you get back to it.
+                                    _focusTvSkipSegment();
+                                    return KeyEventResult.handled;
+                                  case LogicalKeyboardKey.arrowDown:
+                                    if (_primaryPlayFocus.context != null) {
+                                      _primaryPlayFocus.requestFocus();
+                                    }
+                                    return KeyEventResult.handled;
+                                  case LogicalKeyboardKey.select:
+                                  case LogicalKeyboardKey.enter:
+                                    _togglePlayPause();
+                                    _showControls(focusSeekbar: true);
+                                    return KeyEventResult.handled;
+                                  default:
+                                    return KeyEventResult.ignored;
+                                }
+                              },
+                              child: ExcludeFocus(
+                                excluding: PlatformDetection.isTV,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    _buildSeekSlider(
+                                      positionMs: positionMs,
+                                      durationMs: durationMs,
+                                      bufferMs: bufferMs,
+                                    ),
+                                    // Over the slider, so a mark stays visible
+                                    // where it crosses the played part.
+                                    ChapterMarkerTrack(
+                                      positionsMs: showChapterMarks
+                                          ? chapterMarkerPositions(
+                                              _chapters,
+                                              duration.inMilliseconds,
+                                            )
+                                          : const [],
+                                      durationMs: duration.inMilliseconds,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        ),
                         if (!compact)
-                        _buildTimeSlotRow(
-                          left: _timeSlotLabel(
-                            belowLeftSlot,
-                            position: livePosition,
-                            duration: duration,
-                            use24Hour: use24Hour,
+                          _buildTimeSlotRow(
+                            left: _timeSlotLabel(
+                              belowLeftSlot,
+                              position: livePosition,
+                              duration: duration,
+                              use24Hour: use24Hour,
+                            ),
+                            center: _timeSlotLabel(
+                              belowCenterSlot,
+                              position: livePosition,
+                              duration: duration,
+                              use24Hour: use24Hour,
+                            ),
+                            right: _timeSlotLabel(
+                              belowRightSlot,
+                              position: livePosition,
+                              duration: duration,
+                              use24Hour: use24Hour,
+                            ),
                           ),
-                          center: _timeSlotLabel(
-                            belowCenterSlot,
-                            position: livePosition,
-                            duration: duration,
-                            use24Hour: use24Hour,
-                          ),
-                          right: _timeSlotLabel(
-                            belowRightSlot,
-                            position: livePosition,
-                            duration: duration,
-                            use24Hour: use24Hour,
-                          ),
-                        ),
                       ],
                     );
                   },
@@ -6019,7 +6040,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     );
   }
 
-
   /// The seek bar slider itself, lifted out so the marker layer can stack
   /// over it without pushing the whole tree past the line limit.
   Widget _buildSeekSlider({
@@ -6031,16 +6051,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       data: osdSeekBarTheme(thumbFocused: _seekbarFocused),
       child: Slider(
         value: positionMs.clamp(0.0, durationMs),
-        secondaryTrackValue: bufferMs.clamp(
-          0.0,
-          durationMs,
-        ),
+        secondaryTrackValue: bufferMs.clamp(0.0, durationMs),
         max: durationMs,
         onChangeStart: (v) {
-          _suppressSeekPrompts(
-            duration:
-                _seekDragPromptSuppressionDuration,
-          );
+          _suppressSeekPrompts(duration: _seekDragPromptSuppressionDuration);
           _pendingScrubSeekTarget = null;
           _beginScrub();
           setState(() {
@@ -6051,14 +6065,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         },
         onChanged: (v) {
           _suppressSeekPrompts(
-            duration:
-                _seekDragPromptSuppressionDuration,
+            duration: _seekDragPromptSuppressionDuration,
             dismissVisiblePrompts: false,
           );
           setState(() => _seekValue = v);
-          _prefetchVisibleTrickplayPreview(
-            Duration(milliseconds: v.round()),
-          );
+          _prefetchVisibleTrickplayPreview(Duration(milliseconds: v.round()));
         },
         onChangeEnd: (v) {
           _suppressSeekPrompts();
@@ -6368,10 +6379,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         _buildDockedTransportRow(),
         const SizedBox(width: AppSpacing.spaceXs),
         Expanded(child: _buildSecondaryControlsRow()),
-        if (chip != null) ...[
-          const SizedBox(width: AppSpacing.spaceSm),
-          chip,
-        ],
+        if (chip != null) ...[const SizedBox(width: AppSpacing.spaceSm), chip],
       ],
     );
   }
@@ -8335,8 +8343,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   /// its crop.
   ZoomMode get _effectiveZoomMode {
     if (!_letterboxCropApplied) return _zoomMode;
-    final fullscreen =
-        !PlatformDetection.useDesktopUi || _isDesktopFullscreen;
+    final fullscreen = !PlatformDetection.useDesktopUi || _isDesktopFullscreen;
     final cropper = _activeMediaKitBackend?.letterboxCropper;
     if (cropper is MpvLetterboxCropper) {
       final screen = MediaQuery.sizeOf(context);
@@ -8467,12 +8474,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _zoomModeToastOverlay = null;
   }
 
-  String _zoomModeLabel(AppLocalizations l10n, ZoomMode mode) =>
-      switch (mode) {
-        ZoomMode.fit => l10n.fit,
-        ZoomMode.autoCrop => l10n.autoCrop,
-        ZoomMode.stretch => l10n.stretch,
-      };
+  String _zoomModeLabel(AppLocalizations l10n, ZoomMode mode) => switch (mode) {
+    ZoomMode.fit => l10n.fit,
+    ZoomMode.autoCrop => l10n.autoCrop,
+    ZoomMode.stretch => l10n.stretch,
+  };
 
   String _tooltipMessage(String label, {String? shortcut}) {
     if (shortcut == null || shortcut.isEmpty || PlatformDetection.isTV) {
@@ -9056,7 +9062,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         CastTargetKind.dlna => 'DLNA',
         _ => l10n.cast,
       };
-      _showThrottledCastError(l10n.castActionFailed(label, describeError(e, l10n)));
+      _showThrottledCastError(
+        l10n.castActionFailed(label, describeError(e, l10n)),
+      );
     }
   }
 
@@ -9176,9 +9184,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     );
     if (on == interpolated) return;
     LambentEnhancement.interpolateInsist = on;
-    _startQuietReopen(
-      then: () => LambentEnhancement.interpolateInsist = false,
-    );
+    _startQuietReopen(then: () => LambentEnhancement.interpolateInsist = false);
   }
 
   /// A press of a picture control is one of several: the PC starts its next
@@ -9196,9 +9202,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     if (uri == null) return;
     var sent = false;
     try {
-      final reply = await http
-          .post(uri)
-          .timeout(const Duration(seconds: 5));
+      final reply = await http.post(uri).timeout(const Duration(seconds: 5));
       sent = reply.statusCode == 200;
     } catch (_) {}
     // A server from before this, or a stream that has just changed: the new
@@ -9398,8 +9402,10 @@ class _TvFocusButtonState extends State<_TvFocusButton> {
               duration: const Duration(milliseconds: 150),
               // Resting glass circles sit a little inside the slot so
               // neighbours don't touch; focus fills the slot.
-              width: widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
-              height: widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
+              width:
+                  widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
+              height:
+                  widget.extent - (AppColorScheme.isGlass && !_focused ? 8 : 0),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _focused
@@ -9420,7 +9426,9 @@ class _TvFocusButtonState extends State<_TvFocusButton> {
                     ? Border.all(color: const Color(0x24FFFFFF), width: 1.5)
                     : null,
                 boxShadow: _focused && AppColorScheme.isGlass
-                    ? const [BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24)]
+                    ? const [
+                        BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24),
+                      ]
                     : null,
               ),
               child: Center(child: widget.child),
@@ -9517,7 +9525,8 @@ class _ChapterRowState extends State<_ChapterRow> {
           const stride = _PlayerRowTile.landscapeWidth + _gap;
           final viewport = constraints.maxWidth;
           final content = 2 * _padding + widget.count * stride - _gap;
-          final centered = _padding +
+          final centered =
+              _padding +
               widget.initialIndex * stride -
               (viewport - _PlayerRowTile.landscapeWidth) / 2;
           _controller ??= ScrollController(

@@ -35,6 +35,13 @@ class LambentBrand {
   /// can run: `test/flutter_test_config.dart` turns it on.
   static bool enableGames = false;
 
+  /// Upstream's "Save to Downloads folder" on Android, which puts downloads in
+  /// the shared Downloads folder through MediaStore. Finding them again after a
+  /// reinstall takes READ_MEDIA_VIDEO and READ_MEDIA_AUDIO, which Google Play
+  /// allows only when broad media access is the app's core purpose, so Lambent
+  /// asks for neither and keeps every download in the app's own storage.
+  static const bool enablePublicDownloadsFolder = false;
+
   /// This app's own source, which GPL-2.0 has us publish.
   static const String sourceUrl = 'https://github.com/honvl/lambent-player';
 }
