@@ -46,7 +46,7 @@ void main() {
     test('uses a browser-compatible Moonfin user agent', () async {
       expect(
         await userAgentOfNextRequest(),
-        'Mozilla/5.0 (compatible; Moonfin/Flutter)',
+        'Mozilla/5.0 Moonfin/Flutter',
       );
     });
 
@@ -55,7 +55,7 @@ void main() {
 
       expect(
         await userAgentOfNextRequest(),
-        'Mozilla/5.0 (compatible; Moonfin/2.3.2)',
+        'Mozilla/5.0 Moonfin/2.3.2',
       );
     });
 
@@ -64,7 +64,7 @@ void main() {
 
       expect(
         await userAgentOfNextRequest(),
-        'Mozilla/5.0 (compatible; Moonfin/2.3.2)',
+        'Mozilla/5.0 Moonfin/2.3.2',
       );
     });
 
@@ -73,7 +73,7 @@ void main() {
 
       expect(
         await userAgentOfNextRequest(),
-        'Mozilla/5.0 (compatible; Moonfin/Flutter)',
+        'Mozilla/5.0 Moonfin/Flutter',
       );
     });
   });

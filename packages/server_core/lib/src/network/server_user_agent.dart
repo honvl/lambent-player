@@ -3,9 +3,10 @@
 // Dart's default `Dart/<version> (dart:io)` is rejected outright by some
 // reverse proxies and WAFs, so an otherwise reachable server looks
 // unreachable and the connection probes exhaust themselves. The
-// `Mozilla/5.0 (compatible; ...)` prefix clears those filters while still
-// naming Moonfin and its version, so admins can pick the traffic out of
-// their access logs.
+// `Mozilla/5.0` prefix clears those filters while still naming Moonfin and
+// its version, so admins can pick the traffic out of their access logs. No
+// `(compatible; ...)` token: Jellyfin's public demo server, which Google
+// Play's reviewers use, turns away any agent carrying one with a 403.
 
 /// Stands in until startup records the real version.
 const _fallbackVersion = 'Flutter';
@@ -13,7 +14,7 @@ const _fallbackVersion = 'Flutter';
 String _version = _fallbackVersion;
 
 /// The `User-Agent` value for all media-server traffic.
-String get serverUserAgent => 'Mozilla/5.0 (compatible; Moonfin/$_version)';
+String get serverUserAgent => 'Mozilla/5.0 Moonfin/$_version';
 
 /// For `Image.network` and `NetworkImage`, which fetch through a shared client
 /// of Flutter's own that nothing can configure, so each call site passes the

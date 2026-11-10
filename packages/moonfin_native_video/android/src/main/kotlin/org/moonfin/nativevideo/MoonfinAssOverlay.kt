@@ -292,6 +292,18 @@ class MoonfinAssOverlayView(
         setWillNotDraw(false)
     }
 
+    // libass lays the script out on this view's pixels, which is where it
+    // draws. The player's surface can be bigger: the on-device upscaler
+    // renders into a 4K buffer behind a 1080p view, and a script laid out at
+    // 4K puts the dialogue below the bottom of the view.
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w <= 0 || h <= 0) return
+        synchronized(assHandler) { assHandler.onSurfaceSizeChanged(w, h) }
+        // A paused player sends no clock callbacks.
+        redrawCurrentAssFrame()
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (released) return
@@ -684,9 +696,9 @@ class MoonfinAssPlayerListener(
         if (changed) overlay.redrawCurrentAssFrame()
     }
 
-    override fun onSurfaceSizeChanged(width: Int, height: Int) {
-        synchronized(assHandler) { assHandler.onSurfaceSizeChanged(width, height) }
-    }
+    // The overlay gives libass its own size instead (onSizeChanged), since
+    // the video surface isn't always the size of the view it shows in.
+    override fun onSurfaceSizeChanged(width: Int, height: Int) = Unit
 
     override fun onVideoSizeChanged(videoSize: VideoSize) {
         synchronized(assHandler) { assHandler.onVideoSizeChanged(videoSize) }

@@ -7175,10 +7175,16 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
     } else if (isBook) {
       playButtonLabel = hasProgress ? l10n.resumeReading : l10n.read;
     } else if (isSeason) {
-      if (seasonAllWatched) {
-        playButtonLabel = l10n.replay;
+      // Like the show's, a season's button names the episode it plays: the
+      // first one not watched, or the first one when it starts over.
+      final first = viewModel.episodes.firstOrNull;
+      if (seasonNextUpEp != null) {
+        playButtonLabel =
+            _plexEpisodeLabel(l10n, seasonNextUpEp) ?? l10n.resume;
+      } else if (seasonAllWatched) {
+        playButtonLabel = _withEpisodeName(l10n.replay, first);
       } else if (seasonAllUnwatched) {
-        playButtonLabel = l10n.play;
+        playButtonLabel = _withEpisodeName(l10n.play, first);
       } else {
         playButtonLabel = l10n.resume;
       }
@@ -8313,12 +8319,10 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
   /// The show's button as Plex words it, naming the episode it plays:
   /// "Resume S1 E1 • 23m left", or "Play S2 E4" for one not started.
   String? _plexEpisodeLabel(AppLocalizations l10n, AggregatedItem? episode) {
-    final season = episode?.parentIndexNumber;
-    final number = episode?.indexNumber;
-    if (episode == null || season == null || number == null) return null;
+    final name = _episodeName(episode);
+    if (episode == null || name == null) return null;
     final position = episode.playbackPosition ?? Duration.zero;
     final runtime = episode.runtime;
-    final name = 'S$season E$number';
     if (position <= Duration.zero || runtime == null || runtime <= position) {
       return '${l10n.play} $name';
     }
@@ -8331,6 +8335,20 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
         ? l10n.guideHoursLeft(hours)
         : l10n.guideHoursMinutesLeft(hours, minutes);
     return '${l10n.resume} $name \u2022 $time';
+  }
+
+  /// "S2 E4", or null for an episode without both numbers.
+  String? _episodeName(AggregatedItem? episode) {
+    final season = episode?.parentIndexNumber;
+    final number = episode?.indexNumber;
+    if (season == null || number == null) return null;
+    return 'S$season E$number';
+  }
+
+  /// "Play S1 E1", or just "Play" when the episode has no numbers.
+  String _withEpisodeName(String verb, AggregatedItem? episode) {
+    final name = _episodeName(episode);
+    return name == null ? verb : '$verb $name';
   }
 
   String _formatResumePosition(Duration? position) {
