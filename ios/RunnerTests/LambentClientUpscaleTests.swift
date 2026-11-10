@@ -34,6 +34,22 @@ final class LambentClientUpscaleTests: XCTestCase {
     XCTAssertNil(LambentClientUpscale.planHeight(URL(string: "file:///var/mobile/Downloads/film.mkv?cup=2160")))
   }
 
+  func testRavuLiteIsFreeWithoutAPlanStep() {
+    // A direct play with no step, and a file from any server.
+    XCTAssertTrue(LambentClientUpscale.freeUpscale(URL(string: "http://192.168.1.20:47800/Videos/i_42/stream.mkv?static=true")))
+    XCTAssertTrue(LambentClientUpscale.freeUpscale(URL(string: "https://plex.example/library/parts/1/file.mkv")))
+    // The plan's step buys the whole ladder instead.
+    XCTAssertFalse(LambentClientUpscale.freeUpscale(URL(string: "http://192.168.1.20:47800/Videos/i_42/stream.mkv?static=true&cup=2160")))
+    // The PC's picture, a compare among them, stays as the plan has it.
+    XCTAssertFalse(LambentClientUpscale.freeUpscale(URL(string: enhanced)))
+    XCTAssertFalse(LambentClientUpscale.freeUpscale(URL(string: enhanced + "&cmp=1")))
+    XCTAssertFalse(LambentClientUpscale.freeUpscale(nil))
+  }
+
+  func testTheFreeLadderHasNoNetwork() {
+    XCTAssertEqual(LambentClientUpscale.freeLadder, [.prescaler("ravu-lite-ar-r3"), .catmullRom, .none])
+  }
+
   func testThePlanGivesTheLiftWithChdr() {
     XCTAssertTrue(LambentClientUpscale.planLift(URL(string: enhanced + "&chdr=1")))
     XCTAssertTrue(LambentClientUpscale.planLift(URL(string: enhanced + "&CHDR=1&cup=2160")))

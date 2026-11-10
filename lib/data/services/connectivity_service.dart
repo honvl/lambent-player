@@ -9,17 +9,13 @@ import 'package:playback_core/playback_core.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../auth/repositories/session_repository.dart';
+import '../../remote/remote_access.dart';
 import '../../util/platform_detection.dart';
 import 'sync_service.dart';
 import 'remove_watched_service.dart';
 
 class ConnectivityService extends ChangeNotifier {
   final Connectivity _connectivity;
-  final Dio _pingDio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 5),
-    receiveTimeout: const Duration(seconds: 5),
-    followRedirects: false,
-  ));
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _recheckDebounce;
 
@@ -35,6 +31,7 @@ class ConnectivityService extends ChangeNotifier {
   int _retryAttempt = 0;
   final Duration _retryBase;
   static const _retryCap = Duration(seconds: 30);
+  static const _tunnelProbeTimeout = Duration(seconds: 20);
 
   static const _probeAttempts = 2;
 
@@ -90,10 +87,7 @@ class ConnectivityService extends ChangeNotifier {
     @visibleForTesting Connectivity? connectivity,
     @visibleForTesting Duration retryBase = const Duration(seconds: 5),
   }) : _connectivity = connectivity ?? Connectivity(),
-       _retryBase = retryBase {
-    configureServerDio(_pingDio);
-    _pingDio.interceptors.add(redirectInterceptor(_pingDio));
-  }
+       _retryBase = retryBase;
 
   void initialize() {
     if (!PlatformDetection.isAppleTV) {
@@ -270,46 +264,56 @@ class ConnectivityService extends ChangeNotifier {
   Future<void> _checkServerReachability() => _inFlightProbe ??= _probeServer()
       .whenComplete(() => _inFlightProbe = null);
 
+  /// A tunnel dials first, and a stream may be filling a slow link, so a
+  /// Lambent PC away from home gets longer than [SystemApi.pingTimeout].
+  Future<bool> _pingThroughTunnel(MediaServerClient client) async {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: _tunnelProbeTimeout,
+        receiveTimeout: _tunnelProbeTimeout,
+      ),
+    );
+    try {
+      final response = await dio.get<String>(
+        '${client.baseUrl}/System/Ping',
+        options: Options(responseType: ResponseType.plain),
+      );
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      // A refusal for the token still came from the server.
+      return e.response?.statusCode == 401;
+    } catch (_) {
+      return false;
+    } finally {
+      dio.close();
+    }
+  }
+
   Future<void> _probeServer() async {
     if (!GetIt.instance.isRegistered<MediaServerClient>()) return;
     final client = GetIt.instance<MediaServerClient>();
     final wasReachable = _serverReachable;
-    Object? failure;
+    var reachable = false;
     // A pooled connection the server already dropped fails exactly like a
     // server that went away, and sending the whole app to the downloads
     // catalog over one of those is worse than asking twice. The failure takes
     // the bad connection with it, so the second try needs no wait in front.
-    for (var attempt = 0; attempt < _probeAttempts; attempt++) {
+    // Each server type pings its own route (Silo has no /System/Ping), and
+    // the client's ping counts a 401 as an answer (see SystemApi.ping).
+    for (var attempt = 0; attempt < _probeAttempts && !reachable; attempt++) {
       try {
-        await _pingDio.get(
-          client.serverType == ServerType.plex
-              ? '${client.baseUrl}/identity'
-              : '${client.baseUrl}/System/Ping',
-          // Only the status matters. A proxy can label the plain text body as
-          // json, and failing to decode it would mark a healthy server down.
-          options: Options(responseType: ResponseType.plain),
-        );
-        failure = null;
-        break;
-      } on DioException catch (e) {
-        // The probe carries no token, and Emby only lets that through from its
-        // own network, so a remote server turns it down with a 401. That
-        // refusal still came from the server.
-        if (e.response?.statusCode == 401) {
-          failure = null;
-          break;
-        }
-        failure = e;
-      } catch (e) {
-        failure = e;
+        reachable = RemoteAccess.instance.isAway(client.baseUrl)
+            ? await _pingThroughTunnel(client)
+            : await client.systemApi.ping();
+      } catch (_) {
+        // Ping shouldn't throw, but a client that does still means no answer.
       }
     }
-    _serverReachable = failure == null;
+    _serverReachable = reachable;
     if (!_serverReachable && wasReachable) {
       ServerLog.network(
         'Server marked unreachable, every probe failed',
         level: ServerLogLevel.warning,
-        error: failure,
       );
     }
     if (_serverReachable) {

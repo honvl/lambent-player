@@ -6,17 +6,17 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Moonfin web client for self-hosted media servers">
+  <meta name="description" content="Lambent: watch your own library in a browser, enhanced by your PC">
   <meta name="theme-color" content="#101010">
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Moonfin">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="apple-mobile-web-app-title" content="Lambent">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png?v=lambent">
+  <link rel="icon" type="image/png" href="favicon.png?v=lambent">
 
-  <title>Moonfin</title>
+  <title>Lambent</title>
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
@@ -107,6 +107,7 @@
     }
   </style>
 
+  <script src="lambent/door.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script>
     (function () {
@@ -119,6 +120,17 @@
           return true;
         }
         return normalized.indexOf('format=hls') !== -1;
+      }
+
+      // The URL with its token= value replaced, for a URL that carries one.
+      function withToken(url, token) {
+        if (typeof url !== 'string') {
+          return url;
+        }
+        return url.replace(
+          /([?&])token=[^&#]*/,
+          '$1token=' + encodeURIComponent(token)
+        );
       }
 
       function shouldTreatAsHls(url, forceHls) {
@@ -143,7 +155,7 @@
           }
           return !!window.Hls.isSupported();
         },
-        attach: function (video, url, forceHls) {
+        attach: function (video, url, forceHls, onFatalError) {
           if (!this.canUseHlsJs(video, url, forceHls)) {
             return null;
           }
@@ -151,10 +163,36 @@
             enableWorker: true,
             lowLatencyMode: true,
             backBufferLength: 90,
+            // A stream that authenticates with a token in its URLs gets
+            // renewed ones through setToken while it plays, and every request
+            // after that carries the latest.
+            xhrSetup: function (xhr, requestUrl) {
+              if (hls && hls.moonfinToken) {
+                xhr.open('GET', withToken(requestUrl, hls.moonfinToken), true);
+              }
+            },
           });
+          if (typeof onFatalError === 'function') {
+            hls.on(window.Hls.Events.ERROR, function (_, data) {
+              if (!data || !data.fatal) {
+                return;
+              }
+              var status = data.response && data.response.code;
+              onFatalError(
+                String(data.type || ''),
+                String(data.details || ''),
+                typeof status === 'number' ? status : 0
+              );
+            });
+          }
           hls.loadSource(url);
           hls.attachMedia(video);
           return hls;
+        },
+        setToken: function (hls, token) {
+          if (hls) {
+            hls.moonfinToken = token;
+          }
         },
         destroy: function (hls) {
           if (hls && typeof hls.destroy === 'function') {
@@ -185,11 +223,11 @@
         <img
           class="moonfin-loader__logo"
           src="assets/assets/icons/moonfin_logo.svg"
-          alt="Moonfin"
+          alt="Lambent"
           onerror="this.onerror=null;this.src='assets/icons/moonfin_logo.svg';"
         >
       </div>
-      <div class="moonfin-loader__label">Loading Moonfin</div>
+      <div class="moonfin-loader__label">Loading Lambent</div>
     </div>
   </div>
   <script src="flutter_bootstrap.js" async></script>

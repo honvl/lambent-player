@@ -124,6 +124,14 @@ class _TestBackend extends Fake implements PlayerBackend {
     'message': 'Source error',
   });
 
+  /// A provider's refusal, as Media3 reports it for a geo-blocked channel.
+  void emitHttpStatusError(int status) => _errors.add(<String, dynamic>{
+    'event': 'error',
+    'errorCodeName': 'ERROR_CODE_IO_BAD_HTTP_STATUS',
+    'message': 'Source error',
+    'httpStatus': status,
+  });
+
   void emitLiveSourceReset() => _errors.add(<String, dynamic>{
     'event': 'playerError',
     'kind': 'live_source_reset',
@@ -618,7 +626,70 @@ void main() {
       }
     });
 
-    test('a VOD source error still fails the bringup', () async {
+    test(
+      'a direct-played channel the provider refuses gives up at once',
+      () async {
+        final backend = _TestBackend();
+        final resolver = _TestResolver()
+          ..playMethod = StreamPlayMethod.directPlay;
+        final service = _TestService();
+        final clock = _Clock();
+        final manager = _manager(backend, resolver, service, clock);
+        try {
+          await manager.playItems(<dynamic>[_liveChannel]);
+
+          backend.emitHttpStatusError(403);
+          await _settle();
+
+          expect(backend.resumeLiveEdgeCalls, isZero);
+          expect(manager.bringupState.phase, PlaybackBringupPhase.failed);
+          expect(manager.bringupState.error, liveStreamLostError);
+        } finally {
+          manager.dispose();
+        }
+      },
+    );
+
+    test('a rate-limited direct-played channel still recovers', () async {
+      final backend = _TestBackend();
+      final resolver = _TestResolver()..playMethod = StreamPlayMethod.directPlay;
+      final service = _TestService();
+      final clock = _Clock();
+      final manager = _manager(backend, resolver, service, clock);
+      try {
+        await manager.playItems(<dynamic>[_liveChannel]);
+
+        backend.emitHttpStatusError(429);
+        await _settle();
+
+        expect(backend.resumeLiveEdgeCalls, 1);
+        expect(manager.bringupState.phase, isNot(PlaybackBringupPhase.failed));
+      } finally {
+        manager.dispose();
+      }
+    });
+
+    test("a server-relayed channel's 404 still recovers", () async {
+      final backend = _TestBackend();
+      final resolver = _TestResolver()
+        ..playMethod = StreamPlayMethod.directStream;
+      final service = _TestService();
+      final clock = _Clock();
+      final manager = _manager(backend, resolver, service, clock);
+      try {
+        await manager.playItems(<dynamic>[_liveChannel]);
+
+        backend.emitHttpStatusError(404);
+        await _settle();
+
+        expect(backend.resumeLiveEdgeCalls, 1);
+        expect(manager.bringupState.phase, isNot(PlaybackBringupPhase.failed));
+      } finally {
+        manager.dispose();
+      }
+    });
+
+    test('a VOD source error plans once more, then fails the bringup', () async {
       final backend = _TestBackend();
       final resolver = _TestResolver();
       final service = _TestService();
@@ -626,6 +697,10 @@ void main() {
       final manager = _manager(backend, resolver, service, clock);
       try {
         await manager.playItems(<dynamic>[_movie]);
+
+        backend.emitSourceError();
+        await _settle();
+        expect(manager.bringupState.phase, isNot(PlaybackBringupPhase.failed));
 
         backend.emitSourceError();
         await _settle();

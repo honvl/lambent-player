@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../util/lambent_server.dart';
 import '../../auth/repositories/user_repository.dart';
 import '../../data/models/aggregated_library.dart';
 import '../../data/repositories/multi_server_repository.dart';
@@ -36,7 +37,7 @@ import 'settings/settings_panel.dart';
 import '../screens/downloads/downloads_panel.dart';
 import 'downloads_nav_slot.dart';
 import 'friends_nav_slot.dart';
-import '../screens/syncplay/syncplay_screen.dart';
+import '../screens/watch_party/watch_together_route.dart';
 import '../screens/settings/settings_side_panel.dart';
 import 'seerr_icons.dart';
 import 'server_messages_dialog.dart';
@@ -50,8 +51,8 @@ import '../../data/models/aggregated_item.dart';
 import '../../data/services/media_server_client_factory.dart';
 import '../navigation/app_router.dart';
 import 'offline_aware_image.dart';
-import 'paced_network_image.dart';
 import 'adaptive/sf_symbol.dart';
+import 'user_avatar_image.dart';
 
 const _kExpandedWidthDesktop = 240.0;
 const _kExpandedWidthMobile = 260.0;
@@ -180,6 +181,9 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
     _loadUserImage();
     _userSub = _userRepo.currentUserStream.listen((_) => _loadUserImage());
     _prefs.addListener(_onPrefsChanged);
+    if (GetIt.instance.isRegistered<ActiveServerKind>()) {
+      GetIt.instance<ActiveServerKind>().addListener(_onPrefsChanged);
+    }
     _viewsRepo.addListener(_onUserViewsChanged);
     GetIt.instance<PluginSyncService>().addListener(_onPrefsChanged);
     if (GetIt.instance.isRegistered<AchievementsService>()) {
@@ -271,6 +275,9 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
       );
     } catch (_) {}
     _prefs.removeListener(_onPrefsChanged);
+    if (GetIt.instance.isRegistered<ActiveServerKind>()) {
+      GetIt.instance<ActiveServerKind>().removeListener(_onPrefsChanged);
+    }
     _currentTime.dispose();
     // Only clear the shared flag if this instance held focus, so a torn-down
     // route's sidebar can't wipe the state of the one the user is on.
@@ -872,34 +879,20 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                 color: AppColorScheme.accent,
               ),
               clipBehavior: Clip.antiAlias,
-              child: _userImageUrl != null
-                  ? Image(
-                      image: PacedNetworkImage(
-                        _userImageUrl!,
-                        headers: serverImageHeaders,
-                      ),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Center(
-                        child: Text(
-                          initial,
-                          style: TextStyle(
-                            color: AppColorScheme.onAccent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Center(
-                      child: Text(
-                        initial,
-                        style: TextStyle(
-                          color: AppColorScheme.onAccent,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+              child: UserAvatarImage(
+                url: _userImageUrl,
+                size: 23,
+                fallback: Center(
+                  child: Text(
+                    initial,
+                    style: TextStyle(
+                      color: AppColorScheme.onAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
+                  ),
+                ),
+              ),
             ),
             icon(Icons.search_rounded),
             icon(Icons.home_outlined),
@@ -1128,6 +1121,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
         _prefs.get(UserPreferences.showLibrariesIndividually);
     final showSyncPlay =
         !kidsMode &&
+        syncPlayOffered() &&
         _prefs.get(UserPreferences.syncPlayEnabled) &&
         _prefs.get(UserPreferences.showSyncPlayButton);
     final seerrPrefs = GetIt.instance<SeerrPreferences>();
@@ -1289,7 +1283,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                   _SidebarItem(
                     key: const ValueKey('sidebar-syncplay'),
                     icon: Icons.groups_outlined,
-                    label: l10n.syncPlay,
+                    label: l10n.watchParties,
                     baseColor: nextMainSidebarColor(),
                     showLabel: _showLabels,
                     onPressed: () {
@@ -1297,7 +1291,7 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                       _markNavigationAwayFromSidebar();
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => const SyncPlayScreen(),
+                          builder: (_) => watchTogetherScreen(),
                         ),
                       );
                     },
@@ -1321,6 +1315,25 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
                       }
                       _markNavigationAwayFromSidebar();
                       context.navigateTopLevel(Destinations.seerrDiscover);
+                    },
+                  ),
+                if (!kidsMode &&
+                    _prefs.get(UserPreferences.showCalendarButton) &&
+                    GetIt.instance<PluginSyncService>().calendarAvailable)
+                  _SidebarItem(
+                    key: const ValueKey('sidebar-calendar'),
+                    baseColor: nextMainSidebarColor(),
+                    icon: Icons.calendar_month_rounded,
+                    label: l10n.calendar,
+                    showLabel: _showLabels,
+                    onPressed: () {
+                      _onNavigate();
+                      if (_isActive(Destinations.calendar)) {
+                        _exitSidebarToContent();
+                        return;
+                      }
+                      _markNavigationAwayFromSidebar();
+                      context.navigateTopLevel(Destinations.calendar);
                     },
                   ),
                 if (plex && showLibraries && navLibraries.isNotEmpty)
@@ -1543,27 +1556,12 @@ class _LeftSidebarState extends State<LeftSidebar> with RouteAware {
               ),
       ),
       child: ClipOval(
-        child: _userImageUrl != null
-            ? Image(
-                // The server sends the avatar at its stored size, so decode
-                // at the painted size instead of a full bitmap per user.
-                image: ResizeImage.resizeIfNeeded(
-                  ArtworkDecode.widthFor(
-                    avatarSize,
-                    MediaQuery.devicePixelRatioOf(context),
-                  ),
-                  null,
-                  PacedNetworkImage(
-                    _userImageUrl!,
-                    headers: serverImageHeaders,
-                  ),
-                ),
-                fit: BoxFit.cover,
-                width: avatarSize,
-                height: avatarSize,
-                errorBuilder: (_, _, _) => fallback,
-              )
-            : fallback,
+        // Decoded at the painted size, SVG presets drawn as vectors.
+        child: UserAvatarImage(
+          url: _userImageUrl,
+          size: 40,
+          fallback: fallback,
+        ),
       ),
     );
 

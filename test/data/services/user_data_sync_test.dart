@@ -11,6 +11,16 @@ class _MockClient extends Mock implements MediaServerClient {}
 
 class _MockItemsApi extends Mock implements ItemsApi {}
 
+/// An items API that reads one item at a time and narrows a refresh (Silo):
+/// only `changed` is worth asking about again.
+class _ScopedItemsApi extends Mock implements ItemsApi, UserDataRefreshScope {
+  @override
+  List<String> userDataMayHaveChanged(Iterable<String> itemIds) => [
+    for (final id in itemIds)
+      if (id == 'changed') id,
+  ];
+}
+
 AggregatedItem _episode({
   String id = 'ep1',
   bool played = false,
@@ -263,6 +273,51 @@ void main() {
       );
     });
 
+    test(
+      'a server that narrows the refresh is asked only about those',
+      () async {
+        final itemsApi = _ScopedItemsApi();
+        when(
+          () => itemsApi.getItems(
+            ids: any(named: 'ids'),
+            fields: any(named: 'fields'),
+            recursive: any(named: 'recursive'),
+            limit: any(named: 'limit'),
+            enableTotalRecordCount: any(named: 'enableTotalRecordCount'),
+          ),
+        ).thenAnswer((_) async => {'Items': const []});
+        final client = _MockClient();
+        when(() => client.itemsApi).thenReturn(itemsApi);
+
+        await sync.refreshFromServer(client, ['a', 'changed', 'b']);
+        final asked = verify(
+          () => itemsApi.getItems(
+            ids: captureAny(named: 'ids'),
+            fields: any(named: 'fields'),
+            recursive: any(named: 'recursive'),
+            limit: any(named: 'limit'),
+            enableTotalRecordCount: any(named: 'enableTotalRecordCount'),
+          ),
+        ).captured;
+        expect(asked, [
+          ['changed'],
+        ]);
+
+        // Nothing worth asking about: no request at all.
+        clearInteractions(itemsApi);
+        await sync.refreshFromServer(client, ['a', 'b']);
+        verifyNever(
+          () => itemsApi.getItems(
+            ids: any(named: 'ids'),
+            fields: any(named: 'fields'),
+            recursive: any(named: 'recursive'),
+            limit: any(named: 'limit'),
+            enableTotalRecordCount: any(named: 'enableTotalRecordCount'),
+          ),
+        );
+      },
+    );
+
     test('a failed request leaves what is known alone', () async {
       sync.publish('ep1', {'Played': true});
       final itemsApi = _MockItemsApi();
@@ -282,6 +337,24 @@ void main() {
 
       expect(sync.apply(_episode()).isPlayed, isTrue);
     });
+  });
+
+  test('Plex and Lambent Server are asked, Jellyfin reports by itself', () {
+    expect(sendsNoUserDataEvents(ServerType.plex, null), isTrue);
+    expect(
+      sendsNoUserDataEvents(
+        ServerType.jellyfin,
+        '6c616d6201234567890abcdef0000000',
+      ),
+      isTrue,
+    );
+    expect(
+      sendsNoUserDataEvents(
+        ServerType.jellyfin,
+        'f27b7d3c8e1a4c6e9b0d2a5f7c3e1b9d',
+      ),
+      isFalse,
+    );
   });
 
   test('reset drops everything so the next account starts clean', () {

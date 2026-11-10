@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:get_it/get_it.dart';
 import 'package:server_core/server_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/offline/connectivity_aware_media_server_client.dart';
 import '../data/services/log_service.dart';
 import '../data/services/media_server_client_factory.dart';
+import '../remote/remote_access.dart';
 
 /// Measures what the link to the active server can carry, so an Auto bitrate
 /// setting means a measured ceiling. A request is never left without one,
@@ -19,6 +22,8 @@ import '../data/services/media_server_client_factory.dart';
 /// time it takes to arrive gives bits per second. Plex has no such route, so
 /// the start of a file in its library is read instead, a probe's size at a
 /// time.
+///
+/// Each server address keeps its last measurement across launches.
 class AutoBitrateService {
   AutoBitrateService(this._clientFactory);
 
@@ -30,13 +35,26 @@ class AutoBitrateService {
   static const _probeBytes = [500000, 1000000, 3000000];
   static const _nextProbeAboveBps = [500000, 20000000];
 
+  /// Through a tunnel the start of a body comes in a burst, as much as its
+  /// flow window lets through (2 MiB), whatever the link can hold: 1 MB read
+  /// 11.9 Mbit/s on a 3.9 Mbit/s link. So the last probe always runs, and it
+  /// isn't timed until [_awayBurstBytes] have come.
+  static const _awayProbeBytes = [1000000, 4000000];
+  static const _awayNextProbeAboveBps = [500000];
+  static const _awayBurstBytes = 1048576;
+
   static const _requestTimeout = Duration(seconds: 8);
   static const _probeBudget = Duration(seconds: 5);
   static const _cacheLifetime = Duration(minutes: 15);
+  static const _storeKey = 'auto_bitrate_measurements';
 
   /// The ceiling the bitrate setting starts on, used when nothing could be
   /// measured.
   static const _fallbackBps = 120000000;
+
+  /// Away from home a link too poor to measure is a poor link: the server's
+  /// smallest stream rather than the file.
+  static const _awayFallbackBps = 1500000;
 
   /// Jellyfin reads the ceiling into a 32 bit int, and a server on the same
   /// machine measures faster than that holds.
@@ -48,23 +66,35 @@ class AutoBitrateService {
 
   final _cache = <String, ({int bps, DateTime measuredAt})>{};
   final _inFlight = <String, Future<int?>>{};
+  late final Future<void> _loaded = _load();
 
-  /// Bits per second to cap the active server's streams at, or null offline
-  /// or with no server, where there's nothing to cap.
-  Future<int?> measuredBpsForActiveServer() {
-    if (_clientFactory.clients.isEmpty) return Future.value(null);
-    // Offline playback would otherwise wait out the probe's timeout before
-    // the local file starts.
-    if (shouldUseOfflineCatalog()) return Future.value(null);
-    // The signed in server, since the newest client the factory made can be
-    // another saved server's.
-    final client = _clientFactory.clientForServerOrActive(null);
+  /// Drops what was measured: the connection changed, or playback says the
+  /// figure no longer holds.
+  void forget() {
+    _cache.clear();
+    unawaited(_save());
+  }
+
+  /// Whether the active server is a Lambent PC reached through its tunnel, where
+  /// the bitrate setting's default gives way to a measurement.
+  bool get activeServerIsAway {
+    if (_clientFactory.clients.isEmpty) return false;
+    return RemoteAccess.instance.isAway(_clientFactory.clientForServerOrActive(null).baseUrl);
+  }
+
+  /// Bits per second to cap the active server's streams at, measured now
+  /// unless the saved measurement is recent, or null offline or with no
+  /// server, where there's nothing to cap.
+  Future<int?> measuredBpsForActiveServer() async {
+    final client = _measurableClient();
+    if (client == null) return null;
+    await _loaded;
 
     final key = client.baseUrl;
     final cached = _cache[key];
     if (cached != null &&
         DateTime.now().difference(cached.measuredAt) < _cacheLifetime) {
-      return Future.value(cached.bps);
+      return cached.bps;
     }
 
     // One measurement per server at a time, so a burst of plays does not
@@ -74,18 +104,75 @@ class AutoBitrateService {
     });
   }
 
+  /// The last measurement saved for the active server however old it is, or
+  /// the starting ceiling before the first one. Never runs a test.
+  Future<int?> savedBpsForActiveServer() async {
+    final client = _measurableClient();
+    if (client == null) return null;
+    await _loaded;
+    return _cache[client.baseUrl]?.bps ?? _fallbackBps;
+  }
+
+  MediaServerClient? _measurableClient() {
+    if (_clientFactory.clients.isEmpty) return null;
+    // Offline playback would otherwise wait out the probe's timeout before
+    // the local file starts.
+    // Through a tunnel the offline flag can be the stream's own doing: a direct
+    // play too big for the link starves the reachability ping. Measuring is
+    // what ends that, so it goes ahead anyway.
+    if (shouldUseOfflineCatalog() && !activeServerIsAway) return null;
+    // The signed in server, since the newest client the factory made can be
+    // another saved server's.
+    final client = _clientFactory.clientForServerOrActive(null);
+    // Silo has no bandwidth test route, and its playback start takes the
+    // client's bandwidth as input and applies the server's own policy, so
+    // there's nothing to measure against.
+    if (client.serverType == ServerType.silo) return null;
+    return client;
+  }
+
+  Future<void> _load() async {
+    try {
+      final raw = (await SharedPreferences.getInstance()).getString(_storeKey);
+      if (raw == null) return;
+      (jsonDecode(raw) as Map<String, dynamic>).forEach((url, entry) {
+        if (entry case [final int bps, final int measuredAt]) {
+          _cache[url] = (
+            bps: bps,
+            measuredAt: DateTime.fromMillisecondsSinceEpoch(measuredAt),
+          );
+        }
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _save() async {
+    try {
+      await (await SharedPreferences.getInstance()).setString(
+        _storeKey,
+        jsonEncode({
+          for (final MapEntry(:key, :value) in _cache.entries)
+            key: [value.bps, value.measuredAt.millisecondsSinceEpoch],
+        }),
+      );
+    } catch (_) {}
+  }
+
   /// Runs [sample] over the probe sizes and returns the last rate it got, or
   /// null when the first probe failed.
   @visibleForTesting
   static Future<int?> stepThroughProbes(
-    Future<int?> Function(int bytes) sample,
-  ) async {
+    Future<int?> Function(int bytes) sample, {
+    bool away = false,
+  }) async {
+    final sizes = away ? _awayProbeBytes : _probeBytes;
+    final above = away ? _awayNextProbeAboveBps : _nextProbeAboveBps;
     int? bps;
-    for (var i = 0; i < _probeBytes.length; i++) {
-      final measured = await sample(_probeBytes[i]);
+    for (var i = 0; i < sizes.length; i++) {
+      final measured = await sample(sizes[i]);
       if (measured == null) break;
       bps = measured;
-      if (i < _nextProbeAboveBps.length && measured < _nextProbeAboveBps[i]) {
+      if (i < above.length && measured < above[i]) {
         break;
       }
     }
@@ -141,26 +228,24 @@ class AutoBitrateService {
         responseType: ResponseType.stream,
         receiveTimeout: _requestTimeout,
         connectTimeout: _requestTimeout,
-        headers: plex
-            ? {'X-Plex-Token': ?client.accessToken}
-            : {
-                // Newer Jellyfin rejects a bare X-Emby-Token, so send the
-                // same Authorization header the server clients use.
-                'Authorization': buildServerAuthorizationHeader(
-                  scheme: client.serverType == ServerType.emby
-                      ? 'Emby'
-                      : 'MediaBrowser',
-                  deviceInfo: client.deviceInfo,
-                  accessToken: client.accessToken,
-                ),
-              },
+        // Newer Jellyfin rejects a bare X-Emby-Token, so send the same
+        // Authorization header the server clients use.
+        headers: serverAuthHeaders(client),
       ),
     );
 
     try {
+      final away = activeServerIsAway;
       final measured = await stepThroughProbes(
+        away: away,
         (bytes) => plexFile == null
-            ? _sample(dio, '$base/Playback/BitrateTest?size=$bytes', bytes, log)
+            ? _sample(
+                dio,
+                '$base/Playback/BitrateTest?size=$bytes',
+                bytes,
+                log,
+                burst: away && bytes > _awayBurstBytes ? _awayBurstBytes : 0,
+              )
             : _sample(
                 dio,
                 '$base$plexFile',
@@ -170,14 +255,16 @@ class AutoBitrateService {
               ),
       );
       if (measured == null) {
+        final fallback = activeServerIsAway ? _awayFallbackBps : _fallbackBps;
         log.log(
           LogCategory.playback,
-          'Auto bitrate: nothing measured, using ${_fallbackBps}bps',
+          'Auto bitrate: nothing measured, using ${fallback}bps',
         );
-        return _fallbackBps;
+        return fallback;
       }
       final bps = min((measured * _safetyFactor).round(), _maxBps);
       _cache[client.baseUrl] = (bps: bps, measuredAt: DateTime.now());
+      unawaited(_save());
       log.log(LogCategory.playback, 'Auto bitrate: measured ${bps}bps');
       return bps;
     } finally {
@@ -194,6 +281,7 @@ class AutoBitrateService {
     int bytes,
     LogService log, {
     Map<String, String>? headers,
+    int burst = 0,
   }) async {
     try {
       final response = await dio.get<ResponseBody>(
@@ -208,6 +296,12 @@ class AutoBitrateService {
       var outOfTime = false;
       await for (final chunk in body.stream.timeout(_requestTimeout)) {
         received += chunk.length;
+        if (burst > 0 && received >= burst) {
+          received = 0;
+          burst = 0;
+          stopwatch.reset();
+          continue;
+        }
         if (stopwatch.elapsed >= _probeBudget) {
           outOfTime = true;
           break;
@@ -216,7 +310,7 @@ class AutoBitrateService {
       final seconds = stopwatch.elapsedMicroseconds / 1000000;
       // A body that ended short on its own measures the server giving up,
       // not the link.
-      if (!outOfTime && received < bytes ~/ 4) return null;
+      if (burst > 0 || (!outOfTime && received < bytes ~/ 4)) return null;
       if (received == 0 || seconds <= 0) return null;
       return (received * 8 / seconds).round();
     } catch (e) {

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../../remote/remote_access.dart';
 import '../../../auth/models/server.dart';
 import '../../../auth/models/server_addition_state.dart';
 import '../../../auth/models/user.dart';
@@ -21,12 +22,15 @@ import '../../../l10n/app_localizations.dart';
 import '../../../platform/web_runtime_config.dart';
 import '../../../util/app_beta.dart';
 import '../../../util/focus/dpad_keys.dart';
+import '../../../util/lambent_server.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/server_url.dart';
+import '../../../util/silo_failure_message.dart';
 import '../../../util/web_diagnostics_failure.dart';
 import '../../navigation/destinations.dart';
 import '../../widgets/adaptive/adaptive_dialog.dart';
 import '../../widgets/allow_self_signed_dialog.dart';
+import '../../widgets/lambent_server_setup_card.dart';
 import '../../widgets/login_scaffold.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/server_type_icon.dart';
@@ -50,6 +54,10 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
   final _authPrefs = GetIt.instance<AuthenticationPreferences>();
   final _deviceInfo = GetIt.instance<DeviceInfo>();
   final _discoveryService = ServerDiscoveryService();
+  // Separate nodes, because a node handed from a tile to the button keeps the
+  // tile's key handler, which the button has none of its own to replace
+  final _firstServerFocus = FocusNode(debugLabel: 'serverSelectFirstServer');
+  final _addServerFocus = FocusNode(debugLabel: 'serverSelectAddServer');
   StreamSubscription<ServerAdditionState>? _additionSub;
   StreamSubscription<DiscoveredServer>? _discoverySub;
 
@@ -139,10 +147,37 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
     _additionSub = _serverRepo.additionState.listen(_onAdditionState);
     _loadServers();
     _startDiscovery();
+    RemoteAccess.pendingLink.addListener(_openPendingLink);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openPendingLink());
+  }
+
+  /// A scanned QR code opened the app.
+  void _openPendingLink() {
+    final link = RemoteAccess.pendingLink.value;
+    if (link == null || !mounted || _isAddDialogOpen) return;
+    RemoteAccess.pendingLink.value = null;
+    _showAddServerDialog(address: link);
+  }
+
+  /// A remote's select key does nothing until something holds focus, so the
+  /// first entry takes it. Autofocus isn't used because a rebuilt autofocus
+  /// node pulls focus back from a dialog or sheet open over the page.
+  void _focusFirstIfIdle() {
+    if (!mounted) return;
+    final first = _serverRepo.servers.isEmpty
+        ? _addServerFocus
+        : _firstServerFocus;
+    final current = FocusManager.instance.primaryFocus;
+    if (current == null || first.ancestors.contains(current)) {
+      first.requestFocus();
+    }
   }
 
   @override
   void dispose() {
+    RemoteAccess.pendingLink.removeListener(_openPendingLink);
+    _firstServerFocus.dispose();
+    _addServerFocus.dispose();
     _addressController.dispose();
     _additionSub?.cancel();
     _discoverySub?.cancel();
@@ -153,6 +188,12 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
     await _serverRepo.loadStoredServers();
     if (mounted) {
       setState(() {});
+      // Waits for the saved servers so the first one can take focus
+      if (PlatformDetection.isTV) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _focusFirstIfIdle(),
+        );
+      }
     }
     await _autoConnectConfiguredServer();
   }
@@ -321,13 +362,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
     _discoverySub?.cancel();
     _discoverySub = _discoveryService.discoverLocalServers().listen(
       (server) {
-        final savedAddresses = _serverRepo.servers
-            .map((s) => s.address)
-            .toSet();
-        if (!savedAddresses.contains(server.address)) {
-          if (mounted) {
-            setState(() => _discoveredServers.add(server));
-          }
+        if (mounted) {
+          setState(() => _discoveredServers.add(server));
         }
       },
       onDone: () {
@@ -337,6 +373,17 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
         if (mounted) setState(() => _isDiscovering = false);
       },
     );
+  }
+
+  /// Whether [server] is already in the saved list. A joined Lambent PC is saved at its tunnel's address, not the one Bonjour
+  /// finds; one still saved at its local address stays offered, since joining it moves that entry to the tunnel.
+  bool _isSaved(DiscoveredServer server) {
+    final tunnelId = server.irohId;
+    if (tunnelId != null && RemoteAccess.instance.available) {
+      final tunnel = RemoteAccess.instance.tunnelAddress(tunnelId);
+      return tunnel != null && _findServerByAddress(tunnel) != null;
+    }
+    return _findServerByAddress(server.address) != null;
   }
 
   void _onAdditionState(ServerAdditionState state) {
@@ -367,6 +414,7 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
         :final lastStatusCode,
         :final lastErrorMessage,
         :final untrustedCandidate,
+        :final unsupportedSilo,
       ):
         if (!shouldHandleAdditionState) return;
         final targetUrl = (lastCandidate != null && lastCandidate.isNotEmpty)
@@ -376,7 +424,9 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
         setState(() {
           _isConnecting = false;
           _untrustedAddress = untrustedCandidate;
-          _errorMessage = untrustedCandidate != null
+          _errorMessage = unsupportedSilo != null
+              ? SiloUpdateRequired.of(unsupportedSilo).message(l10n)
+              : untrustedCandidate != null
               ? l10n.untrustedServerCertificate
               : l10n.unableToConnectToServer;
         });
@@ -418,7 +468,29 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
     }
 
     try {
-      await _serverRepo.addServer(discovered.address);
+      var address = discovered.address;
+      final tunnelId = discovered.irohId;
+      if (tunnelId != null && RemoteAccess.instance.available) {
+        // A Lambent PC with a tunnel: join it, with no pairing, and keep one entry for it.
+        final uri = Uri.parse(address);
+        final tunnel = await RemoteAccess.instance.join(
+          tunnelId,
+          '${uri.host}:${uri.port}',
+          name: joiningName,
+          kind: joiningKind,
+        );
+        final saved = _findServerByAddress(address);
+        if (saved != null) {
+          await _serverRepo.updateServer(
+            saved.copyWith(
+              address: tunnel,
+              displayAddress: saved.displayAddress ?? saved.address,
+            ),
+          );
+        }
+        address = tunnel;
+      }
+      await _serverRepo.addServer(address);
     } catch (e) {
       if (!mounted) return;
       _maybeOpenWebDiagnosticsForFailure(
@@ -434,20 +506,31 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
 
   Future<void> _deleteServer(Server server) async {
     final l10n = AppLocalizations.of(context);
+    // Read before the dialog takes focus and hands it back a microtask later
+    final tileHadFocus = _firstServerFocus.hasFocus;
     final confirmed = await showFocusRestoringDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog.adaptive(
-        title: Text(l10n.removeServer),
-        content: Text(l10n.removeServerConfirmation(server.name)),
-        actions: [
-          adaptiveDialogAction(onPressed: () => ctx.pop(false), child: Text(l10n.cancel)),
-          adaptiveDialogAction(onPressed: () => ctx.pop(true), isDestructive: true, child: Text(l10n.remove)),
-        ],
+      builder: (ctx) => _IgnoreHeldSelect(
+        child: AlertDialog.adaptive(
+          title: Text(l10n.removeServer),
+          content: Text(l10n.removeServerConfirmation(server.name)),
+          actions: [
+            adaptiveDialogAction(onPressed: () => ctx.pop(false), child: Text(l10n.cancel)),
+            adaptiveDialogAction(onPressed: () => ctx.pop(true), isDestructive: true, child: Text(l10n.remove)),
+          ],
+        ),
       ),
     );
     if (confirmed == true) {
       await _serverRepo.deleteServer(server.id);
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      setState(() {});
+      // Removing the last tile drops its focus, so hand it to Add Server
+      if (tileHadFocus && _serverRepo.servers.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _addServerFocus.requestFocus();
+        });
+      }
     }
   }
 
@@ -492,6 +575,7 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
   Widget build(BuildContext context) {
     final servers = _serverRepo.servers;
     final l10n = AppLocalizations.of(context);
+    final discovered = _discoveredServers.where((s) => !_isSaved(s)).toList();
 
     return LoginScaffold(
       header: Padding(
@@ -520,7 +604,11 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
               ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            ...servers.map((server) => _buildSavedServerTile(server)),
+            for (var i = 0; i < servers.length; i++)
+              _buildSavedServerTile(
+                servers[i],
+                focusNode: i == 0 ? _firstServerFocus : null,
+              ),
             const SizedBox(height: 20),
           ],
           Text(
@@ -530,10 +618,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          if (_discoveredServers.isNotEmpty)
-            ..._discoveredServers.map(
-              (server) => _buildDiscoveredServerTile(server),
-            )
+          if (discovered.isNotEmpty)
+            ...discovered.map((server) => _buildDiscoveredServerTile(server))
           else if (_isDiscovering)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
@@ -553,7 +639,12 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
                 style: TextStyle(color: _loginForeground(0.4), fontSize: 14),
               ),
             ),
-          if (_isDiscovering && _discoveredServers.isNotEmpty)
+          if (servers.isEmpty &&
+              discovered.isEmpty &&
+              !_isDiscovering &&
+              !_isWebPluginMode)
+            LambentServerSetupCard(foreground: _loginForeground(0.95)),
+          if (_isDiscovering && discovered.isNotEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 4, bottom: 8),
               child: Center(
@@ -591,7 +682,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
               if (!_isWebPluginMode) {
                 actions.add(
                   AddServerButton(
-                    onPressed: _isConnecting ? null : _showAddServerDialog,
+                    onPressed: _isConnecting ? null : () => _showAddServerDialog(),
+                    focusNode: _addServerFocus,
                   ),
                 );
               }
@@ -637,10 +729,11 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
     );
   }
 
-  Widget _buildSavedServerTile(Server server) {
+  Widget _buildSavedServerTile(Server server, {FocusNode? focusNode}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: _FocusableTile(
+        focusNode: focusNode,
         onTap: () => context.go('${Destinations.server}?serverId=${server.id}'),
         onLongPress: () => _deleteServer(server),
         child: Row(
@@ -663,7 +756,7 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
                     ),
                   ),
                   Text(
-                    '${server.displayAddress ?? server.address} • ${server.version}',
+                    '${serverAddressLabel(server)} • ${server.version}',
                     style: TextStyle(
                       fontSize: 13,
                       color: _loginForeground(0.5),
@@ -703,7 +796,7 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
                     ),
                   ),
                   Text(
-                    server.address,
+                    RemoteAccess.instance.isTunnel(server.address) ? 'On this network' : server.address,
                     style: TextStyle(
                       fontSize: 13,
                       color: _loginForeground(0.5),
@@ -720,10 +813,10 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
 
   bool _isAddDialogOpen = false;
 
-  Future<void> _showAddServerDialog() async {
+  Future<void> _showAddServerDialog({String? address}) async {
     if (_isAddDialogOpen) return;
     _isAddDialogOpen = true;
-    final defaultAddress = _webDefaultServerUrl;
+    final defaultAddress = address ?? _webDefaultServerUrl;
     _addressController.text = defaultAddress ?? '';
     _addressController.selection = TextSelection.collapsed(
       offset: _addressController.text.length,
@@ -763,15 +856,35 @@ class _FocusableTile extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final FocusNode? focusNode;
 
   const _FocusableTile({
     required this.child,
     required this.onTap,
     this.onLongPress,
+    this.focusNode,
   });
 
   @override
   State<_FocusableTile> createState() => _FocusableTileState();
+}
+
+/// Opened by holding select: the same key, still down, must not press the first button. A remote's repeats would close the dialog at once.
+class _IgnoreHeldSelect extends StatelessWidget {
+  const _IgnoreHeldSelect({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Focus(
+    canRequestFocus: false,
+    skipTraversal: true,
+    onKeyEvent: (node, event) =>
+        event is KeyRepeatEvent && event.logicalKey.isSelectKey
+        ? KeyEventResult.handled
+        : KeyEventResult.ignored,
+    child: child,
+  );
 }
 
 class _FocusableTileState extends State<_FocusableTile> {
@@ -800,6 +913,15 @@ class _FocusableTileState extends State<_FocusableTile> {
     super.dispose();
   }
 
+  /// What it opens takes the focus, so the key's release may never come back here: the press is over now.
+  void _fireLongPress() {
+    _selectHoldTimer?.cancel();
+    _selectHoldTimer = null;
+    _longPressFiredFromKey = true;
+    _selectKeyPressed = false;
+    widget.onLongPress?.call();
+  }
+
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (widget.onTap == null) return KeyEventResult.ignored;
 
@@ -815,20 +937,15 @@ class _FocusableTileState extends State<_FocusableTile> {
       _longPressFiredFromKey = false;
       _selectHoldTimer?.cancel();
       if (widget.onLongPress != null) {
-        _selectHoldTimer = Timer(const Duration(milliseconds: 500), () {
-          _longPressFiredFromKey = true;
-          widget.onLongPress?.call();
-        });
+        _selectHoldTimer = Timer(const Duration(milliseconds: 500), _fireLongPress);
       }
       return KeyEventResult.handled;
     }
 
     if (event is KeyRepeatEvent) {
-      if (widget.onLongPress != null && !_longPressFiredFromKey) {
-        _longPressFiredFromKey = true;
-        _selectHoldTimer?.cancel();
-        _selectHoldTimer = null;
-        widget.onLongPress?.call();
+      // Only a hold that began here: a key still down from a dialog that just closed isn't one.
+      if (widget.onLongPress != null && _selectKeyPressed && !_longPressFiredFromKey) {
+        _fireLongPress();
       }
       return KeyEventResult.handled;
     }
@@ -855,6 +972,7 @@ class _FocusableTileState extends State<_FocusableTile> {
       color: _focused ? _kAccent.withValues(alpha: 0.18) : _tileIdleColor(),
       borderRadius: radius,
       child: Focus(
+        focusNode: widget.focusNode,
         onFocusChange: (f) {
           if (!f) {
             _clearSelectKeyState();

@@ -1,11 +1,13 @@
 package org.moonfin.nativevideo
 
+import android.app.Activity
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.lang.ref.WeakReference
 
 object Media3Bridge {
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -267,6 +269,14 @@ object Media3Bridge {
 
     fun frameRateSwitchingBehavior(): String = frameRateSwitchingBehavior
 
+    // The window an early display mode switch points, before any player view
+    // (whose own context is the activity) exists.
+    private var hostActivity: WeakReference<Activity>? = null
+
+    fun attachActivity(activity: Activity?) {
+        hostActivity = activity?.let { WeakReference(it) }
+    }
+
     fun passthroughMode(): String = passthroughMode
 
     fun passthroughCodecs(): Set<String> = passthroughCodecs
@@ -280,6 +290,39 @@ object Media3Bridge {
     }
 
     fun handleMethodCall(call: MethodCall, result: MethodChannel.Result, caller: Any) {
+        // Asked as playback is requested, before any player view exists. A
+        // player already holding a mode, the next episode in an open player,
+        // switches for its own source as it always has.
+        if (call.method == "prepareDisplayMode") {
+            val args = call.arguments as? Map<*, *>
+            val activity = hostActivity?.get()
+            val frameRate = (args?.get("frameRate") as? Number)?.toFloat() ?: 0f
+            val holding = viewRegistry.values.any { it.holdsDisplayMode() }
+            android.util.Log.i(
+                "MoonfinDisplayMode",
+                "early request for $frameRate fps: activity ${activity != null}, a player holding a mode $holding",
+            )
+            val asked = activity != null && !holding &&
+                EarlyDisplayMode.request(
+                    activity = activity,
+                    frameRate = frameRate,
+                    videoWidth = (args?.get("width") as? Number)?.toInt() ?: 0,
+                    videoHeight = (args?.get("height") as? Number)?.toInt() ?: 0,
+                    // setDecoderPreferences only comes with the source, so the
+                    // setting rides along with the request.
+                    behavior = args?.get("behavior")?.toString()?.trim()?.lowercase()
+                        ?: frameRateSwitchingBehavior,
+                )
+            result.success(asked)
+            return
+        }
+
+        if (call.method == "releasePreparedDisplayMode") {
+            EarlyDisplayMode.release("the start was abandoned")
+            result.success(null)
+            return
+        }
+
         if (call.method == "activateView") {
             val id = ((call.arguments as? Map<*, *>)?.get("viewId") as? Number)?.toInt()
             val view = id?.let { viewRegistry[it] }
@@ -453,6 +496,7 @@ object Media3Bridge {
             "disableTunnelingForSession",
             "addExternalSubtitle",
             "configureSubtitleStyle",
+            "updateRequestHeaders",
             -> {
                 queueCall(call.method, call.arguments)
                 result.success(null)

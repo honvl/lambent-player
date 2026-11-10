@@ -52,7 +52,7 @@ class _LambentEnhancementScreen extends StatelessWidget {
                     children: [
                       EnumPreferenceTile<LambentServerChoice>(
                         preference: UserPreferences.lambentRtxHdr,
-                        title: 'RTX HDR',
+                        title: 'Auto HDR',
                         icon: Icons.hdr_on,
                         labelOf: choiceLabel,
                       ),
@@ -73,6 +73,16 @@ class _LambentEnhancementScreen extends StatelessWidget {
                   const _SectionHeader('Picture'),
                   adaptiveListSection(
                     children: [
+                      SliderPreferenceTile(
+                        preference: UserPreferences.lambentHdrStrength,
+                        title: 'HDR strength',
+                        description: 'Lower brings the brightest parts down.',
+                        icon: Icons.brightness_6_outlined,
+                        min: 0,
+                        max: 100,
+                        divisions: 10,
+                        labelOf: (v) => '$v%',
+                      ),
                       SwitchPreferenceTile(
                         preference: UserPreferences.lambentCustomPicture,
                         title: 'Custom picture on this screen',
@@ -92,7 +102,7 @@ class _LambentEnhancementScreen extends StatelessWidget {
                         SliderPreferenceTile(
                           preference: UserPreferences.lambentContrast,
                           title: 'Contrast',
-                          description: 'RTX HDR only',
+                          description: 'Auto HDR only',
                           icon: Icons.contrast,
                           min: 0,
                           max: 200,
@@ -100,48 +110,34 @@ class _LambentEnhancementScreen extends StatelessWidget {
                           labelOf: (v) => '$v',
                         ),
                         SliderPreferenceTile(
-                          preference: UserPreferences.lambentBrightness,
-                          title: 'Brightness',
-                          description: 'RTX HDR only (middle grey)',
-                          icon: Icons.brightness_6,
-                          min: 10,
-                          max: 100,
-                          divisions: 18,
-                          labelOf: (v) => '$v nits',
-                        ),
-                        SliderPreferenceTile(
                           preference: UserPreferences.lambentPeak,
                           title: 'Peak brightness',
-                          description: 'RTX HDR only',
+                          description: 'Auto HDR only',
                           icon: Icons.wb_sunny_outlined,
                           min: 400,
                           max: 1400,
                           divisions: 20,
                           labelOf: (v) => '$v nits',
                         ),
-                        SliderPreferenceTile(
-                          preference: UserPreferences.lambentHue,
-                          title: 'Hue',
-                          icon: Icons.color_lens_outlined,
-                          min: -30,
-                          max: 30,
-                          divisions: 12,
-                          labelOf: (v) => '$v°',
-                        ),
-                        SliderPreferenceTile(
-                          preference: UserPreferences.lambentWideColour,
-                          title: 'Wide colour',
-                          description:
-                              "RTX HDR only: vivid colours toward HDR's wider range; skin stays",
-                          icon: Icons.palette_outlined,
-                          min: 0,
-                          max: 100,
-                          divisions: 4,
-                          labelOf: (v) => v == 0 ? 'Off' : '$v%',
-                        ),
                       ],
                     ],
                   ),
+                  // A TV smooths motion itself, so it is never asked.
+                  if (!PlatformDetection.isTV) ...[
+                    const _SectionHeader('Motion'),
+                    adaptiveListSection(
+                      children: [
+                        SwitchPreferenceTile(
+                          preference: UserPreferences.lambentInterpolate2D,
+                          title: 'Frame interpolation',
+                          subtitle:
+                              'Smoother motion: films up to 30 fps play at twice '
+                              'their rate where your PC can make the frames.',
+                          icon: Icons.animation,
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ],
             );
@@ -170,11 +166,14 @@ class _EnhanceSubscriptionSectionState
   /// builds sell only through their store, and iOS and Apple TV builds
   /// without a store link out to nothing.
   static bool get _mayLinkOut =>
+      // The Mac build is distributed directly, with no store to sell through.
+      PlatformDetection.isMacOS ||
       PlatformDetection.isAndroid &&
-      switch (AppDistribution.channel) {
-        DistributionChannel.aab || DistributionChannel.androidTvAab => false,
-        _ => true,
-      };
+          switch (AppDistribution.channel) {
+            DistributionChannel.aab ||
+            DistributionChannel.androidTvAab => false,
+            _ => true,
+          };
 
   @override
   void initState() {
@@ -191,7 +190,12 @@ class _EnhanceSubscriptionSectionState
     return ListenableBuilder(
       listenable: purchases,
       builder: (context, _) {
-        if (!purchases.isLambentServer) return const SizedBox.shrink();
+        if (!purchases.isLambentServer) {
+          return _PlayerEnhanceSection(
+            purchases: purchases,
+            mayLinkOut: _mayLinkOut,
+          );
+        }
         final licence = purchases.licence;
         final locale = Localizations.localeOf(context).toLanguageTag();
         String date(DateTime d) => DateFormat.yMMMd(locale).format(d);
@@ -229,13 +233,15 @@ class _EnhanceSubscriptionSectionState
                     ListTile(
                       leading: const Icon(Icons.shopping_bag_outlined),
                       title: Text(
-                        product.yearly
+                        product.lifetime
+                            ? 'Lambent Enhance, lifetime'
+                            : product.yearly
                             ? 'Lambent Enhance, yearly'
                             : 'Lambent Enhance, monthly',
                       ),
                       subtitle: Text(
                         '${product.price} '
-                        '${product.yearly ? 'a year' : 'a month'}, for '
+                        '${product.lifetime ? 'once' : (product.yearly ? 'a year' : 'a month')}, for '
                         'every screen on your server',
                       ),
                       enabled: !purchases.busy,
@@ -270,4 +276,210 @@ class _EnhanceSubscriptionSectionState
       },
     );
   }
+}
+
+/// Lambent Enhance on this device, signed in to a server that is not Lambent
+/// Server (ENTITLEMENTS.md section 8): what it holds and what it can run, said
+/// before anyone pays. A device that can run neither the AI upscaler nor the
+/// HDR lift is offered nothing.
+class _PlayerEnhanceSection extends StatefulWidget {
+  const _PlayerEnhanceSection({
+    required this.purchases,
+    required this.mayLinkOut,
+  });
+
+  final EnhancePurchases purchases;
+  final bool mayLinkOut;
+
+  @override
+  State<_PlayerEnhanceSection> createState() => _PlayerEnhanceSectionState();
+}
+
+class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
+  late final Future<LambentDeviceCapabilities> _capabilities =
+      LambentDeviceCapabilities.detect();
+
+  @override
+  void initState() {
+    super.initState();
+    // A checkout in the browser, or a licence from another device, shows here.
+    widget.purchases.player?.refresh();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final purchases = widget.purchases;
+    final player = purchases.player;
+    if (player == null) return const SizedBox.shrink();
+    return FutureBuilder<LambentDeviceCapabilities>(
+      future: _capabilities,
+      builder: (context, snapshot) {
+        final can = snapshot.data ?? LambentDeviceCapabilities.none;
+        if (!can.worthBuying) return const SizedBox.shrink();
+        return ListenableBuilder(
+          listenable: player,
+          builder: (context, _) {
+            final locale = Localizations.localeOf(context).toLanguageTag();
+            final until = player.until;
+            final date = until == null
+                ? null
+                : DateFormat.yMMMd(locale).format(until);
+            final state = player.state;
+            final buyUrl = player.buyUrl;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _SectionHeader('Lambent Enhance'),
+                adaptiveListSection(
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        player.licensed
+                            ? Icons.verified_rounded
+                            : Icons.auto_awesome_outlined,
+                      ),
+                      title: Text(switch (state) {
+                        EnhanceState.active => 'Lambent Enhance is on',
+                        EnhanceState.trial => 'Lambent Enhance: free trial',
+                        _ => 'Lambent Enhance',
+                      }),
+                      subtitle: Text(
+                        [
+                          'This device runs ${can.summary}.',
+                          if (date != null)
+                            state == EnhanceState.trial
+                                ? 'Trial ends $date.'
+                                : 'Until $date.',
+                        ].join(' '),
+                      ),
+                    ),
+                    if (state != EnhanceState.active && purchases.canBuyInApp)
+                      for (final product in purchases.products)
+                        ListTile(
+                          leading: const Icon(Icons.shopping_bag_outlined),
+                          title: Text(
+                            product.lifetime
+                                ? 'Lambent Enhance, lifetime'
+                                : product.yearly
+                                ? 'Lambent Enhance, yearly'
+                                : 'Lambent Enhance, monthly',
+                          ),
+                          subtitle: Text(
+                            '${product.price} '
+                            '${product.lifetime ? 'once' : (product.yearly ? 'a year' : 'a month')}',
+                          ),
+                          enabled: !purchases.busy,
+                          onTap: () => purchases.buy(product),
+                        ),
+                    if (purchases.store != null)
+                      ListTile(
+                        leading: const Icon(Icons.restore_rounded),
+                        title: const Text('Restore purchases'),
+                        enabled: !purchases.busy,
+                        onTap: purchases.restore,
+                      ),
+                    if (state != EnhanceState.active &&
+                        widget.mayLinkOut &&
+                        buyUrl != null)
+                      ListTile(
+                        leading: const Icon(Icons.open_in_new_rounded),
+                        title: const Text('Get Lambent Enhance'),
+                        subtitle: const Text('Opens the checkout for this device'),
+                        onTap: () => launchUrl(
+                          buyUrl,
+                          mode: LaunchMode.externalApplication,
+                        ),
+                      ),
+                    ListTile(
+                      leading: const Icon(Icons.login_rounded),
+                      title: const Text('Already bought it? Sign in'),
+                      onTap: () => showDialog<void>(
+                        context: context,
+                        builder: (_) => _PlayerSignInDialog(player: player),
+                      ),
+                    ),
+                    if (purchases.message case final message?)
+                      ListTile(
+                        leading: const Icon(Icons.info_outline_rounded),
+                        title: Text(message),
+                      ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Joins this player to a Lambent account: an email with a link, whose page
+/// shows the code to paste here.
+class _PlayerSignInDialog extends StatefulWidget {
+  const _PlayerSignInDialog({required this.player});
+
+  final PlayerLicence player;
+
+  @override
+  State<_PlayerSignInDialog> createState() => _PlayerSignInDialogState();
+}
+
+class _PlayerSignInDialogState extends State<_PlayerSignInDialog> {
+  final _field = TextEditingController();
+  bool _emailSent = false;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _field.dispose();
+    super.dispose();
+  }
+
+  Future<void> _next() async {
+    final text = _field.text.trim();
+    if (text.isEmpty) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      if (_emailSent) {
+        await widget.player.joinAccount(text);
+        if (mounted) Navigator.of(context).pop();
+        return;
+      }
+      await widget.player.requestSignIn(text);
+      _field.clear();
+      _emailSent = true;
+    } on LicenceException catch (e) {
+      _error = e.message ?? "Lambent couldn't be reached. Try again later.";
+    }
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Sign in to Lambent'),
+    content: TextField(
+      controller: _field,
+      autofocus: true,
+      decoration: InputDecoration(
+        labelText: _emailSent ? 'Code from the email\'s page' : 'Email',
+        errorText: _error,
+      ),
+      onSubmitted: (_) => _next(),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: _busy ? null : _next,
+        child: Text(_emailSent ? 'Sign in' : 'Send email'),
+      ),
+    ],
+  );
 }

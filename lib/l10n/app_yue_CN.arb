@@ -1,6 +1,6 @@
 {
     "@@locale": "yue_CN",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -78,7 +78,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent 版本{version}",
+    "appVersionFooter": "Moonfin 版本{version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -152,7 +152,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent 无法访问您的系统密钥环。登录可以继续，但在密钥环解锁之前，安全令牌存储可能不可用。",
+    "secureStorageUnavailableMessage": "Moonfin 无法访问您的系统密钥环。登录可以继续，但在密钥环解锁之前，安全令牌存储可能不可用。",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -164,7 +164,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "在 Lambent 和 Neon Pulse 之间切换，无需重新启动应用程序",
+    "settingsAppearanceThemeSubtitle": "在 Moonfin 和 Neon Pulse 之间切换，无需重新启动应用程序",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -245,7 +245,7 @@
             }
         }
     },
-    "exitApp": "退出Lambent？",
+    "exitApp": "退出Moonfin？",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3072,7 +3072,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "未设置。 Lambent 将尝试应用程序/数据文件夹中的默认 mpv.conf。",
+    "notSetMpvConf": "未设置。 Moonfin 将尝试应用程序/数据文件夹中的默认 mpv.conf。",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3467,7 +3467,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "切换每个库的主页可见性。重新启动 Lambent 以使更改生效。",
+    "libraryVisibilityDescription": "切换每个库的主页可见性。重新启动 Moonfin 以使更改生效。",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3512,7 +3512,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "在 Lambent、MakD 之间进行选择，或关闭媒体栏",
+    "mediaBarModeDescription": "在 Moonfin、MakD 之间进行选择，或关闭媒体栏",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4184,7 +4184,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "玩 Lambent",
+    "playInMoonfin": "玩 Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4238,7 +4238,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "在您的 Lambent 库中找不到项目",
+    "itemNotFoundInLibrary": "在您的 Moonfin 库中找不到项目",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4540,7 +4540,7 @@
         }
     },
     "adminServerRebootInProgress": "服务器正在重启",
-    "adminServerRebootMessage": "服务器正在重新启动，请重新启动 Lambent",
+    "adminServerRebootMessage": "服务器正在重新启动，请重新启动 Moonfin",
     "adminActiveSessions": "活跃会话",
     "adminSessionsLoadFailed": "无法加载会话",
     "adminNoActiveSessions": "没有活动会话",
@@ -6416,7 +6416,7 @@
     "settingsShowGenresButtonInNavigation": "在导航栏中显示流派按钮",
     "settingsShowFavoritesButtonInNavigation": "在导航栏中显示收藏夹按钮",
     "settingsShowLibrariesButtonInNavigation": "在导航栏中显示库按钮",
-    "settingsLibraryVisibilitySubtitle": "切换每个库的主页可见性。重新启动 Lambent 以使更改生效。",
+    "settingsLibraryVisibilitySubtitle": "切换每个库的主页可见性。重新启动 Moonfin 以使更改生效。",
     "settingsMediaBarAndLocalPreviews": "媒体栏和本地预览",
     "settingsVisualOverlays": "视觉叠加",
     "settingsSeasonalSurprise": "季节性惊喜",
@@ -6440,9 +6440,9 @@
     "settingsLicenses": "许可证",
     "settingsOpenSourceLicenseNotices": "开源许可声明",
     "settingsPrivacyPolicy": "隐私政策",
-    "settingsPrivacyPolicySubtitle": "Lambent 如何处理您的数据",
+    "settingsPrivacyPolicySubtitle": "Moonfin 如何处理您的数据",
     "settingsCheckForUpdates": "检查更新",
-    "settingsCheckForUpdatesSubtitle": "检查最新的 Lambent 版本",
+    "settingsCheckForUpdatesSubtitle": "检查最新的 Moonfin 版本",
     "settingsPoweredByFlutter": "由颤动提供支持",
     "settingsLicenseNoticesCount": "{count, plural, one {# license notice} other {# license notices}}",
     "@settingsLicenseNoticesCount": {
@@ -6971,12 +6971,12 @@
     "preferSdhSubtitles": "Prefer SDH subtitles",
     "preferSdhSubtitlesSubtitle": "Prioritize SDH/CC subtitle tracks when auto-selecting.",
     "webDiagnostics": "Web diagnostics",
-    "webDiagnosticsTitle": "Lambent Web Diagnostics",
+    "webDiagnosticsTitle": "Moonfin Web Diagnostics",
     "webDiagnosticsIntro": "Use this page to diagnose browser connectivity issues (CORS, mixed content, and discovery settings).",
     "webDiagnosticsDetectedMixedContentFailure": "Detected Mixed-Content Failure",
     "webDiagnosticsDetectedCorsPreflightFailure": "Detected CORS/Preflight Failure",
-    "webDiagnosticsMixedContentFailureBody": "Lambent detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.",
-    "webDiagnosticsCorsFailureBody": "Lambent detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.",
+    "webDiagnosticsCorsFailureBody": "Moonfin detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.",
     "webDiagnosticsTargetUrl": "Target URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7006,7 +7006,7 @@
     "notConfigured": "not configured",
     "webDiagnosticsMixedContent": "Mixed Content",
     "webDiagnosticsMixedContentDetected": "This page is loaded over HTTPS, but one or more configured URLs are HTTP. Browsers block HTTPS pages from calling HTTP APIs.",
-    "webDiagnosticsMixedContentFix": "Fix: serve your media server or proxy endpoint via HTTPS, or load Lambent over HTTP on trusted local networks only.",
+    "webDiagnosticsMixedContentFix": "Fix: serve your media server or proxy endpoint via HTTPS, or load Moonfin over HTTP on trusted local networks only.",
     "webDiagnosticsNoMixedContentDetected": "No obvious mixed-content configuration detected from current runtime settings.",
     "webDiagnosticsCorsChecklist": "CORS Checklist",
     "webDiagnosticsCorsChecklistItem1": "• Allow the browser origin in Access-Control-Allow-Origin.",

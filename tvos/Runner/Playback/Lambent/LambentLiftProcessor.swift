@@ -2,6 +2,7 @@ import CoreVideo
 import Foundation
 import Metal
 import QuartzCore
+import os
 
 /// The GPU work, off the main thread: 8- or 10-bit 4:2:0 BT.709 in, P010 BT.2020 PQ out (or, with `hdr` off, P010 with the picture's own
 /// SDR colours: upscaling only).
@@ -63,11 +64,17 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private var prescalers: [String: LambentPrescaler] = [:]
     /// The scalers to try, best first; the first one stays until its GPU time does not fit.
     private(set) var ladder: [Scaler]
+    /// The device's whole ladder, which a plan's `cup` buys.
+    private let paidLadder: [Scaler]
     private var step = 0
     private var stepPictures = 0
     private var stepLate = 0
     /// Where the picture is shown, in screen pixels; nil: at its own size.
-    var outputSize: (Int, Int)?
+    var outputSize: (Int, Int)? {
+        get { outputSizeLock.withLock { $0 } }
+        set { outputSizeLock.withLock { $0 = newValue } }
+    }
+    private let outputSizeLock = OSAllocatedUnfairLock<(Int, Int)?>(initialState: nil)
     /// The film's rate: a picture has one frame of it, start to finish.
     var frameRate: Double = 24
     /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off).
@@ -131,6 +138,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
         }
         prescalers = loaded
         self.ladder = ladder.filter { if case .prescaler(let n) = $0 { return loaded[n] != nil } else { return true } }
+        paidLadder = self.ladder
         if case .neural(let fast) = self.ladder.first { _ = LambentNeuralScaler.scaler("neural-low", student: fast, device: device) }
         // A TV's stream (docs/HDR_FALLBACK.md in Lambent): 1000-nit peak, contrast 100, middle grey 50.
         curve = LambentToneParams(peak: 1000).table
@@ -166,6 +174,15 @@ final class LambentLiftProcessor: @unchecked Sendable {
         stepPictures = 0
         stepLate = 0
         network = nil
+    }
+
+    /// The title's ladder: the free one, or the device's whole ladder when a plan asked. Called with no picture in flight (`start`).
+    func useLadder(free: Bool) {
+        guard !forced else { return }
+        ladder = free ? LambentClientUpscale.freeLadder.filter { if case .prescaler(let n) = $0 { return prescalers[n] != nil } else { return true } } : paidLadder
+        step = 0
+        stepPictures = 0
+        stepLate = 0
     }
 
     /// Overrides the ladder (a bench, or a test): the scaler named, alone.

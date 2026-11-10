@@ -220,10 +220,14 @@ void main() {
     }
   });
 
-  test('a backend error during an active session still fails the bring-up', () async {
+  test('a backend error during an active session plans once more, then fails the bring-up', () async {
     final h = _Harness();
     try {
       await h.manager.playItems(<dynamic>[_item]);
+
+      h.backend.emit(_lateError);
+      await pumpEventQueue();
+      expect(h.sawFailure, isFalse);
 
       h.backend.emit(_lateError);
       await pumpEventQueue();

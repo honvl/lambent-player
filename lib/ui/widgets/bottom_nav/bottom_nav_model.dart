@@ -80,6 +80,7 @@ bool bottomNavTabMatchesRoute(BottomNavTab tab, String route) {
     BottomNavTab.genres => route == Destinations.allGenres,
     BottomNavTab.liveTv => under(Destinations.liveTv),
     BottomNavTab.discover => under('/seerr'),
+    BottomNavTab.calendar => under(Destinations.calendar),
   };
 }
 
@@ -146,6 +147,7 @@ List<BottomNavHubTile> resolveHubTiles({
   required bool shuffle,
   required bool syncPlay,
   required bool quickConnect,
+  bool remoteControl = true,
   Set<BottomNavTab> alsoOnBar = const {},
 }) {
   final onBar = {
@@ -162,6 +164,7 @@ List<BottomNavHubTile> resolveHubTiles({
     if (syncPlay) const BottomNavHubTile.action(BottomNavHubAction.syncPlay),
     if (quickConnect)
       const BottomNavHubTile.action(BottomNavHubAction.quickConnect),
-    const BottomNavHubTile.action(BottomNavHubAction.remoteControl),
+    if (remoteControl)
+      const BottomNavHubTile.action(BottomNavHubAction.remoteControl),
   ];
 }

@@ -11,15 +11,20 @@ import '../../../data/models/aggregated_item.dart';
 import '../../../data/offline/connectivity_aware_media_server_client.dart';
 import '../../../data/offline/offline_catalog.dart';
 import '../../../data/repositories/item_mutation_repository.dart';
+import '../../../util/signed_in_server_features.dart';
+import '../../../util/server_url.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../util/error_message.dart';
 import '../../../preference/preference_constants.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/home_refresh_helper.dart';
 import '../../../util/item_watch_state.dart';
+import '../../../data/services/item_membership_service.dart';
 import '../../navigation/destinations.dart';
 import '../add_to_collection_dialog.dart';
 import '../add_to_playlist_dialog.dart';
+import '../remove_from_collection_dialog.dart';
+import '../remove_from_playlist_dialog.dart';
 import '../adaptive/adaptive_dialog.dart';
 import '../change_artwork_dialog.dart';
 import '../identify_dialog.dart';
@@ -95,12 +100,24 @@ Future<void> _hideFromResumeOrReset(
   } catch (_) {}
 }
 
+/// The types that get the play, watched, playlist and collection actions.
+bool isContextMediaType(String? type) =>
+    type == 'Movie' ||
+    type == 'Episode' ||
+    type == 'Series' ||
+    type == 'Season' ||
+    type == 'Audio' ||
+    type == 'MusicAlbum' ||
+    type == 'BoxSet';
+
 List<ItemContextAction> contextActionsFor(
   BuildContext context,
   AggregatedItem item, {
   VoidCallback? onChanged,
   CollectionRemovalContext? collectionRemoval,
   bool isContinueWatchingOrNextUp = false,
+  List<ItemPlaylistMembership>? playlistMemberships,
+  List<ItemCollectionMembership>? collectionMemberships,
 }) {
   final l10n = AppLocalizations.of(context);
   final mutations = GetIt.instance<ItemMutationRepository>();
@@ -114,17 +131,25 @@ List<ItemContextAction> contextActionsFor(
       !requiresCollectionPermission ||
       currentUser?.canManageCollections == true ||
       isAdminUser;
+  // A server that hides Home cards itself (Silo) does it for this item's
+  // server only. Read when a hide is picked, not for every menu.
+  // Cards name their server by its address (Home rows, grids, detail pages)
+  // or by the app's server id, so either counts. Home cards never match the
+  // user's server id.
+  HomeDismissalsApi? dismissals() {
+    final ofThisServer = isStoredServer(
+      item.serverId,
+      serverId: currentUser?.serverId ?? '',
+      baseUrl: client.baseUrl,
+    );
+    if (!ofThisServer) return null;
+    final api = client.itemsApi;
+    return api is HomeDismissalsApi ? api as HomeDismissalsApi : null;
+  }
   final actions = <ItemContextAction>[];
   final type = item.type;
 
-  final isMediaType =
-      type == 'Movie' ||
-      type == 'Episode' ||
-      type == 'Series' ||
-      type == 'Season' ||
-      type == 'Audio' ||
-      type == 'MusicAlbum' ||
-      type == 'BoxSet';
+  final isMediaType = isContextMediaType(type);
 
   if (isMediaType) {
     final prefs = GetIt.instance<UserPreferences>();
@@ -201,13 +226,22 @@ List<ItemContextAction> contextActionsFor(
         icon: Icons.visibility_off_outlined,
         label: l10n.contextMenuHideFromContinueWatching,
         onSelect: () async {
+          // The server's own hide holds on every device and keeps the
+          // resume point. This device's list is the fallback.
+          final server = dismissals();
+          if (await _hiddenByServer(
+            () => server?.hideFromContinueWatching(item.rawData),
+          )) {
+            onChanged?.call();
+            return;
+          }
           final prefs = GetIt.instance<UserPreferences>();
           if (item.seriesId != null && item.seriesId!.isNotEmpty) {
             await prefs.hideFromContinueWatching(item.seriesId!);
           } else {
             await prefs.hideFromContinueWatching(item.id);
           }
-          await _hideFromResumeOrReset(mutations, item);
+          if (server == null) await _hideFromResumeOrReset(mutations, item);
           onChanged?.call();
         },
       ));
@@ -220,10 +254,17 @@ List<ItemContextAction> contextActionsFor(
         icon: Icons.visibility_off_outlined,
         label: l10n.contextMenuHideFromNextUp,
         onSelect: () async {
+          final server = dismissals();
+          if (await _hiddenByServer(
+            () => server?.hideFromNextUp(item.rawData),
+          )) {
+            onChanged?.call();
+            return;
+          }
           final prefs = GetIt.instance<UserPreferences>();
           await prefs.hideFromNextUp(item.seriesId!);
           await prefs.hideFromContinueWatching(item.seriesId!);
-          await _hideFromResumeOrReset(mutations, item);
+          if (server == null) await _hideFromResumeOrReset(mutations, item);
           onChanged?.call();
         },
       ));
@@ -271,24 +312,64 @@ List<ItemContextAction> contextActionsFor(
             onChanged: onChanged,
           ),
         ));
+      } else if (collectionMemberships != null &&
+          collectionMemberships.isNotEmpty) {
+        actions.add(ItemContextAction(
+          icon: Icons.playlist_remove,
+          label: l10n.contextMenuRemoveFromCollection,
+          onSelect: () async {
+            if (!context.mounted) return;
+            final removed = await RemoveFromCollectionDialog.show(
+              context,
+              item: item,
+              collections: collectionMemberships,
+              serverId: item.serverId,
+            );
+            if (removed == true) {
+              onChanged?.call();
+            }
+          },
+        ));
       }
     }
 
-    actions.add(ItemContextAction(
-      icon: Icons.playlist_add,
-      label: l10n.addToPlaylist,
-      onSelect: () async {
-        if (!context.mounted) return;
-        final added = await AddToPlaylistDialog.show(
-          context,
-          itemIds: [item.id],
-          serverId: item.serverId,
-        );
-        if (added == true) {
-          onChanged?.call();
-        }
-      },
-    ));
+    // Not for an item from a server without playlists (Silo).
+    if (itemServerSupports(item.serverId, (f) => f.supportsPlaylists)) {
+      actions.add(ItemContextAction(
+        icon: Icons.playlist_add,
+        label: l10n.addToPlaylist,
+        onSelect: () async {
+          if (!context.mounted) return;
+          final added = await AddToPlaylistDialog.show(
+            context,
+            itemIds: [item.id],
+            serverId: item.serverId,
+          );
+          if (added == true) {
+            onChanged?.call();
+          }
+        },
+      ));
+
+      if (playlistMemberships != null && playlistMemberships.isNotEmpty) {
+        actions.add(ItemContextAction(
+          icon: Icons.playlist_remove,
+          label: l10n.removeFromPlaylist,
+          onSelect: () async {
+            if (!context.mounted) return;
+            final removed = await RemoveFromPlaylistDialog.show(
+              context,
+              item: item,
+              playlists: playlistMemberships,
+              serverId: item.serverId,
+            );
+            if (removed == true) {
+              onChanged?.call();
+            }
+          },
+        ));
+      }
+    }
 
     if (isAdminUser) {
       actions.add(ItemContextAction(
@@ -359,14 +440,14 @@ List<ItemContextAction> contextActionsFor(
                 ? (item.seriesName ?? item.name)
                 : item.name;
 
-            final applied = await IdentifyDialog.show(
+            final identified = await IdentifyDialog.show(
               context,
               itemId: targetItemId,
               itemType: targetItemType,
               itemName: targetItemName,
               itemYear: isTVChild ? null : item.productionYear,
             );
-            if (applied == true) {
+            if (identified != null) {
               onChanged?.call();
             }
           },
@@ -471,4 +552,22 @@ Future<void> _confirmAndRemoveFromCollection(
       ),
     );
   }
+}
+
+/// Runs a server's own hide of a Home card ([HomeDismissalsApi]) and
+/// reloads Home, whose rows the server now answers without the card.
+/// False when the server has none ([hide] answers null) or it failed, so the
+/// caller falls back to this device's list. On that fallback the item isn't
+/// marked unwatched as it is on Jellyfin, because on a server with
+/// dismissals that would also erase its watch history.
+Future<bool> _hiddenByServer(Future<void>? Function() hide) async {
+  try {
+    final hiding = hide();
+    if (hiding == null) return false;
+    await hiding;
+  } catch (_) {
+    return false;
+  }
+  refreshHomeRows();
+  return true;
 }

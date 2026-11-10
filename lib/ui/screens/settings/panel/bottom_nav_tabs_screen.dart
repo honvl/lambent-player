@@ -16,6 +16,8 @@ class _BottomNavTabsScreenState extends State<_BottomNavTabsScreen> {
   BottomNavTabGates get _gates => BottomNavTabGates.fromPreferences(
         _prefs,
         seerrAvailable: GetIt.instance<PluginSyncService>().seerrAvailable,
+        calendarAvailable:
+            GetIt.instance<PluginSyncService>().calendarAvailable,
       );
 
   String get _raw => _prefs.get(UserPreferences.bottomNavbarTabs);
@@ -52,6 +54,10 @@ class _BottomNavTabsScreenState extends State<_BottomNavTabsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    // Not offered when no signed-in server has Live TV (all Silo, say). A
+    // Live TV pin synced from another device stays listed so it can be
+    // removed.
+    final liveTvOnAnyServer = liveTvOnAnySignedInServer();
     final hint = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -140,7 +146,8 @@ class _BottomNavTabsScreenState extends State<_BottomNavTabsScreen> {
             adaptiveListSection(
               children: [
                 for (final tab in BottomNavTab.values)
-                  if (!pinned.contains(tab))
+                  if (!pinned.contains(tab) &&
+                      (tab != BottomNavTab.liveTv || liveTvOnAnyServer))
                     ListTile(
                       enabled: gates.offers(tab) && !full,
                       leading: icon(tab, enabled: gates.offers(tab) && !full),

@@ -175,7 +175,10 @@ class SetupWizardGate {
 
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
-      if (sync.isSyncInitializedForServer(client, serverId: serverId)) {
+      // This user's settings, not the server's flag: on a device where
+      // another profile of the server already synced, the flag is set before
+      // this profile's settings arrive.
+      if (sync.hasReadSignInSettings(client, serverId: serverId)) {
         return true;
       }
       await Future<void>.delayed(const Duration(milliseconds: 120));

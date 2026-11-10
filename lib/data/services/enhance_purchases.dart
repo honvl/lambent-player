@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'lambent_licence.dart';
+import 'player_licence.dart';
 
 /// What a store purchase is doing, independent of the store plugin.
 enum StoreTransactionStatus { pending, purchased, restored, error, canceled }
@@ -32,7 +33,7 @@ class StoreTransaction {
   final String? id;
 }
 
-/// One way to pay for Lambent Enhance: monthly or yearly.
+/// One way to pay for Lambent Enhance: monthly, yearly or lifetime.
 @immutable
 class EnhanceProduct {
   const EnhanceProduct({
@@ -40,6 +41,7 @@ class EnhanceProduct {
     required this.title,
     required this.price,
     required this.yearly,
+    this.lifetime = false,
     this.handle,
   });
 
@@ -49,6 +51,7 @@ class EnhanceProduct {
   /// The store's own price text, in the buyer's currency.
   final String price;
   final bool yearly;
+  final bool lifetime;
   final Object? handle;
 }
 
@@ -76,9 +79,13 @@ abstract class EnhanceStore {
 /// and every purchase passed to the server before the store is told it is
 /// done.
 class EnhancePurchases extends ChangeNotifier {
-  EnhancePurchases({required this.client, this.store});
+  EnhancePurchases({required this.client, this.store, this.player});
 
   final LambentLicenceClient client;
+
+  /// This player's own licence (ENTITLEMENTS.md section 8): shown to a Lambent
+  /// Server when they meet, and what a purchase goes to when there is none.
+  final PlayerLicence? player;
 
   /// Null for builds that may not sell through a store (sideloaded Android,
   /// unsigned iOS, Apple TV): those show the server's buy page instead.
@@ -130,7 +137,7 @@ class EnhancePurchases extends ChangeNotifier {
   /// settings screen calls it again in case the store had nothing at launch.
   Future<void> loadProducts() {
     final store = this.store;
-    if (store == null || !_isLambent || _products.isNotEmpty) {
+    if (store == null || (!_isLambent && player == null) || _products.isNotEmpty) {
       return Future.value();
     }
     return _loadingProducts ??= () async {
@@ -150,13 +157,33 @@ class EnhancePurchases extends ChangeNotifier {
   /// Asks the server for the licence again.
   Future<void> refresh() async {
     try {
-      final licence = await client.fetch();
+      await player?.start();
+      final licence = await client.fetch(player: player?.id);
       _isLambent = licence != null;
       _licence = licence;
+      await _meet(licence);
     } on LicenceException catch (e) {
       debugPrint('EnhancePurchases: licence fetch failed: $e');
     }
     notifyListeners();
+  }
+
+  /// A licensed player and a Lambent Server show each other their leases, so
+  /// that either one's purchase covers both (section 8.2).
+  Future<void> _meet(LambentLicence? licence) async {
+    final player = this.player;
+    if (player == null || licence == null) return;
+    final theirs = licence.present;
+    if (theirs != null) await player.accept(theirs);
+    final household = licence.household;
+    if (household == null) return;
+    final ours = await player.presentTo(household);
+    if (ours == null) return;
+    try {
+      _licence = await client.present(ours) ?? licence;
+    } on LicenceException catch (e) {
+      debugPrint('EnhancePurchases: the server refused the lease: $e');
+    }
   }
 
   Future<void> buy(EnhanceProduct product) async {
@@ -236,13 +263,21 @@ class EnhancePurchases extends ChangeNotifier {
     _busy = true;
     notifyListeners();
     try {
-      _licence = await client.forward(proof);
+      final player = this.player;
+      if (_isLambent || player == null) {
+        _licence = await client.forward(proof);
+        _isLambent = true;
+      } else {
+        // No Lambent Server to pass it on: this player holds it.
+        await player.forward(proof);
+      }
       confirmed.complete(true);
-      _isLambent = true;
       _unconfirmed.removeWhere((u) => identical(u.handle, t.handle));
       await _finishQuietly(t);
       _message = t.status == StoreTransactionStatus.purchased
-          ? 'Lambent Enhance is on for your server.'
+          ? (_isLambent
+                ? 'Lambent Enhance is on for your server.'
+                : 'Lambent Enhance is on for this device.')
           : null;
     } on LicenceException catch (e) {
       confirmed.complete(false);

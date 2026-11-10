@@ -60,6 +60,7 @@ class SkipSegmentOverlay extends StatefulWidget {
 class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
   StreamSubscription<Duration>? _positionSubscription;
   Duration _currentPosition = Duration.zero;
+  late bool _focused = widget.focusNode?.hasFocus ?? false;
 
   @override
   void initState() {
@@ -144,6 +145,12 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
 
     final effectiveRadius = AppColorScheme.isPixel ? 0.0 : _capsuleRadius;
     final borders = ThemeRegistry.active.borders;
+    // On TV the highlight says that Select presses this button, so it follows
+    // focus. Everywhere else the button is pressed directly and stays lit.
+    final highlighted = !PlatformDetection.isTV || _focused;
+    final iconColor = highlighted
+        ? AppColorScheme.accent
+        : AppColorScheme.onSurface;
 
     return Positioned(
       right: widget.rightInset,
@@ -152,6 +159,7 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
         color: Colors.transparent,
         child: Focus(
           focusNode: widget.focusNode,
+          onFocusChange: (focused) => setState(() => _focused = focused),
           onKeyEvent: (_, event) {
             if (widget.focusNode == null) {
               return KeyEventResult.ignored;
@@ -180,7 +188,7 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
                 borderRadius: AppRadius.circular(effectiveRadius),
                 child: Container(
                   decoration: FocusTheme.focusDecoration(
-                    isFocused: true,
+                    isFocused: highlighted,
                     radius: effectiveRadius,
                     color: null,
                   ),
@@ -203,7 +211,7 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
                             children: [
                               Icon(
                                 Icons.skip_next_rounded,
-                                color: AppColorScheme.accent,
+                                color: iconColor,
                                 size: 20,
                               ),
                               const SizedBox(width: 9),
@@ -245,6 +253,7 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
                                 const SizedBox(width: 13),
                                 _CountdownRing(
                                   progress: progress,
+                                  color: iconColor,
                                   center: numberInRing
                                       ? Text(
                                           '$remainingSec',
@@ -259,7 +268,7 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
                                         )
                                       : Icon(
                                           Icons.skip_next_rounded,
-                                          color: AppColorScheme.accent,
+                                          color: iconColor,
                                           size: 15,
                                         ),
                                 ),
@@ -268,20 +277,23 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
                           ),
                         ),
                       ),
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: AppRadius.circular(effectiveRadius),
-                              border: Border.fromBorderSide(
-                                borders.focusBorder.copyWith(
-                                  color: AppColorScheme.accent,
+                      if (highlighted)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: AppRadius.circular(
+                                  effectiveRadius,
+                                ),
+                                border: Border.fromBorderSide(
+                                  borders.focusBorder.copyWith(
+                                    color: AppColorScheme.accent,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -295,9 +307,14 @@ class _SkipSegmentOverlayState extends State<SkipSegmentOverlay> {
 }
 
 class _CountdownRing extends StatelessWidget {
-  const _CountdownRing({required this.progress, this.center});
+  const _CountdownRing({
+    required this.progress,
+    required this.color,
+    this.center,
+  });
 
   final double progress;
+  final Color color;
   final Widget? center;
 
   @override
@@ -313,7 +330,7 @@ class _CountdownRing extends StatelessWidget {
               value: progress.clamp(0.0, 1.0),
               strokeWidth: 3,
               backgroundColor: AppColorScheme.onSurface.withValues(alpha: 0.16),
-              valueColor: AlwaysStoppedAnimation<Color>(AppColorScheme.accent),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
           ?center,

@@ -87,68 +87,80 @@ class _ExitConfirmationContentState extends State<_ExitConfirmationContent> {
 
   @override
   Widget build(BuildContext context) {
+    // The sheet sits in the overlay with no Material above it, so without one
+    // the text fell back to the platform font instead of the theme's.
+    final theme = Theme.of(context);
     final glass = AppColorScheme.isGlass;
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 500),
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: glass ? const Color(0xD90E1117) : AppColorScheme.surface,
-          borderRadius: AppRadius.circular(glass ? 20 : 16),
-          border: glass
-              ? const Border.fromBorderSide(
-                  BorderSide(color: Color(0x33FFFFFF), width: 1),
+    final content = Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.spaceXl,
+        AppSpacing.spaceLg,
+        AppSpacing.spaceXl,
+        AppSpacing.spaceLg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            widget.title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontSize: AppTypography.fontSize2xl,
+              fontWeight: FontWeight.w600,
+              color: AppColorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spaceXs),
+          Text(
+            widget.message,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontSize: AppTypography.fontSizeMd,
+              color: AppColorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spaceLg),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ExitDialogButton(
+                label: widget.cancelLabel,
+                focusNode: widget.cancelFocus,
+                autofocus: true,
+                onPressed: widget.onCancel,
+              ),
+              const SizedBox(width: AppSpacing.spaceSm),
+              _ExitDialogButton(
+                label: widget.exitLabel,
+                focusNode: _exitFocus,
+                onPressed: widget.onExit,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    return Material(
+      type: MaterialType.transparency,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 360, maxWidth: 440),
+        // The same glass as the player's popovers and its control bar.
+        child: GlassSurface(
+          cornerRadius: glass ? 32 : 16,
+          reinforced: true,
+          fallbackColor: AppColorScheme.surface,
+          // TV boxes draw glass without blur, so the screen's own text would
+          // show through. The player bar's dark tint, a little stronger since
+          // this sits over the app rather than video, keeps it readable.
+          child: glass
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: const Color(0xB3101218),
+                    borderRadius: AppRadius.circular(32),
+                  ),
+                  child: content,
                 )
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.exit_to_app_rounded,
-              size: 40,
-              color: AppColorScheme.accent,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
-                color: AppColorScheme.onSurface,
-                decoration: TextDecoration.none,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              widget.message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                color: AppColorScheme.onSurface.withValues(alpha: 0.7),
-                decoration: TextDecoration.none,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ExitDialogButton(
-                  label: widget.cancelLabel,
-                  focusNode: widget.cancelFocus,
-                  autofocus: true,
-                  onPressed: widget.onCancel,
-                ),
-                const SizedBox(width: 16),
-                _ExitDialogButton(
-                  label: widget.exitLabel,
-                  focusNode: _exitFocus,
-                  onPressed: widget.onExit,
-                ),
-              ],
-            ),
-          ],
+              : content,
         ),
       ),
     );
@@ -177,6 +189,22 @@ class _ExitDialogButtonState extends State<_ExitDialogButton> {
 
   @override
   Widget build(BuildContext context) {
+    final glass = AppColorScheme.isGlass;
+    // Pills in the player bar's button style: a faint glass fill at rest, a
+    // brighter fill with the white focus ring and glow when focused.
+    final Color fill;
+    final Color textColor;
+    if (glass) {
+      fill = _focused ? const Color(0x52FFFFFF) : const Color(0x1AFFFFFF);
+      textColor = Colors.white;
+    } else {
+      fill = _focused
+          ? AppColorScheme.buttonFocused
+          : AppColorScheme.buttonNormal;
+      textColor = _focused
+          ? AppColorScheme.onButtonFocused
+          : AppColorScheme.onButtonNormal;
+    }
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,
@@ -184,21 +212,39 @@ class _ExitDialogButtonState extends State<_ExitDialogButton> {
       onKeyEvent: (node, event) => handleOneShotSelect(event, widget.onPressed),
       child: GestureDetector(
         onTap: widget.onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: _focused
-                ? AppColorScheme.onSurface
-                : AppColorScheme.onSurface.withValues(alpha: 0.1),
-            borderRadius: AppRadius.circular(8),
-          ),
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: _focused ? AppColors.black : AppColorScheme.onSurface,
-              decoration: TextDecoration.none,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 150),
+          scale: _focused && glass ? 1.06 : 1.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            height: 46,
+            constraints: const BoxConstraints(minWidth: 120),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spaceLg),
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: AppRadius.circular(999),
+              border: glass
+                  ? Border.fromBorderSide(
+                      _focused
+                          ? const BorderSide(color: Colors.white, width: 3)
+                          : const BorderSide(
+                              color: Color(0x24FFFFFF),
+                              width: 1.5,
+                            ),
+                    )
+                  : null,
+              boxShadow: _focused && glass
+                  ? const [BoxShadow(color: Color(0x40FFFFFF), blurRadius: 24)]
+                  : null,
+            ),
+            child: Text(
+              widget.label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontSize: AppTypography.fontSizeMd,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
             ),
           ),
         ),

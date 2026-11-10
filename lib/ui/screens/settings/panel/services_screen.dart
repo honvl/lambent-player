@@ -47,7 +47,10 @@ class _ServicesScreenState extends State<_ServicesScreen> {
           // The plugin probe lands after sign in, so the list waits on it
           // rather than reading the flag once and never hearing the answer.
           child: ListenableBuilder(
-            listenable: achievementsService,
+            listenable: Listenable.merge([
+              achievementsService,
+              GetIt.instance<PluginSyncService>(),
+            ]),
             builder: (context, _) => _buildList(l10n, achievementsService),
           ),
         ),
@@ -59,26 +62,40 @@ class _ServicesScreenState extends State<_ServicesScreen> {
     final seerrLabel = GetIt.instance<SeerrPreferences>().labelOrDefault(
       l10n.seerr,
     );
+    final seerrShown = lambentShowsSeerr && seerrOnAnySignedInServer();
+    final calendarShown = GetIt.instance<PluginSyncService>().calendarAvailable;
     return ListView(
       children: [
         adaptiveListSection(
           children: [
-            if (lambentShowsSeerr)
-            _TvSettingsListTile(
-              autofocus: true,
-              leading: Image.asset(
-                'assets/icons/seerr.png',
-                width: 24,
-                height: 24,
+            // Seerr goes through the Moonfin plugin. Not offered when no
+            // signed-in server could have it (all Silo, say).
+            if (seerrShown)
+              _TvSettingsListTile(
+                autofocus: true,
+                leading: Image.asset(
+                  'assets/icons/seerr.png',
+                  width: 24,
+                  height: 24,
+                ),
+                title: Text(seerrLabel),
+                subtitle: Text(l10n.mediaRequestIntegration),
+                onTap: () =>
+                    context.pushSettingsScreen(const SeerrConfigScreen()),
               ),
-              title: Text(seerrLabel),
-              subtitle: Text(l10n.mediaRequestIntegration),
-              onTap: () =>
-                  context.pushSettingsScreen(const SeerrConfigScreen()),
-            ),
+            if (calendarShown)
+              _TvSettingsListTile(
+                autofocus: !seerrShown,
+                leading: const Icon(Icons.calendar_month),
+                title: Text(l10n.calendar),
+                subtitle: Text(l10n.calendarSettingsSubtitle),
+                onTap: () => context.pushSettingsScreen(
+                  const _CalendarSettingsScreen(),
+                ),
+              ),
             if (achievements.available)
               _TvSettingsListTile(
-                autofocus: !lambentShowsSeerr,
+                autofocus: !seerrShown && !calendarShown,
                 leading: const Icon(
                   Icons.military_tech,
                   color: Color(0xFFFFC107),

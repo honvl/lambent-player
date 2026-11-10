@@ -81,6 +81,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   private var nativeVideoChannel: NativeApplePlayerChannel?
   private var pipController: IosPiPController?
   private var themeMusicChannel: AppleTvThemeMusicChannel?
+  private var arcadeSoundChannel: AppleArcadeSoundChannel?
   private var previewChannel: AppleTvPreviewChannel?
   private var sfSymbolChannel: FlutterMethodChannel?
 
@@ -158,6 +159,10 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   private(set) var backgroundRefresh: BackgroundRefreshScheduler?
   private var backgroundRefreshChannel: FlutterMethodChannel?
 
+  /// Keeps the app running for a download through the Lambent tunnel.
+  private(set) var downloadKeepAlive: DownloadKeepAlive?
+  private var downloadKeepAliveChannel: FlutterMethodChannel?
+
   func startEngineIfNeeded() {
     guard !engineStarted else { return }
     engineStarted = true
@@ -176,6 +181,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
     configureGoogleCast()
     startEngineIfNeeded()
     registerBackgroundRefresh()
+    registerDownloadKeepAlive()
 
     let launched = super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
@@ -189,6 +195,58 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
     }
 
     return launched
+  }
+
+  private func registerDownloadKeepAlive() {
+    guard downloadKeepAlive == nil,
+      let bundleId = Bundle.main.bundleIdentifier,
+      let channel = downloadKeepAliveChannel
+    else { return }
+    let keepAlive = DownloadKeepAlive(bundleIdentifier: bundleId) { done in
+      Self.wakeDownloads(on: channel, attempts: 40, done: done)
+    }
+    keepAlive.register()
+    downloadKeepAlive = keepAlive
+  }
+
+  /// When the task itself launched the app, Dart's main() may not have bound
+  /// the channel yet, so this retries for a while.
+  private static func wakeDownloads(
+    on channel: FlutterMethodChannel,
+    attempts: Int,
+    done: @escaping () -> Void
+  ) {
+    channel.invokeMethod("wake", arguments: nil) { result in
+      if let flutterResult = result as? NSObject, flutterResult === FlutterMethodNotImplemented,
+        attempts > 0
+      {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+          wakeDownloads(on: channel, attempts: attempts - 1, done: done)
+        }
+        return
+      }
+      done()
+    }
+  }
+
+  private func setUpDownloadKeepAliveChannel(messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(
+      name: "org.moonfin/download_keep_alive",
+      binaryMessenger: messenger
+    )
+    downloadKeepAliveChannel = channel
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard call.method == "update" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let args = call.arguments as? [String: Any]
+      self?.downloadKeepAlive?.update(
+        active: args?["active"] as? Bool ?? false,
+        fraction: args?["fraction"] as? Double ?? 0
+      )
+      result(nil)
+    }
   }
 
   private func registerBackgroundRefresh() {
@@ -292,6 +350,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
 
   private func setUpPlatformChannels(messenger: FlutterBinaryMessenger) {
     setUpBackgroundRefreshChannel(messenger: messenger)
+    setUpDownloadKeepAliveChannel(messenger: messenger)
     setUpDeviceStorageChannel(messenger: messenger)
     bonjourChannel = BonjourChannel(messenger: messenger)
 
@@ -337,6 +396,7 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
       // Theme music + inline previews: AVFoundation channels shared with tvOS
       // (same channel names, so the Dart callers work unchanged on iOS).
       self.themeMusicChannel = AppleTvThemeMusicChannel(messenger: messenger)
+      self.arcadeSoundChannel = AppleArcadeSoundChannel(messenger: messenger)
       // FlutterEngine isn't a FlutterTextureRegistry on iOS, so the registry
       // has to come off a plugin registrar.
       if let previewRegistrar = sharedEngine.registrar(forPlugin: "moonfin_appletv_preview") {

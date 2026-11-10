@@ -83,6 +83,7 @@ void main() {
     final client = _MockClient();
     when(() => client.baseUrl).thenReturn('http://plugin.test');
     when(() => client.accessToken).thenReturn('token');
+    when(() => client.serverType).thenReturn(ServerType.jellyfin);
     when(() => client.deviceInfo).thenReturn(
       const DeviceInfo(
         id: 'dev1',

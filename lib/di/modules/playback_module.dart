@@ -37,16 +37,22 @@ import '../../playback/external_player_policy.dart';
 import '../../playback/apple_player_ui.dart';
 import '../../playback/native_apple_player_backend.dart';
 import '../../playback/auto_bitrate_service.dart';
+import '../../remote/remote_access.dart';
 import '../../playback/aether_backend.dart';
 import '../../playback/media_kit_player_backend.dart';
 import '../../playback/media3_player_backend.dart';
 import '../../playback/offline_stream_resolver.dart';
 import '../../playback/playback_profile_diagnostics.dart';
+import '../../playback/silo_playback_environment.dart';
+import '../../playback/server_shuffle_queue.dart';
+import '../../playback/silo_plugin_for.dart';
 import '../../playback/sleep_timer_controller.dart';
 import '../../platform/pip_service.dart';
 import '../../preference/preference_constants.dart';
 import '../../preference/user_preferences.dart';
 import '../../syncplay/syncplay_manager.dart';
+import '../../watch_party/silo_watch_party_manager.dart';
+import '../../watch_party/watch_party_rooms_service.dart';
 import '../../util/platform_detection.dart';
 import '../../util/episode_playability.dart';
 import '../../util/season_queue_context.dart';
@@ -240,6 +246,9 @@ Future<List<dynamic>> _nextSeasonItemsProvider(
   int _,
 ) async {
   if (completedItem is! AggregatedItem) return const <dynamic>[];
+  // A server's shuffle grows by the item it picks next.
+  final shuffled = await ServerShuffleQueue.instance.extend(completedItem);
+  if (shuffled != null) return shuffled;
   if (!_isEpisodeQueueItem(completedItem)) return const <dynamic>[];
 
   final seriesId = completedItem.seriesId;
@@ -320,6 +329,37 @@ Future<List<dynamic>> _nextSeasonItemsProvider(
   } catch (_) {
     return const <dynamic>[];
   }
+}
+
+/// Writes a series' track choice through to a server that keeps one
+/// ([SeriesTrackPreferencesApi], Silo). Best effort: the device's
+/// own choice is already saved.
+void _rememberSeriesTrackOnServer(
+  dynamic item,
+  String seriesId,
+  int streamIndex, {
+  required bool subtitle,
+}) {
+  if (item is! AggregatedItem) return;
+  final Object? items;
+  try {
+    items = _resolveClientForServerId(item.serverId)?.itemsApi;
+  } catch (_) {
+    return;
+  }
+  if (items is! SeriesTrackPreferencesApi) return;
+  final write = subtitle
+      ? items.setSeriesSubtitleChoice(
+          seriesId,
+          itemId: item.id,
+          streamIndex: streamIndex,
+        )
+      : items.setSeriesAudioChoice(
+          seriesId,
+          itemId: item.id,
+          streamIndex: streamIndex,
+        );
+  write.catchError((Object _) {});
 }
 
 void registerPlaybackModule() {
@@ -405,9 +445,18 @@ void registerPlaybackModule() {
           : LogLevel.debug,
     );
   });
-  manager.autoBitrateProvider = AutoBitrateService(
-    _getIt<MediaServerClientFactory>(),
-  ).measuredBpsForActiveServer;
+  final autoBitrate = AutoBitrateService(_getIt<MediaServerClientFactory>());
+  manager
+    ..autoBitrateProvider = autoBitrate.measuredBpsForActiveServer
+    ..savedAutoBitrateProvider = autoBitrate.savedBpsForActiveServer;
+  // Away from home the bitrate setting's default says nothing about the link,
+  // so a Lambent PC's plays measure it (docs/REMOTE_ACCESS.md in Lambent).
+  manager.measuresOverDefaultBitrate = () =>
+      prefs.get(UserPreferences.maxBitrate) ==
+          UserPreferences.maxBitrate.defaultValue &&
+      autoBitrate.activeServerIsAway;
+  manager.forgetMeasuredBitrate = autoBitrate.forget;
+  RemoteAccess.instance.onRouteChanged = autoBitrate.forget;
 
   // The streams of one kind belonging to whatever is playing, or null when
   // that isn't an episode and so has no series to remember a choice for.
@@ -418,7 +467,13 @@ void registerPlaybackModule() {
     if (item is! AggregatedItem) return null;
     final seriesId = item.seriesId;
     if (seriesId == null || seriesId.isEmpty) return null;
-    final raw = item.rawData['MediaStreams'] as List? ?? const [];
+    // A list's item can come without streams (Lambent Server's do, from Plex's
+    // lists), and a choice with nothing to look it up in is not saved, so turning
+    // subtitles back on would leave the series on off for good.
+    final playing = manager.currentResolution?.mediaStreams;
+    final raw = playing != null && playing.isNotEmpty
+        ? playing
+        : item.rawData['MediaStreams'] as List? ?? const [];
     return (
       seriesId: seriesId,
       streams: raw
@@ -478,6 +533,12 @@ void registerPlaybackModule() {
     // leaves nothing to recognise it by later, so the last choice stays.
     if (pref.isEmpty) return;
     _getIt<UserPreferences>().setSeriesSubtitlePreference(series.seriesId, pref);
+    _rememberSeriesTrackOnServer(
+      manager.queueService.currentItem,
+      series.seriesId,
+      index,
+      subtitle: true,
+    );
   };
   manager.onAudioTrackSelected = (itemId, index) {
     final series = seriesStreams('audio');
@@ -488,6 +549,12 @@ void registerPlaybackModule() {
     );
     if (pref.isEmpty) return;
     _getIt<UserPreferences>().setSeriesAudioPreference(series.seriesId, pref);
+    _rememberSeriesTrackOnServer(
+      manager.queueService.currentItem,
+      series.seriesId,
+      index,
+      subtitle: false,
+    );
   };
 
   manager.setBackend(initialBackend);
@@ -749,6 +816,16 @@ void registerPlaybackModule() {
   _getIt.registerLazySingleton<SyncPlayManager>(
     () => SyncPlayManager(_getIt<PlaybackManager>(), _getIt<UserPreferences>()),
   );
+  _getIt.registerLazySingleton<SiloWatchPartyManager>(
+    () => SiloWatchPartyManager(_getIt<PlaybackManager>()),
+  );
+  _getIt.registerLazySingleton<WatchPartyRoomsService>(
+    () => WatchPartyRoomsService(
+      _getIt<SiloWatchPartyManager>(),
+      _getIt<UserPreferences>(),
+      _getIt<SyncPlayManager>(),
+    ),
+  );
 
   _getIt.registerLazySingleton<AudiobookBookmarksService>(
     () => AudiobookBookmarksService(),
@@ -817,6 +894,10 @@ void setActiveStreamResolver(MediaServerClient client) {
       PlexMediaStreamResolver(client),
       PlexPlaySessionService(client),
     ),
+    ServerType.silo => () {
+      final p = siloPluginFor(client, environment: siloPlaybackEnvironment);
+      return (p.createStreamResolver(), p.createPlaySessionService());
+    }(),
   };
 
   // Local-first: completed downloads play from disk instead of streaming,
@@ -854,18 +935,26 @@ void setActiveStreamResolver(MediaServerClient client) {
 /// Smart downloads and the remove-watched rule react as soon as an item
 /// stops, rather than waiting for the server's debounced user data event or
 /// the next reconnect.
-void _onItemStopped(dynamic item) {
+void _onItemStopped(
+  dynamic item,
+  StreamResolutionResult resolution,
+  Duration position,
+) {
   if (item is! AggregatedItem) return;
   if (item.type == 'Episode' && _getIt.isRegistered<AutoDownloadService>()) {
     _getIt<AutoDownloadService>().onEpisodeStopped(item.serverId);
   }
   if (removeWatchedTypes.contains(item.type) &&
       _getIt.isRegistered<RemoveWatchedService>()) {
-    _getIt<RemoveWatchedService>().onItemStopped(item.id);
+    final removeWatched = _getIt<RemoveWatchedService>();
+    if (resolution.isLocalMedia) {
+      removeWatched.onDownloadStopped(item, position);
+    }
+    removeWatched.onItemStopped(item.id);
   }
-  // Plex sends no user data events, so the new resume point and watched state
-  // have to be asked for. Plex items don't name their server, so one without
-  // an id belongs to the active client.
+  // Without user data events, the new resume point and watched state have to
+  // be asked for. Plex items don't name their server, so one without an id
+  // belongs to the active client.
   if (!_getIt.isRegistered<MediaServerClientFactory>() ||
       !_getIt.isRegistered<MediaServerClient>()) {
     return;
@@ -873,7 +962,7 @@ void _onItemStopped(dynamic item) {
   final client = _getIt<MediaServerClientFactory>().clientForServerOrActive(
     item.serverId,
   );
-  if (client.serverType == ServerType.plex) {
+  if (sendsNoUserDataEvents(client.serverType, item.serverId)) {
     unawaited(
       userDataSync.refreshFromServer(client, [
         item.id,

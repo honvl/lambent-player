@@ -13,6 +13,7 @@ import '../../../data/services/youtube_stream_resolver.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../playback/appletv_preview_player.dart';
 import '../../../playback/mpv_client_certificate.dart';
+import '../../../playback/mpv_player_registry.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/platform_detection.dart';
 import '../../screensaver/screensaver_controller.dart';
@@ -111,7 +112,9 @@ class _TrailerPlayerScreenState extends State<TrailerPlayerScreen> {
       unawaited(_openTrailerAppleTv());
       return;
     }
-    _player ??= Player(configuration: const PlayerConfiguration(libass: false));
+    _player ??= MpvPlayerRegistry.instance.create(
+      configuration: const PlayerConfiguration(libass: false),
+    );
     _controller ??= VideoController(
       _player!,
       configuration: VideoControllerConfiguration(
@@ -147,8 +150,11 @@ class _TrailerPlayerScreenState extends State<TrailerPlayerScreen> {
     _sponsorBlockPositionSub?.cancel();
     _appleTvCompletedSub?.cancel();
     unawaited(_appleTvPlayer?.dispose());
-    _player?.stop();
-    _player?.dispose();
+    final player = _player;
+    if (player != null) {
+      unawaited(player.stop());
+      unawaited(MpvPlayerRegistry.instance.dispose(player));
+    }
     super.dispose();
   }
 
@@ -278,13 +284,26 @@ class _TrailerPlayerScreenState extends State<TrailerPlayerScreen> {
     }
 
     try {
-      final media = useYouTubeHeaders
-          ? Media(streamUrl, httpHeaders: YouTubeStreamResolver.youtubeHeaders)
-          : Media(streamUrl);
       await YouTubeStreamResolver.preferAudioLanguage(
         _player!,
         resolved.audioLanguage,
       );
+      // A single variant has none of the master's caption tracks, so captions
+      // keep the full master.
+      final media = _showCaptions
+          ? Media(
+              streamUrl,
+              httpHeaders: useYouTubeHeaders
+                  ? YouTubeStreamResolver.youtubeHeaders
+                  : null,
+            )
+          : await YouTubeStreamResolver.previewMedia(
+              _player!,
+              streamUrl,
+              youTube: useYouTubeHeaders,
+              audioLanguage: resolved.audioLanguage,
+            );
+      if (!mounted) return;
       await YouTubeStreamResolver.showCaptions(
         _player!,
         _showCaptions,
@@ -406,6 +425,7 @@ class _TrailerPlayerScreenState extends State<TrailerPlayerScreen> {
                           onAutoplayFailed: _useEmbeddedYouTube
                               ? _fallBackToStreamPlayback
                               : null,
+                          autoplayTimeout: const Duration(seconds: 7),
                         ),
                       ),
                     )

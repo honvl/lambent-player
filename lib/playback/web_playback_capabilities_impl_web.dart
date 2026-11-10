@@ -421,7 +421,11 @@ int _parseVersionMajor(String input, RegExp pattern) {
   return int.tryParse(match.group(1) ?? '') ?? 0;
 }
 
+/// Whether this screen shows HDR now. A browser decodes PQ on an SDR screen too, and flattens it into SDR: the PC's own SDR picture looks better there.
+bool _screenShowsHdr() => web.window.matchMedia('(dynamic-range: high)').matches;
+
 bool _supportsHdr10(_BrowserInfo browser) {
+  if (!_screenShowsHdr()) return false;
   if (browser.isSafari &&
       ((browser.isIOS && browser.iOSMajorVersion >= 11) || browser.isMacOS)) {
     return true;

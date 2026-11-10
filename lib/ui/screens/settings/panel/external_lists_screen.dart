@@ -90,7 +90,7 @@ class _SeasonalRowScreenState extends State<_SeasonalRowScreen> {
                       focusNode: _firstFocusNode,
                       preference: UserPreferences.seasonalRowEnabled,
                       title: l10n.seasonalRow,
-                      subtitle: l10n.seasonalRowDescription,
+                      subtitle: seerrBrand(l10n.seasonalRowDescription),
                       icon: Icons.celebration_outlined,
                       onChangedValue: _syncSectionState,
                     ),
@@ -103,6 +103,15 @@ class _SeasonalRowScreenState extends State<_SeasonalRowScreen> {
                           code: _countryLabel(code, l10n),
                       },
                     ),
+                    // Silo picks its own seasonal row, so the switch would do nothing there.
+                    if (GetIt.instance<MediaServerClient>().itemsApi is! ServerHomeSectionsApi)
+                      SwitchPreferenceTile(
+                        preference: UserPreferences.seasonalRowAllYear,
+                        title: l10n.seasonalRowAllYear,
+                        subtitle: l10n.seasonalRowAllYearDescription,
+                        icon: Icons.event_repeat,
+                        onChanged: _reloadHomeRows,
+                      ),
                   ],
                 ),
                 _SectionHeader(l10n.seasonalRowHolidays),
@@ -959,6 +968,7 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
   Widget build(BuildContext context) {
     final prefs = GetIt.instance<UserPreferences>();
 
+    final l10n = AppLocalizations.of(context);
     final radarrEnabled = prefs.get(UserPreferences.enableRadarrCalendar);
     final sonarrEnabled = prefs.get(UserPreferences.enableSonarrCalendar);
     final calendarsCanMerge = radarrEnabled && sonarrEnabled;
@@ -974,7 +984,7 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
         child: Scaffold(
           appBar: buildSettingsAppBar(
             context,
-            const Text('Upcoming Calendars'),
+            Text(l10n.upcomingCalendars),
           ),
           body: FocusScope(
             node: _scope,
@@ -988,7 +998,7 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
                       key: const ValueKey('enableRadarrCalendar'),
                       focusNode: _firstNode,
                       preference: UserPreferences.enableRadarrCalendar,
-                      title: "Enable Radarr's Upcoming Calendar",
+                      title: l10n.enableRadarrCalendar,
                       icon: Icons.movie_outlined,
                       onChangedValue: (isEnabled) {
                         _syncCalendarSectionState(
@@ -1002,29 +1012,36 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
                       SwitchPreferenceTile(
                         key: const ValueKey('radarrCalendarShowCinema'),
                         preference: UserPreferences.radarrCalendarShowCinema,
-                        title: 'Show Upcoming Cinema Releases',
+                        title: l10n.radarrCalendarShowCinema,
                         icon: Icons.theater_comedy,
                         onChanged: () => setState(() {}),
                       ),
                       SwitchPreferenceTile(
                         key: const ValueKey('radarrCalendarShowDigital'),
                         preference: UserPreferences.radarrCalendarShowDigital,
-                        title: 'Show Upcoming Digital Releases',
+                        title: l10n.radarrCalendarShowDigital,
                         icon: Icons.tv,
                         onChanged: () => setState(() {}),
                       ),
                       SwitchPreferenceTile(
                         key: const ValueKey('radarrCalendarShowPhysical'),
                         preference: UserPreferences.radarrCalendarShowPhysical,
-                        title: 'Show Upcoming Physical Releases',
+                        title: l10n.radarrCalendarShowPhysical,
                         icon: Icons.album,
                         onChanged: () => setState(() {}),
                       ),
                       SwitchPreferenceTile(
                         key: const ValueKey('radarrCalendarShowDate'),
                         preference: UserPreferences.radarrCalendarShowDate,
-                        title: 'Show Release Date on Home Screen',
+                        title: l10n.calendarShowReleaseDate,
                         icon: Icons.calendar_month,
+                        onChanged: () => setState(() {}),
+                      ),
+                      SwitchPreferenceTile(
+                        key: const ValueKey('radarrCalendarHideDownloaded'),
+                        preference: UserPreferences.radarrCalendarHideDownloaded,
+                        title: l10n.radarrCalendarHideDownloaded,
+                        icon: Icons.download_done,
                         onChanged: () => setState(() {}),
                       ),
                     ],
@@ -1036,7 +1053,7 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
                     SwitchPreferenceTile(
                       key: const ValueKey('enableSonarrCalendar'),
                       preference: UserPreferences.enableSonarrCalendar,
-                      title: "Enable Sonarr's Upcoming Calendar",
+                      title: l10n.enableSonarrCalendar,
                       icon: Icons.live_tv,
                       onChangedValue: (isEnabled) {
                         _syncCalendarSectionState(
@@ -1050,15 +1067,22 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
                       SwitchPreferenceTile(
                         key: const ValueKey('sonarrCalendarShowEpisodeInfo'),
                         preference: UserPreferences.sonarrCalendarShowEpisodeInfo,
-                        title: 'Display Episode Information',
+                        title: l10n.sonarrCalendarShowEpisodeInfo,
                         icon: Icons.info_outline,
                         onChanged: () => setState(() {}),
                       ),
                       SwitchPreferenceTile(
                         key: const ValueKey('sonarrCalendarShowDate'),
                         preference: UserPreferences.sonarrCalendarShowDate,
-                        title: 'Show Release Date on Home Screen',
+                        title: l10n.calendarShowReleaseDate,
                         icon: Icons.calendar_month,
+                        onChanged: () => setState(() {}),
+                      ),
+                      SwitchPreferenceTile(
+                        key: const ValueKey('sonarrCalendarHideDownloaded'),
+                        preference: UserPreferences.sonarrCalendarHideDownloaded,
+                        title: l10n.sonarrCalendarHideDownloaded,
+                        icon: Icons.download_done,
                         onChanged: () => setState(() {}),
                       ),
                     ],
@@ -1069,11 +1093,23 @@ class _UpcomingCalendarsScreenState extends State<_UpcomingCalendarsScreen> {
                     SwitchPreferenceTile(
                       key: const ValueKey('mergeRadarrSonarrCalendars'),
                       preference: UserPreferences.mergeRadarrSonarrCalendars,
-                      title: 'Merge Sonarr and Radarr Calendars',
+                      title: l10n.mergeRadarrSonarrCalendars,
                       icon: Icons.merge_type,
                       enabled: calendarsCanMerge,
                       onChanged: () => setState(() {}),
                     ),
+                    if (GetIt.instance<PluginSyncService>().calendarAvailable)
+                      SwitchPreferenceTile(
+                        key: const ValueKey('calendarRowSeeAll'),
+                        preference: UserPreferences.calendarRowSeeAll,
+                        title: l10n.calendarRowSeeAll,
+                        subtitle: l10n.calendarRowSeeAllSubtitle,
+                        icon: Icons.calendar_view_month,
+                        onChanged: () {
+                          _pushPersonalizationSync();
+                          _reloadHomeRows();
+                        },
+                      ),
                   ],
                 ),
               ],
@@ -1215,8 +1251,8 @@ class _SeerrListsScreenState extends State<_SeerrListsScreen> {
                     EnumPreferenceTile<ExternalRowSortBy>(
                       focusNode: _firstFocusNode,
                       preference: UserPreferences.seerrRowsSortBy,
-                      title: l10n.seerrRowsSorting,
-                      description: l10n.seerrRowsSortingDescription,
+                      title: seerrBrand(l10n.seerrRowsSorting),
+                      description: seerrBrand(l10n.seerrRowsSortingDescription),
                       icon: Icons.sort,
                       labelOf: (v) => externalRowSortLabel(v, l10n),
                       onChanged: () {
@@ -1228,7 +1264,7 @@ class _SeerrListsScreenState extends State<_SeerrListsScreen> {
                     EnumPreferenceTile<SortDirection>(
                       preference: UserPreferences.seerrRowsSortOrder,
                       title: l10n.sortOrder,
-                      description: l10n.seerrRowsSortOrderDescription,
+                      description: seerrBrand(l10n.seerrRowsSortOrderDescription),
                       icon: Icons.swap_vert,
                       enabled: prefs.get(UserPreferences.seerrRowsSortBy) != ExternalRowSortBy.none &&
                           prefs.get(UserPreferences.seerrRowsSortBy) != ExternalRowSortBy.shuffle,
@@ -1260,7 +1296,7 @@ class _SeerrListsScreenState extends State<_SeerrListsScreen> {
                   }).toList(),
                 ),
                 if (_sliders case final sliders? when sliders.isNotEmpty) ...[
-                  _SectionHeader(l10n.seerrDiscoverSliders),
+                  _SectionHeader(seerrBrand(l10n.seerrDiscoverSliders)),
                   adaptiveListSection(
                     children: [
                       for (final entry in sliders.map(_sliderSection))

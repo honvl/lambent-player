@@ -1,6 +1,6 @@
 {
     "@@locale": "cy",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "fersiwn Lambent {version}",
+    "appVersionFooter": "fersiwn Moonfin {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Ni allai Lambent gyrchu cylch allweddi eich system. Gall mewngofnodi barhau, ond mae'n bosibl na fydd storfa docynnau ddiogel ar gael nes bod y cylch allweddi wedi'i ddatgloi.",
+    "secureStorageUnavailableMessage": "Ni allai Moonfin gyrchu cylch allweddi eich system. Gall mewngofnodi barhau, ond mae'n bosibl na fydd storfa docynnau ddiogel ar gael nes bod y cylch allweddi wedi'i ddatgloi.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Newid rhwng Lambent a Neon Pulse heb ailgychwyn yr app",
+    "settingsAppearanceThemeSubtitle": "Newid rhwng Moonfin a Neon Pulse heb ailgychwyn yr app",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Gadael Lambent?",
+    "exitApp": "Gadael Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Heb ei osod. Bydd Lambent yn ceisio mpv.conf rhagosodedig mewn ffolderi app/data.",
+    "notSetMpvConf": "Heb ei osod. Bydd Moonfin yn ceisio mpv.conf rhagosodedig mewn ffolderi app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Lambent i newidiadau ddod i rym.",
+    "libraryVisibilityDescription": "Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Moonfin i newidiadau ddod i rym.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Chwarae yn Lambent",
+    "playInMoonfin": "Chwarae yn Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Ni chanfuwyd yr eitem yn eich llyfrgell Lambent",
+    "itemNotFoundInLibrary": "Ni chanfuwyd yr eitem yn eich llyfrgell Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Mae ailgychwyn gweinydd ar y gweill",
-    "adminServerRebootMessage": "Ailgychwyn gweinydd ar y gweill, ailgychwynwch Lambent",
+    "adminServerRebootMessage": "Ailgychwyn gweinydd ar y gweill, ailgychwynwch Moonfin",
     "adminActiveSessions": "Sesiynau Gweithredol",
     "adminSessionsLoadFailed": "Wedi methu llwytho sesiynau",
     "adminNoActiveSessions": "Dim sesiynau gweithredol",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Dangoswch y botwm genres yn y bar llywio",
     "settingsShowFavoritesButtonInNavigation": "Dangoswch y botwm ffefrynnau yn y bar llywio",
     "settingsShowLibrariesButtonInNavigation": "Dangoswch y botwm llyfrgelloedd yn y bar llywio",
-    "settingsLibraryVisibilitySubtitle": "Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Lambent i newidiadau ddod i rym.",
+    "settingsLibraryVisibilitySubtitle": "Toglo gwelededd tudalen gartref fesul llyfrgell. Ailgychwyn Moonfin i newidiadau ddod i rym.",
     "settingsMediaBarAndLocalPreviews": "Bar Cyfryngau a Rhagolygon Lleol",
     "settingsVisualOverlays": "Troshaenau Gweledol",
     "settingsSeasonalSurprise": "Syndod Tymhorol",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Trwyddedau",
     "settingsOpenSourceLicenseNotices": "Hysbysiadau trwydded ffynhonnell agored",
     "settingsPrivacyPolicy": "Polisi Preifatrwydd",
-    "settingsPrivacyPolicySubtitle": "Sut mae Lambent yn trin eich data",
+    "settingsPrivacyPolicySubtitle": "Sut mae Moonfin yn trin eich data",
     "settingsCheckForUpdates": "Gwiriwch am Ddiweddariadau",
-    "settingsCheckForUpdatesSubtitle": "Gwiriwch am y datganiad Lambent diweddaraf",
+    "settingsCheckForUpdatesSubtitle": "Gwiriwch am y datganiad Moonfin diweddaraf",
     "settingsPoweredByFlutter": "Wedi'i bweru gan Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# hysbysiad trwydded} zero {# o hysbysiadau trwydded} other {# hysbysiad trwydded}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Gwell isdeitlau SDH",
     "preferSdhSubtitlesSubtitle": "Blaenoriaethu traciau is-deitl SDH/CC wrth ddewis yn awtomatig.",
     "webDiagnostics": "Diagnosteg gwe",
-    "webDiagnosticsTitle": "Lambent Diagnosteg Gwe",
+    "webDiagnosticsTitle": "Moonfin Diagnosteg Gwe",
     "webDiagnosticsIntro": "Defnyddiwch y dudalen hon i wneud diagnosis o broblemau cysylltedd porwr (CORS, cynnwys cymysg, a gosodiadau darganfod).",
     "webDiagnosticsDetectedMixedContentFailure": "Canfod Methiant Cynnwys Cymysg",
     "webDiagnosticsDetectedCorsPreflightFailure": "Wedi canfod CORS/Methiant Rhag Hedfan",
-    "webDiagnosticsMixedContentFailureBody": "Canfu Lambent dudalen HTTPS yn ceisio galw URL gweinydd HTTP. Mae porwyr yn rhwystro'r cais hwn cyn iddo gyrraedd eich gweinydd.",
-    "webDiagnosticsCorsFailureBody": "Canfu Lambent fethiant cais ar lefel porwr a achosir yn aml gan fod penawdau CORS neu rag-hedfan ar goll ar y gweinydd cyfryngau.",
+    "webDiagnosticsMixedContentFailureBody": "Canfu Moonfin dudalen HTTPS yn ceisio galw URL gweinydd HTTP. Mae porwyr yn rhwystro'r cais hwn cyn iddo gyrraedd eich gweinydd.",
+    "webDiagnosticsCorsFailureBody": "Canfu Moonfin fethiant cais ar lefel porwr a achosir yn aml gan fod penawdau CORS neu rag-hedfan ar goll ar y gweinydd cyfryngau.",
     "webDiagnosticsTargetUrl": "URL targed: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "heb ei ffurfweddu",
     "webDiagnosticsMixedContent": "Cynnwys Cymysg",
     "webDiagnosticsMixedContentDetected": "Mae'r dudalen hon wedi'i llwytho dros HTTPS, ond mae un neu fwy o URLau wedi'u ffurfweddu yn HTTP. Mae porwyr yn rhwystro tudalennau HTTPS rhag galw APIs HTTP.",
-    "webDiagnosticsMixedContentFix": "Trwsio: gwasanaethwch eich gweinydd cyfryngau neu bwynt terfyn dirprwy trwy HTTPS, neu llwythwch Lambent dros HTTP ar rwydweithiau lleol dibynadwy yn unig.",
+    "webDiagnosticsMixedContentFix": "Trwsio: gwasanaethwch eich gweinydd cyfryngau neu bwynt terfyn dirprwy trwy HTTPS, neu llwythwch Moonfin dros HTTP ar rwydweithiau lleol dibynadwy yn unig.",
     "webDiagnosticsNoMixedContentDetected": "Dim ffurfweddiad cynnwys cymysg amlwg wedi'i ganfod o'r gosodiadau amser rhedeg cyfredol.",
     "webDiagnosticsCorsChecklist": "Rhestr Wirio CORS",
     "webDiagnosticsCorsChecklistItem1": "• Caniatáu tarddiad y porwr yn Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Clasurol yw cynllun canolog gwreiddiol Lambent. Modern yw cynllun sinematig ymatebol.",
+    "detailScreenStyleSubtitle": "Clasurol yw cynllun canolog gwreiddiol Moonfin. Modern yw cynllun sinematig ymatebol.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Defnyddiwch algorithm llyfrgell leol Lambent Recommends neu Fetrigau Tebygrwydd ar-lein TMDb. Sylwer: mae angen integreiddio Seerr ar gyfer argymhellion ar-lein.",
+    "recommendationSystemSubtitle": "Defnyddiwch algorithm llyfrgell leol Moonfin Recommends neu Fetrigau Tebygrwydd ar-lein TMDb. Sylwer: mae angen integreiddio Seerr ar gyfer argymhellion ar-lein.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recommends",
+    "recommendationSystemMoonfin": "Moonfin Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Cyfyngu awgrymiadau Lambent Recommends yn ôl dosbarthiad oedran y cyfrwng targed",
+    "recommendationsApplyParentalRatingCapSubtitle": "Cyfyngu awgrymiadau Moonfin Recommends yn ôl dosbarthiad oedran y cyfrwng targed",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Mae themâu personol yn newid elfennau gweledol ar draws Lambent. Dewiswch un o'r opsiynau hyn i weddu i'ch arddull.",
+    "customThemeSubtitle": "Mae themâu personol yn newid elfennau gweledol ar draws Moonfin. Dewiswch un o'r opsiynau hyn i weddu i'ch arddull.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Mewngofnodwch i Lambent ar eich ffôn",
+    "carSignInPrompt": "Mewngofnodwch i Moonfin ar eich ffôn",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller yw rendrwr GPU modern Flutter, ar gyfer animeiddiadau llyfnach a llai o hercian. Ar rai bocsys teledu a GPUau hŷn gall achosi namau neu fideo du; diffoddwch ef os gwelwch chi'r rheini. Mae Awtomatig yn dewis y rhagosodiad gorau ar gyfer eich dyfais. Ailgychwynnwch Lambent i'w osod.",
+    "impellerRenderingSubtitle": "Impeller yw rendrwr GPU modern Flutter, ar gyfer animeiddiadau llyfnach a llai o hercian. Ar rai bocsys teledu a GPUau hŷn gall achosi namau neu fideo du; diffoddwch ef os gwelwch chi'r rheini. Mae Awtomatig yn dewis y rhagosodiad gorau ar gyfer eich dyfais. Ailgychwynnwch Moonfin i'w osod.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Mae angen i Lambent ailgychwyn i newid yr injan rendro. Caewch yr ap nawr, yna ei ailagor i osod y newid.",
+    "impellerRestartMessage": "Mae angen i Moonfin ailgychwyn i newid yr injan rendro. Caewch yr ap nawr, yna ei ailagor i osod y newid.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

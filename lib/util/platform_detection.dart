@@ -164,7 +164,7 @@ class PlatformDetection {
   static bool get supportsAv1Hdr10Plus =>
       _capabilityBool('supportsAv1Hdr10Plus');
   static bool get offersAv1SoftwareUhd =>
-      isIOS && supportsAv1 && maxResolutionAv1Height < 2160;
+      (isIOS || isAppleTV) && supportsAv1 && maxResolutionAv1Height < 2160;
 
   static bool get supportsVc1 => _capabilityBool('supportsVc1');
   static bool get supportsMpeg4 => _capabilityBool('supportsMpeg4');
@@ -224,6 +224,10 @@ class PlatformDetection {
   static String? get deviceBoard => _capabilityString('deviceBoard');
   static String? get deviceHardware => _capabilityString('deviceHardware');
   static String? get deviceSocModel => _capabilityString('deviceSocModel');
+
+  /// Amazon starts every Fire TV model name with AFT.
+  static bool get isFireTv =>
+      isAndroid && (deviceModel?.toUpperCase().startsWith('AFT') ?? false);
 
   static void setDisplayHdrTypes(Iterable<String>? values) {
     _hasDisplayHdrCapabilities = values != null;

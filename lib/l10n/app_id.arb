@@ -1,6 +1,6 @@
 {
     "@@locale": "id",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent versi {version}",
+    "appVersionFooter": "Moonfin versi {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent tidak dapat mengakses keyring sistem Anda. Login tetap dapat dilanjutkan, tetapi penyimpanan token aman mungkin tidak tersedia sampai keyring dibuka.",
+    "secureStorageUnavailableMessage": "Moonfin tidak dapat mengakses keyring sistem Anda. Login tetap dapat dilanjutkan, tetapi penyimpanan token aman mungkin tidak tersedia sampai keyring dibuka.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Beralih antara Lambent dan Neon Pulse tanpa memulai ulang aplikasi",
+    "settingsAppearanceThemeSubtitle": "Beralih antara Moonfin dan Neon Pulse tanpa memulai ulang aplikasi",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Keluar dari Lambent?",
+    "exitApp": "Keluar dari Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Belum diatur. Lambent akan mencoba mpv.conf default di folder app/data.",
+    "notSetMpvConf": "Belum diatur. Moonfin akan mencoba mpv.conf default di folder app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Atur visibilitas halaman beranda untuk tiap pustaka. Mulai ulang Lambent agar perubahan berlaku.",
+    "libraryVisibilityDescription": "Atur visibilitas halaman beranda untuk tiap pustaka. Mulai ulang Moonfin agar perubahan berlaku.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Putar di Lambent",
+    "playInMoonfin": "Putar di Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Item tidak ditemukan di pustaka Lambent Anda",
+    "itemNotFoundInLibrary": "Item tidak ditemukan di pustaka Moonfin Anda",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Restart server sedang berlangsung",
-    "adminServerRebootMessage": "Restart server sedang berlangsung, silakan mulai ulang Lambent",
+    "adminServerRebootMessage": "Restart server sedang berlangsung, silakan mulai ulang Moonfin",
     "adminActiveSessions": "Sesi Aktif",
     "adminSessionsLoadFailed": "Gagal memuat sesi",
     "adminNoActiveSessions": "Tidak ada sesi aktif",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Tampilkan tombol genre di bilah navigasi",
     "settingsShowFavoritesButtonInNavigation": "Tampilkan tombol favorit di bilah navigasi",
     "settingsShowLibrariesButtonInNavigation": "Tampilkan tombol pustaka di bilah navigasi",
-    "settingsLibraryVisibilitySubtitle": "Atur visibilitas halaman beranda per pustaka. Mulai ulang Lambent agar perubahan berlaku.",
+    "settingsLibraryVisibilitySubtitle": "Atur visibilitas halaman beranda per pustaka. Mulai ulang Moonfin agar perubahan berlaku.",
     "settingsMediaBarAndLocalPreviews": "Media Bar & Pratinjau Lokal",
     "settingsVisualOverlays": "Overlay Visual",
     "settingsSeasonalSurprise": "Kejutan Musiman",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Lisensi",
     "settingsOpenSourceLicenseNotices": "Pemberitahuan lisensi open source",
     "settingsPrivacyPolicy": "Kebijakan Privasi",
-    "settingsPrivacyPolicySubtitle": "Cara Lambent menangani data Anda",
+    "settingsPrivacyPolicySubtitle": "Cara Moonfin menangani data Anda",
     "settingsCheckForUpdates": "Periksa Pembaruan",
-    "settingsCheckForUpdatesSubtitle": "Periksa rilis Lambent terbaru",
+    "settingsCheckForUpdatesSubtitle": "Periksa rilis Moonfin terbaru",
     "settingsPoweredByFlutter": "Didukung oleh Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# pemberitahuan lisensi} other {# pemberitahuan lisensi}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Utamakan subtitle SDH",
     "preferSdhSubtitlesSubtitle": "Prioritaskan track subtitle SDH/CC saat memilih otomatis.",
     "webDiagnostics": "Diagnostik web",
-    "webDiagnosticsTitle": "Diagnostik Web Lambent",
+    "webDiagnosticsTitle": "Diagnostik Web Moonfin",
     "webDiagnosticsIntro": "Gunakan halaman ini untuk mendiagnosis masalah konektivitas browser (CORS, mixed content, dan pengaturan discovery).",
     "webDiagnosticsDetectedMixedContentFailure": "Kegagalan Mixed Content Terdeteksi",
     "webDiagnosticsDetectedCorsPreflightFailure": "Kegagalan CORS/Preflight Terdeteksi",
-    "webDiagnosticsMixedContentFailureBody": "Lambent mendeteksi halaman HTTPS yang mencoba memanggil URL server HTTP. Browser memblokir permintaan ini sebelum mencapai server Anda.",
-    "webDiagnosticsCorsFailureBody": "Lambent mendeteksi kegagalan permintaan pada tingkat browser yang umumnya disebabkan oleh header CORS atau preflight yang tidak ada pada server media.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin mendeteksi halaman HTTPS yang mencoba memanggil URL server HTTP. Browser memblokir permintaan ini sebelum mencapai server Anda.",
+    "webDiagnosticsCorsFailureBody": "Moonfin mendeteksi kegagalan permintaan pada tingkat browser yang umumnya disebabkan oleh header CORS atau preflight yang tidak ada pada server media.",
     "webDiagnosticsTargetUrl": "URL Target: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "tidak dikonfigurasi",
     "webDiagnosticsMixedContent": "Konten Campuran",
     "webDiagnosticsMixedContentDetected": "Halaman ini dimuat melalui HTTPS, tetapi satu atau lebih URL yang dikonfigurasi menggunakan HTTP. Browser memblokir halaman HTTPS untuk memanggil API HTTP.",
-    "webDiagnosticsMixedContentFix": "Perbaikan: sajikan server media atau endpoint proxy Anda melalui HTTPS, atau muat Lambent melalui HTTP hanya pada jaringan lokal tepercaya.",
+    "webDiagnosticsMixedContentFix": "Perbaikan: sajikan server media atau endpoint proxy Anda melalui HTTPS, atau muat Moonfin melalui HTTP hanya pada jaringan lokal tepercaya.",
     "webDiagnosticsNoMixedContentDetected": "Tidak ada konfigurasi mixed content yang jelas terdeteksi dari pengaturan runtime saat ini.",
     "webDiagnosticsCorsChecklist": "Daftar Periksa CORS",
     "webDiagnosticsCorsChecklistItem1": "-  Izinkan origin browser di Access-Control-Allow-Origin.",
@@ -7593,7 +7593,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klasik adalah tata letak Lambent asli yang terpusat. Modern adalah tata letak sinematik yang responsif.",
+    "detailScreenStyleSubtitle": "Klasik adalah tata letak Moonfin asli yang terpusat. Modern adalah tata letak sinematik yang responsif.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7625,11 +7625,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Gunakan algoritme pustaka lokal Lambent Recommends atau metrik kemiripan TMDb online. Catatan: rekomendasi online memerlukan integrasi Seerr.",
+    "recommendationSystemSubtitle": "Gunakan algoritme pustaka lokal Moonfin Recommends atau metrik kemiripan TMDb online. Catatan: rekomendasi online memerlukan integrasi Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recommends",
+    "recommendationSystemMoonfin": "Moonfin Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7641,7 +7641,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Batasi saran Lambent Recommends berdasarkan rating orang tua dari media yang dituju",
+    "recommendationsApplyParentalRatingCapSubtitle": "Batasi saran Moonfin Recommends berdasarkan rating orang tua dari media yang dituju",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7689,7 +7689,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Tema kustom mengubah elemen visual di seluruh Lambent. Pilih salah satu opsi berikut yang sesuai dengan gaya Anda.",
+    "customThemeSubtitle": "Tema kustom mengubah elemen visual di seluruh Moonfin. Pilih salah satu opsi berikut yang sesuai dengan gaya Anda.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7837,7 +7837,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Masuk ke Lambent di ponsel Anda",
+    "carSignInPrompt": "Masuk ke Moonfin di ponsel Anda",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller adalah perender GPU modern dari Flutter untuk animasi yang lebih mulus dan minim patah-patah. Pada sebagian TV box dan GPU lama, Impeller dapat menyebabkan gangguan tampilan atau video hitam; matikan jika Anda mengalaminya. Otomatis memilih nilai bawaan terbaik untuk perangkat Anda. Mulai ulang Lambent untuk menerapkannya.",
+    "impellerRenderingSubtitle": "Impeller adalah perender GPU modern dari Flutter untuk animasi yang lebih mulus dan minim patah-patah. Pada sebagian TV box dan GPU lama, Impeller dapat menyebabkan gangguan tampilan atau video hitam; matikan jika Anda mengalaminya. Otomatis memilih nilai bawaan terbaik untuk perangkat Anda. Mulai ulang Moonfin untuk menerapkannya.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent perlu dimulai ulang untuk mengubah mesin rendering. Tutup aplikasi sekarang, lalu buka kembali untuk menerapkannya.",
+    "impellerRestartMessage": "Moonfin perlu dimulai ulang untuk mengubah mesin rendering. Tutup aplikasi sekarang, lalu buka kembali untuk menerapkannya.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

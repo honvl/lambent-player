@@ -10,7 +10,7 @@ class AppLocalizationsYue extends AppLocalizations {
   AppLocalizationsYue([String locale = 'yue']) : super(locale);
 
   @override
-  String get appTitle => 'Lambent';
+  String get appTitle => 'Moonfin';
 
   @override
   String get animeMarkerFiller => 'Filler';
@@ -56,6 +56,9 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get signIn => '登入';
+
+  @override
+  String get signingIn => 'Signing in...';
 
   @override
   String get empty => '空';
@@ -139,6 +142,33 @@ class AppLocalizationsYue extends AppLocalizations {
   String get whosWatching => '誰在看？';
 
   @override
+  String get signedInOnThisDevice => 'Signed in on this device';
+
+  @override
+  String get pinRequired => 'PIN required';
+
+  @override
+  String get passwordRequired => 'Password required';
+
+  @override
+  String continueAsUser(String name) {
+    return 'Continue as $name';
+  }
+
+  @override
+  String switchToUser(String name) {
+    return 'Switch to $name';
+  }
+
+  @override
+  String signedInAsOnServer(String user, String server) {
+    return 'Signed in as $user on $server';
+  }
+
+  @override
+  String get accountActive => 'Active';
+
+  @override
   String get addUser => '新增用戶';
 
   @override
@@ -146,7 +176,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String appVersionFooter(String version) {
-    return 'Lambent 版本 $version';
+    return 'Moonfin 版本 $version';
   }
 
   @override
@@ -198,7 +228,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Lambent 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。';
+      'Moonfin 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。';
 
   @override
   String get ok => '好的';
@@ -211,7 +241,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get detailScreenStyleSubtitle =>
-      '「經典」係 Lambent 原本嘅置中版面。「現代」係自適應嘅電影感版面。';
+      '「經典」係 Moonfin 原本嘅置中版面。「現代」係自適應嘅電影感版面。';
 
   @override
   String get detailScreenStyleMoonfin => '經典';
@@ -433,6 +463,29 @@ class AppLocalizationsYue extends AppLocalizations {
   String get detailScreenStyleMinimalist => 'Minimalist';
 
   @override
+  String get detailScreenStyleStage => 'Stage';
+
+  @override
+  String get detailScreenStylePremiere => 'Premiere';
+
+  @override
+  String get detailScreenStyleQuickLook => 'Quick Look';
+
+  @override
+  String get detailScreenStyleFrost => 'Frost';
+
+  @override
+  String get quickLookOpenFullPage => 'Open full page';
+
+  @override
+  String get quickLookBackToClose => 'Back to close';
+
+  @override
+  String quickLookSeasonPlayed(int played, int total) {
+    return '$played of $total';
+  }
+
+  @override
   String get expandedTabs => '展開分頁';
 
   @override
@@ -449,10 +502,10 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get recommendationSystemSubtitle =>
-      '用 Lambent Recommends 嘅本機媒體庫演算法，或者網上 TMDb 嘅相似度指標。注意：網上推薦需要整合 Seerr。';
+      '用 Moonfin Recommends 嘅本機媒體庫演算法，或者網上 TMDb 嘅相似度指標。注意：網上推薦需要整合 Seerr。';
 
   @override
-  String get recommendationSystemMoonfin => 'Lambent Recommends';
+  String get recommendationSystemMoonfin => 'Moonfin Recommends';
 
   @override
   String get recommendationSystemJellyfin => 'Jellyfin Recommends';
@@ -465,7 +518,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get recommendationsApplyParentalRatingCapSubtitle =>
-      '根據目標媒體嘅家長分級嚟限制 Lambent Recommends 嘅建議';
+      '根據目標媒體嘅家長分級嚟限制 Moonfin Recommends 嘅建議';
 
   @override
   String get interfaceStyle => '介面風格';
@@ -488,7 +541,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get interfaceLayoutSubtitle =>
-      'Override the detected layout when this device is read wrong. Restart Lambent for changes to take effect.';
+      'Override the detected layout when this device is read wrong. Restart Moonfin for changes to take effect.';
 
   @override
   String get interfaceLayoutAutomatic => 'Automatic';
@@ -566,20 +619,20 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      '在 Lambent 和 Neon Pulse 之間切換，無需重新啟動應用程式';
+      '在 Moonfin 和 Neon Pulse 之間切換，無需重新啟動應用程式';
 
   @override
   String get customThemeTitle => '自訂主題';
 
   @override
-  String get customThemeSubtitle => '自訂主題會改變成個 Lambent 嘅視覺元素。揀一個啱你風格嘅選項啦。';
+  String get customThemeSubtitle => '自訂主題會改變成個 Moonfin 嘅視覺元素。揀一個啱你風格嘅選項啦。';
 
   @override
   String get keyboardStyle => 'Keyboard Style';
 
   @override
   String get keyboardStyleDescription =>
-      'Native uses your TV\'s own keyboard. Classic is the original Lambent keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
+      'Native uses your TV\'s own keyboard. Classic is the original Moonfin keyboard. Glass is a frosted panel with larger keys. Docked fills the bottom of the screen and shows what you type above the keys.';
 
   @override
   String get keyboardStyleNative => 'Native';
@@ -703,7 +756,7 @@ class AppLocalizationsYue extends AppLocalizations {
   }
 
   @override
-  String get exitApp => '退出Lambent？';
+  String get exitApp => '退出Moonfin？';
 
   @override
   String get exitAppConfirmation => '您確定要退出嗎？';
@@ -1507,10 +1560,6 @@ class AppLocalizationsYue extends AppLocalizations {
   String get queuedDownload => 'Queued';
 
   @override
-  String get downloadWaitingForServer =>
-      'Waiting for the server. The download picks up where it stopped.';
-
-  @override
   String queuedMoreCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -1616,6 +1665,9 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get audioTrack => '音軌';
+
+  @override
+  String get noOtherAudioTracks => 'No other audio tracks';
 
   @override
   String get subtitleTrack => '字幕軌道';
@@ -1765,6 +1817,30 @@ class AppLocalizationsYue extends AppLocalizations {
   String get writers => '編劇';
 
   @override
+  String get episodeDirector => 'Episode Director';
+
+  @override
+  String episodeDirectorWithRole(String role) {
+    return '$role (Episode Director)';
+  }
+
+  @override
+  String get episodeWriter => 'Episode Writer';
+
+  @override
+  String episodeWriterWithRole(String role) {
+    return '$role (Episode Writer)';
+  }
+
+  @override
+  String get guestStar => 'Guest Star';
+
+  @override
+  String guestStarWithRole(String role) {
+    return '$role (Guest Star)';
+  }
+
+  @override
   String get studio => '工作室';
 
   @override
@@ -1845,7 +1921,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get shuffleAllMusic => '隨機播放所有音樂';
 
   @override
-  String get carSignInPrompt => '用你部電話登入 Lambent';
+  String get carSignInPrompt => '用你部電話登入 Moonfin';
 
   @override
   String get carServerUnreachable => '連唔到你個伺服器';
@@ -2124,7 +2200,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get shortcutToggleFullscreen => 'Fullscreen on or off';
 
   @override
-  String get shortcutQuit => 'Quit Lambent';
+  String get shortcutQuit => 'Quit Moonfin';
 
   @override
   String get shortcutPlayPause => 'Play or pause';
@@ -2294,7 +2370,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get bookReadingUnavailableMessage =>
-      'Open it in Lambent on a phone, tablet or computer to read it. Audiobooks still play here.';
+      'Open it in Moonfin on a phone, tablet or computer to read it. Audiobooks still play here.';
 
   @override
   String formatCannotRenderInApp(String extension) {
@@ -2630,6 +2706,11 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String liveReconnecting(int attempt, int total) {
     return 'Reconnecting… ($attempt of $total)';
+  }
+
+  @override
+  String playerMatchingDisplayRate(String fps) {
+    return 'Matching display to $fps fps…';
   }
 
   @override
@@ -3052,6 +3133,13 @@ class AppLocalizationsYue extends AppLocalizations {
   String get watchedIndicators => '觀察指標';
 
   @override
+  String get showPosterLabels => 'Poster Labels';
+
+  @override
+  String get showPosterLabelsSubtitle =>
+      'Show the labels on posters, such as 4K or HDR.';
+
+  @override
   String get always => '總是';
 
   @override
@@ -3107,7 +3195,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get loadingAnimationDescription =>
-      'Customize the loading animations used throughout Lambent';
+      'Customize the loading animations used throughout Moonfin';
 
   @override
   String get loadingAnimationConfiguration => 'Loading Animation Configuration';
@@ -3116,7 +3204,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get loadingAnimationImage => 'Image';
 
   @override
-  String get loadingAnimationImageMoonfinLogo => 'Lambent Logo';
+  String get loadingAnimationImageMoonfinLogo => 'Moonfin Logo';
 
   @override
   String get loadingAnimationImageSpinner => 'Spinner';
@@ -3128,7 +3216,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get loadingAnimationImageMoonPhases => 'Moon Phases';
 
   @override
-  String get loadingAnimationImageMoonfinPhases => 'Lambent Phases';
+  String get loadingAnimationImageMoonfinPhases => 'Moonfin Phases';
 
   @override
   String get loadingAnimationImageNeonfinPhases => 'Neonfin Phases';
@@ -3279,6 +3367,13 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get seasonalRowHolidaysHint => 'Untick a holiday to hide its row.';
+
+  @override
+  String get seasonalRowAllYear => 'Show All Year';
+
+  @override
+  String get seasonalRowAllYearDescription =>
+      'Show a holiday row outside the holiday dates too, a different ticked holiday each day.';
 
   @override
   String get holidayNewYear => 'New Year\'s';
@@ -3740,6 +3835,84 @@ class AppLocalizationsYue extends AppLocalizations {
   String get upcomingEpisodeTomorrow => 'Tomorrow';
 
   @override
+  String get radarrCalendarRow => 'Upcoming Movies (Radarr)';
+
+  @override
+  String get sonarrCalendarRow => 'Upcoming TV Shows (Sonarr)';
+
+  @override
+  String get mergedCalendarRow => 'Upcoming Releases';
+
+  @override
+  String get arrCalendarsRowSubtitle => 'Radarr and Sonarr Calendars';
+
+  @override
+  String get radarrCalendarRowSubtitle => 'Radarr Calendar';
+
+  @override
+  String get sonarrCalendarRowSubtitle => 'Sonarr Calendar';
+
+  @override
+  String calendarReleaseIn(int days, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'In $days days',
+      one: 'Tomorrow',
+      zero: 'Today',
+    );
+    return '$_temp0 ($date)';
+  }
+
+  @override
+  String get calendarReleaseCinema => 'Cinema';
+
+  @override
+  String get calendarReleaseDigital => 'Digital';
+
+  @override
+  String get calendarReleasePhysical => 'Physical';
+
+  @override
+  String get upcomingCalendars => 'Upcoming Calendars';
+
+  @override
+  String get upcomingCalendarsDescription =>
+      'Toggle Upcoming Calendars from Radarr/Sonarr.';
+
+  @override
+  String get enableRadarrCalendar => 'Enable Radarr\'s Upcoming Calendar';
+
+  @override
+  String get radarrCalendarShowCinema => 'Show Upcoming Cinema Releases';
+
+  @override
+  String get radarrCalendarShowDigital => 'Show Upcoming Digital Releases';
+
+  @override
+  String get radarrCalendarShowPhysical => 'Show Upcoming Physical Releases';
+
+  @override
+  String get calendarShowReleaseDate => 'Show Release Date on Home Screen';
+
+  @override
+  String get radarrCalendarHideDownloaded =>
+      'Hide Movies Already on the Server';
+
+  @override
+  String get enableSonarrCalendar => 'Enable Sonarr\'s Upcoming Calendar';
+
+  @override
+  String get sonarrCalendarShowEpisodeInfo => 'Display Episode Information';
+
+  @override
+  String get sonarrCalendarHideDownloaded =>
+      'Hide Episodes Already on the Server';
+
+  @override
+  String get mergeRadarrSonarrCalendars => 'Merge Sonarr and Radarr Calendars';
+
+  @override
   String get moveUp => 'Move Up';
 
   @override
@@ -3751,7 +3924,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get buttonShownInSyncPlayGroup =>
-      'Only shows while you\'re in a SyncPlay group';
+      'Only shows while you\'re in a watch party';
 
   @override
   String get orientationLock => 'Orientation Lock';
@@ -4128,7 +4301,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get customMpvConfPath => '自訂 mpv.conf 路徑';
 
   @override
-  String get notSetMpvConf => '未設定。 Lambent 將嘗試應用程式/資料資料夾中的預設 mpv.conf。';
+  String get notSetMpvConf => '未設定。 Moonfin 將嘗試應用程式/資料資料夾中的預設 mpv.conf。';
 
   @override
   String get selectMpvConf => '選擇mpv.conf';
@@ -4419,7 +4592,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get downloadLocationLimitedByAndroid =>
-      'Android only lets Lambent write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
+      'Android only lets Moonfin write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.';
 
   @override
   String get saveToDownloadsFolder => '儲存到下載資料夾';
@@ -4702,7 +4875,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get libraryVisibility => '圖書館可見性';
 
   @override
-  String get libraryVisibilityDescription => '切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。';
+  String get libraryVisibilityDescription => '切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。';
 
   @override
   String get showInNavigation => '在導航中顯示';
@@ -4760,7 +4933,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get mediaBarMode => '媒體欄風格';
 
   @override
-  String get mediaBarModeDescription => '在 Lambent、MakD 之間進行選擇，或關閉媒體列';
+  String get mediaBarModeDescription => '在 Moonfin、MakD 之間進行選擇，或關閉媒體列';
 
   @override
   String get peekHomeRows => 'Peek Home Rows';
@@ -4804,6 +4977,32 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get mediaBarSourceRandom => 'Random';
+
+  @override
+  String get mediaBarSourceNewReleases => 'New Seasons & Episodes';
+
+  @override
+  String get mediaBarNewReleaseBanner => 'New Release Banner';
+
+  @override
+  String get mediaBarNewReleaseBannerDescription =>
+      'Flag series with a new season or new episodes that aired recently.';
+
+  @override
+  String get mediaBarNewReleaseDays => 'New Release Window';
+
+  @override
+  String get mediaBarNewReleaseDaysDescription =>
+      'How long after an episode airs it still counts as new.';
+
+  @override
+  String get mediaBarNewSeries => 'New Series';
+
+  @override
+  String get mediaBarNewSeason => 'New Season';
+
+  @override
+  String get mediaBarNewEpisodes => 'New Episodes';
 
   @override
   String get moviesAndTvShows => '電影和電視節目';
@@ -5074,6 +5273,24 @@ class AppLocalizationsYue extends AppLocalizations {
   String get dimmingLevel => '調光等級';
 
   @override
+  String get screensaverDuringAudio => 'Show During Music and Audiobooks';
+
+  @override
+  String get screensaverDuringAudioDescription =>
+      'Let the screensaver start while audio plays, so cover art doesn\'t sit on screen for hours.';
+
+  @override
+  String get sleepAfterIdle => 'Let TV Sleep After';
+
+  @override
+  String get sleepAfterIdleDescriptionAndroid =>
+      'Close Moonfin after this long without a button press so your TV\'s own screensaver and sleep timer can take over. Anything paused is stopped first, so it keeps its resume point.';
+
+  @override
+  String get sleepAfterIdleDescriptionAppleTv =>
+      'After this long without a button press, hand the screen back to your Apple TV\'s own screensaver and sleep setting. Moonfin stays open, so you pick up right where you left off.';
+
+  @override
   String get maxAgeRating => '最大年齡等級';
 
   @override
@@ -5115,7 +5332,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get screensaverBackdropBlack => 'Black';
 
   @override
-  String get screensaverBackdropMoonfin => 'Lambent';
+  String get screensaverBackdropMoonfin => 'Moonfin';
 
   @override
   String get screensaverBackdropCalm => 'Calm';
@@ -5130,7 +5347,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get screensaverAdditionalComponent => 'Additional Component';
 
   @override
-  String get screensaverComponentMoonfinLogo => 'Lambent Logo';
+  String get screensaverComponentMoonfinLogo => 'Moonfin Logo';
 
   @override
   String get screensaverComponentRunner => 'Runner';
@@ -5187,6 +5404,32 @@ class AppLocalizationsYue extends AppLocalizations {
   String get additionalRatings => '附加評級';
 
   @override
+  String get mdblistWatchingNow => 'Watching on MDBList';
+
+  @override
+  String get mdblistWatchingNowDescription =>
+      'Show what MDBList users are currently watching';
+
+  @override
+  String watchingNowWatchersCount(int count) {
+    return '$count watching';
+  }
+
+  @override
+  String watchingNowLiveSummary(String users, String movies, String shows) {
+    return '$users watching now · $movies movies · $shows shows';
+  }
+
+  @override
+  String watchingNowLiveSummaryToday(
+    String users,
+    String movies,
+    String shows,
+  ) {
+    return '$users watched today · $movies movies · $shows shows';
+  }
+
+  @override
   String get showMdbListAndTmdbRatings => '顯示 MDBList 和 TMDB 評級';
 
   @override
@@ -5221,6 +5464,9 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get pluginNotDetectedDescription => '目前未偵測到伺服器插件。本地設定仍然使用其保存的值或內建預設值。';
+
+  @override
+  String get moonbaseAddress => 'Moonbase Address';
 
   @override
   String get pluginConnected => 'Connected';
@@ -5341,7 +5587,17 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get showSeerrAvailabilityBadgesDescription =>
-      'Show season availability badges on media details pages';
+      'Show the Seerr status on posters and seasons across the app';
+
+  @override
+  String get seerrBadgeStyle => 'Badge Style';
+
+  @override
+  String get seerrBadgeStyleDescription =>
+      'Badge puts Seerr\'s dot in a corner. Banner runs the status across the top of the poster.';
+
+  @override
+  String get seerrBadgeStyleBadge => 'Badge';
 
   @override
   String get seerrNotificationsSection => '通知';
@@ -5573,7 +5829,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get cancelRequest4k => 'Cancel 4K Request';
 
   @override
-  String get playInMoonfin => '玩 Lambent';
+  String get playInMoonfin => '玩 Moonfin';
 
   @override
   String get requestedByLabel => 'Requested by';
@@ -5602,16 +5858,6 @@ class AppLocalizationsYue extends AppLocalizations {
   String get similar => '相似的';
 
   @override
-  String moreFromStudio(String name) {
-    return 'More from $name';
-  }
-
-  @override
-  String moreWithPerson(String name) {
-    return 'More with $name';
-  }
-
-  @override
   String get recommendations => '建議';
 
   @override
@@ -5628,7 +5874,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get keep => '保持';
 
   @override
-  String get itemNotFoundInLibrary => '在您的 Lambent 庫中找不到項目';
+  String get itemNotFoundInLibrary => '在您的 Moonfin 庫中找不到項目';
 
   @override
   String get errorSearchingLibrary => '搜尋庫時出錯';
@@ -5667,6 +5913,18 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String get seerrSeriesContinuing =>
       'Series Continuing · Future Seasons Can Be Requested';
+
+  @override
+  String get seerrSeriesMatchDescription =>
+      'We couldn\'t match this series automatically. Pick the right one below.';
+
+  @override
+  String get seerrSeriesNoMatch =>
+      'We couldn\'t find a match for this series, so it can\'t be requested.';
+
+  @override
+  String get seerrSeriesMatchFailed =>
+      'Sonarr couldn\'t find a match for this series, or couldn\'t be reached. Try again, or check the series on Seerr.';
 
   @override
   String get advancedOptions => '進階選項';
@@ -7618,7 +7876,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get adminServerRebootInProgress => '伺服器正在重啟';
 
   @override
-  String get adminServerRebootMessage => '伺服器正在重新啟動，請重新啟動 Lambent';
+  String get adminServerRebootMessage => '伺服器正在重新啟動，請重新啟動 Moonfin';
 
   @override
   String get adminActiveSessions => '活躍會話';
@@ -10489,13 +10747,34 @@ class AppLocalizationsYue extends AppLocalizations {
   String get syncPlayRepeat => '重複';
 
   @override
+  String get syncPlayRepeatSubtitle => 'Replay one item or the whole queue';
+
+  @override
   String get syncPlayRepeatOne => '一';
+
+  @override
+  String get syncPlayShuffleSubtitle => 'Play the queue in order or shuffled';
 
   @override
   String get syncPlayShuffleModeShuffled => '洗牌';
 
   @override
   String get syncPlayShuffleModeSorted => '已排序';
+
+  @override
+  String get syncPlayParticipantYou => 'You';
+
+  @override
+  String syncPlayGroupSubtitle(String participants, String detail) {
+    return '$participants · $detail';
+  }
+
+  @override
+  String get syncPlayNothingQueued => 'nothing queued yet';
+
+  @override
+  String get syncPlayOthersCanJoinHint =>
+      'Others can join from their SyncPlay screen while this group exists.';
 
   @override
   String get syncPlaySyncCurrentQueue => '同步目前播放隊列';
@@ -10521,6 +10800,10 @@ class AppLocalizationsYue extends AppLocalizations {
   String get syncPlayCreateNewGroup => '建立一個新群組';
 
   @override
+  String get syncPlayCreateGroupSubtitle =>
+      'Watch together with everyone who joins';
+
+  @override
   String get syncPlayGroupName => '團體名稱';
 
   @override
@@ -10533,13 +10816,26 @@ class AppLocalizationsYue extends AppLocalizations {
   String get syncPlayAvailableGroups => '可用群組';
 
   @override
+  String syncPlayAvailableGroupsCount(int count) {
+    return 'Available groups · $count';
+  }
+
+  @override
   String get syncPlayNoGroupsAvailable => '沒有可用的群組';
+
+  @override
+  String get syncPlayNoGroupsAvailableHint =>
+      'Groups other people create on this server will show up here.';
 
   @override
   String get syncPlayJoinGroupQuestion => '加入 SyncPlay 群組？';
 
   @override
   String get syncPlayJoinGroupWarning => '加入 SyncPlay 群組可能會取代您目前的播放佇列。繼續？';
+
+  @override
+  String get syncPlayJoinReplacesQueueNote =>
+      'Joining a group may replace your current playback queue.';
 
   @override
   String get syncPlayJoin => '加入';
@@ -10935,6 +11231,17 @@ class AppLocalizationsYue extends AppLocalizations {
   String get addToPlaylist => '新增到播放列表';
 
   @override
+  String get removeFromPlaylist => 'Remove from Playlist';
+
+  @override
+  String removeFromPlaylistConfirm(String item, String playlist) {
+    return 'Remove $item from $playlist?';
+  }
+
+  @override
+  String get removeFromPlaylistFailed => 'Failed to remove from playlist';
+
+  @override
   String get lyricsNotAvailable => '沒有可用的歌詞';
 
   @override
@@ -11191,6 +11498,22 @@ class AppLocalizationsYue extends AppLocalizations {
   String get settingsTwentyFourHourClockSubtitle => '無論何時顯示時鐘，都使用 24 小時時間格式';
 
   @override
+  String get settingsDateFormat => 'Date Format';
+
+  @override
+  String get settingsDateFormatDescription =>
+      'Choose between month-day, day-month, or locale default for calendar and release dates';
+
+  @override
+  String get dateFormatSystem => 'Locale Default';
+
+  @override
+  String get dateFormatMonthDay => 'Month / Day (Nov 10)';
+
+  @override
+  String get dateFormatDayMonth => 'Day / Month (10 Nov)';
+
+  @override
   String get settingsShowShuffleButtonInNavigation => '在導覽列中顯示隨機播放按鈕';
 
   @override
@@ -11214,7 +11537,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      '切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。';
+      '切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。';
 
   @override
   String get settingsMediaBarAndLocalPreviews => '媒體欄和本地預覽';
@@ -11350,13 +11673,13 @@ class AppLocalizationsYue extends AppLocalizations {
   String get settingsPrivacyPolicy => '隱私權政策';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Lambent 如何處理您的數據';
+  String get settingsPrivacyPolicySubtitle => 'Moonfin 如何處理您的數據';
 
   @override
   String get settingsCheckForUpdates => '檢查更新';
 
   @override
-  String get settingsCheckForUpdatesSubtitle => '檢查最新的 Lambent 版本';
+  String get settingsCheckForUpdatesSubtitle => '檢查最新的 Moonfin 版本';
 
   @override
   String get settingsBoth => '兩個都';
@@ -11512,6 +11835,20 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get settingsSkipForwardLengthDescription => '按下快轉按鈕後快轉多少秒。';
+
+  @override
+  String get settingsHideControlsAfter => 'Hide Controls After';
+
+  @override
+  String get settingsHideControlsAfterDescription =>
+      'How long the player controls stay on screen after your last button press, tap or mouse move.';
+
+  @override
+  String get settingsHdrControlsDimming => 'Dim Controls in HDR';
+
+  @override
+  String get settingsHdrControlsDimmingDescription =>
+      'White looks far brighter next to HDR video, so the player controls dim by this much while it plays.';
 
   @override
   String get settingsBitstreamAc3ToExternalDecoder => '位元流 AC3 到外部解碼器';
@@ -11899,6 +12236,76 @@ class AppLocalizationsYue extends AppLocalizations {
   String get displayStudiosRowsSubtitle => 'Show Studio row in Home Sections.';
 
   @override
+  String get sinceYouWatched => 'Since You Watched';
+
+  @override
+  String get sinceYouWatchedRowTitle => 'Since you watched';
+
+  @override
+  String sinceYouWatchedItemRowTitle(String title) {
+    return 'Since you watched \"$title\"';
+  }
+
+  @override
+  String sinceYouWatchedRowNumber(int number) {
+    return 'Since You Watched Row $number';
+  }
+
+  @override
+  String get displaySinceYouWatchedRows => 'Display Since You Watched Rows';
+
+  @override
+  String get displaySinceYouWatchedRowsSubtitle =>
+      'Show and customize Since You Watched rows in Home Sections.';
+
+  @override
+  String get sinceYouWatchedSource => 'Recommendation Source';
+
+  @override
+  String get sinceYouWatchedSourceDescription =>
+      'Choose recommendation source (Moonfin Recommends custom local algorithm, Jellyfin Recommends server engine, or TMDb\'s similarity metrics. Note: Online recommendations require Seerr integration).';
+
+  @override
+  String get sinceYouWatchedSourceLocal => 'Moonfin Recommends';
+
+  @override
+  String get sinceYouWatchedSourceServer => 'Jellyfin Recommends';
+
+  @override
+  String get sinceYouWatchedSourceOnline => 'TMDb Similarity';
+
+  @override
+  String get sinceYouWatchedSourceType => 'Source Type';
+
+  @override
+  String get sinceYouWatchedSourceTypeDescription =>
+      'Choose type of items to recommend';
+
+  @override
+  String get sinceYouWatchedSourceItem => 'Source Item';
+
+  @override
+  String get sinceYouWatchedSourceItemDescription =>
+      'Choose which source item to base recommendations on';
+
+  @override
+  String get sinceYouWatchedRecentlyWatched => 'Recently Watched';
+
+  @override
+  String get sinceYouWatchedNumRows => 'Number of Rows to Add';
+
+  @override
+  String get sinceYouWatchedNumRowsDescription =>
+      'Choose how many Since You Watched rows to display (1-5)';
+
+  @override
+  String get sinceYouWatchedIncludeWatched => 'Include Previously Watched';
+
+  @override
+  String get sinceYouWatchedIncludeWatchedSubtitle =>
+      'Include watched items in recommendations';
+
+  @override
   String get studiosRowSorting => 'Studio Row Sorting';
 
   @override
@@ -12131,6 +12538,24 @@ class AppLocalizationsYue extends AppLocalizations {
       'Play AV1 above 1080p, including HDR10, from the original file instead of asking the server to transcode it. This device decodes AV1 in software, so heavy 4K or high bitrate files may stutter.';
 
   @override
+  String get cadenceSlowdown => 'Smooth 24 fps on a 60 Hz TV';
+
+  @override
+  String get cadenceSlowdownSubtitle =>
+      'When Match Frame Rate is off, play 24 fps video 0.1% slower so it fits the TV without dropped frames. Not used when audio is passed through to a receiver.';
+
+  @override
+  String get cadenceTipTitle => 'Turn On Match Frame Rate';
+
+  @override
+  String get cadenceTipMessage =>
+      'This video can\'t play smoothly at your TV\'s current refresh rate. On your Apple TV, open Settings > Video and Audio > Match Content and turn on Match Frame Rate.';
+
+  @override
+  String get cadenceTipSlowdownHint =>
+      'Or turn on Smooth 24 fps on a 60 Hz TV in Moonfin under Playback > Quality & Decoding.';
+
+  @override
   String get useExternalPlayer => 'Use external player';
 
   @override
@@ -12170,7 +12595,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get webDiagnostics => '網頁診斷';
 
   @override
-  String get webDiagnosticsTitle => 'Lambent 網頁診斷';
+  String get webDiagnosticsTitle => 'Moonfin 網頁診斷';
 
   @override
   String get webDiagnosticsIntro => '用呢版嚟診斷瀏覽器嘅連線問題（CORS、混合內容同探索設定）。';
@@ -12183,11 +12608,11 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Lambent 偵測到有 HTTPS 網頁想呼叫 HTTP 嘅伺服器 URL。瀏覽器會喺要求去到你部伺服器之前就封鎖咗佢。';
+      'Moonfin 偵測到有 HTTPS 網頁想呼叫 HTTP 嘅伺服器 URL。瀏覽器會喺要求去到你部伺服器之前就封鎖咗佢。';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Lambent 偵測到瀏覽器層面嘅要求失敗，通常係因為媒體伺服器度缺少咗 CORS 或者預檢標頭。';
+      'Moonfin 偵測到瀏覽器層面嘅要求失敗，通常係因為媒體伺服器度缺少咗 CORS 或者預檢標頭。';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -12235,7 +12660,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      '解決方法：用 HTTPS 提供你嘅媒體伺服器或者代理端點，又或者淨係喺可信嘅本地網路度用 HTTP 載入 Lambent。';
+      '解決方法：用 HTTPS 提供你嘅媒體伺服器或者代理端點，又或者淨係喺可信嘅本地網路度用 HTTP 載入 Moonfin。';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -12350,6 +12775,473 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get watchWithGroup => '同群組一齊睇';
+
+  @override
+  String get watchPartyGroupSubtitles => 'Subtitles for everyone';
+
+  @override
+  String get watchPartyOwnSubtitles => 'Each person\'s choice';
+
+  @override
+  String get watchPartyLobby => 'In the lobby';
+
+  @override
+  String get watchPartyUpNextLabel => 'Up next';
+
+  @override
+  String get watchPartyRoomSettings => 'Room settings';
+
+  @override
+  String get watchPartyCodeOrLink => 'Room code or invite link';
+
+  @override
+  String get watchPartyCopyInvite => 'Copy invite link';
+
+  @override
+  String get watchPartyInviteCopied => 'Invite link copied';
+
+  @override
+  String get watchPartyLetEveryoneVote => 'Let everyone vote on movies';
+
+  @override
+  String get watchPartyVoteHelp =>
+      'Add movies for everyone to vote on, then play the one you want. TV episodes are still your pick.';
+
+  @override
+  String get watchPartyGuestVoteHelp =>
+      'Vote for what you want to watch. The host plays one.';
+
+  @override
+  String get watchPartySearchMovies => 'Search movies';
+
+  @override
+  String get watchPartyNoSuggestions => 'No movies to vote on yet.';
+
+  @override
+  String get watchPartySuggested => 'Added to the Watch Party vote';
+
+  @override
+  String watchPartyVoteCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '$count vote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get watchParty => 'Watch Party';
+
+  @override
+  String get watchPartyUnavailable => 'This server doesn\'t offer Watch Party.';
+
+  @override
+  String get watchPartyRoomCode => 'Room code';
+
+  @override
+  String get watchPartyStart => 'Start a watch party';
+
+  @override
+  String get watchPartyPickTitle =>
+      'Open a title and choose Watch with group to pick what everyone watches.';
+
+  @override
+  String get watchPartyWaitingForHost =>
+      'Waiting for the host to pick something.';
+
+  @override
+  String get watchPartyShareCode =>
+      'Others join with this code from their Watch Party screen.';
+
+  @override
+  String get watchPartyReconnecting => 'Reconnecting...';
+
+  @override
+  String get watchPartyOffline => 'offline';
+
+  @override
+  String get watchPartyStartForEveryone => 'Start for everyone';
+
+  @override
+  String watchPartyResumeAt(String time) {
+    return 'Resume at $time';
+  }
+
+  @override
+  String get watchPartyStartFromBeginning => 'Start from the beginning';
+
+  @override
+  String watchPartyResumeWhere(String name) {
+    return 'Where $name left off, the earliest anyone here has reached.';
+  }
+
+  @override
+  String get watchPartyResumeEarliest =>
+      'The earliest point anyone here has reached.';
+
+  @override
+  String get watchPartyResumeYours =>
+      'Where you left off. Everyone starts from there.';
+
+  @override
+  String watchPartyResumeNotStarted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people haven\'t started it yet.',
+      one: '1 person hasn\'t started it yet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get watchPartyBackToLobby => 'Back to the lobby';
+
+  @override
+  String get watchPartyGuestsCanPause => 'Guests can play and pause';
+
+  @override
+  String get watchPartyEnd => 'End for everyone';
+
+  @override
+  String get watchPartyEnded => 'The Watch Party has ended.';
+
+  @override
+  String get watchPartyStaged => 'Picked for the Watch Party';
+
+  @override
+  String watchPartyUpNext(String title) {
+    return 'Up next: $title';
+  }
+
+  @override
+  String get watchParties => 'Watch Parties';
+
+  @override
+  String get watchPartyStartWith => 'Start parties with';
+
+  @override
+  String get watchPartyServiceMoonbaseHint =>
+      'Chat, reactions and voting. Runs on Moonbase.';
+
+  @override
+  String get watchPartyServiceSyncPlayHint =>
+      'Jellyfin\'s own. Friends on other Jellyfin apps can join.';
+
+  @override
+  String get watchPartyServiceNote =>
+      'You can join rooms of both kinds. This only picks what you start.';
+
+  @override
+  String get watchPartyDuringParty => 'During a party';
+
+  @override
+  String get watchPartyChatOverlay => 'Show chat over the video';
+
+  @override
+  String get watchPartyChatOverlaySubtitle =>
+      'New messages show for a few seconds';
+
+  @override
+  String get watchPartyAlerts => 'Party alerts';
+
+  @override
+  String get watchPartyAlertsSubtitle =>
+      'Tell me when someone on this server starts one';
+
+  @override
+  String get watchPartyJoinWithCode => 'Join with a code';
+
+  @override
+  String get watchPartyOnThisServer => 'On this server';
+
+  @override
+  String watchPartyCountOnServer(int count) {
+    return '$count on this server';
+  }
+
+  @override
+  String get watchPartyRoomsHint =>
+      'You need access to the item to join. A room closes when its last person leaves.';
+
+  @override
+  String get watchPartyRoomsEmpty =>
+      'Parties you can watch show up here. Got a code from someone? Pick Join with a code.';
+
+  @override
+  String get watchPartyPasteHint =>
+      'Pasting an invite link here works too. On a phone, the link opens Moonfin straight into the party.';
+
+  @override
+  String watchPartyWatchingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count watching',
+      one: '$count watching',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String watchPartyHostsParty(String name) {
+    return '$name\'s party';
+  }
+
+  @override
+  String get watchPartyEveryoneControlsShort => 'Everyone controls';
+
+  @override
+  String get watchPartyVotingNow => 'Voting on what to watch';
+
+  @override
+  String get watchPartyNeedsMoonbase =>
+      'Watch Parties need Moonbase on this server';
+
+  @override
+  String get watchPartyNeedsMoonbaseHint =>
+      'Ask whoever runs the server to install the Moonbase plugin. On Jellyfin, SyncPlay still works without it.';
+
+  @override
+  String get watchPartyWrongPin => 'That PIN didn\'t work. Try again.';
+
+  @override
+  String get watchPartyTooManyTries => 'Too many tries. Wait a minute.';
+
+  @override
+  String get watchPartyFull => 'This party is full.';
+
+  @override
+  String get watchPartyNoSuchCode => 'No room has that code.';
+
+  @override
+  String get watchPartyNoAccess =>
+      'You don\'t have access to what they\'re watching.';
+
+  @override
+  String get watchPartyRemoved => 'The host removed you from the party.';
+
+  @override
+  String get watchPartyYours => 'Your watch party';
+
+  @override
+  String get watchPartyInviteHint =>
+      'Paste it in any chat. It opens a page on this server with an Open in Moonfin button.';
+
+  @override
+  String get watchPartySendInvite => 'Send the invite';
+
+  @override
+  String get watchPartyScanInvite =>
+      'Scan with your phone to get the invite link, then send it from there. Or just share the code.';
+
+  @override
+  String get watchPartyStartsTogether =>
+      'Play waits for everyone\'s player, 10 seconds at most, then counts down 3, 2, 1.';
+
+  @override
+  String get watchPartyStatusInSync => 'In sync';
+
+  @override
+  String get watchPartyStatusCatchingUp => 'Catching up';
+
+  @override
+  String get watchPartyStatusBuffering => 'Buffering';
+
+  @override
+  String get watchPartyStatusNotWatching => 'Not watching';
+
+  @override
+  String get watchPartyStatusReady => 'Ready';
+
+  @override
+  String get watchPartyStatusJoining => 'Joining';
+
+  @override
+  String get watchPartyHost => 'Host';
+
+  @override
+  String watchPartyWaitingFor(String name) {
+    return 'Waiting for $name\'s player';
+  }
+
+  @override
+  String watchPartyWaitingForCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Waiting for $count players',
+      one: 'Waiting for $count player',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String watchPartyStartingAnyway(int seconds) {
+    return 'Starting anyway in $seconds s';
+  }
+
+  @override
+  String get watchPartyStartingTogether => 'Starting together';
+
+  @override
+  String watchPartyToastPaused(String name) {
+    return '$name paused';
+  }
+
+  @override
+  String watchPartyToastResumed(String name) {
+    return '$name resumed';
+  }
+
+  @override
+  String watchPartyToastSkipped(String name, String time) {
+    return '$name skipped to $time';
+  }
+
+  @override
+  String watchPartyToastJoined(String name) {
+    return '$name joined';
+  }
+
+  @override
+  String watchPartyToastLeft(String name) {
+    return '$name left';
+  }
+
+  @override
+  String watchPartyToastSwitched(String name, String title) {
+    return '$name switched to $title';
+  }
+
+  @override
+  String get watchPartyToastYouAreHost => 'You\'re the host now';
+
+  @override
+  String watchPartyToastNewHost(String name) {
+    return '$name is the host now';
+  }
+
+  @override
+  String get watchPartyToastEveryoneControls =>
+      'Everyone can control playback now';
+
+  @override
+  String get watchPartyToastHostControls =>
+      'Only the host controls playback now';
+
+  @override
+  String get watchPartyOnlyHostControls =>
+      'Only the host can control playback.';
+
+  @override
+  String get watchPartyToastReconnecting => 'Reconnecting to the party...';
+
+  @override
+  String get watchPartyToastReconnected => 'Back in the party';
+
+  @override
+  String watchPartyToastEnded(String name) {
+    return '$name ended the party';
+  }
+
+  @override
+  String get watchPartyChat => 'Chat';
+
+  @override
+  String get watchPartySendToParty => 'Send to the party';
+
+  @override
+  String get watchPartyBackToClose => 'Back to close';
+
+  @override
+  String get watchPartyType => 'Type';
+
+  @override
+  String get watchPartyReplyHaha => 'Haha';
+
+  @override
+  String get watchPartyReplyNoWay => 'No way';
+
+  @override
+  String get watchPartyReplyPausePlease => 'Pause please';
+
+  @override
+  String get watchPartyReplyBrb => 'Brb';
+
+  @override
+  String get watchPartyReplyAgain => 'Again!';
+
+  @override
+  String get watchPartyReactionLove => 'Love';
+
+  @override
+  String get watchPartyReactionHaha => 'Haha';
+
+  @override
+  String get watchPartyReactionWow => 'Wow';
+
+  @override
+  String get watchPartyReactionSad => 'Sad';
+
+  @override
+  String get watchPartyReactionFire => 'Fire';
+
+  @override
+  String get watchPartyReactionPopcorn => 'Popcorn';
+
+  @override
+  String get watchPartyMakeHost => 'Make host';
+
+  @override
+  String get watchPartyEveryoneControls => 'Everyone can control playback';
+
+  @override
+  String get watchPartyEveryoneControlsHint =>
+      'Anyone can play, pause and skip';
+
+  @override
+  String get watchPartyRoomPin => 'Room PIN';
+
+  @override
+  String get watchPartyRoomPinHint => 'Ask for a PIN before anyone joins';
+
+  @override
+  String get watchPartyPinDigits => '4 to 8 digits';
+
+  @override
+  String get watchPartyLeave => 'Leave';
+
+  @override
+  String watchPartyLeaveHandsOver(String name) {
+    return 'Leave · $name hosts';
+  }
+
+  @override
+  String watchPartyStartedBy(String name) {
+    return '$name started a watch party';
+  }
+
+  @override
+  String watchPartyInLobbyCount(String title, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$title · $count in the lobby',
+      one: '$title · $count in the lobby',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get watchPartyFirstOnHome => 'It\'s first in Watch Parties on Home';
+
+  @override
+  String watchPartyAddServerQuestion(String address) {
+    return 'This invite is for a server you have not added yet, $address. Add it and sign in to join.';
+  }
 
   @override
   String get disk => '磁碟';
@@ -13905,7 +14797,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get impellerRenderingSubtitle =>
-      'Impeller 係 Flutter 新一代嘅 GPU 算圖器，動畫會順啲、少啲窒。喺部分電視盒同舊 GPU 上面可能會有花屏或者黑畫面；如果你見到咁就閂咗佢。「自動」會為你部裝置揀最啱嘅預設值。要重新啟動 Lambent 先生效。';
+      'Impeller 係 Flutter 新一代嘅 GPU 算圖器，動畫會順啲、少啲窒。喺部分電視盒同舊 GPU 上面可能會有花屏或者黑畫面；如果你見到咁就閂咗佢。「自動」會為你部裝置揀最啱嘅預設值。要重新啟動 Moonfin 先生效。';
 
   @override
   String get impellerAuto => '自動';
@@ -13921,7 +14813,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get impellerRestartMessage =>
-      'Lambent 要重新啟動先可以更改算圖引擎。而家閂咗個應用程式，再開返就會生效。';
+      'Moonfin 要重新啟動先可以更改算圖引擎。而家閂咗個應用程式，再開返就會生效。';
 
   @override
   String get impellerCloseNow => '而家閂咗應用程式';
@@ -14225,6 +15117,36 @@ class AppLocalizationsYue extends AppLocalizations {
       'White is much brighter in HDR than in SDR, so a dimmer style here avoids the glare';
 
   @override
+  String get subtitleBold => 'Bold Text';
+
+  @override
+  String get subtitleStrokeWidth => 'Text Stroke Width';
+
+  @override
+  String get subtitleFont => 'Font';
+
+  @override
+  String get subtitleFontDescription =>
+      'Fonts are downloaded from Google Fonts the first time you pick them';
+
+  @override
+  String subtitleFontDownloadFailed(String font) {
+    return 'Couldn\'t download $font';
+  }
+
+  @override
+  String get subtitleShadow => 'Text Shadow';
+
+  @override
+  String get subtitleShadowIntensity => 'Shadow Intensity';
+
+  @override
+  String get subtitleShadowOffset => 'Shadow Offset';
+
+  @override
+  String get subtitleShadowBlur => 'Shadow Blur';
+
+  @override
   String get scrollSensitivity => 'Scroll Sensitivity';
 
   @override
@@ -14261,6 +15183,20 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String get hideHomeMediaDescriptionSubtitle =>
       'Hide the movie or episode descriptive text.';
+
+  @override
+  String get hideHomeWatchProgress => 'Hide Watch Progress';
+
+  @override
+  String get hideHomeWatchProgressSubtitle =>
+      'Hide the progress bar on posters you\'ve started watching.';
+
+  @override
+  String get hideHomeUnwatchedCount => 'Hide Unwatched Count';
+
+  @override
+  String get hideHomeUnwatchedCountSubtitle =>
+      'Hide the badge showing how many episodes are left to watch.';
 
   @override
   String get continueWatchingAndNextUpHeader => 'Continue Watching and Next Up';
@@ -14332,6 +15268,34 @@ class AppLocalizationsYue extends AppLocalizations {
       'Artwork, one play button and the episodes.';
 
   @override
+  String get setupStyleStage => 'Stage';
+
+  @override
+  String get setupDetailStageHint =>
+      'The poster up front, with play under it and the details beside it.';
+
+  @override
+  String get setupStylePremiere => 'Premiere';
+
+  @override
+  String get setupDetailPremiereHint =>
+      'The title centered over a full screen backdrop, with everything else down the page.';
+
+  @override
+  String get setupStyleQuickLook => 'Quick Look';
+
+  @override
+  String get setupDetailQuickLookHint =>
+      'A drawer over the screen you were on, with play and the basics, and the full page a press away.';
+
+  @override
+  String get setupStyleFrost => 'Frost';
+
+  @override
+  String get setupDetailFrostHint =>
+      'The title in a glass window over its blurred art, with tabs under the buttons.';
+
+  @override
   String get setupNavbarStyleQuestion => 'How should the bottom bar look?';
 
   @override
@@ -14374,6 +15338,62 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get setupCurrent => 'Current';
+
+  @override
+  String get setupMoonbaseTitle => 'Add Moonbase to your server';
+
+  @override
+  String get setupMoonbaseHint =>
+      'A free server plugin that unlocks more of Moonfin';
+
+  @override
+  String get setupMoonbaseIntro =>
+      'Moonbase is free and runs on your server. With it, Moonfin gets:';
+
+  @override
+  String get setupMoonbaseAskAdmin =>
+      'Only a server admin can install it. Send them this link.';
+
+  @override
+  String get setupMoonbaseManualSteps =>
+      'It takes a few steps on your server to install. They\'re all at this link.';
+
+  @override
+  String get setupMoonbaseInstalling => 'Installing Moonbase...';
+
+  @override
+  String get setupMoonbaseInstalled =>
+      'Moonbase is installed. It turns on when the server restarts, which stops anything playing right now.';
+
+  @override
+  String get setupMoonbaseRestarting =>
+      'The server is restarting. Moonbase turns on once it\'s back.';
+
+  @override
+  String get moonbaseFeatureSync => 'Settings synced across your devices';
+
+  @override
+  String get moonbaseFeatureRatings => 'Extra ratings and TMDB reviews';
+
+  @override
+  String get moonbaseFeatureRows => 'Custom rows from your favorite lists';
+
+  @override
+  String get moonbaseFeatureGames => 'Retro games with synced saves';
+
+  @override
+  String get moonbaseFeatureCalendar => 'A calendar of what\'s coming up';
+
+  @override
+  String get moonbaseFeatureCollections => 'Your own order for each collection';
+
+  @override
+  String get moonbaseFeatureMessages => 'Messages from your server admin';
+
+  @override
+  String setupMoonbaseInstallFailed(String error) {
+    return 'Moonbase couldn\'t be installed. $error';
+  }
 
   @override
   String get setupTvHint =>
@@ -14443,6 +15463,13 @@ class AppLocalizationsYue extends AppLocalizations {
       'Browse titles from Open Library and LibriVox in your book and audiobook libraries';
 
   @override
+  String get bookFoldersAsSeries => 'Treat book folders as series';
+
+  @override
+  String get bookFoldersAsSeriesDescription =>
+      'Treat folders containing books as series instead of relying on the individual books\' metadata';
+
+  @override
   String get autoDownloadNewEpisodes => 'Auto-download new episodes';
 
   @override
@@ -14467,7 +15494,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get autoDownloadTranscodedForegroundNote =>
-      'Transcoded qualities only download while Lambent is open. Original quality also downloads in the background.';
+      'Transcoded qualities only download while Moonfin is open. Original quality also downloads in the background.';
 
   @override
   String get autoDownloadTranscodedRunningNote =>
@@ -14475,7 +15502,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get autoDownloadForegroundOnly =>
-      'Downloads only while Lambent is open';
+      'Downloads only while Moonfin is open';
 
   @override
   String get autoDownloadQualityTitle => 'Auto-download quality';
@@ -14498,7 +15525,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get smartDownloadsEnableDescription =>
-      'When you finish an episode on any device, Lambent downloads the next ones. Episodes it downloads are deleted once watched.';
+      'When you finish an episode on any device, Moonfin downloads the next ones. Episodes it downloads are deleted once watched.';
 
   @override
   String get smartDownloadsKeepReady => 'Episodes to Keep Downloaded';
@@ -14549,6 +15576,20 @@ class AppLocalizationsYue extends AppLocalizations {
       'When to remove episodes and movies you downloaded yourself. Only those you watch after turning this on are removed';
 
   @override
+  String get removeWatchedAsk => 'Ask me';
+
+  @override
+  String get deleteFinishedDownloadTitle => 'Delete this download?';
+
+  @override
+  String deleteFinishedDownloadMessage(String title) {
+    return 'You finished $title. Delete its download to free up space, or keep it and stop asking.';
+  }
+
+  @override
+  String get notNow => 'Not Now';
+
+  @override
   String get keepDownloaded => 'Keep Downloaded';
 
   @override
@@ -14572,15 +15613,15 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get autoDownloadBackgroundRefreshSubtitle =>
-      'Allow the system to check for new episodes periodically while Lambent is closed';
+      'Allow the system to check for new episodes periodically while Moonfin is closed';
 
   @override
   String get autoDownloadBackgroundRefreshDenied =>
-      'Background App Refresh is disabled for Lambent. Enable it in iOS Settings.';
+      'Background App Refresh is disabled for Moonfin. Enable it in iOS Settings.';
 
   @override
   String get autoDownloadBackgroundRestrictedAndroid =>
-      'Background usage is restricted for Lambent in Android Settings.';
+      'Background usage is restricted for Moonfin in Android Settings.';
 
   @override
   String get autoDownloadCheckNow => 'Check Now';
@@ -14798,13 +15839,13 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get topShelfDescription =>
-      'What the Apple TV home screen shows above the Lambent icon when it is selected. This setting stays on this device.';
+      'What the Apple TV home screen shows above the Moonfin icon when it is selected. This setting stays on this device.';
 
   @override
   String get topShelfLatestMedia => 'Latest media';
 
   @override
-  String get topShelfAppBanner => 'Lambent banner';
+  String get topShelfAppBanner => 'Moonfin banner';
 
   @override
   String get keepVideoClearOfDynamicIsland =>
@@ -14950,7 +15991,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get settingsPlaybackSubtitle =>
-      'Player, quality, audio, subtitles, skipping, and SyncPlay';
+      'Player, quality, audio, subtitles, skipping, and watch parties';
 
   @override
   String get settingsStorageSubtitle =>
@@ -14990,7 +16031,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get settingsSkippingAndQueueSection => 'Skipping & Queue';
 
   @override
-  String get settingsWatchTogetherSection => 'Watch Together';
+  String get settingsWatchTogetherSection => 'Watch Parties';
 
   @override
   String get settingsAdvancedSection => 'Advanced';
@@ -14998,6 +16039,58 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String get playerSettingsSubtitle =>
       'Controls, seeking, player buttons, and trick play';
+
+  @override
+  String get siloPasswordChangeTitle => 'Choose a new password';
+
+  @override
+  String get siloPasswordChangeMessage =>
+      'This account has a temporary password. Choose a new one to finish signing in.';
+
+  @override
+  String get siloPasswordChangeNew => 'New password';
+
+  @override
+  String get siloPasswordChangeConfirm => 'Confirm new password';
+
+  @override
+  String get siloPasswordChangeSubmit => 'Change password';
+
+  @override
+  String siloPasswordChangeTooShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Use at least $count characters',
+      one: 'Use at least 1 character',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get siloPasswordChangeTooLong => 'That password is too long';
+
+  @override
+  String get siloPasswordChangeMismatch => 'The passwords don\'t match';
+
+  @override
+  String get siloPasswordChangeSameAsTemporary =>
+      'Choose a password different from the temporary one';
+
+  @override
+  String get siloPasswordChangeFailed =>
+      'Couldn\'t change the password. Try again.';
+
+  @override
+  String get siloPasswordChangeUnavailable =>
+      'This account has a temporary password, and this server doesn\'t allow changing it here. Change it in Silo\'s web app, then sign in again.';
+
+  @override
+  String get siloPasswordChangedSignInAgain =>
+      'Your password was changed. Sign in with the new password.';
+
+  @override
+  String get siloServerRowSubtitle => 'From your server';
 
   @override
   String get playlistSortReleaseDate => 'Release Date';
@@ -15104,6 +16197,13 @@ class AppLocalizationsYue extends AppLocalizations {
   String get playbackInfoWhy => 'Why';
 
   @override
+  String get playbackInfoServerCompatibilityCheck =>
+      'Server compatibility check';
+
+  @override
+  String get playbackInfoBitrateUnavailable => 'Bitrate unavailable';
+
+  @override
   String get playbackInfoQualityLimit => 'Quality Limit';
 
   @override
@@ -15163,6 +16263,63 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String get playbackInfoNoteDirectStream =>
       'The server is repackaging the file without converting it.';
+
+  @override
+  String get playbackInfoNoteLiveRelay =>
+      'The server is relaying the channel without converting it.';
+
+  @override
+  String playbackInfoFrameRateFrom(String rate, String source) {
+    return '$rate fps ($source)';
+  }
+
+  @override
+  String get playbackInfoRateSourceHeader => 'stream header';
+
+  @override
+  String get playbackInfoRateSourceMeasured => 'measured';
+
+  @override
+  String get playbackInfoRateSourceServer => 'server';
+
+  @override
+  String get playbackInfoServerFrameRate => 'Server Frame Rate';
+
+  @override
+  String get playbackInfoScan => 'Scan';
+
+  @override
+  String get playbackInfoProgressive => 'Progressive';
+
+  @override
+  String get playbackInfoInterlaced => 'Interlaced';
+
+  @override
+  String get playbackInfoRepeatedFields => 'Telecined (repeated fields)';
+
+  @override
+  String get playbackInfoHdmiOutput => 'HDMI Output';
+
+  @override
+  String playbackInfoDisplayMode(String width, String height, String rate) {
+    return '$width×$height @ $rate Hz';
+  }
+
+  @override
+  String get playbackInfoRateCorrections => 'Rate Corrections';
+
+  @override
+  String get playbackInfoAudioOutput => 'Output';
+
+  @override
+  String playbackInfoPassthroughOf(String codec) {
+    return 'Passthrough ($codec)';
+  }
+
+  @override
+  String playbackInfoDecodedTo(String channels) {
+    return 'Decoded ($channels)';
+  }
 
   @override
   String get playbackInfoNoteTranscodeVideo =>
@@ -15225,6 +16382,11 @@ class AppLocalizationsYue extends AppLocalizations {
   @override
   String playbackInfoWhyVideoCodec(String codec) {
     return 'This device can\'t play $codec video';
+  }
+
+  @override
+  String playbackInfoWhyVideoProfileUnknown(String codec) {
+    return 'The server couldn\'t verify this stream\'s $codec profile.';
   }
 
   @override
@@ -15462,6 +16624,154 @@ class AppLocalizationsYue extends AppLocalizations {
       'Recording started, but couldn\'t request a future showing.';
 
   @override
+  String get siloCodeSignIn => 'Sign in with a code';
+
+  @override
+  String siloCodeSignInInstruction(String address) {
+    return 'Scan the QR code with your phone, or go to $address on any signed-in device and enter this code:';
+  }
+
+  @override
+  String get siloCodeSignInInstructionNoLink =>
+      'Enter this code in Silo on a device where you\'re signed in:';
+
+  @override
+  String get siloCodeSignInOpened =>
+      'Code found. Approve the sign-in on your other device.';
+
+  @override
+  String get siloCodeSignInDenied => 'This sign-in was declined.';
+
+  @override
+  String get siloCodeSignInNewCode => 'Get a new code';
+
+  @override
+  String get siloCodeSignInOff =>
+      'Signing in with a code is turned off on this server.';
+
+  @override
+  String get siloCodeSignInPasswordChangeRequired =>
+      'This account has a temporary password. Sign in with the password once to replace it.';
+
+  @override
+  String get siloApproveSignIn => 'Approve a sign-in';
+
+  @override
+  String get siloApproveSignInHint => 'Code shown on the other device';
+
+  @override
+  String get siloApproveSignInApprove => 'Approve';
+
+  @override
+  String get siloApproveSignInDone =>
+      'Approved. The other device is signing in.';
+
+  @override
+  String get siloApproveSignInNoRequest =>
+      'No sign-in is waiting with that code. Check it, or get a new code on the other device.';
+
+  @override
+  String get siloNativeOfferTitle => 'Connect to Silo directly?';
+
+  @override
+  String siloNativeOfferMessage(String serverName, String address) {
+    return 'This address is the Jellyfin-compatible service of $serverName. Moonfin can connect to Silo directly at $address, with Silo\'s own features.';
+  }
+
+  @override
+  String get siloNativeOfferUse => 'Use Silo';
+
+  @override
+  String get siloNativeOfferKeep => 'Keep Jellyfin';
+
+  @override
+  String get siloAppUpdateRequired =>
+      'This Silo server needs a newer version of Moonfin. Update Moonfin to use it.';
+
+  @override
+  String get siloServerUpdateRequired =>
+      'This Silo server is too old for this version of Moonfin. Update Silo to use it.';
+
+  @override
+  String get siloTooManyAttempts => 'Too many attempts. Try again later.';
+
+  @override
+  String siloTooManyAttemptsWait(String wait) {
+    return 'Too many attempts. Try again in $wait.';
+  }
+
+  @override
+  String get siloServerBusy =>
+      'The server is busy or still starting. Try again later.';
+
+  @override
+  String siloServerBusyWait(String wait) {
+    return 'The server is busy or still starting. Try again in $wait.';
+  }
+
+  @override
+  String siloWaitSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds',
+      one: '1 second',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String siloWaitMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get siloPlaybackUnavailable =>
+      'Playback isn\'t available on this Silo server.';
+
+  @override
+  String get siloPlaybackUpdateRequired =>
+      'This Silo server needs a newer version of Moonfin to play.';
+
+  @override
+  String get siloPlaybackEndedOnServer =>
+      'Playback was ended on the Silo server.';
+
+  @override
+  String siloPinTitle(String name) {
+    return 'PIN for $name';
+  }
+
+  @override
+  String get siloPinHint => 'PIN';
+
+  @override
+  String get siloPinUnlock => 'Unlock';
+
+  @override
+  String get siloPinRemember => 'Remember PIN on this device';
+
+  @override
+  String get siloPinWrong => 'That PIN isn\'t right.';
+
+  @override
+  String get siloPinLocked => 'Too many wrong PINs. Try again later.';
+
+  @override
+  String siloPinLockedWait(String wait) {
+    return 'Too many wrong PINs. Try again in $wait.';
+  }
+
+  @override
+  String get siloPinFailed => 'The PIN couldn\'t be checked. Try again.';
+
+  @override
   String trailerCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -15516,7 +16826,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get rommUnlinkNote =>
-      'Unlinking stops Lambent from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
+      'Unlinking stops Moonfin from using your RomM key. The key stays in RomM until you remove it from your API tokens there.';
 
   @override
   String get rommUnlink => 'Unlink';
@@ -15530,7 +16840,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get rommUnreachable =>
-      'Lambent couldn\'t reach RomM. Try again in a moment.';
+      'Moonfin couldn\'t reach RomM. Try again in a moment.';
 
   @override
   String get rommNotAvailable => 'This server has no RomM library.';
@@ -15567,7 +16877,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get addServerAddressChoice =>
-      'Jellyfin or Emby on your network or online';
+      'Jellyfin, Emby or Silo on your network or online';
 
   @override
   String get addServerPlexChoice => 'Use your Plex account to find its servers';
@@ -15578,7 +16888,7 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get addServerDetectNote =>
-      'Works with Jellyfin and Emby. A Plex address opens the Plex sign-in.';
+      'Works with Jellyfin, Emby and Silo. A Plex address opens the Plex sign-in.';
 
   @override
   String addServerChecking(String address) {
@@ -15745,6 +17055,647 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get bookReaderControlsStayVisible => 'Controls stay visible';
+
+  @override
+  String get settingsLivePreview => 'Live preview';
+
+  @override
+  String settingsPreviewShowsOn(String screen) {
+    return 'Shows on the $screen preview';
+  }
+
+  @override
+  String get settingsPreviewNotShown => 'Not shown in the preview';
+
+  @override
+  String get settingsPreviewSaved => 'Saved';
+
+  @override
+  String get smartSearch => 'Smart Search';
+
+  @override
+  String smartSearchOnSeerr(String seerr) {
+    return 'Smart Search on $seerr';
+  }
+
+  @override
+  String get calendar => 'Calendar';
+
+  @override
+  String get showCalendarButton => 'Show Calendar Button';
+
+  @override
+  String get showCalendarButtonSubtitle =>
+      'Show the calendar of upcoming episodes and movies in the navigation bar';
+
+  @override
+  String get calendarFullCalendar => 'Full calendar';
+
+  @override
+  String get calendarUpcoming => 'Upcoming';
+
+  @override
+  String get calendarRecentlyAired => 'Recently aired';
+
+  @override
+  String get calendarRemindMe => 'Remind me';
+
+  @override
+  String get calendarReminderSet => 'Reminder set';
+
+  @override
+  String get calendarReminderFailed => 'Couldn\'t save the reminder';
+
+  @override
+  String get calendarReadyToWatch => 'Ready to watch';
+
+  @override
+  String get calendarComingUpThisWeek => 'Coming up this week';
+
+  @override
+  String get calendarNothingUpcoming => 'Nothing coming up';
+
+  @override
+  String get calendarNothingRecent => 'Nothing aired recently';
+
+  @override
+  String get calendarEmptyDay => 'Nothing on this day';
+
+  @override
+  String get calendarStartsIn => 'Starts in';
+
+  @override
+  String get calendarUnitDays => 'days';
+
+  @override
+  String get calendarUnitHours => 'hr';
+
+  @override
+  String get calendarUnitMinutes => 'min';
+
+  @override
+  String calendarDayAtTime(String day, String time) {
+    return '$day at $time';
+  }
+
+  @override
+  String get calendarAllDay => 'All day';
+
+  @override
+  String get calendarBadgeSeriesPremiere => 'Series premiere';
+
+  @override
+  String get calendarBadgeSeasonPremiere => 'New season';
+
+  @override
+  String get calendarBadgeSeasonFinale => 'Finale';
+
+  @override
+  String get calendarBadgeMidseasonFinale => 'Midseason finale';
+
+  @override
+  String get calendarBadgeSeriesFinale => 'Series finale';
+
+  @override
+  String get calendarBadgeNew => 'NEW';
+
+  @override
+  String get calendarStatusInLibrary => 'In library';
+
+  @override
+  String get calendarNotMonitored => 'Not monitored';
+
+  @override
+  String get calendarMovieDetails => 'Movie details';
+
+  @override
+  String get calendarProblemAdminsOnly =>
+      'The calendar is limited to admins on this server.';
+
+  @override
+  String get calendarProblemNeedsSeerr =>
+      'An admin needs to sign in to Seerr in Moonfin before the calendar can load.';
+
+  @override
+  String get calendarProblemNotConfigured =>
+      'No Sonarr or Radarr server is linked yet.';
+
+  @override
+  String get calendarProblemFailed => 'Couldn\'t load the calendar.';
+
+  @override
+  String get calendarSettingsSubtitle =>
+      'Style, filters and actions for the calendar';
+
+  @override
+  String get calendarSettingsView => 'View';
+
+  @override
+  String get calendarSettingsStyle => 'Calendar style';
+
+  @override
+  String get calendarSettingsStyleDescription =>
+      'What the Calendar button opens. The full month is one button away in both.';
+
+  @override
+  String get calendarSettingsStyleAgenda => 'Agenda';
+
+  @override
+  String get calendarSettingsStyleCountdown => 'Countdown';
+
+  @override
+  String get calendarSettingsWeekStart => 'Week starts on';
+
+  @override
+  String get calendarSettingsWhatShows => 'What shows';
+
+  @override
+  String get calendarSettingsScope => 'Show';
+
+  @override
+  String get calendarSettingsScopeDescription =>
+      'My shows keeps the series you favorited or started watching';
+
+  @override
+  String get calendarSettingsScopeEverything => 'Everything';
+
+  @override
+  String get calendarSettingsScopeMyShows => 'My shows';
+
+  @override
+  String get calendarSettingsUnmonitored => 'Include unmonitored';
+
+  @override
+  String get calendarSettingsUnmonitoredSubtitle =>
+      'Also list episodes and movies Sonarr and Radarr aren\'t set to download';
+
+  @override
+  String get calendarSettingsSpecials => 'Specials';
+
+  @override
+  String get calendarSettingsSpecialsSubtitle =>
+      'Season 0 episodes, like extras and holiday specials';
+
+  @override
+  String get calendarSettingsBadges => 'Premiere and finale tags';
+
+  @override
+  String get calendarSettingsBadgesSubtitle =>
+      'Mark premieres, finales and new seasons';
+
+  @override
+  String get calendarSettingsColorBy => 'Color by';
+
+  @override
+  String get calendarSettingsColorByDescription =>
+      'Type tells episodes from movies. Status shows what\'s in your library, coming up or missing.';
+
+  @override
+  String get calendarSettingsColorByType => 'Type';
+
+  @override
+  String get calendarSettingsImageType => 'Card image';
+
+  @override
+  String get calendarSettingsImageTypeDescription =>
+      'The artwork on the Countdown rows';
+
+  @override
+  String get calendarSettingsSpoilerSafe => 'Spoiler safe';
+
+  @override
+  String get calendarSettingsSpoilerSafeSubtitle =>
+      'Hide episode titles and stills for shows you\'re behind on';
+
+  @override
+  String get calendarSettingsActions => 'Actions';
+
+  @override
+  String get calendarSettingsSelectAction => 'Selecting an item';
+
+  @override
+  String get calendarSettingsSelectActionDescription =>
+      'What OK or a tap does on something that\'s already in your library';
+
+  @override
+  String get calendarSettingsSelectDetails => 'Open details';
+
+  @override
+  String get calendarSettingsSelectPlay => 'Play when in library';
+
+  @override
+  String get calendarSettingsRequestButton => 'Request button';
+
+  @override
+  String get calendarSettingsRequestButtonSubtitle =>
+      'Show the Seerr request button on missing movies and seasons';
+
+  @override
+  String get calendarSettingsReminders => 'Reminders';
+
+  @override
+  String get calendarSettingsRemindersSubtitle =>
+      'Show Remind me, which sends a notification when a title lands in your library';
+
+  @override
+  String get calendarRowSeeAll => 'See All card';
+
+  @override
+  String get calendarRowSeeAllSubtitle =>
+      'End the upcoming rows with a card that opens the calendar';
+
+  @override
+  String get showNextAirDate => 'Next air date at the end';
+
+  @override
+  String get showNextAirDateSubtitle =>
+      'When the next episode isn\'t in your library yet, the end of episode card says when it airs';
+
+  @override
+  String get afterHoursTitle => 'After Hours';
+
+  @override
+  String get afterHoursUnlocked => 'After Hours unlocked';
+
+  @override
+  String afterHoursPressesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more presses',
+      one: '1 more press',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String afterHoursTapsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more taps',
+      one: '1 more tap',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get afterHoursPlay => 'Play';
+
+  @override
+  String get afterHoursLeaderboards => 'Leaderboards';
+
+  @override
+  String get afterHoursTop3 => 'Top 3';
+
+  @override
+  String afterHoursScoresFrom(String server) {
+    return 'Scores from $server';
+  }
+
+  @override
+  String get afterHoursScoresOnDevice => 'Scores on this device';
+
+  @override
+  String get afterHoursGameOver => 'Game over';
+
+  @override
+  String afterHoursNewRank(int rank) {
+    return 'New #$rank on the board';
+  }
+
+  @override
+  String get afterHoursPlayAgain => 'Play again';
+
+  @override
+  String get afterHoursBackToArcade => 'Back to the arcade';
+
+  @override
+  String get afterHoursArcade => 'Arcade';
+
+  @override
+  String get afterHoursLandscapeNote => 'Turns to landscape while you play';
+
+  @override
+  String get afterHoursTouch => 'Touch';
+
+  @override
+  String get afterHoursNewTag => 'NEW';
+
+  @override
+  String get afterHoursNoScores => 'No scores yet';
+
+  @override
+  String get afterHoursPerfect => 'PERFECT';
+
+  @override
+  String get afterHoursBoxSet => 'BOX SET';
+
+  @override
+  String get afterHoursBufferRun => 'Buffer Run';
+
+  @override
+  String get afterHoursBufferRunGenre => 'Endless runner with a gravity flip';
+
+  @override
+  String get afterHoursBufferRunPitch =>
+      'The runner from the loading screen finally gets somewhere to go. Double jump and gravity flips it onto the ceiling.';
+
+  @override
+  String get afterHoursBufferRunRemote =>
+      'OK jumps, again mid-air to flip sides. Down slides. On the ceiling Up and Down swap.';
+
+  @override
+  String get afterHoursBufferRunTouch =>
+      'Tap to jump, and tap again in the air to flip. Swipe toward the side you\'re running on to slide.';
+
+  @override
+  String get afterHoursFastForward => 'Fast Forward';
+
+  @override
+  String get afterHoursFastForwardGenre => 'Three-lane runner';
+
+  @override
+  String get afterHoursFastForwardPitch =>
+      'A sprint down three lobby aisles. Hop the low stuff, and remember the popcorn carts don\'t move for anyone.';
+
+  @override
+  String get afterHoursFastForwardRemote =>
+      'Up and Down change lanes. OK jumps.';
+
+  @override
+  String get afterHoursFastForwardTouch =>
+      'Swipe up or down to change lanes. Tap to jump.';
+
+  @override
+  String get afterHoursCableCrawl => 'Cable Crawl';
+
+  @override
+  String get afterHoursCableCrawlGenre => 'Grid crawler';
+
+  @override
+  String get afterHoursCableCrawlPitch =>
+      'Steer an HDMI cable around the back of the TV cabinet and plug into signal. Every bar makes it longer.';
+
+  @override
+  String get afterHoursCableCrawlRemote =>
+      'Arrows turn. The cable never stops.';
+
+  @override
+  String get afterHoursCableCrawlTouch => 'Swipe to turn.';
+
+  @override
+  String get afterHoursCaseStack => 'Case Stack';
+
+  @override
+  String get afterHoursCaseStackGenre => 'One-button stacker';
+
+  @override
+  String get afterHoursCaseStackPitch =>
+      'Build a shelf-high tower of Blu-ray cases, each one a title from your own library. Whatever hangs over the edge gets trimmed off, so land them dead on.';
+
+  @override
+  String get afterHoursCaseStackRemote => 'OK drops the case.';
+
+  @override
+  String get afterHoursCaseStackTouch => 'Tap anywhere to drop.';
+
+  @override
+  String get afterHoursPixelPurge => 'Pixel Purge';
+
+  @override
+  String get afterHoursPixelPurgeGenre => 'Paddle breaker';
+
+  @override
+  String get afterHoursPixelPurgePitch =>
+      'A bad encode left the picture full of blocky artifacts, and they creep down a little every second. Bounce the play button off the seek bar to clear them before they reach it.';
+
+  @override
+  String get afterHoursPixelPurgeRemote =>
+      'Left and Right slide the scrubber. The ball launches on its own.';
+
+  @override
+  String get afterHoursPixelPurgeTouch => 'Drag to slide the scrubber.';
+
+  @override
+  String get afterHoursHowToPlay => 'How to play';
+
+  @override
+  String get afterHoursStart => 'Start';
+
+  @override
+  String get afterHoursBackToGame => 'Back to the game';
+
+  @override
+  String get afterHoursEnemies => 'Enemies';
+
+  @override
+  String get afterHoursObstacles => 'Obstacles';
+
+  @override
+  String get afterHoursPowerups => 'Powerups';
+
+  @override
+  String get afterHoursCastShieldLine => 'A shield that takes one hit.';
+
+  @override
+  String get afterHoursCastPointsLine => '25 points a piece.';
+
+  @override
+  String get afterHoursCastLagBat => 'Lag Bat';
+
+  @override
+  String get afterHoursCastLagBatLine =>
+      'Swoops in at head height. Slide under it.';
+
+  @override
+  String get afterHoursCastGremlin => 'Static Gremlin';
+
+  @override
+  String get afterHoursCastGremlinLine =>
+      'Hops along the floor or the ceiling toward you. Jump it.';
+
+  @override
+  String get afterHoursCastCable => 'Cable Coil';
+
+  @override
+  String get afterHoursCastCableLine =>
+      'Low on the floor or the ceiling. Jump it.';
+
+  @override
+  String get afterHoursCastBanner => 'Buffering Banner';
+
+  @override
+  String get afterHoursCastBannerLine =>
+      'Slide under the sign. Its pole is a wall on the other side.';
+
+  @override
+  String get afterHoursCastSkipIntro => 'Skip Intro';
+
+  @override
+  String get afterHoursCastSkipIntroLine =>
+      'Three seconds of dash that smashes anything.';
+
+  @override
+  String get afterHoursCastPopcorn => 'Popcorn';
+
+  @override
+  String get afterHoursCastRollingReel => 'Loose Reel';
+
+  @override
+  String get afterHoursCastRollingReelLine =>
+      'Rolls down your lane faster than you run. Jump it.';
+
+  @override
+  String get afterHoursCastUsher => 'Usher';
+
+  @override
+  String get afterHoursCastUsherLine =>
+      'Walks toward you and changes lanes once.';
+
+  @override
+  String get afterHoursCastVelvetRope => 'Velvet Rope';
+
+  @override
+  String get afterHoursCastVelvetRopeLine => 'Low. Jump it or change lanes.';
+
+  @override
+  String get afterHoursCastPopcornCart => 'Popcorn Cart';
+
+  @override
+  String get afterHoursCastPopcornCartLine => 'Too tall to jump. Change lanes.';
+
+  @override
+  String get afterHoursCastFrontRowPass => 'Front Row Pass';
+
+  @override
+  String get afterHoursCastMagnet => 'Magnet';
+
+  @override
+  String get afterHoursCastMagnetLine =>
+      'Pulls in tickets from every lane for eight seconds.';
+
+  @override
+  String get afterHoursCastTicket => 'Ticket';
+
+  @override
+  String get afterHoursCastBug => 'Interference Bug';
+
+  @override
+  String get afterHoursCastBugLine => 'Wanders at random.';
+
+  @override
+  String get afterHoursCastTangle => 'Tangle';
+
+  @override
+  String get afterHoursCastTangleLine => 'Slowly chases your plug.';
+
+  @override
+  String get afterHoursCastStatic => 'Static';
+
+  @override
+  String get afterHoursCastStaticLine =>
+      'A dead cell. One appears every third signal.';
+
+  @override
+  String get afterHoursCastBrick => 'Power Brick';
+
+  @override
+  String get afterHoursCastBrickLine => 'A 2 by 2 block every fifth signal.';
+
+  @override
+  String get afterHoursCastGhost => 'Ghost';
+
+  @override
+  String get afterHoursCastGhostLine =>
+      'Five seconds of passing through everything but the edge.';
+
+  @override
+  String get afterHoursCastSnip => 'Snip';
+
+  @override
+  String get afterHoursCastSnipLine =>
+      'Cuts the cable in half for bonus points.';
+
+  @override
+  String get afterHoursCastSignal => 'Signal';
+
+  @override
+  String get afterHoursCastSignalLine => 'Points, and two more segments.';
+
+  @override
+  String get afterHoursCastShelfCat => 'Shelf Cat';
+
+  @override
+  String get afterHoursCastShelfCatLine =>
+      'Bats a case as it comes in, so that one slides faster.';
+
+  @override
+  String get afterHoursCastBluCase => 'Blu-ray Case';
+
+  @override
+  String get afterHoursCastBluCaseLine =>
+      'A title from your library. The overhang gets trimmed off.';
+
+  @override
+  String get afterHoursCastSteelbook => 'Steelbook';
+
+  @override
+  String get afterHoursCastSteelbookLine =>
+      'Every tenth case. Slides much faster.';
+
+  @override
+  String get afterHoursCastPerfect => 'Perfect Drop';
+
+  @override
+  String get afterHoursCastPerfectLine =>
+      'Land it dead on and the stack grows a little wider.';
+
+  @override
+  String get afterHoursCastBoxSet => 'Box Set';
+
+  @override
+  String get afterHoursCastBoxSetLine =>
+      'Three perfect drops in a row grow it a lot wider.';
+
+  @override
+  String get afterHoursCastDeadPixel => 'Dead Pixel';
+
+  @override
+  String get afterHoursCastDeadPixelLine =>
+      'Falls from cleared blocks. Catching it shrinks the scrubber.';
+
+  @override
+  String get afterHoursCastMacroblock => 'Macroblock';
+
+  @override
+  String get afterHoursCastMacroblockLine => 'One hit clears it.';
+
+  @override
+  String get afterHoursCastKeyframe => 'Keyframe';
+
+  @override
+  String get afterHoursCastKeyframeLine =>
+      'Takes three hits and drops a powerup.';
+
+  @override
+  String get afterHoursCastHdrLine =>
+      'A scrubber twice as wide for eight seconds.';
+
+  @override
+  String get afterHoursCastBufferNet => 'Buffer';
+
+  @override
+  String get afterHoursCastBufferNetLine =>
+      'A net under the scrubber that saves one miss.';
+
+  @override
+  String get afterHoursBufferRunCardTouch =>
+      'Tap to jump, again mid-air to flip sides. Swipe toward your side to slide.';
+
+  @override
+  String get afterHoursPixelPurgeCardRemote =>
+      'Left and Right slide the scrubber.';
 }
 
 /// The translations for Yue Chinese Cantonese, as used in China (`yue_CN`).
@@ -15752,7 +17703,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   AppLocalizationsYueCn() : super('yue_CN');
 
   @override
-  String get appTitle => 'Lambent';
+  String get appTitle => 'Moonfin';
 
   @override
   String get signIn => '登入';
@@ -15807,7 +17758,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String appVersionFooter(String version) {
-    return 'Lambent 版本$version';
+    return 'Moonfin 版本$version';
   }
 
   @override
@@ -15859,7 +17810,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Lambent 无法访问您的系统密钥环。登录可以继续，但在密钥环解锁之前，安全令牌存储可能不可用。';
+      'Moonfin 无法访问您的系统密钥环。登录可以继续，但在密钥环解锁之前，安全令牌存储可能不可用。';
 
   @override
   String get ok => '好的';
@@ -15869,7 +17820,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      '在 Lambent 和 Neon Pulse 之间切换，无需重新启动应用程序';
+      '在 Moonfin 和 Neon Pulse 之间切换，无需重新启动应用程序';
 
   @override
   String get themeMoonfin => 'Moonfin';
@@ -15928,7 +17879,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   }
 
   @override
-  String get exitApp => '退出Lambent？';
+  String get exitApp => '退出Moonfin？';
 
   @override
   String get exitAppConfirmation => '您确定要退出吗？';
@@ -17958,7 +19909,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get customMpvConfPath => '自定义 mpv.conf 路径';
 
   @override
-  String get notSetMpvConf => '未设置。 Lambent 将尝试应用程序/数据文件夹中的默认 mpv.conf。';
+  String get notSetMpvConf => '未设置。 Moonfin 将尝试应用程序/数据文件夹中的默认 mpv.conf。';
 
   @override
   String get selectMpvConf => '选择mpv.conf';
@@ -18240,7 +20191,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get libraryVisibility => '图书馆可见性';
 
   @override
-  String get libraryVisibilityDescription => '切换每个库的主页可见性。重新启动 Lambent 以使更改生效。';
+  String get libraryVisibilityDescription => '切换每个库的主页可见性。重新启动 Moonfin 以使更改生效。';
 
   @override
   String get showInNavigation => '在导航中显示';
@@ -18281,7 +20232,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get mediaBarMode => '媒体栏风格';
 
   @override
-  String get mediaBarModeDescription => '在 Lambent、MakD 之间进行选择，或关闭媒体栏';
+  String get mediaBarModeDescription => '在 Moonfin、MakD 之间进行选择，或关闭媒体栏';
 
   @override
   String get mediaBarModeMoonfin => 'Moonfin';
@@ -18732,7 +20683,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get cancelRequest => '取消请求';
 
   @override
-  String get playInMoonfin => '玩 Lambent';
+  String get playInMoonfin => '玩 Moonfin';
 
   @override
   String requestedByName(String name) {
@@ -18765,7 +20716,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get keep => '保持';
 
   @override
-  String get itemNotFoundInLibrary => '在您的 Lambent 库中找不到项目';
+  String get itemNotFoundInLibrary => '在您的 Moonfin 库中找不到项目';
 
   @override
   String get errorSearchingLibrary => '搜索库时出错';
@@ -19179,7 +21130,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get adminServerRebootInProgress => '服务器正在重启';
 
   @override
-  String get adminServerRebootMessage => '服务器正在重新启动，请重新启动 Lambent';
+  String get adminServerRebootMessage => '服务器正在重新启动，请重新启动 Moonfin';
 
   @override
   String get adminActiveSessions => '活跃会话';
@@ -21686,7 +23637,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      '切换每个库的主页可见性。重新启动 Lambent 以使更改生效。';
+      '切换每个库的主页可见性。重新启动 Moonfin 以使更改生效。';
 
   @override
   String get settingsMediaBarAndLocalPreviews => '媒体栏和本地预览';
@@ -21753,13 +23704,13 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get settingsPrivacyPolicy => '隐私政策';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Lambent 如何处理您的数据';
+  String get settingsPrivacyPolicySubtitle => 'Moonfin 如何处理您的数据';
 
   @override
   String get settingsCheckForUpdates => '检查更新';
 
   @override
-  String get settingsCheckForUpdatesSubtitle => '检查最新的 Lambent 版本';
+  String get settingsCheckForUpdatesSubtitle => '检查最新的 Moonfin 版本';
 
   @override
   String get settingsBoth => '两个都';
@@ -22230,7 +24181,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
   String get webDiagnostics => 'Web diagnostics';
 
   @override
-  String get webDiagnosticsTitle => 'Lambent Web Diagnostics';
+  String get webDiagnosticsTitle => 'Moonfin Web Diagnostics';
 
   @override
   String get webDiagnosticsIntro =>
@@ -22246,11 +24197,11 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Lambent detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.';
+      'Moonfin detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Lambent detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.';
+      'Moonfin detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -22298,7 +24249,7 @@ class AppLocalizationsYueCn extends AppLocalizationsYue {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Fix: serve your media server or proxy endpoint via HTTPS, or load Lambent over HTTP on trusted local networks only.';
+      'Fix: serve your media server or proxy endpoint via HTTPS, or load Moonfin over HTTP on trusted local networks only.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>
@@ -22640,7 +24591,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   AppLocalizationsYueHk() : super('yue_HK');
 
   @override
-  String get appTitle => 'Lambent';
+  String get appTitle => 'Moonfin';
 
   @override
   String get signIn => '登入';
@@ -22695,7 +24646,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String appVersionFooter(String version) {
-    return 'Lambent version $version';
+    return 'Moonfin version $version';
   }
 
   @override
@@ -22747,7 +24698,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String get secureStorageUnavailableMessage =>
-      'Lambent 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。';
+      'Moonfin 無法存取您的系統金鑰環。登入可以繼續，但在密鑰環解鎖之前，安全令牌儲存可能不可用。';
 
   @override
   String get ok => '好的';
@@ -22757,7 +24708,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String get settingsAppearanceThemeSubtitle =>
-      '在 Lambent 和 Neon Pulse 之間切換，無需重新啟動應用程式';
+      '在 Moonfin 和 Neon Pulse 之間切換，無需重新啟動應用程式';
 
   @override
   String get themeMoonfin => 'Moonfin';
@@ -22816,7 +24767,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   }
 
   @override
-  String get exitApp => '退出Lambent？';
+  String get exitApp => '退出Moonfin？';
 
   @override
   String get exitAppConfirmation => '您確定要退出嗎？';
@@ -24846,7 +26797,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get customMpvConfPath => '自訂 mpv.conf 路徑';
 
   @override
-  String get notSetMpvConf => '未設定。 Lambent 將嘗試應用程式/資料資料夾中的預設 mpv.conf。';
+  String get notSetMpvConf => '未設定。 Moonfin 將嘗試應用程式/資料資料夾中的預設 mpv.conf。';
 
   @override
   String get selectMpvConf => '選擇mpv.conf';
@@ -25128,7 +27079,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get libraryVisibility => '圖書館可見性';
 
   @override
-  String get libraryVisibilityDescription => '切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。';
+  String get libraryVisibilityDescription => '切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。';
 
   @override
   String get showInNavigation => '在導航中顯示';
@@ -25169,7 +27120,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get mediaBarMode => '媒體欄風格';
 
   @override
-  String get mediaBarModeDescription => '在 Lambent、MakD 之間進行選擇，或關閉媒體列';
+  String get mediaBarModeDescription => '在 Moonfin、MakD 之間進行選擇，或關閉媒體列';
 
   @override
   String get mediaBarModeMoonfin => 'Moonfin';
@@ -25620,7 +27571,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get cancelRequest => '取消請求';
 
   @override
-  String get playInMoonfin => '玩 Lambent';
+  String get playInMoonfin => '玩 Moonfin';
 
   @override
   String requestedByName(String name) {
@@ -25653,7 +27604,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get keep => '保持';
 
   @override
-  String get itemNotFoundInLibrary => '在您的 Lambent 庫中找不到項目';
+  String get itemNotFoundInLibrary => '在您的 Moonfin 庫中找不到項目';
 
   @override
   String get errorSearchingLibrary => '搜尋庫時出錯';
@@ -26067,7 +28018,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get adminServerRebootInProgress => '伺服器正在重啟';
 
   @override
-  String get adminServerRebootMessage => '伺服器正在重新啟動，請重新啟動 Lambent';
+  String get adminServerRebootMessage => '伺服器正在重新啟動，請重新啟動 Moonfin';
 
   @override
   String get adminActiveSessions => '活躍會話';
@@ -28574,7 +30525,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String get settingsLibraryVisibilitySubtitle =>
-      '切換每個庫的主頁可見性。重新啟動 Lambent 以使變更生效。';
+      '切換每個庫的主頁可見性。重新啟動 Moonfin 以使變更生效。';
 
   @override
   String get settingsMediaBarAndLocalPreviews => '媒體欄和本地預覽';
@@ -28641,13 +30592,13 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get settingsPrivacyPolicy => '隱私權政策';
 
   @override
-  String get settingsPrivacyPolicySubtitle => 'Lambent 如何處理您的數據';
+  String get settingsPrivacyPolicySubtitle => 'Moonfin 如何處理您的數據';
 
   @override
   String get settingsCheckForUpdates => '檢查更新';
 
   @override
-  String get settingsCheckForUpdatesSubtitle => '檢查最新的 Lambent 版本';
+  String get settingsCheckForUpdatesSubtitle => '檢查最新的 Moonfin 版本';
 
   @override
   String get settingsBoth => '兩個都';
@@ -29117,7 +31068,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
   String get webDiagnostics => 'Web diagnostics';
 
   @override
-  String get webDiagnosticsTitle => 'Lambent Web Diagnostics';
+  String get webDiagnosticsTitle => 'Moonfin Web Diagnostics';
 
   @override
   String get webDiagnosticsIntro =>
@@ -29133,11 +31084,11 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String get webDiagnosticsMixedContentFailureBody =>
-      'Lambent detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.';
+      'Moonfin detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.';
 
   @override
   String get webDiagnosticsCorsFailureBody =>
-      'Lambent detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.';
+      'Moonfin detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.';
 
   @override
   String webDiagnosticsTargetUrl(String url) {
@@ -29185,7 +31136,7 @@ class AppLocalizationsYueHk extends AppLocalizationsYue {
 
   @override
   String get webDiagnosticsMixedContentFix =>
-      'Fix: serve your media server or proxy endpoint via HTTPS, or load Lambent over HTTP on trusted local networks only.';
+      'Fix: serve your media server or proxy endpoint via HTTPS, or load Moonfin over HTTP on trusted local networks only.';
 
   @override
   String get webDiagnosticsNoMixedContentDetected =>

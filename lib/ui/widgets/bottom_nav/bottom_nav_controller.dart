@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../../util/lambent_server.dart';
 import '../../../auth/repositories/server_repository.dart';
 import '../../../auth/repositories/session_repository.dart';
 import '../../../auth/repositories/user_repository.dart';
@@ -20,6 +21,7 @@ import '../../../preference/preference_constants.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/game_library.dart';
 import '../../../util/live_tv_library.dart';
+import '../../../util/signed_in_server_features.dart';
 import '../downloads_nav_slot.dart';
 import '../friends_nav_slot.dart';
 import 'bottom_nav_model.dart';
@@ -30,6 +32,9 @@ import 'bottom_nav_model.dart';
 class BottomNavController extends ChangeNotifier {
   BottomNavController() {
     _prefs.addListener(_onPrefsChanged);
+    if (GetIt.instance.isRegistered<ActiveServerKind>()) {
+      GetIt.instance<ActiveServerKind>().addListener(_onPrefsChanged);
+    }
     _viewsRepo.addListener(_scheduleLibrariesReload);
     _pluginSync?.addListener(_onPrefsChanged);
     _messages?.addListener(notifyListeners);
@@ -55,6 +60,23 @@ class BottomNavController extends ChangeNotifier {
 
   static T? _maybe<T extends Object>() =>
       GetIt.instance.isRegistered<T>() ? GetIt.instance<T>() : null;
+
+  /// Whether the active server approves other devices' sign-in codes
+  /// (Jellyfin's Quick Connect, Silo's device sign-in). No hub tile without
+  /// a server.
+  static bool get _activeServerHasQuickConnect {
+    final client = _maybe<MediaServerClient>();
+    return client != null &&
+        FeatureDetector(
+          serverType: client.serverType,
+          serverVersion: '',
+        ).supportsQuickConnect;
+  }
+
+  /// Whether the active server is Silo, whose words for Quick Connect differ
+  /// ("Approve a sign-in").
+  static bool get activeServerIsSilo =>
+      _maybe<MediaServerClient>()?.serverType == ServerType.silo;
 
   StreamSubscription? _userSub;
   Timer? _librariesReloadDebounce;
@@ -95,6 +117,7 @@ class BottomNavController extends ChangeNotifier {
   BottomNavTabGates get gates => BottomNavTabGates.fromPreferences(
         _prefs,
         seerrAvailable: _pluginSync?.seerrAvailable ?? false,
+        calendarAvailable: _pluginSync?.calendarAvailable ?? false,
       );
 
   bool get _hasLiveTvLibrary => _libraries.any(isLiveTvLibrary);
@@ -123,6 +146,7 @@ class BottomNavController extends ChangeNotifier {
 
   List<BottomNavHubTile> hubTiles() {
     final syncPlay = !kidsMode &&
+        syncPlayOffered() &&
         _prefs.get(UserPreferences.syncPlayEnabled) &&
         _prefs.get(UserPreferences.showSyncPlayButton);
     return resolveHubTiles(
@@ -133,8 +157,8 @@ class BottomNavController extends ChangeNotifier {
           DownloadsNavSlot.isOffered() && DownloadsNavSlot.hasSavedMedia(),
       shuffle: _prefs.get(UserPreferences.showShuffleButton),
       syncPlay: syncPlay,
-      quickConnect:
-          _maybe<MediaServerClient>()?.serverType == ServerType.jellyfin,
+      quickConnect: _activeServerHasQuickConnect,
+      remoteControl: activeServerSupports((f) => f.supportsRemoteControl),
       alsoOnBar: style == BottomNavbarStyle.split
           ? const {BottomNavTab.search}
           : const {},
@@ -175,7 +199,9 @@ class BottomNavController extends ChangeNotifier {
         _prefs.get(UserPreferences.showGenresButton),
         _prefs.get(UserPreferences.showLiveTvButton),
         _prefs.get(UserPreferences.showSeerrButton),
+        _prefs.get(UserPreferences.showCalendarButton),
         _prefs.get(UserPreferences.showShuffleButton),
+        syncPlayOffered(),
         _prefs.get(UserPreferences.syncPlayEnabled),
         _prefs.get(UserPreferences.showSyncPlayButton),
         _prefs.get(UserPreferences.showServerMessagesButton),
@@ -185,6 +211,7 @@ class BottomNavController extends ChangeNotifier {
         _prefs.get(UserPreferences.navbarColor),
         _prefs.get(UserPreferences.navbarOpacity),
         _pluginSync?.seerrAvailable ?? false,
+        _pluginSync?.calendarAvailable ?? false,
       ].join('|');
 
   void _onPrefsChanged() {
@@ -265,6 +292,9 @@ class BottomNavController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _prefs.removeListener(_onPrefsChanged);
+    if (GetIt.instance.isRegistered<ActiveServerKind>()) {
+      GetIt.instance<ActiveServerKind>().removeListener(_onPrefsChanged);
+    }
     try {
       _viewsRepo.removeListener(_scheduleLibrariesReload);
       _pluginSync?.removeListener(_onPrefsChanged);

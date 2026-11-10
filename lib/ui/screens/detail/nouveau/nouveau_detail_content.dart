@@ -25,6 +25,7 @@ import 'discovery/nouveau_discovery_section.dart';
 import 'discovery/nouveau_more_rows_section.dart';
 import 'episodes/nouveau_episodes_section.dart';
 import 'extras/nouveau_extras_section.dart';
+import 'books/nouveau_books_section.dart';
 import 'hero/nouveau_hero.dart';
 import 'nouveau_landscape_layout.dart';
 import 'nouveau_portrait_layout.dart';
@@ -83,6 +84,9 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
   final GlobalKey<NouveauCollectionSectionState> _collectionSectionKey =
       GlobalKey<NouveauCollectionSectionState>();
+
+  final GlobalKey<NouveauBooksSectionState> _booksSectionKey =
+      GlobalKey<NouveauBooksSectionState>();
 
   final GlobalKey<NouveauDiscoverySectionState> _discoverySectionKey =
       GlobalKey<NouveauDiscoverySectionState>();
@@ -157,6 +161,8 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
         item.type == 'Series' ||
             item.type == 'Season' ||
             (PlatformDetection.isTV && item.type == 'Episode'),
+      _ when key == _booksSectionKey =>
+        item.type == 'BookSeries',
       _ when key == _collectionSectionKey =>
         NouveauCollectionSection.shouldInclude(_vm, _visibility),
       _ when key == _chaptersSectionKey =>
@@ -214,6 +220,8 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
         _chaptersSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _collectionSectionKey =>
         _collectionSectionKey.currentState?.canFocusTop ?? false,
+      _ when key == _booksSectionKey =>
+        _booksSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _extrasSectionKey =>
         _extrasSectionKey.currentState?.canFocusTop ?? false,
       _ when key == _discoverySectionKey =>
@@ -446,6 +454,13 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       return _focusCollectionBottom();
     }
 
+    if (target == _booksSectionKey) {
+      return _focusAndReveal(
+        _booksSectionKey,
+        () => _booksSectionKey.currentState?.focusTop() ?? false,
+      );
+    }
+
     if (target == _extrasSectionKey) {
       return _focusAndReveal(
         _extrasSectionKey,
@@ -505,6 +520,13 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
     if (target == _collectionSectionKey) {
       return _focusCollectionTop();
+    }
+
+    if (target == _booksSectionKey) {
+      return _focusAndReveal(
+        _booksSectionKey,
+        () => _booksSectionKey.currentState?.focusTop() ?? false,
+      );
     }
 
     if (target == _episodesSectionKey) {
@@ -1201,6 +1223,10 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       sectionWidgets[_collectionSectionKey] = _buildCollectionSection();
     }
 
+    if (_sectionVisible(_booksSectionKey, item)) {
+      sectionWidgets[_booksSectionKey] = _buildBooksSection();
+    }
+
     if (_sectionVisible(_chaptersSectionKey, item)) {
       sectionWidgets[_chaptersSectionKey] = _buildChaptersSection(item);
     }
@@ -1290,6 +1316,7 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       _chaptersSectionKey,
       _extrasSectionKey,
       _collectionSectionKey,
+      _booksSectionKey,
       _discoverySectionKey,
       _reviewsSectionKey,
       _peopleSectionKey,
@@ -1304,6 +1331,10 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
     if (key == _collectionSectionKey) {
       return 'collection';
+    }
+
+    if (key == _booksSectionKey) {
+      return 'books';
     }
 
     if (key == _chaptersSectionKey) {
@@ -1500,6 +1531,17 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       onNavigateUp: () => _moveUp(_collectionSectionKey),
       onNavigateDown: () => _moveDown(_collectionSectionKey),
       onRevealRequested: _scheduleOuterReveal,
+    );
+  }
+
+  Widget _buildBooksSection() {
+    return NouveauBooksSection(
+      key: _booksSectionKey,
+      items: _vm.seriesBooks,
+      imageApi: _vm.imageApi,
+      prefs: widget.prefs,
+      onNavigateUp: () => _moveUp(_booksSectionKey),
+      onNavigateDown: () => _moveDown(_booksSectionKey),
     );
   }
 

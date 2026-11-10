@@ -61,6 +61,7 @@ void main() {
     required int itemCount,
     List<Map<String, dynamic>> libraries = const [],
     String? pickedLibraries,
+    String source = UserPreferences.mediaBarSourceRandom,
   }) async {
     SharedPreferences.setMockInitialValues({});
     final store = PreferenceStore();
@@ -68,6 +69,7 @@ void main() {
     final prefs = UserPreferences(store);
     await prefs.set(UserPreferences.pluginSyncEnabled, false);
     await prefs.set(UserPreferences.mediaBarItemCount, '$itemCount');
+    await prefs.set(UserPreferences.mediaBarSourceType, source);
     if (libraries.isEmpty) {
       await prefs.set(
         UserPreferences.mediaBarCollectionIds,
@@ -95,6 +97,7 @@ void main() {
         fields: any(named: 'fields'),
         enableTotalRecordCount: any(named: 'enableTotalRecordCount'),
         enableImageTypes: any(named: 'enableImageTypes'),
+        minPremiereDate: any(named: 'minPremiereDate'),
       ),
     ).thenAnswer(server.answer);
     final images = _ImageApi();
@@ -192,5 +195,22 @@ void main() {
 
       expect(server.asked, {'home'});
     });
+  });
+
+  // The server's titles have no air date, so nothing counts as aired lately.
+  test('a quiet new release window shows random titles from a later source '
+      'when the first has none', () async {
+    final server = _Server({
+      'empty': const [],
+      'full': const ['f0', 'f1', 'f2'],
+    });
+
+    final shown = await load(
+      server,
+      itemCount: 10,
+      source: UserPreferences.mediaBarSourceNewReleases,
+    );
+
+    expect(shown.toSet(), {'f0', 'f1', 'f2'});
   });
 }

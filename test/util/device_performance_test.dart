@@ -176,4 +176,21 @@ void main() {
       expect(skiaCacheCapFor(1280 * 720), isNull);
     });
   });
+
+  group('playback budgets', () {
+    const at1080p = 1920.0 * 1080;
+    test('a 1080p UI keeps three frames of Skia cache while a video plays', () {
+      expect(skiaCacheBytesDuringPlayback(at1080p), 1920 * 1080 * 3 * 4);
+    });
+
+    test('closing the player gives back the engine default, or the start cap', () {
+      expect(skiaCacheBytesAfterPlayback(at1080p), 1920 * 1080 * 12 * 4);
+      expect(skiaCacheBytesAfterPlayback(3840.0 * 2160), skiaCacheBytesAt1080p);
+    });
+
+    test('a view with no size sets nothing', () {
+      expect(skiaCacheBytesDuringPlayback(0), isNull);
+      expect(skiaCacheBytesAfterPlayback(0), isNull);
+    });
+  });
 }

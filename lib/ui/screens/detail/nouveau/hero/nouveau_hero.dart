@@ -219,7 +219,7 @@ class NouveauHeroState extends State<NouveauHero> {
 
   @override
   Widget build(BuildContext context) {
-    final item = widget.item;
+    var item = widget.item;
     final viewModel = widget.viewModel;
     final textTheme = Theme.of(context).textTheme;
 
@@ -245,6 +245,9 @@ class NouveauHeroState extends State<NouveauHero> {
         : item.logoImageTag != null
         ? item.id
         : item.seriesId;
+
+    final series = item.type == 'BookSeries' ? item : null;
+    item = viewModel.seriesFeaturedBook ?? item;
 
     final overview = cleanOverview(item.overview?.trim());
 
@@ -389,8 +392,10 @@ class NouveauHeroState extends State<NouveauHero> {
           )
         : null;
 
+    final itemName = series?.name ?? item.name;
+
     final branding = _NouveauBranding(
-      title: item.name,
+      title: itemName,
       logoUrl: logoUrl,
       // Plex names the episode under its show's title art.
       companionTitle: isSeason || (_plexTv && isEpisode) ? item.name : null,

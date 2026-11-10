@@ -8,6 +8,7 @@ import 'package:server_core/server_core.dart';
 import '../data/utils/video_range_label.dart';
 import '../l10n/app_localizations.dart';
 import '../preference/user_preferences.dart';
+import '../remote/remote_access.dart';
 import '../util/audio_labels.dart';
 import '../util/language_codes.dart';
 import '../util/language_matching.dart';
@@ -15,6 +16,7 @@ import '../util/platform_detection.dart';
 import '../util/remote_subtitle_labels.dart' show frameRateLabel;
 import 'aether_backend.dart';
 import 'html_video_backend.dart';
+import 'media3_playback_status.dart';
 import 'media3_player_backend.dart';
 import 'media_kit_player_backend.dart';
 import 'playback_profile_diagnostics.dart';
@@ -41,6 +43,7 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
   String? device,
   String? audioRoute,
   String? hdrOutput,
+  Media3PlaybackStatus? nativeStatus,
 }) {
   final download = offline || (resolution?.isLocalMedia ?? false);
   final query = _lowerQuery(resolution?.streamUrl);
@@ -101,6 +104,15 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
   );
   final sourceBitrate =
       resolution?.sourceBitrate ?? _int(mediaSource?['Bitrate']);
+  final liveRelayCompatibilityCheck =
+      !download &&
+      method == StreamPlayMethod.directStream &&
+      channel != null &&
+      reasons.isNotEmpty;
+  final incompleteLiveAggregateBitrate =
+      !download &&
+      channel != null &&
+      _isIncompleteLiveAggregateBitrate(mediaStreams, sourceBitrate);
   // Jellyfin leaves SubtitleMethod=Encode on the URL even when the picked
   // track goes out as a separate file, so the URL has to name that track.
   final burned =
@@ -151,6 +163,8 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
       ? l10n.playbackInfoNoteOffline
       : switch (method) {
           StreamPlayMethod.directPlay => l10n.playbackInfoNoteDirectPlay,
+          StreamPlayMethod.directStream when channel != null =>
+            l10n.playbackInfoNoteLiveRelay,
           StreamPlayMethod.directStream => l10n.playbackInfoNoteDirectStream,
           StreamPlayMethod.transcode when videoConverted && audioConverted =>
             l10n.playbackInfoNoteTranscodeBoth,
@@ -191,7 +205,7 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
         _ => null,
       };
   final outText = out == null ? null : formatPlaybackBitrate(out);
-  final sourceText = sourceBitrate == null
+  final sourceText = sourceBitrate == null || incompleteLiveAggregateBitrate
       ? null
       : formatPlaybackBitrate(sourceBitrate);
   final bitrate = outText == null || sourceText == null || outText == sourceText
@@ -208,8 +222,15 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
         StreamPlayMethod.transcode => l10n.transcoding,
       }, bold: true),
     if (note != null) {'note': note},
-    if (why.isNotEmpty) _row(l10n.playbackInfoWhy, why.join('\n')),
-    if (bitrate != null) _row(l10n.bitrate, bitrate),
+    if (why.isNotEmpty)
+      _row(
+        liveRelayCompatibilityCheck
+            ? l10n.playbackInfoServerCompatibilityCheck
+            : l10n.playbackInfoWhy,
+        why.join('\n'),
+      ),
+    if (bitrate != null || incompleteLiveAggregateBitrate)
+      _row(l10n.bitrate, bitrate ?? l10n.playbackInfoBitrateUnavailable),
     if (qualityLimitMbps != null)
       _row(
         l10n.playbackInfoQualityLimit,
@@ -222,8 +243,19 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
     final height = _positive(video['Height']);
     final outWidth = _positive(info?['Width']);
     final outHeight = _positive(info?['Height']);
+    final decodedWidth = nativeStatus?.videoWidth;
+    final decodedHeight = nativeStatus?.videoHeight;
     String? resolutionText;
-    if (width != null && height != null) {
+    if (outWidth == null &&
+        decodedWidth != null &&
+        decodedHeight != null &&
+        (decodedWidth != width || decodedHeight != height)) {
+      // The server's probe can describe an earlier programme on a live
+      // channel; the decoder's size is what is playing.
+      resolutionText =
+          '${playbackResolutionName(decodedWidth, decodedHeight)} '
+          '($decodedWidth×$decodedHeight)';
+    } else if (width != null && height != null) {
       final sourceName = playbackResolutionName(width, height);
       resolutionText =
           outWidth != null &&
@@ -237,7 +269,31 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
           : '$sourceName ($width×$height)';
     }
 
-    final fps = _frameRate(video);
+    // The server's rate is a probe, which for live TV can be an earlier
+    // programme's. The player's own decision is what is playing.
+    final serverFps = _frameRate(video);
+    final playingFps = nativeStatus?.pictureFrameRate;
+    final fps = playingFps ?? serverFps;
+    final fpsText = playingFps == null
+        ? (serverFps == null ? null : '${frameRateLabel(serverFps)} fps')
+        : l10n.playbackInfoFrameRateFrom(
+            frameRateLabel(playingFps),
+            switch (nativeStatus?.decisionSource) {
+              'header' => l10n.playbackInfoRateSourceHeader,
+              'measured' => l10n.playbackInfoRateSourceMeasured,
+              _ => l10n.playbackInfoRateSourceServer,
+            },
+          );
+    final serverDiffers =
+        playingFps != null &&
+        serverFps != null &&
+        (serverFps - playingFps).abs() / playingFps > 0.01;
+    final scan = switch (nativeStatus?.scanType) {
+      'progressive' => l10n.playbackInfoProgressive,
+      'interlaced' => l10n.playbackInfoInterlaced,
+      'repeated_fields' => l10n.playbackInfoRepeatedFields,
+      _ => null,
+    };
 
     String? format;
     if (sourceVideo != null) {
@@ -259,8 +315,14 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
 
     addSection(l10n.video, [
       if (resolutionText != null) _row(l10n.resolution, resolutionText),
-      if (fps != null)
-        _row(l10n.playbackInfoFrameRate, '${frameRateLabel(fps)} fps'),
+      if (fps != null && fpsText != null)
+        _row(l10n.playbackInfoFrameRate, fpsText),
+      if (serverDiffers)
+        _row(
+          l10n.playbackInfoServerFrameRate,
+          '${frameRateLabel(serverFps)} fps',
+        ),
+      if (scan != null) _row(l10n.playbackInfoScan, scan),
       if (format != null) _row(l10n.format, format),
       _row(
         l10n.hdr,
@@ -287,6 +349,22 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
     }
     final channels = _int(audio['Channels']);
     final outChannels = _int(info?['AudioChannels']);
+    String? output;
+    if (nativeStatus?.audioPassthrough == true) {
+      final encoding = nativeStatus?.audioEncoding;
+      output = l10n.playbackInfoPassthroughOf(switch (encoding) {
+        'eac3joc' => audioCodecName('eac3', profile: 'atmos'),
+        'dtshd' => 'DTS-HD',
+        // IEC-packed audio names the packing, not the codec inside it.
+        'iec61937' || null => audioCodecName(sourceAudio ?? ''),
+        final name => audioCodecName(name),
+      });
+    } else if (nativeStatus?.audioPassthrough == false &&
+        (nativeStatus?.audioChannels ?? 0) > 0) {
+      output = l10n.playbackInfoDecodedTo(
+        playbackChannelsLabel(l10n, nativeStatus!.audioChannels!),
+      );
+    }
 
     addSection(l10n.audio, [
       if (track != null)
@@ -307,6 +385,7 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
                 )
               : playbackChannelsLabel(l10n, channels),
         ),
+      if (output != null) _row(l10n.playbackInfoAudioOutput, output),
     ]);
   }
 
@@ -336,6 +415,40 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
     ]);
   }
 
+  if (nativeStatus?.switchingEnabled case final enabled?) {
+    final width = nativeStatus!.displayWidth;
+    final height = nativeStatus.displayHeight;
+    final refresh = nativeStatus.displayRefreshRate;
+    addSection(l10n.display, [
+      _row(
+        l10n.refreshRateSwitching,
+        !enabled
+            ? l10n.off
+            : switch (nativeStatus.switchingBehavior) {
+                'scaleontv' => l10n.scaleOnTv,
+                'scaleondevice' => l10n.scaleOnDevice,
+                _ => l10n.enabled,
+              },
+      ),
+      if (enabled &&
+          refresh != null &&
+          width != null &&
+          width > 0 &&
+          height != null &&
+          height > 0)
+        _row(
+          l10n.playbackInfoHdmiOutput,
+          l10n.playbackInfoDisplayMode(
+            '$width',
+            '$height',
+            refresh.toStringAsFixed(2),
+          ),
+        ),
+      if (nativeStatus.corrections > 0)
+        _row(l10n.playbackInfoRateCorrections, '${nativeStatus.corrections}'),
+    ]);
+  }
+
   if (channel == null) {
     final size = _int(mediaSource?['Size']);
     addSection(l10n.playbackInfoFile, [
@@ -356,6 +469,7 @@ List<Map<String, dynamic>> buildPlaybackInfoSections({
     'rows': [
       if (_text(player) case final value?) _row(l10n.player, value),
       if (_text(device) case final value?) _row(l10n.playbackInfoDevice, value),
+      if (_tunnelPath() case final value?) _row('Tunnel', value),
       if (reasons.isNotEmpty) _row(l10n.transcodeReasons, reasons.join(', ')),
       if (_text(audioRoute) case final value?)
         _row(l10n.playbackInfoAudioRoute, value),
@@ -481,8 +595,10 @@ List<String> playbackWhyLines(
     'videocodecnotsupported' || 'videocodectagnotsupported' => (4, videoLine),
     'videoprofilenotsupported' => (
       5,
-      codec == null || profile == null
+      codec == null
           ? videoLine
+          : profile == null
+          ? l10n.playbackInfoWhyVideoProfileUnknown(codec)
           : l10n.playbackInfoWhyVideoProfile(codec, profile),
     ),
     'videolevelnotsupported' => (
@@ -920,4 +1036,46 @@ String? _text(Object? value) {
   return text == null || text.isEmpty ? null : text;
 }
 
-int? _int(Object? value) => value is num ? value.toInt() : null;
+int? _int(Object? value) =>
+    value is num && value.isFinite ? value.toInt() : null;
+
+bool _isIncompleteLiveAggregateBitrate(
+  List<Map<String, dynamic>> mediaStreams,
+  int? aggregateBitrate,
+) {
+  if (aggregateBitrate == null || aggregateBitrate <= 0) return false;
+  final internalStreams = mediaStreams
+      .where((stream) => stream['IsExternal'] != true)
+      .toList();
+  final videos = internalStreams.where((stream) => stream['Type'] == 'Video');
+  final audio = internalStreams.where((stream) => stream['Type'] == 'Audio');
+  if (videos.isEmpty || audio.isEmpty) return false;
+
+  // Missing video bitrate alone can be legitimate. Only hide a live aggregate
+  // when the video dimensions are also incomplete and the total is exactly
+  // explained by every known internal audio stream.
+  if (videos.any(
+    (stream) =>
+        _positive(stream['BitRate']) != null ||
+        (_positive(stream['Width']) != null &&
+            _positive(stream['Height']) != null),
+  )) {
+    return false;
+  }
+  final audioBitrates = [
+    for (final stream in audio) _positive(stream['BitRate']),
+  ];
+  if (audioBitrates.any((bitrate) => bitrate == null)) return false;
+  final audioTotal = audioBitrates.cast<int>().fold<int>(
+    0,
+    (sum, value) => sum + value,
+  );
+  return audioTotal > 0 && audioTotal == aggregateBitrate;
+}
+
+/// Whether a Lambent PC's tunnel runs direct or through a relay, while it's in use.
+String? _tunnelPath() {
+  final getIt = GetIt.instance;
+  if (!getIt.isRegistered<MediaServerClient>()) return null;
+  return RemoteAccess.instance.tunnelPath(getIt<MediaServerClient>().baseUrl);
+}

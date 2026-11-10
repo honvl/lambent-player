@@ -7,6 +7,7 @@ import 'package:server_core/server_core.dart';
 import 'package:web/web.dart' as web;
 
 import '../../platform/web_runtime_config.dart';
+import '../../remote/remote_access_web.dart';
 import '../../util/server_url.dart';
 import 'server_discovery_types.dart';
 
@@ -50,6 +51,7 @@ class ServerDiscoveryService {
       );
 
       try {
+        final nearby = _discoverNearbyLambent(emit, isCanceled: () => canceled);
         await _discoverSameOriginAndCommonHosts(
           dio,
           emit,
@@ -63,6 +65,7 @@ class ServerDiscoveryService {
         if (webRuntimeConfig.enableWebRtcScan) {
           await _discoverPrivateSubnet(dio, emit, isCanceled: () => canceled);
         }
+        await nearby;
       } catch (_) {
       } finally {
         dio.close(force: true);
@@ -73,6 +76,26 @@ class ServerDiscoveryService {
     }());
 
     yield* controller.stream;
+  }
+
+  /// A page can't browse Bonjour, so getlambent.app says which Lambent PCs share this browser's public address, and the door
+  /// keeps those it can reach over the LAN.
+  Future<void> _discoverNearbyLambent(
+    void Function(DiscoveredServer server) onFound, {
+    required bool Function() isCanceled,
+  }) async {
+    for (final pc in await RemoteAccess.instance.nearby()) {
+      if (isCanceled()) return;
+      onFound(
+        DiscoveredServer(
+          id: pc.id,
+          name: pc.name,
+          address: RemoteAccess.instance.tunnelAddress(pc.id)!,
+          serverType: ServerType.jellyfin,
+          irohId: pc.id,
+        ),
+      );
+    }
   }
 
   Future<void> _discoverSameOriginAndCommonHosts(
@@ -375,6 +398,7 @@ class ServerDiscoveryService {
     final normalizedHint = typeHint?.trim().toLowerCase();
     if (normalizedHint == 'emby') return ServerType.emby;
     if (normalizedHint == 'jellyfin') return ServerType.jellyfin;
+    if (normalizedHint == 'silo') return ServerType.silo;
     return ServerType.detect(productName, version);
   }
 

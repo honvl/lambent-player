@@ -45,12 +45,13 @@ class _QualityDecodingScreen extends StatelessWidget {
                   MaxVideoResolution.res2160p => '2160p (4K)',
                 },
               ),
-              SwitchPreferenceTile(
-                preference: UserPreferences.liveTvDirectPlayEnabled,
-                title: l10n.settingsLiveTvDirect,
-                subtitle: l10n.settingsLiveTvDirectSubtitle,
-                icon: Icons.live_tv,
-              ),
+              if (liveTvOnAnySignedInServer())
+                SwitchPreferenceTile(
+                  preference: UserPreferences.liveTvDirectPlayEnabled,
+                  title: l10n.settingsLiveTvDirect,
+                  subtitle: l10n.settingsLiveTvDirectSubtitle,
+                  icon: Icons.live_tv,
+                ),
             ],
           ),
 
@@ -89,6 +90,13 @@ class _QualityDecodingScreen extends StatelessWidget {
                   icon: Icons.memory,
                 ),
               if (DisplayHdrProbe.isSupported) const _RedetectDisplayTile(),
+              if (PlatformDetection.isAppleTV)
+                SwitchPreferenceTile(
+                  preference: UserPreferences.cadenceSlowdown,
+                  title: l10n.cadenceSlowdown,
+                  subtitle: l10n.cadenceSlowdownSubtitle,
+                  icon: Icons.speed,
+                ),
               if (isAndroidTv)
                 EnumPreferenceTile<RefreshRateSwitchingBehavior>(
                   preference: UserPreferences.refreshRateSwitchingBehavior,

@@ -69,12 +69,21 @@ class Destinations {
 
   // General
   static const home = '/home';
+
+  /// The Watch Parties screen, `?code=` joining a room as it opens. Party
+  /// pushes and invite links land here.
+  static const watchParty = '/watch-party';
   static const search = '/search';
 
   // Browsing
   static const libraryBrowse = '/library/:libraryId';
   static const allGenres = '/genres';
   static const allFavorites = '/favorites';
+
+  /// Opens the user's calendar style. The month grid sits under it.
+  static const calendar = '/calendar';
+  static const calendarMonth = '/calendar/month';
+
   static const folderBrowse = '/folder/:folderId';
   static const collectionBrowse = '/collection/:collectionId';
   static const libraryViewRoute = '/library-view/:libraryId';
@@ -197,19 +206,26 @@ class Destinations {
   /// always the item's own season: a special inlined by
   /// DisplaySpecialsWithinSeasons is listed under a regular season while still
   /// living in Specials. Carrying it keeps the episode list and the play queue
-  /// on the season that was on screen.
+  /// on the season that was on screen. [full] opens the full page where Quick
+  /// Look would open its drawer.
   static String item(
     String itemId, {
     String? serverId,
     bool autoPlay = false,
     String? seasonContext,
+    bool full = false,
+    String? libraryId,
   }) {
-    final base = '/item/$itemId';
+    // A book series id carries its name, which can hold a slash or a question
+    // mark.
+    final base = '/${Uri(pathSegments: ['item', itemId]).path}';
     final params = <String>[
       if (serverId != null) 'serverId=$serverId',
       if (autoPlay) 'autoPlay=true',
       if (seasonContext != null && seasonContext.isNotEmpty)
         'seasonContext=${Uri.encodeQueryComponent(seasonContext)}',
+      if (full) 'full=true',
+      if (libraryId != null) 'libraryId=$libraryId',
     ];
     return params.isEmpty ? base : '$base?${params.join('&')}';
   }
@@ -268,16 +284,24 @@ class Destinations {
     required String genreId,
     String? parentId,
     String? includeType,
+    String? serverId,
   }) {
     final base = '/genre/${Uri.encodeComponent(genreName)}';
     final params = <String>['genreId=$genreId'];
     if (parentId != null) params.add('parentId=$parentId');
     if (includeType != null) params.add('includeType=$includeType');
+    if (serverId != null && serverId.isNotEmpty) {
+      params.add('serverId=${Uri.encodeComponent(serverId)}');
+    }
     return '$base?${params.join('&')}';
   }
 
-  static String studio(String studioName) =>
-      '/studio/${Uri.encodeComponent(studioName)}';
+  static String studio(String studioName, {String? serverId}) {
+    final base = '/studio/${Uri.encodeComponent(studioName)}';
+    return serverId != null && serverId.isNotEmpty
+        ? '$base?serverId=${Uri.encodeComponent(serverId)}'
+        : base;
+  }
 
   static String folder(String folderId, {String? serverId}) {
     final base = '/folder/$folderId';
@@ -369,8 +393,12 @@ class Destinations {
   static String nextUpFor(String itemId) => '/player/next-up/$itemId';
   static String stillWatchingFor(String itemId) =>
       '/player/still-watching/$itemId';
+  /// Search from the request screens, landing on the Requests tab.
+  static const searchRequests = '/search?tab=requests';
   static String searchWith(String query) =>
       '/search?query=${Uri.encodeComponent(query)}';
+  static String searchRequestsWith(String query) =>
+      '$searchRequests&query=${Uri.encodeComponent(query)}';
   static String searchInLibrary(String libraryId, {String? query}) {
     final params = <String, String>{'libraryId': libraryId};
     if (query != null && query.trim().isNotEmpty) {

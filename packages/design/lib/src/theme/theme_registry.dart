@@ -44,18 +44,18 @@ class ThemeRegistry {
       };
 
   /// The theme the user picked, before OLED Mode is layered on.
-  static ThemeSpec _base = moonfinThemeSpec;
+  static ThemeSpec _base = glassThemeSpec;
   static OledTuning _oled = OledTuning.off;
 
   /// [_base] with [_oled] applied. Memoized rather than derived per read:
   /// `AppColorScheme` proxies this getter on every colour lookup, so deriving
   /// lazily would allocate `Color`s in the paint path.
-  static ThemeSpec _active = moonfinThemeSpec;
+  static ThemeSpec _active = glassThemeSpec;
 
   static ThemeSpec get active => _active;
 
   static void setActiveById(String id) {
-    _base = availableThemes[id] ?? moonfinThemeSpec;
+    _base = availableThemes[id] ?? glassThemeSpec;
     _recompute();
   }
 
@@ -68,7 +68,7 @@ class ThemeRegistry {
   static void _recompute() => _active = applyOled(_base, _oled);
 
   static ThemeSpec resolveById(String id) {
-    return availableThemes[id] ?? moonfinThemeSpec;
+    return availableThemes[id] ?? glassThemeSpec;
   }
 
   /// Register or replace a plugin-supplied theme. Built-in IDs are reserved

@@ -1,7 +1,7 @@
 // One bundle id for iPhone, iPad and Apple TV (tvos/Runner.xcodeproj), so a
 // Lambent Enhance subscription bought on one is shared by all (Universal
 // Purchase, ENTITLEMENTS.md section 1).
-MOONFIN_BUNDLE_IDENTIFIER = app.getlambent.player
+MOONFIN_BUNDLE_IDENTIFIER = app.getlambent.viewer
 MOONFIN_BUNDLE_DISPLAY_NAME = Lambent
 MOONFIN_DEVELOPMENT_TEAM = T6355X8JD5
 

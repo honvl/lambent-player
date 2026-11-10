@@ -7,7 +7,7 @@ final class TopShelfChannel: NSObject {
     private let channel: FlutterMethodChannel
     private var pendingDeepLink: String?
 
-    private static let appGroupIdentifier = "group.app.getlambent.player"
+    private static let appGroupIdentifier = "group.app.getlambent.viewer"
     private static let cacheFileName = "topshelf_cache.json"
 
     init(messenger: FlutterBinaryMessenger) {

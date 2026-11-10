@@ -98,6 +98,7 @@ class _VideoPlaybackScreen extends StatelessWidget {
                 leading: const Icon(Icons.timer_outlined),
                 title: Text(l10n.playbackTimeDisplay),
                 subtitle: Text(l10n.settingsPlaybackTimeDisplayDescription),
+                previewKey: UserPreferences.playbackTimeAboveLeft.key,
                 onTap: () => context.pushSettingsScreen(
                   const _PlaybackTimeLayoutScreen(),
                 ),
@@ -173,6 +174,27 @@ class _VideoPlaybackScreen extends StatelessWidget {
                   60000: l10n.settingsSixtySeconds,
                 },
               ),
+              IntPickerPreferenceTile(
+                preference: UserPreferences.controlsHideDelay,
+                title: l10n.settingsHideControlsAfter,
+                description: l10n.settingsHideControlsAfterDescription,
+                icon: Icons.timer_outlined,
+                options: {
+                  1000: l10n.settingsOneSecond,
+                  3000: l10n.settingsThreeSeconds,
+                  5000: l10n.fiveSeconds,
+                },
+              ),
+              SliderPreferenceTile(
+                preference: UserPreferences.hdrControlsDimming,
+                title: l10n.settingsHdrControlsDimming,
+                description: l10n.settingsHdrControlsDimmingDescription,
+                icon: Icons.hdr_on,
+                min: 0,
+                max: 70,
+                divisions: 7,
+                labelOf: (value) => value == 0 ? l10n.off : '$value%',
+              ),
               SwitchPreferenceTile(
                 preference: UserPreferences.showChapterMarkers,
                 title: l10n.showChapterMarkers,
@@ -217,6 +239,7 @@ class _VideoPlaybackScreen extends StatelessWidget {
                 leading: const Icon(Icons.tune),
                 title: Text(l10n.osdButtons),
                 subtitle: Text(l10n.osdButtonsDescription),
+                previewKey: osdButtonLayout.orderPreference.key,
                 onTap: () =>
                     context.pushSettingsScreen(const _OsdButtonsScreen()),
               ),
@@ -250,7 +273,6 @@ class _VideoPlaybackScreen extends StatelessWidget {
                   // turning it on adds rows below the one being used rather
                   // than shifting it down and taking its focus with it.
                   if (showsPreviews) ...[
-                    const TrickplaySettingsPreview(),
                     SliderPreferenceTile(
                       preference: UserPreferences.trickPlayPreviewScalePercent,
                       title: l10n.trickplayPreviewScale,
@@ -437,48 +459,37 @@ class _ExternalPlayerAppPickerTileState
       final result = await showFocusRestoringDialog<String>(
         context: context,
         useRootNavigator: false,
-        builder: (dialogContext) => SimpleDialog(
-          title: Text(AppLocalizations.of(dialogContext).externalPlayerApp),
+        builder: (dialogContext) => SettingsPickerDialog(
+          title: AppLocalizations.of(dialogContext).externalPlayerApp,
           children: [
-            TvFocusHighlight(
-              builder: (_, _) => ListTile(
-                autofocus: normalizedCurrent.isEmpty,
-                leading: const Icon(Icons.help_outline),
-                title: Text(
-                  AppLocalizations.of(dialogContext).settingsAskEachTime,
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(
-                    dialogContext,
-                  ).externalPlayerAskEachTimeSubtitle,
-                ),
-                trailing: normalizedCurrent.isEmpty
-                    ? const Icon(Icons.check)
-                    : null,
-                onTap: () {
-                  if (picked) return;
-                  picked = true;
-                  Navigator.pop(dialogContext, '');
-                },
-              ),
+            SettingsPickerOption(
+              autofocus: normalizedCurrent.isEmpty,
+              leading: const Icon(Icons.help_outline),
+              label: AppLocalizations.of(dialogContext).settingsAskEachTime,
+              subtitle: AppLocalizations.of(
+                dialogContext,
+              ).externalPlayerAskEachTimeSubtitle,
+              selected: normalizedCurrent.isEmpty,
+              onTap: () {
+                if (picked) return;
+                picked = true;
+                Navigator.pop(dialogContext, '');
+              },
             ),
             ..._players.asMap().entries.map((entry) {
               final index = entry.key;
               final player = entry.value;
-              final selected = player.component == normalizedCurrent;
-              return TvFocusHighlight(
-                builder: (_, _) => ListTile(
-                  autofocus: index == autofocusIndex,
-                  leading: _ExternalPlayerAppIcon(player: player),
-                  title: Text(player.label),
-                  subtitle: Text(player.packageName),
-                  trailing: selected ? const Icon(Icons.check) : null,
-                  onTap: () {
-                    if (picked) return;
-                    picked = true;
-                    Navigator.pop(dialogContext, player.component);
-                  },
-                ),
+              return SettingsPickerOption(
+                autofocus: index == autofocusIndex,
+                leading: _ExternalPlayerAppIcon(player: player),
+                label: player.label,
+                subtitle: player.packageName,
+                selected: player.component == normalizedCurrent,
+                onTap: () {
+                  if (picked) return;
+                  picked = true;
+                  Navigator.pop(dialogContext, player.component);
+                },
               );
             }),
           ],

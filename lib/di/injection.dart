@@ -20,12 +20,12 @@ import '../data/services/media_server_client_factory.dart';
 import '../data/services/recent_searches_store.dart';
 import '../data/services/pending_rating_store.dart';
 import '../data/services/storage_path_service.dart';
-import '../platform/web_runtime_config.dart';
 import '../preference/preference_constants.dart';
 import '../preference/user_preferences.dart';
 import '../util/app_beta.dart';
 import '../util/http_overrides_stub.dart'
     if (dart.library.io) '../util/http_overrides_io.dart';
+import '../util/lambent_server.dart';
 import '../util/platform_detection.dart';
 import 'modules/app_module.dart';
 import 'modules/auth_module.dart';
@@ -47,21 +47,19 @@ bool _legacyStereoAacFallbackDefaultForPlatform() {
 }
 
 String _clientName() {
-  if (PlatformDetection.isAppleTV) return 'Moonfin for tvOS';
+  if (PlatformDetection.isAppleTV) return 'Lambent for tvOS';
   if (PlatformDetection.isAndroid && PlatformDetection.isTV) {
-    return 'Moonfin for Android TV';
+    return 'Lambent for Android TV';
   }
   if (PlatformDetection.isWeb) {
-    return webRuntimeConfig.pluginMode
-        ? 'Moonfin for Web'
-        : 'Moonfin on Github';
+    return 'Lambent for Web';
   }
-  if (PlatformDetection.isAndroid) return 'Moonfin for Android';
-  if (PlatformDetection.isIOS) return 'Moonfin for iOS';
-  if (PlatformDetection.isMacOS) return 'Moonfin for macOS';
-  if (PlatformDetection.isWindows) return 'Moonfin for Windows';
-  if (PlatformDetection.isLinux) return 'Moonfin for Linux';
-  return 'Moonfin';
+  if (PlatformDetection.isAndroid) return 'Lambent for Android';
+  if (PlatformDetection.isIOS) return 'Lambent for iOS';
+  if (PlatformDetection.isMacOS) return 'Lambent for macOS';
+  if (PlatformDetection.isWindows) return 'Lambent for Windows';
+  if (PlatformDetection.isLinux) return 'Lambent for Linux';
+  return 'Lambent';
 }
 
 String _joinNonEmpty(List<String?> parts, String separator) {
@@ -110,6 +108,10 @@ Future<String> _resolveDeviceName() async {
   final deviceInfo = DeviceInfoPlugin();
 
   try {
+    if (PlatformDetection.isWeb) {
+      return browserDeviceName((await deviceInfo.webBrowserInfo).userAgent ?? '');
+    }
+
     if (PlatformDetection.isAndroid) {
       final info = await deviceInfo.androidInfo;
       final name = _resolveAndroidDeviceName(info);
@@ -121,8 +123,7 @@ Future<String> _resolveDeviceName() async {
 
     if (PlatformDetection.isIOS) {
       final info = await deviceInfo.iosInfo;
-      final marketingName = _joinNonEmpty([info.name, info.model], ' ');
-      return _fallbackIfEmpty(marketingName, 'iPhone');
+      return appleMobileDeviceName(name: info.name, modelName: info.modelName, model: info.model);
     }
 
     if (PlatformDetection.isMacOS) {

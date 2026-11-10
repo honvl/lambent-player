@@ -1,6 +1,6 @@
 {
     "@@locale": "ug",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent نەشرى {version}",
+    "appVersionFooter": "Moonfin نەشرى {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent سىستېمىڭىزنىڭ ئاچقۇچلىرىنى زىيارەت قىلالمىدى. كىرىشنى داۋاملاشتۇرغىلى بولىدۇ ، ئەمما ئاچقۇچ ئېچىلمىغۇچە بىخەتەر بەلگە ساقلاشنى ئىشلەتكىلى بولمايدۇ.",
+    "secureStorageUnavailableMessage": "Moonfin سىستېمىڭىزنىڭ ئاچقۇچلىرىنى زىيارەت قىلالمىدى. كىرىشنى داۋاملاشتۇرغىلى بولىدۇ ، ئەمما ئاچقۇچ ئېچىلمىغۇچە بىخەتەر بەلگە ساقلاشنى ئىشلەتكىلى بولمايدۇ.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "بۇ دېتالنى قايتا قوزغىماي Lambent بىلەن Neon Pulse نى ئالماشتۇرۇڭ",
+    "settingsAppearanceThemeSubtitle": "بۇ دېتالنى قايتا قوزغىماي Moonfin بىلەن Neon Pulse نى ئالماشتۇرۇڭ",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "چىقىش Lambent?",
+    "exitApp": "چىقىش Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "تەڭشەلمىدى. Lambent ئەپ / سانلىق مەلۇمات قىسقۇچتا سۈكۈتتىكى mpv.conf نى سىنايدۇ.",
+    "notSetMpvConf": "تەڭشەلمىدى. Moonfin ئەپ / سانلىق مەلۇمات قىسقۇچتا سۈكۈتتىكى mpv.conf نى سىنايدۇ.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "ھەر بىر كۈتۈپخانىنىڭ باش بېتىنىڭ كۆرۈنۈشىنى توغرىلاڭ. ئۆزگەرتىشنىڭ كۈچكە ئىگە بولۇشى ئۈچۈن Lambent نى قايتا قوزغىتىڭ.",
+    "libraryVisibilityDescription": "ھەر بىر كۈتۈپخانىنىڭ باش بېتىنىڭ كۆرۈنۈشىنى توغرىلاڭ. ئۆزگەرتىشنىڭ كۈچكە ئىگە بولۇشى ئۈچۈن Moonfin نى قايتا قوزغىتىڭ.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "Lambent ، MakD نى تاللاڭ ياكى مېدىيا بالدىقىنى ئېتىۋېتىڭ",
+    "mediaBarModeDescription": "Moonfin ، MakD نى تاللاڭ ياكى مېدىيا بالدىقىنى ئېتىۋېتىڭ",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Lambent دە ئويناڭ",
+    "playInMoonfin": "Moonfin دە ئويناڭ",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Lambent كۈتۈپخانىسىدا تېپىلمىغان تۈر",
+    "itemNotFoundInLibrary": "Moonfin كۈتۈپخانىسىدا تېپىلمىغان تۈر",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "مۇلازىمېتىر قايتا قوزغىتىلىۋاتىدۇ",
-    "adminServerRebootMessage": "مۇلازىمېتىرنى قايتا قوزغىتىش باسقۇچىدا ، Lambent نى قايتا قوزغىتىڭ",
+    "adminServerRebootMessage": "مۇلازىمېتىرنى قايتا قوزغىتىش باسقۇچىدا ، Moonfin نى قايتا قوزغىتىڭ",
     "adminActiveSessions": "ئاكتىپ يىغىن",
     "adminSessionsLoadFailed": "ئولتۇرۇشنى يۈكلىيەلمىدى",
     "adminNoActiveSessions": "ئاكتىپ يىغىن يوق",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "يولباشچى ستونىدا ژانىر كۇنۇپكىسىنى كۆرسىتىڭ",
     "settingsShowFavoritesButtonInNavigation": "يولباشچى ستونىدا ياقتۇرىدىغان كۇنۇپكىنى كۆرسىتىڭ",
     "settingsShowLibrariesButtonInNavigation": "يولباشچى ستونىدىكى كۈتۈپخانىلار كۇنۇپكىسىنى كۆرسەت",
-    "settingsLibraryVisibilitySubtitle": "ھەر بىر كۈتۈپخانىنىڭ باش بېتىنىڭ كۆرۈنۈشىنى توغرىلاڭ. ئۆزگەرتىشنىڭ كۈچكە ئىگە بولۇشى ئۈچۈن Lambent نى قايتا قوزغىتىڭ.",
+    "settingsLibraryVisibilitySubtitle": "ھەر بىر كۈتۈپخانىنىڭ باش بېتىنىڭ كۆرۈنۈشىنى توغرىلاڭ. ئۆزگەرتىشنىڭ كۈچكە ئىگە بولۇشى ئۈچۈن Moonfin نى قايتا قوزغىتىڭ.",
     "settingsMediaBarAndLocalPreviews": "مېدىيا بالدىقى ۋە يەرلىك ئالدىن كۆرۈشلەر",
     "settingsVisualOverlays": "كۆرۈنۈش قاپلىمىلىرى",
     "settingsSeasonalSurprise": "پەسىل خاراكتېرلىك ھەيران قېلىش",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "ئىجازەتنامە",
     "settingsOpenSourceLicenseNotices": "ئوچۇق كودلۇق ئىجازەتنامە ئۇقتۇرۇشى",
     "settingsPrivacyPolicy": "مەخپىيەتلىك تۈزۈمى",
-    "settingsPrivacyPolicySubtitle": "Lambent سانلىق مەلۇماتلىرىڭىزنى قانداق بىر تەرەپ قىلىدۇ",
+    "settingsPrivacyPolicySubtitle": "Moonfin سانلىق مەلۇماتلىرىڭىزنى قانداق بىر تەرەپ قىلىدۇ",
     "settingsCheckForUpdates": "يېڭىلانمىلارنى تەكشۈرۈڭ",
-    "settingsCheckForUpdatesSubtitle": "Lambent نىڭ ئەڭ يېڭى تارقىتىلغانلىقىنى تەكشۈرۈڭ",
+    "settingsCheckForUpdatesSubtitle": "Moonfin نىڭ ئەڭ يېڭى تارقىتىلغانلىقىنى تەكشۈرۈڭ",
     "settingsPoweredByFlutter": "Flutter تەرىپىدىن ئىشلەنگەن",
     "settingsLicenseNoticesCount": "{count, plural, one {# ئىجازەتنامە ئۇقتۇرۇشى} other {# ئىجازەتنامە ئۇقتۇرۇشى}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH ئېكران خېتىنى ئالدىن تاللاش",
     "preferSdhSubtitlesSubtitle": "ئۆزلۈكىدىن تاللىغاندا SDH/CC ئېكران خېتى يوللىرىنى ئالدىنقى ئورۇنغا قويىدۇ.",
     "webDiagnostics": "تور دىئاگنوزى",
-    "webDiagnosticsTitle": "Lambent تور دىئاگنوزى",
+    "webDiagnosticsTitle": "Moonfin تور دىئاگنوزى",
     "webDiagnosticsIntro": "بۇ بەتنى تور كۆرگۈچ ئۇلىنىش مەسىلىلىرىنى (CORS، ئارىلاش مەزمۇن ۋە بايقاش تەڭشەكلىرى) دىئاگنوز قىلىشقا ئىشلىتىڭ.",
     "webDiagnosticsDetectedMixedContentFailure": "ئارىلاش مەزمۇن خاتالىقى بايقالدى",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/Preflight خاتالىقى بايقالدى",
-    "webDiagnosticsMixedContentFailureBody": "Lambent بىر HTTPS بەتنىڭ HTTP مۇلازىمېتىر URL ئادرېسىنى چاقىرماقچى بولغانلىقىنى بايقىدى. تور كۆرگۈچلەر بۇ تەلەپنى مۇلازىمېتىرىڭىزغا يېتىشتىن بۇرۇن توسىدۇ.",
-    "webDiagnosticsCorsFailureBody": "Lambent كۆپىنچە مېدىيا مۇلازىمېتىرىدا CORS ياكى preflight قېشى كەم بولغاندا كۆرۈلىدىغان تور كۆرگۈچ دەرىجىلىك تەلەپ خاتالىقىنى بايقىدى.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin بىر HTTPS بەتنىڭ HTTP مۇلازىمېتىر URL ئادرېسىنى چاقىرماقچى بولغانلىقىنى بايقىدى. تور كۆرگۈچلەر بۇ تەلەپنى مۇلازىمېتىرىڭىزغا يېتىشتىن بۇرۇن توسىدۇ.",
+    "webDiagnosticsCorsFailureBody": "Moonfin كۆپىنچە مېدىيا مۇلازىمېتىرىدا CORS ياكى preflight قېشى كەم بولغاندا كۆرۈلىدىغان تور كۆرگۈچ دەرىجىلىك تەلەپ خاتالىقىنى بايقىدى.",
     "webDiagnosticsTargetUrl": "نىشان URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "سەپلەنمىگەن",
     "webDiagnosticsMixedContent": "ئارىلاش مەزمۇن",
     "webDiagnosticsMixedContentDetected": "بۇ بەت HTTPS ئارقىلىق يۈكلەنگەن، ئەمما سەپلەنگەن بىر ياكى بىرنەچچە URL بولسا HTTP. تور كۆرگۈچلەر HTTPS بەتلەرنىڭ HTTP API چاقىرىشىنى توسىدۇ.",
-    "webDiagnosticsMixedContentFix": "ھەل قىلىش: مېدىيا مۇلازىمېتىرىڭىز ياكى ۋاكالەتچى ئېغىزىڭىزنى HTTPS ئارقىلىق تەمىنلەڭ، ياكى Lambent نى پەقەت ئىشەنچلىك يەرلىك تورلاردىلا HTTP ئارقىلىق ئېچىڭ.",
+    "webDiagnosticsMixedContentFix": "ھەل قىلىش: مېدىيا مۇلازىمېتىرىڭىز ياكى ۋاكالەتچى ئېغىزىڭىزنى HTTPS ئارقىلىق تەمىنلەڭ، ياكى Moonfin نى پەقەت ئىشەنچلىك يەرلىك تورلاردىلا HTTP ئارقىلىق ئېچىڭ.",
     "webDiagnosticsNoMixedContentDetected": "نۆۋەتتىكى ئىجرا تەڭشەكلىرىدىن ئېنىق ئارىلاش مەزمۇن سەپلىمىسى بايقالمىدى.",
     "webDiagnosticsCorsChecklist": "CORS تەكشۈرۈش تىزىملىكى",
     "webDiagnosticsCorsChecklistItem1": "• تور كۆرگۈچ Origin نى Access-Control-Allow-Origin غا كىرگۈزۈڭ.",
@@ -7353,11 +7353,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Lambent Recommends يەرلىك ئامبار ئالگورىتمىنى ياكى توردىكى TMDb ئوخشاشلىق ئۆلچەملىرىنى ئىشلىتىڭ. ئەسكەرتىش: توردىكى تەۋسىيەلەرگە Seerr بىرىكمىسى كېرەك.",
+    "recommendationSystemSubtitle": "Moonfin Recommends يەرلىك ئامبار ئالگورىتمىنى ياكى توردىكى TMDb ئوخشاشلىق ئۆلچەملىرىنى ئىشلىتىڭ. ئەسكەرتىش: توردىكى تەۋسىيەلەرگە Seerr بىرىكمىسى كېرەك.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recommends",
+    "recommendationSystemMoonfin": "Moonfin Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7369,7 +7369,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Lambent Recommends تەۋسىيەلىرىنى نىشان مېدىيانىڭ ياش چەكلىمىسى بويىچە چەكلەيدۇ",
+    "recommendationsApplyParentalRatingCapSubtitle": "Moonfin Recommends تەۋسىيەلىرىنى نىشان مېدىيانىڭ ياش چەكلىمىسى بويىچە چەكلەيدۇ",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7417,7 +7417,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "ئىختىيارى تېمىلار Lambent نىڭ كۆرۈنۈش ئېلېمېنتلىرىنى ئۆزگەرتىدۇ. ئۇسلۇبىڭىزغا ماس بىرىنى تاللاڭ.",
+    "customThemeSubtitle": "ئىختىيارى تېمىلار Moonfin نىڭ كۆرۈنۈش ئېلېمېنتلىرىنى ئۆزگەرتىدۇ. ئۇسلۇبىڭىزغا ماس بىرىنى تاللاڭ.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7590,7 +7590,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "تېلېفونىڭىزدا Lambent غا كىرىڭ",
+    "carSignInPrompt": "تېلېفونىڭىزدا Moonfin غا كىرىڭ",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8899,7 +8899,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller بولسا Flutter نىڭ زامانىۋى GPU سىزغۇچى بولۇپ، ھەرىكەتلەرنى تېخىمۇ سىلىق قىلىپ توختاپ قېلىشنى ئازايتىدۇ. بەزى TV قۇتىلىرى ۋە كونا GPU لاردا خاتالىق ياكى قارا سىن پەيدا قىلىشى مۇمكىن؛ شۇنداق ئەھۋال كۆرۈلسە ئۇنى تاقاق قىلىڭ. ئاپتوماتىك ئۈسكۈنىڭىزگە ئەڭ ماس سۈكۈتتىكىنى تاللايدۇ. قوللىنىش ئۈچۈن Lambent نى قايتا قوزغىتىڭ.",
+    "impellerRenderingSubtitle": "Impeller بولسا Flutter نىڭ زامانىۋى GPU سىزغۇچى بولۇپ، ھەرىكەتلەرنى تېخىمۇ سىلىق قىلىپ توختاپ قېلىشنى ئازايتىدۇ. بەزى TV قۇتىلىرى ۋە كونا GPU لاردا خاتالىق ياكى قارا سىن پەيدا قىلىشى مۇمكىن؛ شۇنداق ئەھۋال كۆرۈلسە ئۇنى تاقاق قىلىڭ. ئاپتوماتىك ئۈسكۈنىڭىزگە ئەڭ ماس سۈكۈتتىكىنى تاللايدۇ. قوللىنىش ئۈچۈن Moonfin نى قايتا قوزغىتىڭ.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "سىزىش ماتورىنى ئۆزگەرتىش ئۈچۈن Lambent قايتا قوزغىتىلىشى كېرەك. ئەپنى ھازىر تاقاپ، ئاندىن قايتا ئېچىڭ.",
+    "impellerRestartMessage": "سىزىش ماتورىنى ئۆزگەرتىش ئۈچۈن Moonfin قايتا قوزغىتىلىشى كېرەك. ئەپنى ھازىر تاقاپ، ئاندىن قايتا ئېچىڭ.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

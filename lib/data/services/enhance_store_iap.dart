@@ -11,18 +11,21 @@ import 'lambent_licence.dart';
 
 /// Lambent Enhance's store products (ENTITLEMENTS.md section 1). The App Store
 /// sells two auto-renewable subscriptions in the "Lambent Enhance" group; Play
-/// sells one subscription with a monthly and a yearly base plan.
+/// sells one subscription with a monthly and a yearly base plan. Both also
+/// sell a one-time lifetime product.
 class EnhanceProductIds {
   const EnhanceProductIds._();
 
-  static const appStoreMonthly = 'app.getlambent.player.enhance.monthly';
-  static const appStoreYearly = 'app.getlambent.player.enhance.yearly';
+  static const appStoreMonthly = 'app.getlambent.enhance.monthly';
+  static const appStoreYearly = 'app.getlambent.enhance.yearly';
+  static const appStoreLifetime = 'app.getlambent.enhance.lifetime';
   static const play = 'enhance';
+  static const playLifetime = 'enhance_lifetime';
   static const playYearlyBasePlan = 'yearly';
 
   static Set<String> get forThisStore => PlatformDetection.isAndroid
-      ? const {play}
-      : const {appStoreMonthly, appStoreYearly};
+      ? const {play, playLifetime}
+      : const {appStoreMonthly, appStoreYearly, appStoreLifetime};
 }
 
 /// The App Store or Google Play behind the `in_app_purchase` plugin.
@@ -98,13 +101,19 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
           title: d.title,
           price: d.price,
           yearly: _isYearly(d),
+          lifetime: _isLifetime(d),
           handle: d,
         ),
     ];
-    // Monthly first, as the stores list them.
-    products.sort((a, b) => (a.yearly ? 1 : 0) - (b.yearly ? 1 : 0));
+    // Monthly first, as the stores list them, then lifetime.
+    int rank(EnhanceProduct p) => p.lifetime ? 2 : (p.yearly ? 1 : 0);
+    products.sort((a, b) => rank(a) - rank(b));
     return products;
   }
+
+  static bool _isLifetime(ProductDetails d) =>
+      d.id == EnhanceProductIds.appStoreLifetime ||
+      d.id == EnhanceProductIds.playLifetime;
 
   static bool _isYearly(ProductDetails d) {
     if (d is GooglePlayProductDetails) {
@@ -122,8 +131,8 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
   @override
   Future<void> buy(EnhanceProduct product) async {
     final details = product.handle! as ProductDetails;
-    // Subscriptions are bought as non-consumables; on Play the base plan's
-    // offer token rides on the GooglePlayProductDetails.
+    // Subscriptions are bought as non-consumables, like the lifetime product;
+    // on Play the base plan's offer token rides on the GooglePlayProductDetails.
     await _iap.buyNonConsumable(
       purchaseParam: PurchaseParam(productDetails: details),
     );

@@ -17,6 +17,8 @@ class LambentLicence {
     this.source,
     this.proOnHousehold = false,
     this.buyUrl,
+    this.household,
+    this.present,
   });
 
   factory LambentLicence.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,8 @@ class LambentLicence {
       source: e['source'] as String?,
       proOnHousehold: json['pro_on_this_household'] == true,
       buyUrl: buy is String ? Uri.tryParse(buy) : null,
+      household: json['household'] as String?,
+      present: LeasePresentation.fromJson(json['present']),
     );
   }
 
@@ -51,6 +55,12 @@ class LambentLicence {
 
   /// The server's own checkout page, for builds that may not sell in-app.
   final Uri? buyUrl;
+
+  /// The server's household id, which a player signs its lease to.
+  final String? household;
+
+  /// The server's own lease, shown to the player that asked (section 8.2).
+  final LeasePresentation? present;
 
   /// Whether the household has Enhance, bought or on trial.
   bool get enhanced =>
@@ -82,6 +92,44 @@ class LambentLicence {
       _ => null,
     };
   }
+}
+
+/// A lease shown to one receiver (ENTITLEMENTS.md section 8.2): the key the
+/// lease names signs it, so a lease's bytes alone prove nothing.
+@immutable
+class LeasePresentation {
+  const LeasePresentation({
+    required this.lease,
+    required this.tsMs,
+    required this.to,
+    required this.sig,
+  });
+
+  final String lease;
+  final int tsMs;
+  final String to;
+  final String sig;
+
+  static LeasePresentation? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final lease = json['lease'], ts = json['ts_ms'], to = json['to'];
+    final sig = json['sig'];
+    if (lease is! String || ts is! num || to is! String || sig is! String) {
+      return null;
+    }
+    return LeasePresentation(lease: lease, tsMs: ts.toInt(), to: to, sig: sig);
+  }
+
+  Map<String, Object> toJson() => {
+    'lease': lease,
+    'ts_ms': tsMs,
+    'to': to,
+    'sig': sig,
+  };
+
+  /// What the holder signs.
+  static String message(String to, int tsMs, String lease) =>
+      'lambent-present\n$to\n$tsMs\n$lease';
 }
 
 /// The proof a store hands over for one purchase, in the shape Lambent Server
@@ -169,13 +217,47 @@ class LambentLicenceClient {
       'X-Emby-Token': token,
   };
 
-  /// The server's licence, or null when the server has no such route (a
-  /// Jellyfin or Emby server that is not Lambent).
-  Future<LambentLicence?> fetch() async {
+  /// The server's licence, or null when it isn't Lambent Server: Jellyfin and
+  /// Emby have no such route, Plex refuses it, and a web app answers with its
+  /// own page. Lambent's route needs no sign-in, so a refusal is not Lambent's.
+  /// [player] asks a licensed server to show this player its lease.
+  Future<LambentLicence?> fetch({String? player}) async {
+    final http.Response response;
+    try {
+      final uri = _uri('/v1/licence');
+      response = await _client
+          .get(
+            player == null
+                ? uri
+                : uri.replace(queryParameters: {'player': player}),
+            headers: _headers,
+          )
+          .timeout(timeout);
+    } on Exception catch (e) {
+      throw LicenceException(0, message: '$e');
+    }
+    final status = response.statusCode;
+    if (status == 404 || status == 401 || status == 403) return null;
+    try {
+      return _licenceOrThrow(response);
+    } on LicenceException catch (e) {
+      if (status >= 200 && status < 300 && e.code == 'bad_body') return null;
+      rethrow;
+    }
+  }
+
+  /// Shows the server this player's lease: the household then has Enhance as
+  /// long as the lease does (section 8.2). Null from a server too old to know
+  /// the route.
+  Future<LambentLicence?> present(LeasePresentation presentation) async {
     final http.Response response;
     try {
       response = await _client
-          .get(_uri('/v1/licence'), headers: _headers)
+          .post(
+            _uri('/v1/licence/present'),
+            headers: {..._headers, 'Content-Type': 'application/json'},
+            body: jsonEncode(presentation.toJson()),
+          )
           .timeout(timeout);
     } on Exception catch (e) {
       throw LicenceException(0, message: '$e');
@@ -210,7 +292,9 @@ class LambentLicenceClient {
       body = null;
     }
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (body is Map<String, dynamic>) return LambentLicence.fromJson(body);
+      if (body is Map<String, dynamic> && body['enhance'] is Map) {
+        return LambentLicence.fromJson(body);
+      }
       throw LicenceException(response.statusCode, code: 'bad_body');
     }
     final error = body is Map ? body : const {};

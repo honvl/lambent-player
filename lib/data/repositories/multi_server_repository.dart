@@ -6,6 +6,9 @@ import 'package:server_core/server_core.dart';
 
 import '../../auth/models/server.dart';
 import '../../auth/repositories/session_repository.dart';
+import '../../auth/models/user.dart';
+import '../../auth/services/silo_household.dart';
+import '../../auth/services/silo_token_storage.dart';
 import '../../auth/store/authentication_store.dart';
 import '../../auth/store/credential_store.dart';
 import '../../preference/preference_constants.dart';
@@ -97,6 +100,7 @@ class MultiServerRepository {
     final activeServerId = _sessionRepo.activeServerId;
 
     final sessions = <ServerUserSession>[];
+    final siloTokens = SiloTokenStorage(_authStore);
 
     for (final server in servers) {
       try {
@@ -105,6 +109,7 @@ class MultiServerRepository {
 
         String? userId;
         String? accessToken;
+        PrivateUser? chosenUser;
 
         if (server.id == activeServerId && _sessionRepo.activeUserId != null) {
           final activeUser = users
@@ -113,22 +118,34 @@ class MultiServerRepository {
           if (activeUser != null && activeUser.accessToken.isNotEmpty) {
             userId = activeUser.id;
             accessToken = activeUser.accessToken;
+            chosenUser = activeUser;
           }
         }
 
         if (userId == null) {
           final token = await _credentialStore.getToken(server.id);
-          for (final user in users) {
+          // Another Silo server: its most recently used profile that needs
+          // no PIN now, not whichever profile was stored first.
+          final candidates = server.serverType == ServerType.silo
+              ? [
+                  ?SiloHousehold.profileForOtherServer(users, siloTokens),
+                ]
+              : users;
+          for (final user in candidates) {
             final userToken = token ?? user.accessToken;
             if (userToken.isNotEmpty) {
               userId = user.id;
               accessToken = userToken;
+              chosenUser = user;
               break;
             }
           }
         }
 
-        if (userId == null || accessToken == null || accessToken.isEmpty) {
+        if (userId == null ||
+            chosenUser == null ||
+            accessToken == null ||
+            accessToken.isEmpty) {
           continue;
         }
 
@@ -137,7 +154,13 @@ class MultiServerRepository {
           serverType: server.serverType,
           baseUrl: server.address,
         );
-        client.accessToken = accessToken;
+        // A Silo profile restores its account's pair and profile. Setting the
+        // stored access token would drop the active session's refresh token.
+        siloTokens.putLogin(
+          client: client,
+          user: chosenUser,
+          accessToken: accessToken,
+        );
         client.userId = userId;
 
         sessions.add(
@@ -460,28 +483,28 @@ class MultiServerRepository {
     final sessions = await getLoggedInServers();
     final perServer = (limit * 3).clamp(1, 100);
 
-    final results = await Future.wait(
-      sessions.map(
-        (session) => _withTimeout(() async {
-          final response = await session.client.itemsApi.getGenres(
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            recursive: true,
-            limit: perServer,
-            fields: 'ItemCounts,PrimaryImageAspectRatio',
-            includeItemTypes: browseItemTypes,
-          );
-          final items = await _buildBrowsableGenresForSession(
-            session,
-            response,
-            includeItemTypes: browseItemTypes,
-          );
-          _rowTotals['${cacheKeyPrefix}_${session.server.id}'] =
-              response['TotalRecordCount'] as int? ?? items.length;
-          return items;
-        }, label: '$cacheKeyPrefix from ${session.server.name}'),
-      ),
-    );
+    final results = await _gatherPerServer(sessions, (session) async {
+      final response = await session.client.itemsApi.getGenres(
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+        recursive: true,
+        limit: perServer,
+        fields: 'ItemCounts,PrimaryImageAspectRatio',
+        includeItemTypes: browseItemTypes,
+      );
+      // No server can put more than [limit] genres into the row, and each one
+      // costs a request for its artwork, so a big library would otherwise run
+      // past the per-server timeout.
+      final items = await _buildBrowsableGenresForSession(
+        session,
+        response,
+        includeItemTypes: browseItemTypes,
+        maxGenres: limit,
+      );
+      _rowTotals['${cacheKeyPrefix}_${session.server.id}'] =
+          response['TotalRecordCount'] as int? ?? items.length;
+      return items;
+    }, label: cacheKeyPrefix);
 
     final all = _sortAggregatedItems(
       results.expand((e) => e).toList(growable: false),
@@ -1283,9 +1306,10 @@ class MultiServerRepository {
     ServerUserSession session,
     Map<String, dynamic> response, {
     required List<String> includeItemTypes,
+    int? maxGenres,
   }) async {
     final rawItems = response['Items'] as List? ?? const [];
-    final genres = rawItems
+    final browsable = rawItems
         .whereType<Map>()
         .map((item) => item.cast<String, dynamic>())
         .where(
@@ -1293,7 +1317,8 @@ class MultiServerRepository {
             genre,
             normalizedItemTypes: includeItemTypes,
           ),
-        )
+        );
+    final genres = (maxGenres == null ? browsable : browsable.take(maxGenres))
         .toList(growable: false);
 
     if (genres.isEmpty) {

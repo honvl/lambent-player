@@ -108,16 +108,13 @@ void main() {
     expect(theme.cardTheme.color, _black);
   });
 
-  test('changing theme while OLED is on keeps the crush applied', () async {
+  test('asking for another theme keeps Glass, the only one', () async {
     final prefs = await _prefs();
     final controller = AppThemeController.fromPreferences(prefs);
 
-    await prefs.set(UserPreferences.oledMode, OledMode.vivid);
-    controller.refreshFromPreferences(prefs);
-
     await controller.applyThemeSelection(prefs, VisualThemeId.neonPulse);
 
-    expect(controller.activeThemeId, VisualThemeId.neonPulse);
-    expect(controller.activeSpec.colors.background, _black);
+    expect(controller.activeThemeId, VisualThemeId.glass);
+    expect(controller.activeSpec.id, ThemeRegistry.glassId);
   });
 }

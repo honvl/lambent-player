@@ -1,6 +1,6 @@
 {
     "@@locale": "it",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Versione Lambent {version}",
+    "appVersionFooter": "Versione Moonfin {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent non è riuscito ad accedere al portachiavi di sistema. L'accesso può continuare, ma l'archiviazione sicura dei token potrebbe non essere disponibile fino allo sblocco del portachiavi.",
+    "secureStorageUnavailableMessage": "Moonfin non è riuscito ad accedere al portachiavi di sistema. L'accesso può continuare, ma l'archiviazione sicura dei token potrebbe non essere disponibile fino allo sblocco del portachiavi.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Passa da Lambent a Neon Pulse senza riavviare l'app.",
+    "settingsAppearanceThemeSubtitle": "Passa da Moonfin a Neon Pulse senza riavviare l'app.",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Uscire da Lambent?",
+    "exitApp": "Uscire da Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3046,7 +3046,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Non impostato. Lambent cercherà un mpv.conf predefinito nelle cartelle app/dati.",
+    "notSetMpvConf": "Non impostato. Moonfin cercherà un mpv.conf predefinito nelle cartelle app/dati.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -4165,7 +4165,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Riproduci in Lambent",
+    "playInMoonfin": "Riproduci in Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4219,7 +4219,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Elemento non trovato nella tua libreria Lambent",
+    "itemNotFoundInLibrary": "Elemento non trovato nella tua libreria Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4475,7 +4475,7 @@
         }
     },
     "adminServerRebootInProgress": "Riavvio server in corso",
-    "adminServerRebootMessage": "Riavvio server in corso, riavvia Lambent",
+    "adminServerRebootMessage": "Riavvio server in corso, riavvia Moonfin",
     "adminActiveSessions": "Sessioni Attive",
     "adminSessionsLoadFailed": "Impossibile caricare le sessioni",
     "adminNoActiveSessions": "Nessuna sessione attiva",
@@ -6266,7 +6266,7 @@
     "@subtitlePreviewText": {
         "description": "Sample text shown in the subtitle live preview"
     },
-    "libraryVisibilityDescription": "Attiva/disattiva la visibilità della home page per libreria. Riavvia Lambent affinché le modifiche abbiano effetto.",
+    "libraryVisibilityDescription": "Attiva/disattiva la visibilità della home page per libreria. Riavvia Moonfin affinché le modifiche abbiano effetto.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -6511,7 +6511,7 @@
     "settingsShowGenresButtonInNavigation": "Mostra il pulsante dei generi nella barra di navigazione",
     "settingsShowFavoritesButtonInNavigation": "Mostra il pulsante dei preferiti nella barra di navigazione",
     "settingsShowLibrariesButtonInNavigation": "Mostra il pulsante delle librerie nella barra di navigazione",
-    "settingsLibraryVisibilitySubtitle": "Attiva/disattiva la visibilità della home page per libreria. Riavvia Lambent affinché le modifiche abbiano effetto.",
+    "settingsLibraryVisibilitySubtitle": "Attiva/disattiva la visibilità della home page per libreria. Riavvia Moonfin affinché le modifiche abbiano effetto.",
     "settingsMediaBarAndLocalPreviews": "Barra multimediale e anteprime locali",
     "settingsVisualOverlays": "Sovrapposizioni visive",
     "settingsSeasonalSurprise": "Sorpresa stagionale",
@@ -6535,9 +6535,9 @@
     "settingsLicenses": "Licenze",
     "settingsOpenSourceLicenseNotices": "Avvisi sulla licenza open source",
     "settingsPrivacyPolicy": "Informativa sulla privacy",
-    "settingsPrivacyPolicySubtitle": "Come Lambent gestisce i tuoi dati",
+    "settingsPrivacyPolicySubtitle": "Come Moonfin gestisce i tuoi dati",
     "settingsCheckForUpdates": "Controlla gli aggiornamenti",
-    "settingsCheckForUpdatesSubtitle": "Controlla la versione più recente Lambent",
+    "settingsCheckForUpdatesSubtitle": "Controlla la versione più recente Moonfin",
     "settingsPoweredByFlutter": "Alimentato da Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# avviso di licenza} other {# avvisi di licenza}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Preferisci i sottotitoli SDH",
     "preferSdhSubtitlesSubtitle": "Dai priorità alle tracce di sottotitoli SDH/CC nella selezione automatica.",
     "webDiagnostics": "Diagnostica web",
-    "webDiagnosticsTitle": "Diagnostica Web di Lambent",
+    "webDiagnosticsTitle": "Diagnostica Web di Moonfin",
     "webDiagnosticsIntro": "Usa questa pagina per diagnosticare i problemi di connettività del browser (CORS, contenuti misti e impostazioni di rilevamento).",
     "webDiagnosticsDetectedMixedContentFailure": "Rilevato Errore di Contenuto Misto",
     "webDiagnosticsDetectedCorsPreflightFailure": "Rilevato Errore CORS/Preflight",
-    "webDiagnosticsMixedContentFailureBody": "Lambent ha rilevato una pagina HTTPS che tenta di chiamare un URL server HTTP. I browser bloccano questa richiesta prima che raggiunga il tuo server.",
-    "webDiagnosticsCorsFailureBody": "Lambent ha rilevato un errore di richiesta a livello di browser, comunemente causato da intestazioni CORS o preflight mancanti sul media server.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin ha rilevato una pagina HTTPS che tenta di chiamare un URL server HTTP. I browser bloccano questa richiesta prima che raggiunga il tuo server.",
+    "webDiagnosticsCorsFailureBody": "Moonfin ha rilevato un errore di richiesta a livello di browser, comunemente causato da intestazioni CORS o preflight mancanti sul media server.",
     "webDiagnosticsTargetUrl": "URL di destinazione: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "non configurato",
     "webDiagnosticsMixedContent": "Contenuto Misto",
     "webDiagnosticsMixedContentDetected": "Questa pagina è caricata via HTTPS, ma uno o più URL configurati sono HTTP. I browser impediscono alle pagine HTTPS di chiamare API HTTP.",
-    "webDiagnosticsMixedContentFix": "Soluzione: pubblica il tuo media server o l'endpoint proxy via HTTPS, oppure carica Lambent via HTTP solo su reti locali attendibili.",
+    "webDiagnosticsMixedContentFix": "Soluzione: pubblica il tuo media server o l'endpoint proxy via HTTPS, oppure carica Moonfin via HTTP solo su reti locali attendibili.",
     "webDiagnosticsNoMixedContentDetected": "Nessuna configurazione evidente di contenuto misto rilevata dalle impostazioni di runtime attuali.",
     "webDiagnosticsCorsChecklist": "Checklist CORS",
     "webDiagnosticsCorsChecklistItem1": "• Consenti l'origine del browser in Access-Control-Allow-Origin.",
@@ -7453,7 +7453,7 @@
     "@detailScreenStyleModern": {
         "description": "Detail screen style option: the responsive cinematic layout"
     },
-    "recommendationSystemMoonfin": "Suggerimenti Lambent",
+    "recommendationSystemMoonfin": "Suggerimenti Moonfin",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7527,7 +7527,7 @@
     "@settingsConnectionSection": {
         "description": "Section header for server connection settings"
     },
-    "detailScreenStyleSubtitle": "Classica utilizza il layout Lambent originale con contenuti centrati. Moderna offre un layout cinematografico e adattivo.",
+    "detailScreenStyleSubtitle": "Classica utilizza il layout Moonfin originale con contenuti centrati. Moderna offre un layout cinematografico e adattivo.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7539,11 +7539,11 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "recommendationSystemSubtitle": "Usa l'algoritmo locale di Suggerimenti Lambent oppure le metriche di similarità di TMDb. Nota: le raccomandazioni online richiedono l'integrazione con Seerr.",
+    "recommendationSystemSubtitle": "Usa l'algoritmo locale di Suggerimenti Moonfin oppure le metriche di similarità di TMDb. Nota: le raccomandazioni online richiedono l'integrazione con Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Limita i suggerimenti di Suggerimenti Lambent in base alla classificazione per età del contenuto selezionato",
+    "recommendationsApplyParentalRatingCapSubtitle": "Limita i suggerimenti di Suggerimenti Moonfin in base alla classificazione per età del contenuto selezionato",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7612,7 +7612,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "I temi personalizzati modificano l'aspetto di Lambent. Scegli quello più adatto al tuo stile.",
+    "customThemeSubtitle": "I temi personalizzati modificano l'aspetto di Moonfin. Scegli quello più adatto al tuo stile.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7703,7 +7703,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Accedi a Lambent dal tuo telefono",
+    "carSignInPrompt": "Accedi a Moonfin dal tuo telefono",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller è il moderno renderer GPU di Flutter, per animazioni più fluide e meno scatti. Su alcuni TV box e GPU datate può causare glitch o video nero; in tal caso disattivalo. Automatico sceglie l'impostazione migliore per il tuo dispositivo. Riavvia Lambent per applicare la modifica.",
+    "impellerRenderingSubtitle": "Impeller è il moderno renderer GPU di Flutter, per animazioni più fluide e meno scatti. Su alcuni TV box e GPU datate può causare glitch o video nero; in tal caso disattivalo. Automatico sceglie l'impostazione migliore per il tuo dispositivo. Riavvia Moonfin per applicare la modifica.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent deve riavviarsi per cambiare il motore di rendering. Chiudi l'app ora, poi riaprila per applicare la modifica.",
+    "impellerRestartMessage": "Moonfin deve riavviarsi per cambiare il motore di rendering. Chiudi l'app ora, poi riaprila per applicare la modifica.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9188,7 +9188,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android consente a Lambent di scrivere solo nelle cartelle di sua proprietà e questo dispositivo non ha memorie rimovibili. Attiva \"Salva nella cartella Download\" qui sopra per mantenere i download in una posizione raggiungibile dalle altre app.",
+    "downloadLocationLimitedByAndroid": "Android consente a Moonfin di scrivere solo nelle cartelle di sua proprietà e questo dispositivo non ha memorie rimovibili. Attiva \"Salva nella cartella Download\" qui sopra per mantenere i download in una posizione raggiungibile dalle altre app.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9620,7 +9620,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Sovrascrivi il layout rilevato quando il dispositivo viene identificato in modo errato. Riavvia Lambent per applicare le modifiche.",
+    "interfaceLayoutSubtitle": "Sovrascrivi il layout rilevato quando il dispositivo viene identificato in modo errato. Riavvia Moonfin per applicare le modifiche.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10051,5 +10051,247 @@
                 "type": "String"
             }
         }
+    },
+    "animeMarkerFiller": "Filler",
+    "@animeMarkerFiller": {
+        "description": "Badge on an anime episode that is filler, meaning it is not adapted from the source manga"
+    },
+    "animeMarkerMixed": "Misto",
+    "@animeMarkerMixed": {
+        "description": "Badge on an anime episode that mixes source material with filler, so it still contains story"
+    },
+    "animeMarkerSubbed": "Sottotitolato",
+    "@animeMarkerSubbed": {
+        "description": "Badge on an anime episode or season whose only audio is Japanese, so it is watched with subtitles"
+    },
+    "animeMarkerDubbed": "Doppiato",
+    "@animeMarkerDubbed": {
+        "description": "Badge on an anime episode or season that has an audio track in a language other than Japanese"
+    },
+    "animeMarkerSubbedAndDubbed": "Sottotitolato/Doppiato",
+    "@animeMarkerSubbedAndDubbed": {
+        "description": "Badge on anime that carries both the original Japanese audio and a dub, so it can be watched either way"
+    },
+    "timesUpMessage": "Questo account non è al momento disponibile.",
+    "@timesUpMessage": {
+        "description": "Explanation on the Time's up screen"
+    },
+    "timesUpResumesToday": "Potrai utilizzarlo nuovamente oggi alle {time}.",
+    "@timesUpResumesToday": {
+        "description": "When access returns, on the Time's up screen, for a time later today",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "timesUpResumesTomorrow": "Potrai utilizzarlo nuovamente domani alle {time}.",
+    "@timesUpResumesTomorrow": {
+        "description": "When access returns, on the Time's up screen, for a time tomorrow",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "timesUpResumesOn": "Potrai utilizzarlo nuovamente il {day} alle {time}.",
+    "@timesUpResumesOn": {
+        "description": "When access returns, on the Time's up screen, for a time on a later day",
+        "placeholders": {
+            "day": {
+                "type": "String"
+            },
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "loginForbidden": "Questo account non può effettuare l'accesso al momento. Potrebbe essere soggetto a restrizioni orarie, bloccato o disabilitato. Riprova più tardi o contatta un amministratore.",
+    "@loginForbidden": {
+        "description": "Sign in error when the server refuses the account with a 403, which Jellyfin does for an access schedule, a lockout or a disabled account without saying which"
+    },
+    "readOnTmdb": "Leggi su TMDB",
+    "@readOnTmdb": {
+        "description": "Button in an opened review that opens the review on the TMDB website"
+    },
+    "activeDownloads": "Download Attivi",
+    "@activeDownloads": {
+        "description": "Tab title for downloads that are transferring or queued"
+    },
+    "savedMediaDeleteDownload": "Elimina download",
+    "@savedMediaDeleteDownload": {
+        "description": "Row menu action that removes one downloaded file from the device"
+    },
+    "savedMediaCancelDownload": "Annulla download",
+    "@savedMediaCancelDownload": {
+        "description": "Row menu action that stops a running or queued transfer"
+    },
+    "sortByName": "Nome",
+    "@sortByName": {
+        "description": "Sort option: alphabetical by title"
+    },
+    "storageAndDownloads": "Archiviazione & Download",
+    "@storageAndDownloads": {
+        "description": "Settings root entry and screen for downloads, storage location and the image cache"
+    },
+    "incompleteRecording": "Incompleto",
+    "@incompleteRecording": {
+        "description": "Badge and detail label for a Live TV recording that was written for less than its scheduled length"
+    },
+    "increaseValue": "Aumenta {setting}",
+    "@increaseValue": {
+        "description": "Tooltip for the button that raises a setting's value",
+        "placeholders": {
+            "setting": {
+                "type": "String"
+            }
+        }
+    },
+    "subtitleDownloadLanguages": "Lingue per il download dei sottotitoli",
+    "@subtitleDownloadLanguages": {
+        "description": "Setting that picks which languages a subtitle download searches"
+    },
+    "preferExternalSubtitles": "Preferisci i sottotitoli esterni",
+    "preferExternalSubtitlesSubtitle": "Privilegia i sottotitoli esterni rispetto a quelli inclusi nel video.",
+    "preferTextSubtitles": "Preferisci i sottotitoli testuali",
+    "preferTextSubtitlesSubtitle": "Privilegia i sottotitoli testuali (SRT, VTT) rispetto a quelli grafici (PGS, VobSub).",
+    "signingIn": "Accesso in corso...",
+    "@signingIn": {
+        "description": "Shown under the user list while a tapped user is being signed in"
+    },
+    "spotlightChaptersExtras": "Capitoli ed extra",
+    "@spotlightChaptersExtras": {
+        "description": "Title of the spotlight summary card that opens the chapters and special features modal"
+    },
+    "spotlightSeasonsEpisodes": "Stagioni ed episodi",
+    "@spotlightSeasonsEpisodes": {
+        "description": "Title of the spotlight summary card that opens the seasons grid modal for a series"
+    },
+    "spotlightMoviesAndShows": "Film & Serie TV",
+    "@spotlightMoviesAndShows": {
+        "description": "Subtitle of the spotlight similar and recommendations card"
+    },
+    "spotlightChaptersCount": "{count, plural, =1{1 capitolo} other{{count} capitoli}}",
+    "@spotlightChaptersCount": {
+        "description": "Count fragment on spotlight summary cards: chapters",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightExtrasCount": "{count, plural, =1{1 extra} other{{count} extra}}",
+    "@spotlightExtrasCount": {
+        "description": "Count fragment on spotlight summary cards: extras/special features",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightSeasonsCount": "{count, plural, =1{1 stagione} other{{count} stagioni}}",
+    "@spotlightSeasonsCount": {
+        "description": "Count fragment on spotlight summary cards: seasons",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightEpisodesCount": "{count, plural, =1{1 episodio} other{{count} episodi}}",
+    "@spotlightEpisodesCount": {
+        "description": "Count fragment on spotlight summary cards: episodes",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightMoviesCount": "{count, plural, =1{1 film} other{{count} film}}",
+    "@spotlightMoviesCount": {
+        "description": "Count fragment on spotlight summary cards: movies",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightShowsCount": "{count, plural, =1{1 serie} other{{count} serie}}",
+    "@spotlightShowsCount": {
+        "description": "Count fragment on spotlight summary cards: series/shows",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightAlbumsCount": "{count, plural, =1{1 album} other{{count} album}}",
+    "@spotlightAlbumsCount": {
+        "description": "Count fragment on spotlight summary cards: albums",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "spotlightCollectionsCard": "Raccolte",
+    "@spotlightCollectionsCard": {
+        "description": "Title of the spotlight summary card that opens the parent collections modal"
+    },
+    "spotlightTitlesCount": "{count, plural, =1{1 titolo} other{{count} titoli}}",
+    "@spotlightTitlesCount": {
+        "description": "Count fragment on the spotlight similar card: titles across the library and Seerr sections",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "detailScreenStyleNouveau": "Nouveau",
+    "@detailScreenStyleNouveau": {
+        "description": "Detail screen style option: nouveau full-screen layout with integrated sections"
+    },
+    "detailScreenStyleMinimalist": "Minimalista",
+    "@detailScreenStyleMinimalist": {
+        "description": "Detail screen style option: artwork, one play button and the episodes, and the style Kids Mode always shows"
+    },
+    "externalRowSortName": "Nome",
+    "externalRowSortReleaseDate": "Data di uscita",
+    "externalPlayerLiveTvOnlySubtitle": "Utilizza il lettore esterno per la TV in diretta e quello integrato per tutti gli altri contenuti.",
+    "@externalPlayerLiveTvOnlySubtitle": {
+        "description": "Description for the Live TV Only external player setting"
+    },
+    "autoDownloadStorageFull": "Spazio di archiviazione insufficiente",
+    "@autoDownloadStorageFull": {
+        "description": "Appended to the last-check summary when the storage limit stopped queueing"
+    },
+    "autoDownloadSection": "Download automatici",
+    "@autoDownloadSection": {
+        "description": "Settings section header for auto-download subscriptions"
+    },
+    "autoDownloadDeleteNever": "Mai",
+    "@autoDownloadDeleteNever": {
+        "description": "Delete-after-watching option: keep episodes"
+    },
+    "autoDownloadEnabledFor": "Download automatici abilitati per {title}",
+    "@autoDownloadEnabledFor": {
+        "description": "Snackbar after subscribing a series",
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "autoDownloadStorageFullTitle": "Spazio di archiviazione insufficiente per nuovi episodi",
+    "@autoDownloadStorageFullTitle": {
+        "description": "System notification title when the automatic check has to hold new episodes back"
+    },
+    "autoDownloadEnable": "Abilita Download Automatici",
+    "@autoDownloadEnable": {
+        "description": "Master switch for auto-download subscriptions"
+    },
+    "autoDownloadKeepAll": "Tutti",
+    "@autoDownloadKeepAll": {
+        "description": "Option meaning no cap on kept unwatched episodes"
     }
 }

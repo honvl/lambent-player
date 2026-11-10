@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
+import 'remote/remote_access.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get_it/get_it.dart';
@@ -31,11 +32,10 @@ import 'data/services/seerr_notification_service.dart';
 import 'data/services/media_server_client_factory.dart';
 import 'data/services/crash_report_service.dart';
 import 'data/services/log_service.dart';
-import 'data/services/storage_path_service.dart';
 import 'util/lambent_brand.dart';
 import 'util/scroll_sensitivity_binding.dart';
+import 'util/silo_image_hooks.dart';
 import 'util/webview_environment.dart';
-import 'data/services/theme_store_service.dart';
 import 'di/injection.dart';
 import 'playback/appletv_audio_now_playing_feeder.dart';
 import 'playback/native_apple_player_backend.dart';
@@ -47,7 +47,9 @@ import 'playback/display_hdr_probe.dart';
 import 'playback/media_browse_service.dart';
 import 'playback/mpris_service.dart';
 import 'playback/playback_lifecycle_handler.dart';
+import 'playback/subtitle_fonts.dart';
 import 'platform/background_refresh.dart';
+import 'platform/download_keep_alive.dart';
 import 'platform/web_runtime_config.dart';
 import 'preference/preference_constants.dart';
 import 'preference/user_preferences.dart';
@@ -731,6 +733,27 @@ class _AutoDownloadResumeObserver with WidgetsBindingObserver {
   }
 }
 
+/// Puts back a tunnel listener that the system closed while the app was suspended, on the way back and before the resume handlers
+/// send their requests. Losing focus alone, on a Mac or under Control Center, suspends nothing.
+class _TunnelListenerResumeObserver with WidgetsBindingObserver {
+  bool _away = false;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+        _away = true;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.resumed:
+        if (_away) unawaited(RemoteAccess.instance.reviveListeners());
+        _away = false;
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+}
+
 class _ImageCacheSweepObserver with WidgetsBindingObserver {
   _ImageCacheSweepObserver(this._prefs);
 
@@ -933,6 +956,7 @@ void main() async {
   }
 
   _configureImageCache();
+  installSiloImageHooks();
   _capSkiaCache();
   await configureImageDiskCache(tier: _resolvedTier());
 
@@ -964,6 +988,7 @@ void main() async {
   if (PlatformDetection.isAndroid && PlatformDetection.isTV) NavigationSounds.install();
   // When the system runs the auto-download refresh task against this
   // engine, the native side retries its call until this handler is bound.
+  DownloadKeepAlive.instance.bind();
   if (AutoDownloadService.isSupportedPlatform) {
     BackgroundRefresh.instance.bind(runAutoDownloadBackgroundRefresh);
   }
@@ -986,6 +1011,7 @@ void main() async {
   WidgetsBinding.instance.addObserver(_ImageCacheSweepObserver(prefs));
   WidgetsBinding.instance.addObserver(_CapabilityRefreshObserver());
   WidgetsBinding.instance.addObserver(_AutoDownloadResumeObserver());
+  WidgetsBinding.instance.addObserver(_TunnelListenerResumeObserver());
   WidgetsBinding.instance.addPostFrameCallback((_) => _sweepImageCache(prefs));
 
   GetIt.instance<PlaybackManager>().queueService.queueChangedStream.listen((_) {
@@ -998,12 +1024,6 @@ void main() async {
       }
     }
   });
-
-  // Register Theme Store themes before the active theme is resolved so a
-  // store-saved theme applies on launch.
-  await ThemeStoreService(
-    GetIt.instance<StoragePathService>(),
-  ).loadAndRegister();
 
   if (PlatformDetection.isDesktop) {
     await _restoreWindowGeometry();
@@ -1039,6 +1059,8 @@ void main() async {
     GetIt.instance<AirPlayCommandBridge>().start();
   } catch (_) {}
 
+  await RemoteAccess.instance.restore();
+
   runApp(const MoonfinApp());
 }
 
@@ -1070,6 +1092,8 @@ Future<void> _initDeferredStartupServices(UserPreferences prefs) async {
   }
 
   await _detectAndApplyAudioCapabilities(prefs);
+
+  unawaited(SubtitleFonts.instance.follow(prefs));
 
   try {
     await GetIt.instance<DownloadNotificationService>().initialize();

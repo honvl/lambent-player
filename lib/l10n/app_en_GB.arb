@@ -1,6 +1,6 @@
 {
     "@@locale": "en_GB",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent version {version}",
+    "appVersionFooter": "Moonfin version {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent could not access your system keyring. Login can continue, but secure token storage may be unavailable until the keyring is unlocked.",
+    "secureStorageUnavailableMessage": "Moonfin could not access your system keyring. Login can continue, but secure token storage may be unavailable until the keyring is unlocked.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Exit Lambent?",
+    "exitApp": "Exit Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Not set. Lambent will try a default mpv.conf in app/data folders.",
+    "notSetMpvConf": "Not set. Moonfin will try a default mpv.conf in app/data folders.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Toggle home page visibility per library. Restart Lambent for changes to take effect.",
+    "libraryVisibilityDescription": "Toggle home page visibility per library. Restart Moonfin for changes to take effect.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4248,7 +4248,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Play in Lambent",
+    "playInMoonfin": "Play in Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4302,7 +4302,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Item not found in your Lambent library",
+    "itemNotFoundInLibrary": "Item not found in your Moonfin library",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4606,7 +4606,7 @@
         }
     },
     "adminServerRebootInProgress": "Server reboot in progress",
-    "adminServerRebootMessage": "Server reboot in progress, please restart Lambent",
+    "adminServerRebootMessage": "Server reboot in progress, please restart Moonfin",
     "adminActiveSessions": "Active Sessions",
     "adminSessionsLoadFailed": "Failed to load sessions",
     "adminNoActiveSessions": "No active sessions",
@@ -6497,7 +6497,7 @@
     "settingsShowGenresButtonInNavigation": "Show the genres button in the navigation bar",
     "settingsShowFavoritesButtonInNavigation": "Show the favourites button in the navigation bar",
     "settingsShowLibrariesButtonInNavigation": "Show the libraries button in the navigation bar",
-    "settingsLibraryVisibilitySubtitle": "Toggle home page visibility per library. Restart Lambent for changes to take effect.",
+    "settingsLibraryVisibilitySubtitle": "Toggle home page visibility per library. Restart Moonfin for changes to take effect.",
     "settingsMediaBarAndLocalPreviews": "Media Bar & Local Previews",
     "settingsVisualOverlays": "Visual Overlays",
     "settingsSeasonalSurprise": "Seasonal Surprise",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licenses",
     "settingsOpenSourceLicenseNotices": "Open-source license notices",
     "settingsPrivacyPolicy": "Privacy Policy",
-    "settingsPrivacyPolicySubtitle": "How Lambent handles your data",
+    "settingsPrivacyPolicySubtitle": "How Moonfin handles your data",
     "settingsCheckForUpdates": "Check for Updates",
-    "settingsCheckForUpdatesSubtitle": "Check for the latest Lambent release",
+    "settingsCheckForUpdatesSubtitle": "Check for the latest Moonfin release",
     "settingsPoweredByFlutter": "Powered by Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# license notice} other {# license notices}}",
     "@settingsLicenseNoticesCount": {
@@ -7066,12 +7066,12 @@
     "preferSdhSubtitles": "Prefer SDH subtitles",
     "preferSdhSubtitlesSubtitle": "Prioritize SDH/CC subtitle tracks when auto-selecting.",
     "webDiagnostics": "Web diagnostics",
-    "webDiagnosticsTitle": "Lambent Web Diagnostics",
+    "webDiagnosticsTitle": "Moonfin Web Diagnostics",
     "webDiagnosticsIntro": "Use this page to diagnose browser connectivity issues (CORS, mixed content, and discovery settings).",
     "webDiagnosticsDetectedMixedContentFailure": "Detected Mixed-Content Failure",
     "webDiagnosticsDetectedCorsPreflightFailure": "Detected CORS/Preflight Failure",
-    "webDiagnosticsMixedContentFailureBody": "Lambent detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.",
-    "webDiagnosticsCorsFailureBody": "Lambent detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin detected an HTTPS page trying to call an HTTP server URL. Browsers block this request before it reaches your server.",
+    "webDiagnosticsCorsFailureBody": "Moonfin detected a browser-level request failure that is commonly caused by missing CORS or preflight headers on the media server.",
     "webDiagnosticsTargetUrl": "Target URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7101,7 +7101,7 @@
     "notConfigured": "not configured",
     "webDiagnosticsMixedContent": "Mixed Content",
     "webDiagnosticsMixedContentDetected": "This page is loaded over HTTPS, but one or more configured URLs are HTTP. Browsers block HTTPS pages from calling HTTP APIs.",
-    "webDiagnosticsMixedContentFix": "Fix: serve your media server or proxy endpoint via HTTPS, or load Lambent over HTTP on trusted local networks only.",
+    "webDiagnosticsMixedContentFix": "Fix: serve your media server or proxy endpoint via HTTPS, or load Moonfin over HTTP on trusted local networks only.",
     "webDiagnosticsNoMixedContentDetected": "No obvious mixed-content configuration detected from current runtime settings.",
     "webDiagnosticsCorsChecklist": "CORS Checklist",
     "webDiagnosticsCorsChecklistItem1": "• Allow the browser origin in Access-Control-Allow-Origin.",
@@ -7593,7 +7593,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Classic is the original centred Lambent layout. Modern is a responsive cinematic layout. Spotlight is a hero-first layout with pop-up content cards. Nouveau is a full-screen layout with sections stacked down the page. Minimalist is artwork, one play button and the episodes.",
+    "detailScreenStyleSubtitle": "How a movie or show looks when you open it.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7625,11 +7625,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Use the Lambent Recommends local-library algorithm, Jellyfin Recommends server engine, or the online TMDb's Similarity Metrics. Note: Online recommendations require Seerr integration.",
+    "recommendationSystemSubtitle": "Use the Moonfin Recommends local-library algorithm, Jellyfin Recommends server engine, or the online TMDb's Similarity Metrics. Note: Online recommendations require Seerr integration.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recommends",
+    "recommendationSystemMoonfin": "Moonfin Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7641,7 +7641,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Limit Lambent Recommends suggestions by parental rating of target media",
+    "recommendationsApplyParentalRatingCapSubtitle": "Limit Moonfin Recommends suggestions by parental rating of target media",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7705,7 +7705,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Custom themes alter visual elements across Lambent. Choose one of these options to suit your style.",
+    "customThemeSubtitle": "Custom themes alter visual elements across Moonfin. Choose one of these options to suit your style.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7891,7 +7891,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Sign in to Lambent on your phone",
+    "carSignInPrompt": "Sign in to Moonfin on your phone",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8159,7 +8159,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android only lets Lambent write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.",
+    "downloadLocationLimitedByAndroid": "Android only lets Moonfin write to the folders it owns, and this device has no removable storage. Turn on Save to Downloads folder above to keep downloads somewhere other apps can reach.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9291,7 +9291,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller is Flutter's modern GPU renderer for smoother animations and less stutter. On some TV boxes and older GPUs it can cause glitches or black video; switch it Off if you see those. Automatic picks the best default for your device. Restart Lambent to apply.",
+    "impellerRenderingSubtitle": "Impeller is Flutter's modern GPU renderer for smoother animations and less stutter. On some TV boxes and older GPUs it can cause glitches or black video; switch it Off if you see those. Automatic picks the best default for your device. Restart Moonfin to apply.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -9302,7 +9302,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent needs to restart to change the rendering engine. Close the app now, then reopen it to apply.",
+    "impellerRestartMessage": "Moonfin needs to restart to change the rendering engine. Close the app now, then reopen it to apply.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9623,7 +9623,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Override the detected layout when this device is read wrong. Restart Lambent for changes to take effect.",
+    "interfaceLayoutSubtitle": "Override the detected layout when this device is read wrong. Restart Moonfin for changes to take effect.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10673,7 +10673,7 @@
     "@shortcutToggleFullscreen": {
         "description": "F11 and Alt+Enter anywhere, F in the player"
     },
-    "shortcutQuit": "Quit Lambent",
+    "shortcutQuit": "Quit Moonfin",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },
@@ -10892,7 +10892,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "Customize the loading animations used throughout Lambent",
+    "loadingAnimationDescription": "Customize the loading animations used throughout Moonfin",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10904,7 +10904,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Lambent Logo",
+    "loadingAnimationImageMoonfinLogo": "Moonfin Logo",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10920,7 +10920,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Lambent Phases",
+    "loadingAnimationImageMoonfinPhases": "Moonfin Phases",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -11191,7 +11191,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Lambent",
+    "screensaverBackdropMoonfin": "Moonfin",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -11211,7 +11211,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Lambent Logo",
+    "screensaverComponentMoonfinLogo": "Moonfin Logo",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },
@@ -11247,7 +11247,7 @@
     "@showSeerrAvailabilityBadges": {
         "description": "Setting title for showing Seerr availability badges on media details pages"
     },
-    "showSeerrAvailabilityBadgesDescription": "Show season availability badges on media details pages",
+    "showSeerrAvailabilityBadgesDescription": "Show the Seerr status on posters and seasons across the app",
     "@showSeerrAvailabilityBadgesDescription": {
         "description": "Setting description for showing Seerr availability badges on media details pages"
     },
@@ -12033,7 +12033,7 @@
             }
         }
     },
-    "autoDownloadTranscodedForegroundNote": "Transcoded qualities only download while Lambent is open. Original quality also downloads in the background.",
+    "autoDownloadTranscodedForegroundNote": "Transcoded qualities only download while Moonfin is open. Original quality also downloads in the background.",
     "@autoDownloadTranscodedForegroundNote": {
         "description": "Shown under transcoded options when choosing the quality of an auto-download subscription"
     },
@@ -12041,7 +12041,7 @@
     "@autoDownloadTranscodedRunningNote": {
         "description": "Shown under a running transcoded download that a subscription queued"
     },
-    "autoDownloadForegroundOnly": "Downloads only while Lambent is open",
+    "autoDownloadForegroundOnly": "Downloads only while Moonfin is open",
     "@autoDownloadForegroundOnly": {
         "description": "Short note next to a followed series in a transcoded quality"
     },
@@ -12111,15 +12111,15 @@
     "@autoDownloadBackgroundRefresh": {
         "description": "Setting that lets the system wake the app to check for new episodes"
     },
-    "autoDownloadBackgroundRefreshSubtitle": "Allow the system to check for new episodes periodically while Lambent is closed",
+    "autoDownloadBackgroundRefreshSubtitle": "Allow the system to check for new episodes periodically while Moonfin is closed",
     "@autoDownloadBackgroundRefreshSubtitle": {
         "description": "Explains the background refresh setting"
     },
-    "autoDownloadBackgroundRefreshDenied": "Background App Refresh is disabled for Lambent. Enable it in iOS Settings.",
+    "autoDownloadBackgroundRefreshDenied": "Background App Refresh is disabled for Moonfin. Enable it in iOS Settings.",
     "@autoDownloadBackgroundRefreshDenied": {
         "description": "Shown when iOS forbids background refresh for the app"
     },
-    "autoDownloadBackgroundRestrictedAndroid": "Background usage is restricted for Lambent in Android Settings.",
+    "autoDownloadBackgroundRestrictedAndroid": "Background usage is restricted for Moonfin in Android Settings.",
     "@autoDownloadBackgroundRestrictedAndroid": {
         "description": "Shown when Android restricts the app from running in the background"
     },

@@ -7,6 +7,7 @@ import '../../util/platform_detection.dart';
 import 'enhance_purchases.dart';
 import 'enhance_store_iap.dart';
 import 'lambent_licence.dart';
+import 'player_licence.dart';
 
 /// Lambent Enhance for the server this app is signed in to: one
 /// [EnhancePurchases] at a time, rebuilt when the server changes.
@@ -21,6 +22,21 @@ class LambentEnhanceService {
   final EnhanceStore? _store = InAppPurchaseEnhanceStore.supported
       ? InAppPurchaseEnhanceStore()
       : null;
+
+  /// This player's own licence, whatever server it is signed in to.
+  final PlayerLicence player = PlayerLicence(store: SecurePlayerLicenceStore());
+
+  /// The steps this player gives itself where no Lambent Server has a plan for
+  /// it (ENTITLEMENTS.md section 8.3); null when there is a server to decide, or
+  /// no licence. The device then runs what it can of them. Asking is playing,
+  /// so it starts this player's trial.
+  ({int lines, bool lift})? get localSteps {
+    final purchases = current;
+    if (purchases == null || purchases.isLambentServer) return null;
+    if (!player.licensed) return null;
+    player.startTrial();
+    return (lines: 2160, lift: true);
+  }
 
   EnhancePurchases? _current;
   String? _forServer;
@@ -41,6 +57,7 @@ class LambentEnhanceService {
         accessToken: client.accessToken,
       ),
       store: _store,
+      player: player,
     );
     _current = purchases;
     // A server is held to its licence only once it has answered with one.

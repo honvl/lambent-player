@@ -6,9 +6,37 @@ import 'package:get_it/get_it.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../preference/user_preferences.dart';
+import '../models/aggregated_item.dart';
+import '../models/calendar_entry.dart';
 import '../models/upcoming_episode_info.dart';
 import '../repositories/seerr_repository.dart';
+import 'moonbase_endpoint.dart';
 import 'plugin_sync_service.dart';
+
+/// The calendar reminder for [info], the next episode of [series]. Null when
+/// the series has no TVDB id, since the server matches episode reminders by it.
+CalendarEntry? upcomingEpisodeReminder(
+  AggregatedItem series,
+  UpcomingEpisodeInfo info,
+) {
+  final ids = series.providerIds;
+  final tvdbId = int.tryParse(ids['Tvdb'] ?? ids['tvdb'] ?? ids['TVDB'] ?? '');
+  if (tvdbId == null || tvdbId <= 0) return null;
+  return CalendarEntry(
+    key: 'episode:$tvdbId:${info.seasonNumber}:${info.episodeNumber}',
+    kind: CalendarEntryKind.episode,
+    release: CalendarRelease.airing,
+    date: info.airDate.toLocal(),
+    hasTime: false,
+    title: series.name,
+    episodeTitle: info.title == 'TBA' ? null : info.title,
+    seasonNumber: info.seasonNumber,
+    episodeNumber: info.episodeNumber,
+    tvdbId: tvdbId,
+    tmdbId: int.tryParse(series.tmdbId ?? ''),
+    imdbId: series.imdbId,
+  );
+}
 
 /// Service that resolves upcoming episode air dates for a TV series,
 /// prioritizing Sonarr Calendar and falling back to TMDB.
@@ -201,15 +229,13 @@ class UpcomingEpisodeService {
     // Otherwise, try Moonbase server proxy if available:
     if (GetIt.instance.isRegistered<MediaServerClient>()) {
       final client = GetIt.instance<MediaServerClient>();
-      final token = client.accessToken;
-      if (token != null) {
+      final ep = await moonbaseEndpoint(client, _dio);
+      if (ep != null) {
         try {
           final response = await _dio.get(
-            '${client.baseUrl}/Moonfin/Tmdb/NextEpisode',
+            '${ep.base}/Moonfin/Tmdb/NextEpisode',
             queryParameters: {'tmdbId': tmdbId},
-            options: Options(headers: {
-              'Authorization': 'MediaBrowser Token="$token"',
-            }),
+            options: Options(headers: ep.headers),
           );
           if (response.statusCode == 200 && response.data is Map) {
             final data = response.data;

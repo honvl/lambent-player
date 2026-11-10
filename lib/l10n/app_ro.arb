@@ -1,6 +1,6 @@
 {
     "@@locale": "ro",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent versiunea {version}",
+    "appVersionFooter": "Moonfin versiunea {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent nu a putut accesa breloul de chei al sistemului. Autentificarea poate continua, dar stocarea securizată a token-ului poate fi indisponibilă până la deblocarea breloului de chei.",
+    "secureStorageUnavailableMessage": "Moonfin nu a putut accesa breloul de chei al sistemului. Autentificarea poate continua, dar stocarea securizată a token-ului poate fi indisponibilă până la deblocarea breloului de chei.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Ieși din Lambent?",
+    "exitApp": "Ieși din Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Nesetat. Lambent va încerca un mpv.conf implicit în folderele aplicației/datelor.",
+    "notSetMpvConf": "Nesetat. Moonfin va încerca un mpv.conf implicit în folderele aplicației/datelor.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Comută vizibilitatea pe ecranul principal pentru fiecare bibliotecă. Repornește Lambent pentru ca modificările să aibă efect.",
+    "libraryVisibilityDescription": "Comută vizibilitatea pe ecranul principal pentru fiecare bibliotecă. Repornește Moonfin pentru ca modificările să aibă efect.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Redă în Lambent",
+    "playInMoonfin": "Redă în Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Elementul nu a fost găsit în biblioteca ta Lambent",
+    "itemNotFoundInLibrary": "Elementul nu a fost găsit în biblioteca ta Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Repornirea serverului este în curs",
-    "adminServerRebootMessage": "Repornirea serverului este în curs, repornește Lambent",
+    "adminServerRebootMessage": "Repornirea serverului este în curs, repornește Moonfin",
     "adminActiveSessions": "Sesiuni active",
     "adminSessionsLoadFailed": "Nu s-au putut încărca sesiunile",
     "adminNoActiveSessions": "Nicio sesiune activă",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Afișează butonul de genuri în bara de navigare",
     "settingsShowFavoritesButtonInNavigation": "Afișează butonul de favorite în bara de navigare",
     "settingsShowLibrariesButtonInNavigation": "Afișează butonul de biblioteci în bara de navigare",
-    "settingsLibraryVisibilitySubtitle": "Comută vizibilitatea pe ecranul principal pentru fiecare bibliotecă. Repornește Lambent pentru ca modificările să aibă efect.",
+    "settingsLibraryVisibilitySubtitle": "Comută vizibilitatea pe ecranul principal pentru fiecare bibliotecă. Repornește Moonfin pentru ca modificările să aibă efect.",
     "settingsMediaBarAndLocalPreviews": "Bara media și previzualizările locale",
     "settingsVisualOverlays": "Suprapuneri vizuale",
     "settingsSeasonalSurprise": "Surpriză de sezon",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licențe",
     "settingsOpenSourceLicenseNotices": "Notificări despre licențele open-source",
     "settingsPrivacyPolicy": "Politica de confidențialitate",
-    "settingsPrivacyPolicySubtitle": "Cum gestionează Lambent datele tale",
+    "settingsPrivacyPolicySubtitle": "Cum gestionează Moonfin datele tale",
     "settingsCheckForUpdates": "Verifică actualizările",
-    "settingsCheckForUpdatesSubtitle": "Verifică cea mai recentă versiune Lambent",
+    "settingsCheckForUpdatesSubtitle": "Verifică cea mai recentă versiune Moonfin",
     "settingsPoweredByFlutter": "Realizat cu Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# notificare de licență} few {# notificări de licență} other {# de notificări de licență}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Preferă subtitrările SDH",
     "preferSdhSubtitlesSubtitle": "Prioritizează pistele de subtitrare SDH/CC la selectarea automată.",
     "webDiagnostics": "Diagnosticare web",
-    "webDiagnosticsTitle": "Diagnosticare web Lambent",
+    "webDiagnosticsTitle": "Diagnosticare web Moonfin",
     "webDiagnosticsIntro": "Folosește această pagină pentru a diagnostica problemele de conectivitate ale browserului (CORS, conținut mixt și setări de descoperire).",
     "webDiagnosticsDetectedMixedContentFailure": "A fost detectată o eroare de conținut mixt",
     "webDiagnosticsDetectedCorsPreflightFailure": "A fost detectată o eroare CORS/preflight",
-    "webDiagnosticsMixedContentFailureBody": "Lambent a detectat o pagină HTTPS care încearcă să apeleze un URL de server HTTP. Browserele blochează această cerere înainte să ajungă la server.",
-    "webDiagnosticsCorsFailureBody": "Lambent a detectat o eroare de cerere la nivel de browser, cauzată de obicei de lipsa antetelor CORS sau preflight de pe serverul media.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin a detectat o pagină HTTPS care încearcă să apeleze un URL de server HTTP. Browserele blochează această cerere înainte să ajungă la server.",
+    "webDiagnosticsCorsFailureBody": "Moonfin a detectat o eroare de cerere la nivel de browser, cauzată de obicei de lipsa antetelor CORS sau preflight de pe serverul media.",
     "webDiagnosticsTargetUrl": "URL țintă: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "neconfigurat",
     "webDiagnosticsMixedContent": "Conținut mixt",
     "webDiagnosticsMixedContentDetected": "Această pagină este încărcată prin HTTPS, dar unul sau mai multe URL-uri configurate folosesc HTTP. Browserele blochează apelurile către API-uri HTTP din pagini HTTPS.",
-    "webDiagnosticsMixedContentFix": "Soluție: servește serverul media sau endpointul proxy prin HTTPS ori încarcă Lambent prin HTTP doar în rețele locale de încredere.",
+    "webDiagnosticsMixedContentFix": "Soluție: servește serverul media sau endpointul proxy prin HTTPS ori încarcă Moonfin prin HTTP doar în rețele locale de încredere.",
     "webDiagnosticsNoMixedContentDetected": "Nu a fost detectată nicio configurație evidentă de conținut mixt în setările curente de execuție.",
     "webDiagnosticsCorsChecklist": "Listă de verificare CORS",
     "webDiagnosticsCorsChecklistItem1": "• Permite originea browserului în Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Clasic este aspectul original Lambent, centrat. Modern este un aspect cinematic adaptabil. Spotlight este un aspect cu accent pe imaginea principală și carduri de conținut pop-up. Nouveau este un aspect pe tot ecranul, cu secțiunile așezate una sub alta pe pagină. Minimalist înseamnă ilustrații, un singur buton de redare și episoadele.",
+    "detailScreenStyleSubtitle": "Clasic este aspectul original Moonfin, centrat. Modern este un aspect cinematic adaptabil. Spotlight este un aspect cu accent pe imaginea principală și carduri de conținut pop-up. Nouveau este un aspect pe tot ecranul, cu secțiunile așezate una sub alta pe pagină. Minimalist înseamnă ilustrații, un singur buton de redare și episoadele.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Folosește algoritmul local Lambent Recommends pentru biblioteca ta, motorul Jellyfin Recommends de pe server sau metricile de similaritate TMDb online. Notă: recomandările online necesită integrarea Seerr.",
+    "recommendationSystemSubtitle": "Folosește algoritmul local Moonfin Recommends pentru biblioteca ta, motorul Jellyfin Recommends de pe server sau metricile de similaritate TMDb online. Notă: recomandările online necesită integrarea Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recommends",
+    "recommendationSystemMoonfin": "Moonfin Recommends",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Limitează sugestiile Lambent Recommends în funcție de clasificarea parentală a conținutului vizat",
+    "recommendationsApplyParentalRatingCapSubtitle": "Limitează sugestiile Moonfin Recommends în funcție de clasificarea parentală a conținutului vizat",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Temele personalizate modifică elementele vizuale din întreaga aplicație Lambent. Alege una dintre aceste opțiuni, potrivită stilului tău.",
+    "customThemeSubtitle": "Temele personalizate modifică elementele vizuale din întreaga aplicație Moonfin. Alege una dintre aceste opțiuni, potrivită stilului tău.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Autentifică-te în Lambent pe telefon",
+    "carSignInPrompt": "Autentifică-te în Moonfin pe telefon",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller este motorul GPU modern al Flutter, pentru animații mai fluide și mai puține sacadări. Pe unele TV box-uri și plăci grafice mai vechi poate provoca artefacte sau imagine neagră; dezactivează-l dacă observi astfel de probleme. Opțiunea Automat alege cea mai bună valoare implicită pentru dispozitivul tău. Repornește Lambent pentru a aplica modificarea.",
+    "impellerRenderingSubtitle": "Impeller este motorul GPU modern al Flutter, pentru animații mai fluide și mai puține sacadări. Pe unele TV box-uri și plăci grafice mai vechi poate provoca artefacte sau imagine neagră; dezactivează-l dacă observi astfel de probleme. Opțiunea Automat alege cea mai bună valoare implicită pentru dispozitivul tău. Repornește Moonfin pentru a aplica modificarea.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent trebuie repornit pentru a schimba motorul de randare. Închide aplicația acum, apoi redeschide-o pentru a aplica modificarea.",
+    "impellerRestartMessage": "Moonfin trebuie repornit pentru a schimba motorul de randare. Închide aplicația acum, apoi redeschide-o pentru a aplica modificarea.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9137,7 +9137,7 @@
     "@sdCard": {
         "description": "Download location option for a removable storage volume"
     },
-    "downloadLocationLimitedByAndroid": "Android permite aplicației Lambent să scrie doar în folderele proprii, iar acest dispozitiv nu are stocare detașabilă. Activează mai sus „Salvează în folderul Descărcări” pentru a păstra descărcările într-un loc accesibil și altor aplicații.",
+    "downloadLocationLimitedByAndroid": "Android permite aplicației Moonfin să scrie doar în folderele proprii, iar acest dispozitiv nu are stocare detașabilă. Activează mai sus „Salvează în folderul Descărcări” pentru a păstra descărcările într-un loc accesibil și altor aplicații.",
     "@downloadLocationLimitedByAndroid": {
         "description": "Note shown when the only download location Android allows is the default one"
     },
@@ -9620,7 +9620,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Suprascrie aspectul detectat când acest dispozitiv este recunoscut greșit. Repornește Lambent pentru ca modificările să aibă efect.",
+    "interfaceLayoutSubtitle": "Suprascrie aspectul detectat când acest dispozitiv este recunoscut greșit. Repornește Moonfin pentru ca modificările să aibă efect.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -10242,7 +10242,7 @@
     "@loadingAnimation": {
         "description": "Setting title for custom loading animation"
     },
-    "loadingAnimationDescription": "Personalizează animațiile de încărcare folosite în Lambent",
+    "loadingAnimationDescription": "Personalizează animațiile de încărcare folosite în Moonfin",
     "@loadingAnimationDescription": {
         "description": "Description for loading animation customization settings"
     },
@@ -10258,7 +10258,7 @@
     "@loadingAnimationImageSpinner": {
         "description": "Loading animation image option: Spinner"
     },
-    "loadingAnimationImageMoonfinLogo": "Sigla Lambent",
+    "loadingAnimationImageMoonfinLogo": "Sigla Moonfin",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -10270,7 +10270,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Fazele Lambent",
+    "loadingAnimationImageMoonfinPhases": "Fazele Moonfin",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -10390,7 +10390,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Lambent",
+    "screensaverBackdropMoonfin": "Moonfin",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -10410,7 +10410,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Sigla Lambent",
+    "screensaverComponentMoonfinLogo": "Sigla Moonfin",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },
@@ -10589,7 +10589,7 @@
             }
         }
     },
-    "autoDownloadTranscodedForegroundNote": "Calitățile transcodate se descarcă doar cât timp Lambent este deschis. Calitatea originală se descarcă și în fundal.",
+    "autoDownloadTranscodedForegroundNote": "Calitățile transcodate se descarcă doar cât timp Moonfin este deschis. Calitatea originală se descarcă și în fundal.",
     "@autoDownloadTranscodedForegroundNote": {
         "description": "Shown under transcoded options when choosing the quality of an auto-download subscription"
     },
@@ -10597,7 +10597,7 @@
     "@autoDownloadTranscodedRunningNote": {
         "description": "Shown under a running transcoded download that a subscription queued"
     },
-    "autoDownloadForegroundOnly": "Se descarcă doar cât timp Lambent este deschis",
+    "autoDownloadForegroundOnly": "Se descarcă doar cât timp Moonfin este deschis",
     "@autoDownloadForegroundOnly": {
         "description": "Short note next to a followed series in a transcoded quality"
     },
@@ -10663,7 +10663,7 @@
     "@autoDownloadDeleteAfterWeek": {
         "description": "Delete-after-watching option"
     },
-    "autoDownloadBackgroundRefreshSubtitle": "Permite sistemului să verifice periodic dacă există episoade noi cât timp Lambent este închis",
+    "autoDownloadBackgroundRefreshSubtitle": "Permite sistemului să verifice periodic dacă există episoade noi cât timp Moonfin este închis",
     "@autoDownloadBackgroundRefreshSubtitle": {
         "description": "Explains the background refresh setting"
     },
@@ -10671,7 +10671,7 @@
     "@autoDownloadBackgroundRefresh": {
         "description": "Setting that lets the system wake the app to check for new episodes"
     },
-    "autoDownloadBackgroundRefreshDenied": "Reîmprospătarea aplicațiilor în fundal este dezactivată pentru Lambent. Activeaz-o în Setările iOS.",
+    "autoDownloadBackgroundRefreshDenied": "Reîmprospătarea aplicațiilor în fundal este dezactivată pentru Moonfin. Activeaz-o în Setările iOS.",
     "@autoDownloadBackgroundRefreshDenied": {
         "description": "Shown when iOS forbids background refresh for the app"
     },
@@ -10679,7 +10679,7 @@
     "@autoDownloadCheckNow": {
         "description": "Button that runs a subscription check immediately"
     },
-    "autoDownloadBackgroundRestrictedAndroid": "Utilizarea în fundal este restricționată pentru Lambent în Setările Android.",
+    "autoDownloadBackgroundRestrictedAndroid": "Utilizarea în fundal este restricționată pentru Moonfin în Setările Android.",
     "@autoDownloadBackgroundRestrictedAndroid": {
         "description": "Shown when Android restricts the app from running in the background"
     },
@@ -11178,7 +11178,7 @@
     "@shortcutPlayPause": {
         "description": "Player shortcut action"
     },
-    "shortcutQuit": "Ieși din Lambent",
+    "shortcutQuit": "Ieși din Moonfin",
     "@shortcutQuit": {
         "description": "What Ctrl+Q does on desktop"
     },

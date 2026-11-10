@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
@@ -73,6 +75,10 @@ class AppThemeController extends ChangeNotifier {
   }
 
   void _apply(VisualThemeId builtIn, String customId, OledMode oled) {
+    // Lambent has one look: Glass. Whatever a preference or a plugin sync asks
+    // for, it is what applies (OLED Mode still layers on it).
+    builtIn = VisualThemeId.glass;
+    customId = '';
     ThemeSpec resolved;
     final hasCustom =
         customId.isNotEmpty &&
@@ -153,19 +159,18 @@ class AppThemeController extends ChangeNotifier {
   }
 
   static AppThemeController fromPreferences(UserPreferences prefs) {
-    final prefTheme = prefs.get(UserPreferences.visualTheme);
-    final customId = prefs.get(UserPreferences.customThemeId);
-    final hasCustom =
-      customId.isNotEmpty &&
-      !ThemeRegistry.builtInIds.contains(customId) &&
-      ThemeRegistry.availableThemes.containsKey(customId);
-    final initial = hasCustom
-        ? ThemeRegistry.resolveById(customId)
-      : ThemeRegistry.resolveById(builtInThemeIdFor(prefTheme));
+    // An install that chose another theme before Glass became the only one
+    // moves to it, with Glass's own focus colour.
+    if (prefs.get(UserPreferences.visualTheme) != VisualThemeId.glass ||
+        prefs.get(UserPreferences.customThemeId).isNotEmpty) {
+      unawaited(prefs.set(UserPreferences.visualTheme, VisualThemeId.glass));
+      unawaited(prefs.set(UserPreferences.customThemeId, ''));
+      unawaited(prefs.set(UserPreferences.focusColor, _defaultFocusColorForTheme(VisualThemeId.glass)));
+    }
     return AppThemeController(
-      initial,
-      prefTheme,
-      hasCustom ? customId : '',
+      ThemeRegistry.resolveById(ThemeRegistry.glassId),
+      VisualThemeId.glass,
+      '',
       prefs.get(UserPreferences.oledMode),
     );
   }

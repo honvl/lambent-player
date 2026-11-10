@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../data/models/aggregated_item.dart';
 import '../../../../../data/viewmodels/item_detail_view_model.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../l10n/lambent_strings.dart';
 import '../../../../../preference/preference_constants.dart';
 import '../../../../../preference/user_preferences.dart';
 import '../../../../widgets/focus/locked_focus_row.dart';

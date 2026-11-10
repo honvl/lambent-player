@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../util/lambent_server.dart';
 import '../../data/offline/connectivity_aware_media_server_client.dart';
 import '../../data/offline/offline_catalog.dart';
 import '../../data/repositories/offline_repository.dart';
@@ -20,6 +21,7 @@ import '../../data/services/seerr_notification_service.dart';
 import '../../data/services/socket_handler.dart';
 import '../../data/services/storage_path_service.dart';
 import '../../platform/auto_download_background_binding.dart';
+import '../../platform/download_keep_alive.dart';
 import '../../playback/current_playing_item.dart';
 import '../../playback/server_transcode_capabilities.dart';
 import '../../util/download_grouping.dart' show downloadNotificationLabel;
@@ -67,6 +69,9 @@ void registerServerModule() {
     );
   }
 
+  if (!_getIt.isRegistered<ActiveServerKind>()) {
+    _getIt.registerLazySingleton<ActiveServerKind>(ActiveServerKind.new);
+  }
   if (!_getIt.isRegistered<ServerTranscodeCapabilities>()) {
     _getIt.registerLazySingleton<ServerTranscodeCapabilities>(
       () => ServerTranscodeCapabilities(),
@@ -116,6 +121,9 @@ void setActiveServerClient(
     _getIt<DownloadNotificationService>(),
   );
   _getIt.registerSingleton<DownloadService>(downloadService);
+  if (!background) {
+    DownloadKeepAlive.instance.attach(downloadService, rawClient.baseUrl);
+  }
 
   // Absent on the background isolates, which never draw a nav bar.
   if (_getIt.isRegistered<OfflineRepository>()) {
@@ -137,6 +145,7 @@ void setActiveServerClient(
   // Fire and forget: device profiles read the cached result and fall back to
   // the H264-first transcode offer until the probe lands.
   _getIt<ServerTranscodeCapabilities>().refresh(rawClient);
+  if (!background) unawaited(_getIt<ActiveServerKind>().refresh(rawClient));
 
   // Absent on the background isolates, which never sync progress. On the app
   // engine a new client is the moment to push progress recorded offline, as

@@ -65,7 +65,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Versión Lambent {version}",
+    "appVersionFooter": "Versión Moonfin {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -139,7 +139,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.",
+    "secureStorageUnavailableMessage": "Moonfin no pudo acceder al conjunto de claves de su sistema. El inicio de sesión puede continuar, pero es posible que el almacenamiento seguro del token no esté disponible hasta que se desbloquee el llavero.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -151,7 +151,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Cambia entre Lambent y Neon Pulse sin reiniciar la aplicación",
+    "settingsAppearanceThemeSubtitle": "Cambia entre Moonfin y Neon Pulse sin reiniciar la aplicación",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -228,7 +228,7 @@
             }
         }
     },
-    "exitApp": "¿Salir de Lambent?",
+    "exitApp": "¿Salir de Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3059,7 +3059,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "No establecido. Lambent probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.",
+    "notSetMpvConf": "No establecido. Moonfin probará un mpv.conf predeterminado en las carpetas de aplicaciones/datos.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3454,7 +3454,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.",
+    "libraryVisibilityDescription": "Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4207,7 +4207,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Jugar en Lambent",
+    "playInMoonfin": "Jugar en Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4261,7 +4261,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Artículo no encontrado en tu biblioteca Lambent",
+    "itemNotFoundInLibrary": "Artículo no encontrado en tu biblioteca Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4563,7 +4563,7 @@
         }
     },
     "adminServerRebootInProgress": "Reinicio del servidor en progreso",
-    "adminServerRebootMessage": "Reinicio del servidor en progreso, reinicie Lambent",
+    "adminServerRebootMessage": "Reinicio del servidor en progreso, reinicie Moonfin",
     "adminActiveSessions": "Sesiones activas",
     "adminSessionsLoadFailed": "No se pudieron cargar las sesiones",
     "adminNoActiveSessions": "No hay sesiones activas",
@@ -6433,7 +6433,7 @@
     "settingsShowGenresButtonInNavigation": "Mostrar el botón de géneros en la barra de navegación.",
     "settingsShowFavoritesButtonInNavigation": "Mostrar el botón de favoritos en la barra de navegación",
     "settingsShowLibrariesButtonInNavigation": "Mostrar el botón de bibliotecas en la barra de navegación",
-    "settingsLibraryVisibilitySubtitle": "Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Lambent para que los cambios surtan efecto.",
+    "settingsLibraryVisibilitySubtitle": "Alternar la visibilidad de la página de inicio por biblioteca. Reinicie Moonfin para que los cambios surtan efecto.",
     "settingsMediaBarAndLocalPreviews": "Barra multimedia y vistas previas locales",
     "settingsVisualOverlays": "Superposiciones visuales",
     "settingsSeasonalSurprise": "Sorpresa estacional",
@@ -6457,9 +6457,9 @@
     "settingsLicenses": "Licencias",
     "settingsOpenSourceLicenseNotices": "Avisos de licencia de código abierto",
     "settingsPrivacyPolicy": "política de privacidad",
-    "settingsPrivacyPolicySubtitle": "Cómo maneja Lambent tus datos",
+    "settingsPrivacyPolicySubtitle": "Cómo maneja Moonfin tus datos",
     "settingsCheckForUpdates": "Buscar actualizaciones",
-    "settingsCheckForUpdatesSubtitle": "Busque la última versión de Lambent",
+    "settingsCheckForUpdatesSubtitle": "Busque la última versión de Moonfin",
     "settingsPoweredByFlutter": "Desarrollado por Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# aviso de licencia} other {# avisos de licencia}}",
     "@settingsLicenseNoticesCount": {
@@ -6956,12 +6956,12 @@
     "preferSdhSubtitles": "Prefiere subtítulos SDH",
     "preferSdhSubtitlesSubtitle": "Priorice las pistas de subtítulos SDH/CC al realizar la selección automática.",
     "webDiagnostics": "Diagnóstico web",
-    "webDiagnosticsTitle": "Lambent Diagnóstico web",
+    "webDiagnosticsTitle": "Moonfin Diagnóstico web",
     "webDiagnosticsIntro": "Utilice esta página para diagnosticar problemas de conectividad del navegador (CORS, contenido mixto y configuración de descubrimiento).",
     "webDiagnosticsDetectedMixedContentFailure": "Error de contenido mixto detectado",
     "webDiagnosticsDetectedCorsPreflightFailure": "Falla CORS/verificación previa detectada",
-    "webDiagnosticsMixedContentFailureBody": "Lambent detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.",
-    "webDiagnosticsCorsFailureBody": "Lambent detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin detectó una página HTTPS que intentaba llamar a una URL del servidor HTTP. Los navegadores bloquean esta solicitud antes de que llegue a su servidor.",
+    "webDiagnosticsCorsFailureBody": "Moonfin detectó una falla en la solicitud a nivel del navegador que comúnmente se debe a la falta de CORS o encabezados de verificación previa en el servidor de medios.",
     "webDiagnosticsTargetUrl": "URL de destino: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -6991,7 +6991,7 @@
     "notConfigured": "no configurado",
     "webDiagnosticsMixedContent": "Contenido mixto",
     "webDiagnosticsMixedContentDetected": "Esta página se carga a través de HTTPS, pero una o más URL configuradas son HTTP. Los navegadores impiden que las páginas HTTPS llamen a las API HTTP.",
-    "webDiagnosticsMixedContentFix": "Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Lambent a través de HTTP solo en redes locales confiables.",
+    "webDiagnosticsMixedContentFix": "Solución: sirva su servidor de medios o punto final proxy a través de HTTPS, o cargue Moonfin a través de HTTP solo en redes locales confiables.",
     "webDiagnosticsNoMixedContentDetected": "No se detectó ninguna configuración obvia de contenido mixto en la configuración actual del tiempo de ejecución.",
     "webDiagnosticsCorsChecklist": "Lista de verificación CORS",
     "webDiagnosticsCorsChecklistItem1": "• Permitir el origen del navegador en Access-Control-Allow-Origin.",
@@ -7164,5 +7164,111 @@
     "autoHdrSwitchingDescription": "Habilite HDR automáticamente para la reproducción de video HDR y restaure el modo de visualización al salir.",
     "whenFullscreen": "Cuando pantalla completa",
     "transcodingLimits": "Límites de transcodificación",
-    "settingsSupportMoonfinSubtitle": "Dona un café al desarrollador"
+    "settingsSupportMoonfinSubtitle": "Dona un café al desarrollador",
+    "appTitle": "Moonfin",
+    "@appTitle": {
+        "description": "The application title"
+    },
+    "animeMarkerSubbed": "Subtitulado",
+    "@animeMarkerSubbed": {
+        "description": "Badge on an anime episode or season whose only audio is Japanese, so it is watched with subtitles"
+    },
+    "animeMarkerDubbed": "Doblado",
+    "@animeMarkerDubbed": {
+        "description": "Badge on an anime episode or season that has an audio track in a language other than Japanese"
+    },
+    "animeMarkerSubbedAndDubbed": "Subtitulado/Doblado",
+    "@animeMarkerSubbedAndDubbed": {
+        "description": "Badge on anime that carries both the original Japanese audio and a dub, so it can be watched either way"
+    },
+    "animeMarkerSubbedShort": "Subt.",
+    "@animeMarkerSubbedShort": {
+        "description": "Short form of the Subbed badge"
+    },
+    "animeMarkerDubbedShort": "Dobl.",
+    "@animeMarkerDubbedShort": {
+        "description": "Short form of the Dubbed badge"
+    },
+    "animeMarkerSubbedAndDubbedShort": "Subt/Dobl",
+    "@animeMarkerSubbedAndDubbedShort": {
+        "description": "Short form of the Subbed/Dubbed badge"
+    },
+    "animeMarkerPending": "Pendiente",
+    "@animeMarkerPending": {
+        "description": "Badge on an anime episode whose filler information the server has matched but not downloaded yet"
+    },
+    "animeMarkerRecap": "Resumen",
+    "@animeMarkerRecap": {
+        "description": "Badge on an anime episode that recaps earlier episodes"
+    },
+    "animeMarkerFiller": "Relleno",
+    "@animeMarkerFiller": {
+        "description": "Badge on an anime episode that is filler, meaning it is not adapted from the source manga"
+    },
+    "animeMarkerMixed": "Mixto",
+    "@animeMarkerMixed": {
+        "description": "Badge on an anime episode that mixes source material with filler, so it still contains story"
+    },
+    "animeMarkerAnimeCanon": "Canon de Anime",
+    "@animeMarkerAnimeCanon": {
+        "description": "Badge on an anime episode that is not in the source manga but is part of the anime's own continuity"
+    },
+    "animeMarkerMangaCanon": "Canon de Manga",
+    "@animeMarkerMangaCanon": {
+        "description": "Badge on an anime episode adapted from the source manga"
+    },
+    "interfaceLanguage": "Idioma de la interfaz",
+    "@interfaceLanguage": {
+        "description": "Label for the app interface language setting"
+    },
+    "systemLanguageDefault": "Predeterminado del sistema",
+    "@systemLanguageDefault": {
+        "description": "Label for using the system default language in settings"
+    },
+    "signingIn": "Iniciando sesión...",
+    "@signingIn": {
+        "description": "Shown under the user list while a tapped user is being signed in"
+    },
+    "empty": "Vacío",
+    "@empty": {
+        "description": "Label indicating a section or category is empty"
+    },
+    "quickConnect": "Conexión Rápida",
+    "@quickConnect": {
+        "description": "Quick Connect toggle button label"
+    },
+    "quickConnectScanHint": "O escanealo con un celular que tenga la sesión iniciada en tu servidor",
+    "@quickConnectScanHint": {
+        "description": "Caption under the Quick Connect QR code that opens the server's web page with the code filled in"
+    },
+    "quickConnectTapOrScanHint": "Tocá para aprobar en tu navegador, o escanealo con otro dispositivo",
+    "@quickConnectTapOrScanHint": {
+        "description": "Caption under the Quick Connect QR code on a phone or tablet, where tapping the code opens the server's web page with the code filled in"
+    },
+    "timesUpTitle": "Se terminó el tiempo",
+    "@timesUpTitle": {
+        "description": "Title of the screen that covers the app when the user's access schedule doesn't allow the current time"
+    },
+    "timesUpMessage": "Esta cuenta no está disponible en este momento.",
+    "@timesUpMessage": {
+        "description": "Explanation on the Time's up screen"
+    },
+    "timesUpResumesToday": "Podés volver a usarla hoy a las {time}.",
+    "@timesUpResumesToday": {
+        "description": "When access returns, on the Time's up screen, for a time later today",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "timesUpResumesTomorrow": "Podés volver a usarla mañana a las {time}.",
+    "@timesUpResumesTomorrow": {
+        "description": "When access returns, on the Time's up screen, for a time tomorrow",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    }
 }

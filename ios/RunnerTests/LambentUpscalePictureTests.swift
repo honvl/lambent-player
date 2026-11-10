@@ -94,6 +94,25 @@ final class LambentUpscalePictureTests: XCTestCase {
 
   func testRavuLite() throws { try check(.prescaler("ravu-lite-ar-r3"), mean: 1.5) }
 
+  /// What a title without a plan's step gets: RAVU-lite off the free ladder, whatever else the device could run.
+  func testTheFreeLadderUpscalesWithRavuLite() throws {
+    let processor = try XCTUnwrap(LambentLiftProcessor())
+    let whole = processor.ladder
+    processor.reset(deepen: false)
+    processor.useLadder(free: true)
+    XCTAssertEqual(processor.scaler, .prescaler("ravu-lite-ar-r3"))
+    XCTAssertFalse(processor.ladder.contains { $0.isNeural })
+    processor.hdr = false
+    processor.frameRate = 24
+    processor.outputSize = Self.dst
+    let out = try XCTUnwrap(processor.process(try picture(), deadline: .infinity))
+    XCTAssertEqual(CVPixelBufferGetWidth(out), Self.dst.0)
+    XCTAssertLessThan(error(out).mean, 1.5)
+    // A later title with a plan's step gets the device's whole ladder back.
+    processor.useLadder(free: false)
+    XCTAssertEqual(processor.ladder, whole)
+  }
+
   func testFSRCNNX() throws { try check(.prescaler("FSRCNNX_x2_8-0-4-1"), mean: 2) }
 
   func testAIUpscaler() throws {

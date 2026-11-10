@@ -4,7 +4,21 @@
 
   ],
   "products" : [
-
+    {
+      "displayPrice" : "79.99",
+      "familyShareable" : false,
+      "internalID" : "21500003",
+      "localizations" : [
+        {
+          "description" : "Live PC enhancement for every Lambent Server screen",
+          "displayName" : "Lambent Enhance Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "app.getlambent.enhance.lifetime",
+      "referenceName" : "Lambent Enhance lifetime",
+      "type" : "NonConsumable"
+    }
   ],
   "settings" : {
     "_compatibilityTimeRate" : {
@@ -46,7 +60,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "app.getlambent.player.enhance.monthly",
+          "productID" : "app.getlambent.enhance.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Lambent Enhance monthly",
           "subscriptionGroupID" : "21500001",
@@ -74,7 +88,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "app.getlambent.player.enhance.yearly",
+          "productID" : "app.getlambent.enhance.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Lambent Enhance yearly",
           "subscriptionGroupID" : "21500001",

@@ -9,7 +9,7 @@ import '../../../preference/seerr_preferences.dart';
 import '../../navigation/destinations.dart';
 import '../../navigation/home_refresh_bus.dart';
 import '../../screens/downloads/downloads_panel.dart';
-import '../../screens/syncplay/syncplay_screen.dart';
+import '../../screens/watch_party/watch_together_route.dart';
 import '../adaptive/sf_symbol.dart';
 import '../remote_control_dialog.dart';
 import '../seerr_icons.dart';
@@ -27,18 +27,23 @@ String bottomNavTabLabel(AppLocalizations l10n, BottomNavTab tab) =>
       BottomNavTab.liveTv => l10n.liveTv,
       BottomNavTab.discover => GetIt.instance.isRegistered<SeerrPreferences>()
           ? GetIt.instance<SeerrPreferences>().labelOrDefault(l10n.seerr)
-          : l10n.seerr,
+          : seerrBrand(l10n.seerr),
+      BottomNavTab.calendar => l10n.calendar,
     };
 
+/// [silo]: the active server is Silo, which calls approving another
+/// device's code "Approve a sign-in".
 String bottomNavHubActionLabel(
   AppLocalizations l10n,
-  BottomNavHubAction action,
-) =>
+  BottomNavHubAction action, {
+  bool silo = false,
+}) =>
     switch (action) {
       BottomNavHubAction.saved => l10n.savedMedia,
       BottomNavHubAction.shuffle => l10n.shuffle,
-      BottomNavHubAction.syncPlay => l10n.syncPlay,
-      BottomNavHubAction.quickConnect => l10n.quickConnect,
+      BottomNavHubAction.syncPlay => l10n.watchParties,
+      BottomNavHubAction.quickConnect =>
+        silo ? l10n.siloApproveSignIn : l10n.quickConnect,
       BottomNavHubAction.remoteControl => l10n.remoteControl,
     };
 
@@ -96,6 +101,8 @@ Widget bottomNavTabIconWidget(
         fit: BoxFit.contain,
       ),
     BottomNavTab.discover => SeerrIcon(size: size, color: color, solid: active),
+    BottomNavTab.calendar =>
+      adaptive(Icons.calendar_month_rounded, Icons.calendar_month_outlined),
   };
 }
 
@@ -148,6 +155,7 @@ void openBottomNavTab(BuildContext context, BottomNavTab tab) {
     BottomNavTab.genres => Destinations.allGenres,
     BottomNavTab.liveTv => Destinations.liveTvGuide,
     BottomNavTab.discover => Destinations.seerrDiscover,
+    BottomNavTab.calendar => Destinations.calendar,
     BottomNavTab.libraries => null,
   };
   if (route == null) return;
@@ -173,7 +181,7 @@ void runBottomNavHubAction(BuildContext context, BottomNavHubAction action) {
       showShuffleOverlay(context);
     case BottomNavHubAction.syncPlay:
       Navigator.of(context).push(
-        MaterialPageRoute<void>(builder: (_) => const SyncPlayScreen()),
+        MaterialPageRoute<void>(builder: (_) => watchTogetherScreen()),
       );
     case BottomNavHubAction.quickConnect:
       showQuickConnectCodeDialog(context);

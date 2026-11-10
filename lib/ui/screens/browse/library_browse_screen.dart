@@ -150,6 +150,10 @@ class LibraryBrowseScreen extends StatefulWidget {
   final List<String>? includeItemTypes;
   final bool favoritesOnly;
 
+  /// Set by the settings live preview, which draws the library in this style
+  /// with its first card held in focus and leaves the app's backdrop alone.
+  final LibraryStyle? previewStyle;
+
   const LibraryBrowseScreen({
     super.key,
     required this.libraryId,
@@ -159,6 +163,7 @@ class LibraryBrowseScreen extends StatefulWidget {
     this.studioName,
     this.includeItemTypes,
     this.favoritesOnly = false,
+    this.previewStyle,
   });
 
   @override
@@ -201,10 +206,12 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     _vm.addListener(_onChanged);
     _vm.load();
     _scrollController.addListener(_onScroll);
-    _backgroundSub = _backgroundService.backgroundStream.listen((url) {
-      if (mounted) setState(() => _backdropUrl = url);
-    });
-    _backdropUrl = _backgroundService.currentUrl;
+    if (widget.previewStyle == null) {
+      _backgroundSub = _backgroundService.backgroundStream.listen((url) {
+        if (mounted) setState(() => _backdropUrl = url);
+      });
+      _backdropUrl = _backgroundService.currentUrl;
+    }
     _prefs.addListener(_onChanged);
     InlineBackInterceptor.push(_backToAlphabet);
   }
@@ -288,6 +295,13 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
 
   void _onChanged() {
     _hasSubtitlesCache = null;
+    if (widget.previewStyle != null &&
+        _vm.focusedItem == null &&
+        _vm.currentCategoryItems.isNotEmpty) {
+      final first = _vm.currentCategoryItems.first;
+      _backdropUrl = _backgroundService.backdropUrlsFor(first).firstOrNull;
+      _vm.setFocusedItem(first);
+    }
     if (mounted) setState(() {});
     _maybeBumpGridVersion();
   }
@@ -930,7 +944,8 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     );
   }
 
-  LibraryStyle get _libraryStyle => _prefs.get(UserPreferences.libraryStyle);
+  LibraryStyle get _libraryStyle =>
+      widget.previewStyle ?? _prefs.get(UserPreferences.libraryStyle);
 
   /// The toolbar's first control. On TV there is no home button (the sidebar
   /// stays beside the library): the classic header gives the home node to its
@@ -1832,6 +1847,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     Widget card(BuildContext? revealContext) {
       return MediaCard(
         animeMarkerItemId: item.id,
+        posterBadgeItemId: item.id,
         recordingItemId: item.id,
         title: item.name,
         subtitle: _cardSubtitle(item),
@@ -2107,6 +2123,7 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
                       if (index >= items.length) return null;
                       final item = items[index];
                       return MediaCard(
+                        posterBadgeItemId: item.id,
                         recordingItemId: item.id,
                         title: item.name,
                         subtitle: _cardSubtitle(item),

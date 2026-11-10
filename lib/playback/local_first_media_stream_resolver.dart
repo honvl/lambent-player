@@ -12,7 +12,12 @@ import 'offline_stream_resolver.dart';
 /// `PlaybackManager._playCurrentItem` -> `resolver.resolve(item)` per queue
 /// item, wrapping here gives local-first behavior everywhere, including mixed
 /// queues where only some episodes are downloaded.
-class LocalFirstMediaStreamResolver extends MediaStreamResolver {
+///
+/// A replan (see [StreamReplanner]) and a credential renewal (see
+/// [StreamCredentialRefresher]) always go to the wrapped server resolver:
+/// they belong to a server stream, which a local file never is.
+class LocalFirstMediaStreamResolver extends MediaStreamResolver
+    implements StreamReplanner, StreamCredentialRefresher {
   final MediaStreamResolver _inner;
   final OfflineStreamResolver _offline;
   final Future<void> Function(String itemId)? _restoreSubtitles;
@@ -73,6 +78,42 @@ class LocalFirstMediaStreamResolver extends MediaStreamResolver {
       enableDirectPlay: enableDirectPlay,
       enableDirectStream: enableDirectStream,
       enableTranscoding: enableTranscoding,
+    );
+  }
+
+  @override
+  bool canReplan(StreamResolutionResult current) {
+    final inner = _inner;
+    return !current.isLocalMedia &&
+        inner is StreamReplanner &&
+        (inner as StreamReplanner).canReplan(current);
+  }
+
+  @override
+  Future<StreamResolutionResult> replan(
+    dynamic mediaItem,
+    StreamResolutionResult current,
+    ReplanRequest request,
+  ) {
+    final inner = _inner;
+    if (inner is! StreamReplanner) {
+      throw StateError('${inner.runtimeType} cannot replan');
+    }
+    return (inner as StreamReplanner).replan(mediaItem, current, request);
+  }
+
+  @override
+  Future<StreamCredentials?> currentCredentials(
+    StreamResolutionResult current, {
+    bool refresh = false,
+  }) async {
+    final inner = _inner;
+    if (current.isLocalMedia || inner is! StreamCredentialRefresher) {
+      return null;
+    }
+    return (inner as StreamCredentialRefresher).currentCredentials(
+      current,
+      refresh: refresh,
     );
   }
 

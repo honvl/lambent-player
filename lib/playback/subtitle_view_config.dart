@@ -5,6 +5,7 @@ import 'package:playback_core/playback_core.dart';
 import '../preference/user_preferences.dart';
 import '../util/platform_detection.dart';
 import '../util/subtitle_track_logic.dart';
+import 'subtitle_fonts.dart';
 import 'subtitle_style.dart';
 
 /// How media_kit draws the subtitles it renders itself, for both the on
@@ -16,23 +17,6 @@ SubtitleViewConfiguration buildSubtitleViewConfiguration({
   required StreamResolutionResult? resolution,
   required int? subtitleStreamIndex,
 }) {
-  final style = SubtitleStyle.forResolution(prefs, resolution);
-  final textColor = Color(style.textColor);
-  final bgColor = Color(style.backgroundColor);
-  final strokeColor = Color(style.strokeColor);
-  final prefSize = style.fontSize;
-  final fontWeight = style.fontWeight;
-  final offset = style.verticalOffset;
-
-  final baseSize = PlatformDetection.useMobileUi ? 40.0 : 32.0;
-  final fontSize = (prefSize / 24.0) * baseSize;
-
-  final basePadding = PlatformDetection.useMobileUi ? 16.0 : 24.0;
-  final bottomPadding =
-      basePadding + (offset * MediaQuery.sizeOf(context).height * 0.5);
-
-  final strokeShadows = subtitleStrokeShadows(strokeColor, fontSize);
-
   bool isAssOrPgs = false;
   if (subtitleStreamIndex != null && subtitleStreamIndex >= 0) {
     final mediaStreams = resolution?.mediaStreams;
@@ -46,8 +30,33 @@ SubtitleViewConfiguration buildSubtitleViewConfiguration({
     }
   }
 
-  return SubtitleViewConfiguration(
+  return subtitleViewConfigurationFor(
+    SubtitleStyle.forResolution(prefs, resolution),
+    screenHeight: MediaQuery.sizeOf(context).height,
     visible: PlatformDetection.isDesktop ? false : !isAssOrPgs,
+  );
+}
+
+/// The text view's look for [style] on a screen [screenHeight] tall.
+SubtitleViewConfiguration subtitleViewConfigurationFor(
+  SubtitleStyle style, {
+  required double screenHeight,
+  bool visible = true,
+}) {
+  final textColor = Color(style.textColor);
+  final bgColor = Color(style.backgroundColor);
+  final prefSize = style.fontSize;
+  final fontWeight = style.fontWeight;
+  final offset = style.verticalOffset;
+
+  final baseSize = PlatformDetection.useMobileUi ? 40.0 : 32.0;
+  final fontSize = (prefSize / 24.0) * baseSize;
+
+  final basePadding = PlatformDetection.useMobileUi ? 16.0 : 24.0;
+  final bottomPadding = basePadding + (offset * screenHeight * 0.5);
+
+  return SubtitleViewConfiguration(
+    visible: visible,
     style: TextStyle(
       inherit: false,
       height: 1.4,
@@ -55,20 +64,44 @@ SubtitleViewConfiguration buildSubtitleViewConfiguration({
       color: textColor,
       fontWeight: fontWeight >= 700 ? FontWeight.bold : FontWeight.normal,
       backgroundColor: bgColor,
+      fontFamily: SubtitleFonts.instance.flutterFamily(style.fontFamily),
       fontFamilyFallback: const ['Roboto', 'Noto Sans', 'Arial'],
-      shadows: strokeShadows,
+      shadows: subtitleShadows(style, fontSize),
     ),
     textAlign: TextAlign.center,
     padding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, bottomPadding),
   );
 }
 
+/// The drop shadow, then the outline over it.
+List<Shadow>? subtitleShadows(SubtitleStyle style, double fontSize) {
+  final stroke = subtitleStrokeShadows(
+    Color(style.strokeColor),
+    fontSize,
+    scale: style.strokeScale,
+  );
+  if (style.shadowColor == 0) return stroke;
+  final offset = style.shadowOffset * fontSize;
+  return [
+    Shadow(
+      offset: Offset(offset, offset),
+      blurRadius: style.shadowBlur * fontSize,
+      color: Color(style.shadowColor),
+    ),
+    ...?stroke,
+  ];
+}
+
 /// 8-direction scaled shadow ring approximating a text stroke. Width scales
 /// with [fontSize] so the outline stays visible at large sizes and extends
 /// past any [TextStyle.backgroundColor] rectangle behind the glyph.
-List<Shadow>? subtitleStrokeShadows(Color strokeColor, double fontSize) {
+List<Shadow>? subtitleStrokeShadows(
+  Color strokeColor,
+  double fontSize, {
+  double scale = 1,
+}) {
   if (strokeColor.a <= 0) return null;
-  final w = (fontSize / 16.0).clamp(1.0, 3.0);
+  final w = (fontSize / 16.0).clamp(1.0, 3.0) * scale;
   return <Shadow>[
     Shadow(offset: Offset(-w, -w), color: strokeColor),
     Shadow(offset: Offset(0, -w), color: strokeColor),

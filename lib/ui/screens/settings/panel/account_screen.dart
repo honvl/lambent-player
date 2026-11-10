@@ -14,6 +14,21 @@ class _AccountScreen extends StatelessWidget {
           _SectionHeader(l10n.settingsSignInSection),
           adaptiveListSection(
             children: [
+              // The phone's only other way out is an avatar at the top of Home.
+              _TvSettingsListTile(
+                leading: const Icon(Icons.dns),
+                title: Text(l10n.switchServer),
+                onTap: () => GoRouter.of(context).go(Destinations.serverSelect),
+              ),
+              _TvSettingsListTile(
+                leading: const Icon(Icons.logout),
+                title: Text(l10n.signOut),
+                onTap: () async {
+                  final router = GoRouter.of(context);
+                  await GetIt.instance<SessionRepository>().destroyCurrentSession();
+                  router.go(Destinations.serverSelect);
+                },
+              ),
               EnumPreferenceTile<UserSelectBehavior>(
                 autofocus: true,
                 preference: UserPreferences.autoLoginUserBehavior,
@@ -116,16 +131,20 @@ class _AccountScreen extends StatelessWidget {
               ],
             ),
           ],
-          adaptiveListSection(
-            children: [
-              _TvSettingsListTile(
-                leading: const Icon(Icons.sync),
-                title: Text(l10n.settingsSync),
-                subtitle: Text(l10n.settingsSyncSubtitle),
-                onTap: () => context.pushSettingsScreen(const _PluginScreen()),
-              ),
-            ],
-          ),
+          // Settings sync is the Moonfin plugin's. Not offered when no
+          // signed-in server could have it (all Silo, say).
+          if (moonfinPluginOnAnySignedInServer())
+            adaptiveListSection(
+              children: [
+                _TvSettingsListTile(
+                  leading: const Icon(Icons.sync),
+                  title: Text(l10n.settingsSync),
+                  subtitle: Text(l10n.settingsSyncSubtitle),
+                  onTap: () =>
+                      context.pushSettingsScreen(const _PluginScreen()),
+                ),
+              ],
+            ),
         ],
       ),
     );

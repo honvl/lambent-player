@@ -1,6 +1,6 @@
 {
     "@@locale": "ru",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent версии {version}",
+    "appVersionFooter": "Moonfin версии {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent не удалось получить доступ к вашему системному набору ключей. Вход в систему может быть продолжен, но безопасное хранилище токенов может быть недоступно, пока брелок не будет разблокирован.",
+    "secureStorageUnavailableMessage": "Moonfin не удалось получить доступ к вашему системному набору ключей. Вход в систему может быть продолжен, но безопасное хранилище токенов может быть недоступно, пока брелок не будет разблокирован.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Переключайтесь между Lambent и Neon Pulse, не перезапуская приложение.",
+    "settingsAppearanceThemeSubtitle": "Переключайтесь между Moonfin и Neon Pulse, не перезапуская приложение.",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Выход из Lambent?",
+    "exitApp": "Выход из Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Не установлено. Lambent попробует использовать mpv.conf по умолчанию в папках app/data.",
+    "notSetMpvConf": "Не установлено. Moonfin попробует использовать mpv.conf по умолчанию в папках app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Переключить видимость домашней страницы для каждой библиотеки. Перезапустите Lambent, чтобы изменения вступили в силу.",
+    "libraryVisibilityDescription": "Переключить видимость домашней страницы для каждой библиотеки. Перезапустите Moonfin, чтобы изменения вступили в силу.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Играйте в Lambent",
+    "playInMoonfin": "Играйте в Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Предмет не найден в вашей библиотеке Lambent.",
+    "itemNotFoundInLibrary": "Предмет не найден в вашей библиотеке Moonfin.",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Идет перезагрузка сервера",
-    "adminServerRebootMessage": "Выполняется перезагрузка сервера, перезапустите Lambent",
+    "adminServerRebootMessage": "Выполняется перезагрузка сервера, перезапустите Moonfin",
     "adminActiveSessions": "Активные сессии",
     "adminSessionsLoadFailed": "Не удалось загрузить сеансы",
     "adminNoActiveSessions": "Нет активных сессий",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Показывать кнопку жанров на панели навигации",
     "settingsShowFavoritesButtonInNavigation": "Показывать кнопку избранного на панели навигации",
     "settingsShowLibrariesButtonInNavigation": "Показать кнопку «Библиотеки» на панели навигации.",
-    "settingsLibraryVisibilitySubtitle": "Переключить видимость домашней страницы для каждой библиотеки. Перезапустите Lambent, чтобы изменения вступили в силу.",
+    "settingsLibraryVisibilitySubtitle": "Переключить видимость домашней страницы для каждой библиотеки. Перезапустите Moonfin, чтобы изменения вступили в силу.",
     "settingsMediaBarAndLocalPreviews": "Медиа-бар и локальные превью",
     "settingsVisualOverlays": "Визуальные наложения",
     "settingsSeasonalSurprise": "Сезонный сюрприз",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Лицензии",
     "settingsOpenSourceLicenseNotices": "Уведомления о лицензии с открытым исходным кодом",
     "settingsPrivacyPolicy": "политика конфиденциальности",
-    "settingsPrivacyPolicySubtitle": "Как Lambent обрабатывает ваши данные",
+    "settingsPrivacyPolicySubtitle": "Как Moonfin обрабатывает ваши данные",
     "settingsCheckForUpdates": "Проверьте наличие обновлений",
-    "settingsCheckForUpdatesSubtitle": "Проверьте наличие последней версии Lambent",
+    "settingsCheckForUpdatesSubtitle": "Проверьте наличие последней версии Moonfin",
     "settingsPoweredByFlutter": "При поддержке Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# лицензионное уведомление} few {# лицензионных уведомления} many {# лицензионных уведомлений} other {# лицензионных уведомления}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Предпочитать субтитры SDH",
     "preferSdhSubtitlesSubtitle": "Отдавать приоритет дорожкам SDH/CC при автовыборе.",
     "webDiagnostics": "Веб-диагностика",
-    "webDiagnosticsTitle": "Веб-диагностика Lambent",
+    "webDiagnosticsTitle": "Веб-диагностика Moonfin",
     "webDiagnosticsIntro": "Эта страница помогает диагностировать проблемы подключения в браузере (CORS, смешанное содержимое и настройки обнаружения).",
     "webDiagnosticsDetectedMixedContentFailure": "Обнаружен сбой из-за смешанного содержимого",
     "webDiagnosticsDetectedCorsPreflightFailure": "Обнаружен сбой CORS/preflight",
-    "webDiagnosticsMixedContentFailureBody": "Lambent обнаружил, что HTTPS-страница обращается к серверу по HTTP. Браузеры блокируют такой запрос ещё до того, как он дойдёт до сервера.",
-    "webDiagnosticsCorsFailureBody": "Lambent обнаружил сбой запроса на уровне браузера. Обычно он вызван отсутствием заголовков CORS или preflight на медиасервере.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin обнаружил, что HTTPS-страница обращается к серверу по HTTP. Браузеры блокируют такой запрос ещё до того, как он дойдёт до сервера.",
+    "webDiagnosticsCorsFailureBody": "Moonfin обнаружил сбой запроса на уровне браузера. Обычно он вызван отсутствием заголовков CORS или preflight на медиасервере.",
     "webDiagnosticsTargetUrl": "Целевой URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "не настроено",
     "webDiagnosticsMixedContent": "Смешанное содержимое",
     "webDiagnosticsMixedContentDetected": "Эта страница загружена по HTTPS, но один или несколько заданных URL используют HTTP. Браузеры блокируют обращения HTTPS-страниц к HTTP-API.",
-    "webDiagnosticsMixedContentFix": "Решение: используйте HTTPS для медиасервера или прокси либо открывайте Lambent по HTTP только в доверенных локальных сетях.",
+    "webDiagnosticsMixedContentFix": "Решение: используйте HTTPS для медиасервера или прокси либо открывайте Moonfin по HTTP только в доверенных локальных сетях.",
     "webDiagnosticsNoMixedContentDetected": "В текущих настройках явных признаков смешанного содержимого не обнаружено.",
     "webDiagnosticsCorsChecklist": "Чек-лист CORS",
     "webDiagnosticsCorsChecklistItem1": "• Разрешите источник браузера в Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "«Классический» — исходная центрированная компоновка Lambent. «Современный» — адаптивная кинематографичная компоновка.",
+    "detailScreenStyleSubtitle": "«Классический» — исходная центрированная компоновка Moonfin. «Современный» — адаптивная кинематографичная компоновка.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Использовать алгоритм локальной библиотеки «Lambent рекомендует» или онлайн-метрики схожести TMDb. Примечание: для онлайн-рекомендаций нужна интеграция с Seerr.",
+    "recommendationSystemSubtitle": "Использовать алгоритм локальной библиотеки «Moonfin рекомендует» или онлайн-метрики схожести TMDb. Примечание: для онлайн-рекомендаций нужна интеграция с Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent рекомендует",
+    "recommendationSystemMoonfin": "Moonfin рекомендует",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Ограничивать подборку «Lambent рекомендует» возрастным рейтингом выбранного медиа",
+    "recommendationsApplyParentalRatingCapSubtitle": "Ограничивать подборку «Moonfin рекомендует» возрастным рейтингом выбранного медиа",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Пользовательские темы меняют оформление во всём Lambent. Выберите вариант на свой вкус.",
+    "customThemeSubtitle": "Пользовательские темы меняют оформление во всём Moonfin. Выберите вариант на свой вкус.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Войдите в Lambent на телефоне",
+    "carSignInPrompt": "Войдите в Moonfin на телефоне",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller — современный GPU-рендерер Flutter: анимации плавнее, подтормаживаний меньше. На некоторых ТВ-приставках и старых GPU он может вызывать артефакты или чёрное видео — тогда выберите «Выкл». «Автоматически» подбирает лучший вариант для вашего устройства. Перезапустите Lambent, чтобы применить.",
+    "impellerRenderingSubtitle": "Impeller — современный GPU-рендерер Flutter: анимации плавнее, подтормаживаний меньше. На некоторых ТВ-приставках и старых GPU он может вызывать артефакты или чёрное видео — тогда выберите «Выкл». «Автоматически» подбирает лучший вариант для вашего устройства. Перезапустите Moonfin, чтобы применить.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Чтобы сменить движок отрисовки, Lambent нужно перезапустить. Закройте приложение и откройте его снова.",
+    "impellerRestartMessage": "Чтобы сменить движок отрисовки, Moonfin нужно перезапустить. Закройте приложение и откройте его снова.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

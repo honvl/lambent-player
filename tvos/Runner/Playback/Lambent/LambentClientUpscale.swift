@@ -1,6 +1,11 @@
 import CoreGraphics
 import Foundation
 import Metal
+#if canImport(UIKit)
+    import UIKit
+#elseif canImport(AppKit)
+    import AppKit
+#endif
 
 /// Lambent Enhance's upscale on the device (docs/MONETIZATION.md 5.1 in Lambent): a step of Lambent Server's plan, not a setting.
 ///
@@ -9,6 +14,9 @@ import Metal
 /// docs/ENTITLEMENTS.md 6.1), so without Lambent Enhance or a trial the plan has no `cup` and nothing is upscaled on the device. A
 /// direct play has no plan URL: for a paid screen Flutter writes PlaybackInfo's `LambentDevice` onto the URL it opens, in the same
 /// keys (docs/ENTITLEMENTS.md 6.6). The client keeps no paywall of its own.
+///
+/// RAVU-lite is free (`freeUpscale`): without a plan's step, a title from any server is scaled by it. It costs what a good bicubic costs
+/// and needs no network or server. The plan's `cup` buys the rest of the ladder.
 ///
 /// The plan has two steps for `LambentHDRLift`: `cup` upscales (the picture keeps the colours the PC sent, SDR or HDR10) and `chdr=1`
 /// lifts an SDR picture to HDR10 here. The Apple TV does what the plan asks (`appleTVWork`); the iPad only what is worth its power
@@ -32,6 +40,16 @@ enum LambentClientUpscale {
     private static func carriesSteps(_ url: URL) -> Bool {
         url.path.contains("/v1/enhanced/") || url.path.range(of: #"/Videos/[^/]+/stream(\.\w+)?$"#, options: .regularExpression) != nil
     }
+
+    /// Without a plan's step, RAVU-lite takes the picture: everything but a Lambent enhanced stream, which is the PC's picture (a compare
+    /// among them, whose left half must stay the original).
+    static func freeUpscale(_ url: URL?) -> Bool {
+        guard let url, planHeight(url) == nil else { return false }
+        return !url.path.contains("/v1/enhanced/")
+    }
+
+    /// The free ladder: RAVU-lite, then as the paid ladder ends.
+    static let freeLadder: [LambentLiftProcessor.Scaler] = [.prescaler("ravu-lite-ar-r3"), .catmullRom, .none]
 
     /// The query member that carries the client's HDR step: `chdr=1`, "client: Auto HDR here" (the PC sends the picture SDR).
     static let liftKey = "chdr"
@@ -74,6 +92,19 @@ enum LambentClientUpscale {
         return Work(hdr: hdr, size: upscaleAsked && larger ? fitted : nil)
     }
 
+    /// A Mac's work for a `picture`-sized picture shown at `fitted` pixels in a window that can grow to `wholeScreen` pixels; nil when
+    /// neither step could ever run and AVPlayer shows the picture itself. The power rule is the iPad's (the lift needs the headroom, an
+    /// external SDR display has none). The upscale stays ready while the window is small: it starts when the window grows.
+    static func macWork(
+        liftAsked: Bool, sourceHDR: Bool, headroom: CGFloat, lowPower: Bool, upscaleAsked: Bool, picture: (Int, Int), fitted: (Int, Int),
+        wholeScreen: (Int, Int)
+    ) -> Work? {
+        let hdr = liftAsked && !sourceHDR && !lowPower && headroom >= liftHeadroom
+        let grows = upscaleAsked && wholeScreen.0 > picture.0 * 6 / 5 && wholeScreen.1 > picture.1 * 6 / 5
+        guard hdr || grows else { return nil }
+        return Work(hdr: hdr, size: upscaleAsked && fitted.0 > picture.0 && fitted.1 > picture.1 ? fitted : nil)
+    }
+
     /// The Apple TV's work for a `picture`-sized picture whose place on the screen is `fitted` pixels (`outputSize`); nil when there is
     /// none and AVPlayer shows the picture itself. It is plugged in, so no power rule: the lift when the plan asks and the picture is
     /// SDR, the upscale when the plan asks and the screen is larger.
@@ -110,6 +141,26 @@ enum LambentClientUpscale {
         if supports(.apple8), neuralModels(true) { ladder.append(.neural(fast: true)) }
         if supports(.apple10) { ladder.append(.prescaler("FSRCNNX_x2_8-0-4-1")) }
         return ladder + [.prescaler("ravu-lite-ar-r3"), .catmullRom, .none]
+    }
+
+    /// What this device can run by itself (docs/ENTITLEMENTS.md 8.4 in Lambent), for the purchase screen: `ai` the AI upscaler, `shader` a
+    /// shader upscaler (the fallbacks ship with the app), `hdr` the lift, on this screen. A TV's own HDR mode decides there.
+    @MainActor
+    static func capabilities() -> [String: Bool] {
+        guard let device = MTLCreateSystemDefaultDevice() else { return ["ai": false, "shader": false, "hdr": false] }
+        let steps = ladder(supports: { device.supportsFamily($0) }, neuralModels: { LambentNeuralScaler.available(student: $0) })
+        #if os(tvOS)
+            let headroom = liftHeadroom
+        #elseif os(macOS)
+            let headroom = NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1
+        #else
+            let headroom = UIScreen.main.potentialEDRHeadroom
+        #endif
+        return [
+            "ai": steps.contains { $0.isNeural },
+            "shader": LambentPrescaler.bundleDirectory != nil,
+            "hdr": headroom >= liftHeadroom,
+        ]
     }
 
     /// The least scale at which the AI upscaler runs. The network always doubles the picture and the last pass scales that to the

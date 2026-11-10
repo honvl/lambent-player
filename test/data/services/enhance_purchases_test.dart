@@ -95,13 +95,13 @@ class FakeStore implements EnhanceStore {
       ? const []
       : const [
     EnhanceProduct(
-      id: 'app.getlambent.player.enhance.monthly',
+      id: 'app.getlambent.enhance.monthly',
       title: 'Lambent Enhance',
       price: r'$4.99',
       yearly: false,
     ),
     EnhanceProduct(
-      id: 'app.getlambent.player.enhance.yearly',
+      id: 'app.getlambent.enhance.yearly',
       title: 'Lambent Enhance',
       price: r'$39.99',
       yearly: true,
@@ -121,7 +121,7 @@ class FakeStore implements EnhanceStore {
 
 StoreTransaction purchased(StoreProof proof, {Object? handle, String? id}) =>
     StoreTransaction(
-      productId: 'app.getlambent.player.enhance.monthly',
+      productId: 'app.getlambent.enhance.monthly',
       status: StoreTransactionStatus.purchased,
       proof: proof,
       needsFinish: true,

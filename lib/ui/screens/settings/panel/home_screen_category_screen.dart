@@ -32,8 +32,10 @@ class _HomeScreenCategoryScreenState extends State<_HomeScreenCategoryScreen> {
   Future<void> _checkServices() async {
     try {
       final repo = GetIt.instance<SeerrRepository>();
-      final radarr = await repo.getRadarrSettings();
-      final sonarr = await repo.getSonarrSettings();
+      // Seerr only lets admins read settings/*, while the calendars work for
+      // every user, so ask the service list any signed in user can read.
+      final radarr = await repo.getRadarrServers();
+      final sonarr = await repo.getSonarrServers();
       if (mounted) {
         setState(() {
           _radarrInstalled = radarr.isNotEmpty;
@@ -177,6 +179,44 @@ class _HomeScreenCategoryScreenState extends State<_HomeScreenCategoryScreen> {
   void _reloadHomeRows() {
     if (!GetIt.instance.isRegistered<HomeViewModel>()) return;
     GetIt.instance<HomeViewModel>().load(preserveExisting: true);
+  }
+
+  void _syncMdblistWatchingNowSection(bool isEnabled) {
+    final configs = List<HomeSectionConfig>.from(_prefs.homeSectionsConfig);
+    final idx = configs.indexWhere(
+      (c) => c.type == HomeSectionType.mdblistWatchingNow,
+    );
+
+    if (isEnabled) {
+      if (idx >= 0) {
+        final existing = configs.removeAt(idx);
+        final lastEnabledIndex = configs.lastIndexWhere((c) => c.enabled);
+        final insertIndex = lastEnabledIndex >= 0 ? lastEnabledIndex + 1 : 0;
+        configs.insert(insertIndex, existing.copyWith(enabled: true));
+      } else {
+        final lastEnabledIndex = configs.lastIndexWhere((c) => c.enabled);
+        final insertIndex = lastEnabledIndex >= 0 ? lastEnabledIndex + 1 : 0;
+        configs.insert(
+          insertIndex,
+          const HomeSectionConfig(
+            type: HomeSectionType.mdblistWatchingNow,
+            enabled: true,
+            order: 0,
+          ),
+        );
+      }
+    } else {
+      if (idx >= 0) {
+        configs[idx] = configs[idx].copyWith(enabled: false);
+      }
+    }
+
+    for (var i = 0; i < configs.length; i++) {
+      configs[i] = configs[i].copyWith(order: i);
+    }
+    _prefs.setHomeSectionsConfig(configs);
+    _pushPersonalizationSync();
+    _reloadHomeRows();
   }
 
   @override
@@ -379,6 +419,20 @@ class _HomeScreenCategoryScreenState extends State<_HomeScreenCategoryScreen> {
                 icon: Icons.description_outlined,
                 onChanged: _pushPersonalizationSync,
               ),
+              SwitchPreferenceTile(
+                preference: UserPreferences.hideHomeWatchProgress,
+                title: l10n.hideHomeWatchProgress,
+                subtitle: l10n.hideHomeWatchProgressSubtitle,
+                icon: Icons.linear_scale,
+                onChanged: _pushPersonalizationSync,
+              ),
+              SwitchPreferenceTile(
+                preference: UserPreferences.hideHomeUnwatchedCount,
+                title: l10n.hideHomeUnwatchedCount,
+                subtitle: l10n.hideHomeUnwatchedCountSubtitle,
+                icon: Icons.filter_9_plus_outlined,
+                onChanged: _pushPersonalizationSync,
+              ),
               StringPickerPreferenceTile(
                 preference: UserPreferences.mediaPreviewMode,
                 title: l10n.mediaPreview,
@@ -436,6 +490,13 @@ class _HomeScreenCategoryScreenState extends State<_HomeScreenCategoryScreen> {
                   onTap: () =>
                       context.pushSettingsScreen(const _ImdbListsScreen()),
                 ),
+                SwitchPreferenceTile(
+                  preference: UserPreferences.mdblistWatchingNowEnabled,
+                  title: l10n.mdblistWatchingNow,
+                  subtitle: l10n.mdblistWatchingNowDescription,
+                  icon: Icons.public,
+                  onChangedValue: _syncMdblistWatchingNowSection,
+                ),
                 _TvSettingsListTile(
                   leading: const Icon(Icons.trending_up),
                   title: const Text('TMDB Lists'),
@@ -451,17 +512,15 @@ class _HomeScreenCategoryScreenState extends State<_HomeScreenCategoryScreen> {
                 _TvSettingsListTile(
                   leading: const Icon(Icons.celebration_outlined),
                   title: Text(l10n.seasonalRow),
-                  subtitle: Text(l10n.seasonalRowDescription),
+                  subtitle: Text(seerrBrand(l10n.seasonalRowDescription)),
                   onTap: () =>
                       context.pushSettingsScreen(const _SeasonalRowScreen()),
                 ),
                 if (showUpcomingCalendars)
                   _TvSettingsListTile(
                     leading: const Icon(Icons.calendar_month),
-                    title: const Text('Upcoming Calendars'),
-                    subtitle: const Text(
-                      'Toggle Upcoming Calendars from Radarr/Sonarr.',
-                    ),
+                    title: Text(l10n.upcomingCalendars),
+                    subtitle: Text(l10n.upcomingCalendarsDescription),
                     onTap: () => context.pushSettingsScreen(
                       const _UpcomingCalendarsScreen(),
                     ),

@@ -5,12 +5,17 @@ import CoreMedia
 import CoreVideo
 import Metal
 import QuartzCore
-import UIKit
 import os
+#if canImport(UIKit)
+    import UIKit
+    typealias LiftHostView = UIView
+#else
+    import AppKit
+    typealias LiftHostView = NSView
+#endif
 
-/// Lambent Enhance's steps on the device: the upscale and the HDR lift, each only when Lambent Server's plan asks
-/// (LambentClientUpscale.swift). There is no setting: without Lambent Enhance or a trial, and on a direct play, the plan has no
-/// step and AVPlayer shows the picture.
+/// The picture's work on the device: Lambent Enhance's steps, the upscale and the HDR lift, each only when Lambent Server's plan asks,
+/// and without them the free RAVU-lite (LambentClientUpscale.swift). There is no setting.
 ///
 /// AetherEngine plays the title through AVPlayer as usual. Its frames are
 /// taken from an `AVPlayerItemVideoOutput`, lifted on the GPU (Lambent's
@@ -28,7 +33,7 @@ import os
 final class LambentHDRLift {
     private weak var playerLayer: AVPlayerLayer?
     private weak var item: AVPlayerItem?
-    private weak var host: UIView?
+    private weak var host: LiftHostView?
     private var output: AVPlayerItemVideoOutput?
     private let liftView = LiftView()
     private var displayLayer: AVSampleBufferDisplayLayer { liftView.layer as! AVSampleBufferDisplayLayer }
@@ -50,8 +55,12 @@ final class LambentHDRLift {
     private var maxHeight: Int?
     /// The plan gives this device the HDR lift (`chdr=1`).
     private var liftAsked = false
+    /// No plan's step: the free RAVU-lite.
+    private var free = false
     /// A compare stream: the left half stays AVPlayer's.
     private var compare = false
+    /// The first picture's size.
+    private var pictureSize: (Int, Int)?
     /// What the player's chip and panel call the upscale running here (`LambentClientUpscale.label`), nil when none is; called on the
     /// main thread when it changes.
     var onUpscale: ((String?) -> Void)?
@@ -70,10 +79,10 @@ final class LambentHDRLift {
 
     var isRunning: Bool { output != nil }
 
-    /// Starts on the engine's AVPlayer once its item exists, only when the plan asks (`planHeight`, its `cup`; `lift`, its `chdr=1`),
-    /// and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
-    func start(engine: AetherEngine, in view: UIView, planHeight: Int?, lift: Bool, compare: Bool) -> Bool {
-        guard planHeight != nil || lift, engine.sourceVideoFormat != .dolbyVision else { return false }
+    /// Starts on the engine's AVPlayer once its item exists, when the plan asks (`planHeight`, its `cup`; `lift`, its `chdr=1`) or for
+    /// the free upscale (`free`), and not for Dolby Vision; `compare`: the stream is a compare (`cmp=1`).
+    func start(engine: AetherEngine, in view: LiftHostView, planHeight: Int?, lift: Bool, compare: Bool, free: Bool = false) -> Bool {
+        guard planHeight != nil || lift || free, engine.sourceVideoFormat != .dolbyVision else { return false }
         guard output == nil, let layer = engine.nativePlayerLayer, let item = layer.player?.currentItem
         else { return false }
         let output = AVPlayerItemVideoOutput(pixelBufferAttributes: [
@@ -95,12 +104,14 @@ final class LambentHDRLift {
         frameRate = engine.sourceVideoFrameRate ?? 24
         hdr = false
         maxHeight = planHeight
+        self.free = free
         liftAsked = lift
         self.compare = compare
         liftView.rightHalfOnly = compare
         started = false
         lead = 0
         processor.reset(deepen: false)
+        processor.useLadder(free: free)
         processor.hdr = hdr
         processor.sourceBitrate = engine.sourceVideoBitrate
         processor.outputSize = nil
@@ -109,9 +120,14 @@ final class LambentHDRLift {
 
         displayLayer.videoGravity = layer.videoGravity
         liftView.frame = view.bounds
-        liftView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        liftView.isUserInteractionEnabled = false
-        liftView.backgroundColor = .black
+        #if canImport(UIKit)
+            liftView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            liftView.isUserInteractionEnabled = false
+            liftView.backgroundColor = .black
+        #else
+            liftView.autoresizingMask = [.width, .height]
+            liftView.layer?.backgroundColor = NSColor.black.cgColor
+        #endif
         var timebase: CMTimebase?
         CMTimebaseCreateWithSourceClock(
             allocator: nil, sourceClock: CMClockGetHostTimeClock(), timebaseOut: &timebase)
@@ -123,11 +139,15 @@ final class LambentHDRLift {
         view.addSubview(liftView)
         layer.opacity = compare ? 1 : 0
 
-        let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
+        #if canImport(UIKit)
+            let link = CADisplayLink(target: self, selector: #selector(tick(_:)))
+        #else
+            let link = view.displayLink(target: self, selector: #selector(tick(_:)))
+        #endif
         link.add(to: .main, forMode: .common)
         self.link = link
         NSLog("[LambentHDR] started fps %.3f bitrate %lld plan %@%@%@", frameRate, engine.sourceVideoBitrate,
-            planHeight.map { "cup=\($0)" } ?? "none", lift ? " chdr" : "", compare ? " compare" : "")
+            planHeight.map { "cup=\($0)" } ?? (free ? "free" : "none"), lift ? " chdr" : "", compare ? " compare" : "")
         return true
     }
 
@@ -154,7 +174,7 @@ final class LambentHDRLift {
 
     /// Asks the panel for HDR10 at the film's rate. AetherEngine programmed SDR
     /// criteria for an SDR source at load; this replaces them.
-    private func requestHDR10(in view: UIView, width: Int, height: Int) {
+    private func requestHDR10(in view: LiftHostView, width: Int, height: Int) {
         requestedHDR = true
         #if os(tvOS)
         guard let window = view.window else { return }
@@ -203,7 +223,18 @@ final class LambentHDRLift {
                     let fitted = LambentClientUpscale.outputSize(
                         picture: (w, h), bounds: screen.nativeBounds.size, scale: 1, maxHeight: maxHeight)
                     let work = LambentClientUpscale.appleTVWork(
-                        liftAsked: liftAsked, sourceHDR: alreadyHDR, upscaleAsked: maxHeight != nil, picture: (w, h), fitted: fitted)
+                        liftAsked: liftAsked, sourceHDR: alreadyHDR, upscaleAsked: maxHeight != nil || free, picture: (w, h), fitted: fitted)
+                #elseif os(macOS)
+                    // The window can grow to the whole screen and shrink again, so the upscale's size follows it (`followWindow`); what
+                    // the lift and the upscale need is decided for the screen.
+                    let scale = screen.backingScaleFactor
+                    let fitted = LambentClientUpscale.outputSize(picture: (w, h), bounds: host.bounds.size, scale: scale, maxHeight: maxHeight)
+                    let whole = LambentClientUpscale.outputSize(picture: (w, h), bounds: screen.frame.size, scale: scale, maxHeight: maxHeight)
+                    let work = LambentClientUpscale.macWork(
+                        liftAsked: liftAsked, sourceHDR: alreadyHDR, headroom: screen.maximumPotentialExtendedDynamicRangeColorComponentValue,
+                        lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled,
+                        upscaleAsked: maxHeight != nil || (free && !ProcessInfo.processInfo.isLowPowerModeEnabled), picture: (w, h),
+                        fitted: fitted, wholeScreen: whole)
                 #else
                     // Only the work worth the iPad's power: the lift, the upscale (to the player's place on the screen, in pixels, up to
                     // the plan's lines), both, or neither (AVPlayer shows it).
@@ -211,7 +242,8 @@ final class LambentHDRLift {
                         picture: (w, h), bounds: host.bounds.size, scale: screen.nativeScale, maxHeight: maxHeight)
                     let work = LambentClientUpscale.iPadWork(
                         liftAsked: liftAsked, sourceHDR: alreadyHDR, headroom: screen.potentialEDRHeadroom,
-                        lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled, upscaleAsked: maxHeight != nil, picture: (w, h),
+                        lowPower: ProcessInfo.processInfo.isLowPowerModeEnabled,
+                        upscaleAsked: maxHeight != nil || (free && !ProcessInfo.processInfo.isLowPowerModeEnabled), picture: (w, h),
                         fitted: fitted)
                 #endif
                 guard let work else {
@@ -230,12 +262,15 @@ final class LambentHDRLift {
                     processor.skipNeural()
                 }
                 processor.frameRate = frameRate
+                #if !os(macOS)
                 if !hdr && !processor.scales(w, h) {
                     NSLog("[LambentHDR] %dx%d: no lift and nothing to upscale: AVPlayer shows it", w, h)
                     stop()
                     report(label: LambentClientUpscale.notNeeded)
                     return
                 }
+                #endif
+                pictureSize = (w, h)
                 if hdr { requestHDR10(in: host, width: w, height: h) }
                 updateLead(link)
                 NSLog("[LambentHDR] first picture %dx%d, %@ at %.3f Hz, shown at %@, scaler %@", w, h, hdr ? "HDR10" : "SDR", frameRate,
@@ -270,11 +305,18 @@ final class LambentHDRLift {
                 }
             }
         }
+        #if os(macOS)
+            followWindow()
+        #endif
         let now = CACurrentMediaTime()
         if now - lastReport >= 2 {
             lastReport = now
             updateLead(link)
-            let headroom = host?.window?.screen.currentEDRHeadroom ?? 0
+            #if canImport(UIKit)
+                let headroom = host?.window?.screen.currentEDRHeadroom ?? 0
+            #else
+                let headroom = host?.window?.screen?.maximumExtendedDynamicRangeColorComponentValue ?? 0
+            #endif
             #if os(tvOS)
                 let switching = host?.window?.avDisplayManager.isDisplayModeSwitchInProgress ?? false
             #else
@@ -297,6 +339,18 @@ final class LambentHDRLift {
             }
         }
     }
+
+    #if os(macOS)
+        /// A Mac's window changes size while playing: the upscale follows it, in pixels.
+        private func followWindow() {
+            guard started, maxHeight != nil || free, let (w, h) = pictureSize, let host, let screen = host.window?.screen else { return }
+            let fitted = LambentClientUpscale.outputSize(
+                picture: (w, h), bounds: host.bounds.size, scale: screen.backingScaleFactor, maxHeight: maxHeight)
+            let size = fitted.0 > w && fitted.1 > h ? fitted : nil
+            guard size?.0 != processor.outputSize?.0 || size?.1 != processor.outputSize?.1 else { return }
+            processor.outputSize = size
+        }
+    #endif
 
     /// As many vsyncs ahead as a picture takes from fetch to display layer, less the one the display link already gives (with 3 ms to
     /// spare). With the AI upscaler that is its three stages, a picture apart, so pictures are fetched two or three film frames ahead;
@@ -325,20 +379,50 @@ final class LambentHDRLift {
 }
 
 /// The lifted picture's view: its layer is the sample-buffer layer.
-private final class LiftView: UIView {
-    override class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
+#if canImport(UIKit)
+    private final class LiftView: UIView {
+        override class var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
 
-    /// A compare: only the right half shows, the original (AVPlayer's own picture) shows through on the left.
-    var rightHalfOnly = false {
-        didSet {
-            layer.mask = rightHalfOnly ? CALayer() : nil
-            layer.mask?.backgroundColor = UIColor.black.cgColor
-            setNeedsLayout()
+        /// A compare: only the right half shows, the original (AVPlayer's own picture) shows through on the left.
+        var rightHalfOnly = false {
+            didSet {
+                layer.mask = rightHalfOnly ? CALayer() : nil
+                layer.mask?.backgroundColor = UIColor.black.cgColor
+                setNeedsLayout()
+            }
+        }
+
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            layer.mask?.frame = CGRect(x: bounds.midX, y: 0, width: bounds.width - bounds.midX, height: bounds.height)
         }
     }
+#else
+    private final class LiftView: NSView {
+        override init(frame: NSRect) {
+            super.init(frame: frame)
+            wantsLayer = true
+        }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        layer.mask?.frame = CGRect(x: bounds.midX, y: 0, width: bounds.width - bounds.midX, height: bounds.height)
+        required init?(coder: NSCoder) { fatalError("This view is only created in code") }
+
+        override func makeBackingLayer() -> CALayer { AVSampleBufferDisplayLayer() }
+
+        // Every click reaches the Flutter OSD.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        /// A compare: only the right half shows, the original (AVPlayer's own picture) shows through on the left.
+        var rightHalfOnly = false {
+            didSet {
+                layer?.mask = rightHalfOnly ? CALayer() : nil
+                layer?.mask?.backgroundColor = NSColor.black.cgColor
+                needsLayout = true
+            }
+        }
+
+        override func layout() {
+            super.layout()
+            layer?.mask?.frame = CGRect(x: bounds.midX, y: 0, width: bounds.width - bounds.midX, height: bounds.height)
+        }
     }
-}
+#endif

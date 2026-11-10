@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:moonfin_design/moonfin_design.dart';
@@ -10,23 +12,32 @@ import '../focusable_dialog_row.dart';
 import '../track_selector_dialog.dart';
 
 /// The controls for what Lambent Server's PC enhancer does to the stream:
-/// upscaling quality, RTX HDR, Dolby Vision, Deepen blacks, and the picture
+/// upscaling quality, Auto HDR, Dolby Vision, Deepen blacks, and the picture
 /// (saturation, contrast, brightness, peak brightness, hue).
 ///
-/// Changes stay pending until Apply, because each one reopens the stream and
-/// the enhancer takes a few seconds to start again. A control whose setting the
-/// stream's URL does not carry is left out, since the server cannot honour it.
+/// An on/off row applies when it is pressed, so Compare shows what it compares
+/// at once; so does Frame interpolation, this screen's own choice for 2D titles,
+/// kept for later plays. HDR strength, saturation, contrast, brightness, hue and
+/// wide colour change while the stream plays ([onLive]), and show once what the
+/// player has buffered has played. The quality and peak brightness stay pending
+/// until Apply: each reopens the stream, and the enhancer takes a few seconds to
+/// start again. A control whose setting the stream's URL does not carry is left out,
+/// since the server cannot honour it.
 Future<void> showEnhancementPanel(
   BuildContext context, {
   required LambentEnhancement current,
   required bool enhanced,
   required void Function(bool on) onSetEnhancement,
   required void Function(LambentEnhancement chosen) onApply,
+  required void Function(LambentEnhancement chosen) onLive,
+  required Duration Function() liveDelay,
+  required VoidCallback onShowLiveNow,
   required VoidCallback onReset,
   required VoidCallback onShowStreamInfo,
   String? status,
   bool compareOnly = false,
   String? deviceUpscale,
+  EnhancementInterpolation? interpolation,
   bool useRootNavigator = false,
 }) {
   return showStyledPlayerDialog<void>(
@@ -45,6 +56,16 @@ Future<void> showEnhancementPanel(
         enhanced: enhanced,
         compareOnly: compareOnly,
         deviceUpscale: deviceUpscale,
+        interpolation: interpolation == null
+            ? null
+            : (
+                on: interpolation.on,
+                streamFps: interpolation.streamFps,
+                onSet: (on) {
+                  close();
+                  interpolation.onSet(on);
+                },
+              ),
         onSetEnhancement: (on) {
           close();
           onSetEnhancement(on);
@@ -52,6 +73,12 @@ Future<void> showEnhancementPanel(
         onApply: (chosen) {
           close();
           onApply(chosen);
+        },
+        onLive: onLive,
+        liveDelay: liveDelay,
+        onShowLiveNow: () {
+          close();
+          onShowLiveNow();
         },
         onReset: () {
           close();
@@ -66,6 +93,16 @@ Future<void> showEnhancementPanel(
   );
 }
 
+/// The frame interpolation row: offered only where the server's PC
+/// interpolates and the title's source is slow enough to double. [on] is this
+/// screen's choice; [streamFps] the rate the stream plays at when the PC
+/// interpolates it, null when it doesn't (yet).
+typedef EnhancementInterpolation = ({
+  bool on,
+  double? streamFps,
+  void Function(bool on) onSet,
+});
+
 const _qualityNames = <int, String>{
   1: '1 · Fastest',
   2: '2',
@@ -74,6 +111,19 @@ const _qualityNames = <int, String>{
 };
 
 typedef _Range = ({int min, int max});
+
+/// "Off", "On", or "On · 48 fps" once the stream is at the doubled rate:
+/// 47.952 shows as 48, 59.94 as itself.
+String _interpolationLabel(EnhancementInterpolation fi) {
+  final fps = fi.streamFps;
+  if (!fi.on) return 'Off';
+  if (fps == null) return 'On';
+  final whole = fps.round();
+  final shown = (fps - whole).abs() < 0.05
+      ? '$whole'
+      : fps.toStringAsFixed(2).replaceFirst(RegExp(r'0$'), '');
+  return 'On · $shown fps';
+}
 
 double _fraction(int value, _Range range) =>
     (value - range.min) / (range.max - range.min);
@@ -91,13 +141,20 @@ class _EnhancementPanelBody extends StatefulWidget {
     required this.enhanced,
     required this.onSetEnhancement,
     required this.onApply,
+    required this.onLive,
+    required this.liveDelay,
+    required this.onShowLiveNow,
     required this.onReset,
     required this.onShowStreamInfo,
     this.compareOnly = false,
     this.deviceUpscale,
+    this.interpolation,
   });
 
   final LambentEnhancement current;
+
+  /// The frame interpolation row; null where it is not offered.
+  final EnhancementInterpolation? interpolation;
 
   /// The plan's upscale on this device ("AI upscale", "Shader upscale",
   /// "Starting"), null when the plan does not give this device one. Shown,
@@ -113,6 +170,13 @@ class _EnhancementPanelBody extends StatefulWidget {
   final bool enhanced;
   final void Function(bool on) onSetEnhancement;
   final void Function(LambentEnhancement chosen) onApply;
+
+  /// A picture control that changes while the stream plays has changed.
+  final void Function(LambentEnhancement chosen) onLive;
+
+  /// How long until what the player gets next is on screen.
+  final Duration Function() liveDelay;
+  final VoidCallback onShowLiveNow;
   final VoidCallback onReset;
   final VoidCallback onShowStreamInfo;
 
@@ -123,7 +187,28 @@ class _EnhancementPanelBody extends StatefulWidget {
 class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
   late LambentEnhancement _pending = widget.current;
 
-  bool get _changed => _pending != widget.current;
+  /// When the last live change reaches the picture; null before the first.
+  DateTime? _liveDue;
+  Timer? _liveCountdown;
+
+  bool get _changed => !_pending.sameStream(widget.current);
+
+  void _changeLive(LambentEnhancement next) {
+    setState(() {
+      _pending = next;
+      _liveDue = DateTime.now().add(widget.liveDelay());
+    });
+    widget.onLive(widget.current.withLookOf(next));
+    _liveCountdown ??= Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveCountdown?.cancel();
+    super.dispose();
+  }
 
   String _onOff(bool? value) => value == true ? 'On' : 'Off';
 
@@ -156,15 +241,24 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
       required LambentEnhancement Function(int) set,
       String unit = '',
       bool needsHdr = false,
+      bool live = true,
       int? origin,
       String? zeroLabel,
     }) {
       final enabled = !needsHdr || hdrOn;
       final shown = value == 0 && zeroLabel != null ? zeroLabel : '$value$unit';
+      void change(LambentEnhancement next) {
+        if (live) {
+          _changeLive(next);
+        } else {
+          setState(() => _pending = next);
+        }
+      }
+
       return _EnhancementRow(
         autofocus: autofocusNext(),
         label: label,
-        value: enabled ? shown : 'Needs HDR',
+        value: enabled ? shown : 'Needs Auto HDR',
         dimmed: !enabled,
         slider: (
           value: _fraction(value!, range),
@@ -173,14 +267,13 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         stepper: true,
         onStep: (dir, wrap) {
           if (!enabled) return;
-          setState(() {
-            _pending = set(_stepped(value, dir, step, range, wrap));
-          });
+          change(set(_stepped(value, dir, step, range, wrap)));
         },
         onSlide: enabled
-            ? (fraction) => setState(() {
-                _pending = set(_valueAt(fraction, step, range));
-              })
+            ? (fraction) {
+                final next = _valueAt(fraction, step, range);
+                if (next != value) change(set(next));
+              }
             : null,
       );
     }
@@ -197,9 +290,10 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         label: label,
         value: enabled ? _onOff(value) : disabledReason,
         dimmed: !enabled,
-        onStep: (_, _) {
-          if (!enabled) return;
-          setState(() => _pending = set(!(value ?? false)));
+        // Only a press, so that left or right on the way past cannot restart
+        // the stream. Anything else still pending goes with it.
+        onStep: (_, press) {
+          if (enabled && press) widget.onApply(set(!(value ?? false)));
         },
       );
     }
@@ -225,19 +319,22 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
         ),
       if (cur.hdr != null)
         toggle(
-          label: 'RTX HDR',
+          label: 'Auto HDR',
           value: pending.hdr,
-          // Dolby Vision cannot outlive the HDR picture it rides on.
+          // Dolby Vision cannot outlive the HDR picture it rides on, and comes
+          // on with it (the owner's choice); its own row turns it off again.
           set: (on) => pending.copyWith(
             hdr: on,
-            dolbyVision: on ? pending.dolbyVision : false,
+            dolbyVision: on
+                ? (LambentEnhancement.dolbyVisionWithHdr || (pending.dolbyVision ?? false))
+                : false,
           ),
         ),
       if (cur.dolbyVision != null)
         toggle(
           label: 'Dolby Vision',
           value: pending.dolbyVision,
-          disabledReason: hdrOn ? null : 'Needs HDR',
+          disabledReason: hdrOn ? null : 'Needs Auto HDR',
           set: (on) => pending.copyWith(dolbyVision: on),
         ),
       if (cur.deepenBlacks != null)
@@ -254,6 +351,16 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           value: pending.compare ?? false,
           set: (on) => pending.copyWith(compare: on),
         ),
+      if (widget.interpolation case final fi?)
+        _EnhancementRow(
+          autofocus: autofocusNext(),
+          label: 'Frame interpolation',
+          value: _interpolationLabel(fi),
+          // Only a press, as for the other on/off rows: it reopens the stream.
+          onStep: (_, press) {
+            if (press) fi.onSet(!fi.on);
+          },
+        ),
       if (widget.deviceUpscale != null)
         _EnhancementRow(
           label: 'On this device',
@@ -263,6 +370,16 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
     ];
 
     final pictureRows = <Widget>[
+      if (cur.hdrStrength != null)
+        number(
+          label: 'HDR strength',
+          value: pending.hdrStrength,
+          step: 10,
+          range: LambentEnhancement.hdrStrengthRange,
+          unit: '%',
+          needsHdr: true,
+          set: (v) => pending.copyWith(hdrStrength: v),
+        ),
       if (cur.saturation != null)
         number(
           label: 'Saturation',
@@ -280,16 +397,6 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           needsHdr: true,
           set: (v) => pending.copyWith(contrast: v),
         ),
-      if (cur.middleGray != null)
-        number(
-          label: 'Brightness',
-          value: pending.middleGray,
-          step: 5,
-          range: LambentEnhancement.middleGrayRange,
-          unit: ' nits',
-          needsHdr: true,
-          set: (v) => pending.copyWith(middleGray: v),
-        ),
       if (cur.peakNits != null)
         number(
           label: 'Peak brightness',
@@ -298,28 +405,8 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           range: LambentEnhancement.peakRange,
           unit: ' nits',
           needsHdr: true,
+          live: false,
           set: (v) => pending.copyWith(peakNits: v),
-        ),
-      if (cur.hue != null)
-        number(
-          label: 'Hue',
-          value: pending.hue,
-          step: 5,
-          range: LambentEnhancement.hueRange,
-          unit: '°',
-          origin: 0,
-          set: (v) => pending.copyWith(hue: v),
-        ),
-      if (cur.wideColour != null)
-        number(
-          label: 'Wide colour',
-          value: pending.wideColour,
-          step: 25,
-          range: LambentEnhancement.wideColourRange,
-          unit: '%',
-          needsHdr: true,
-          zeroLabel: 'Off',
-          set: (v) => pending.copyWith(wideColour: v),
         ),
     ];
 
@@ -354,6 +441,7 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
       );
     }
 
+    final liveLeft = _liveDue?.difference(DateTime.now()).inSeconds ?? 0;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Column(
@@ -368,6 +456,12 @@ class _EnhancementPanelBodyState extends State<_EnhancementPanelBody> {
           const SizedBox(height: 8),
           Container(height: 1, color: Colors.white.withValues(alpha: 0.08)),
           const SizedBox(height: 8),
+          if (liveLeft > 0)
+            FocusableDialogRow(
+              icon: Icons.bolt_rounded,
+              label: 'Show now, or wait about $liveLeft s',
+              onTap: widget.onShowLiveNow,
+            ),
           FocusableDialogRow(
             icon: Icons.check_rounded,
             label: _changed ? 'Apply and restart stream' : 'Apply',

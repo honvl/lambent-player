@@ -14,6 +14,14 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    if (GetIt.instance.isRegistered<PosterBadgeRepository>()) {
+      unawaited(GetIt.instance<PosterBadgeRepository>().checkAvailable());
+    }
+  }
+
+  @override
   void dispose() {
     _appearanceScope.dispose();
     super.dispose();
@@ -32,7 +40,11 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
         // Rebuild on preference changes so the Glass Quality tile appears or
         // disappears the moment the glass theme is selected or replaced.
         child: ListenableBuilder(
-          listenable: GetIt.instance<UserPreferences>(),
+          listenable: Listenable.merge([
+            GetIt.instance<UserPreferences>(),
+            if (GetIt.instance.isRegistered<PosterBadgeRepository>())
+              GetIt.instance<PosterBadgeRepository>().available,
+          ]),
           builder: (context, _) => ListView(
             padding: EdgeInsets.only(bottom: bottomPad),
             children: [
@@ -100,16 +112,7 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
                       InterfaceStyle.material => l10n.interfaceStyleMaterial,
                     },
                   ),
-                  _TvSettingsListTile(
-                    leading: const Icon(Icons.palette_outlined),
-                    title: Text(l10n.settingsAppearanceTheme),
-                    subtitle: Text(l10n.settingsAppearanceThemeSubtitle),
-                    onTap: () => context.pushSettingsScreen(
-                      const AppearanceThemeScreen(),
-                    ),
-                  ),
-                  if (AppColorScheme.isGlass)
-                    EnumPreferenceTile<GlassQualityMode>(
+                  EnumPreferenceTile<GlassQualityMode>(
                       preference: UserPreferences.glassQuality,
                       title: l10n.glassQuality,
                       description: l10n.glassQualitySubtitle,
@@ -126,27 +129,6 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
                     icon: Icons.border_color,
                     labelOf: (v) => _formatCamelCaseLabel(v.name),
                   ),
-                  _TvSettingsListTile(
-                    leading: const Icon(Icons.storefront_outlined),
-                    title: Text(l10n.themeStore),
-                    subtitle: Text(l10n.themeStoreSubtitle),
-                    onTap: () =>
-                        context.pushSettingsScreen(const ThemeStoreScreen()),
-                  ),
-                  _TvSettingsListTile(
-                    leading: const Icon(Icons.download_outlined),
-                    title: Text(l10n.savedThemesTitle),
-                    subtitle: Text(l10n.savedThemesManageSubtitle),
-                    onTap: () =>
-                        context.pushSettingsScreen(const SavedThemesScreen()),
-                  ),
-                  if (_showThemeEditorEntry)
-                    _TvSettingsListTile(
-                      leading: const Icon(Icons.brush),
-                      title: Text(l10n.themeEditor),
-                      subtitle: Text(l10n.themeEditorSubtitle),
-                      onTap: () => unawaited(_openThemeEditor(context)),
-                    ),
                 ],
               ),
               _SectionHeader(l10n.display),
@@ -236,6 +218,15 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
                       WatchedIndicatorBehavior.never => l10n.never,
                     },
                   ),
+                  // Only when the server gives this person labels, since it
+                  // would switch nothing otherwise.
+                  if (_posterLabelsAvailable)
+                    SwitchPreferenceTile(
+                      preference: UserPreferences.showPosterLabels,
+                      title: l10n.showPosterLabels,
+                      subtitle: l10n.showPosterLabelsSubtitle,
+                      icon: Icons.label_outline,
+                    ),
                 ],
               ),
               if (!PlatformDetection.useMobileUi) ...[
@@ -310,3 +301,7 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
     );
   }
 }
+
+bool get _posterLabelsAvailable =>
+    GetIt.instance.isRegistered<PosterBadgeRepository>() &&
+    GetIt.instance<PosterBadgeRepository>().available.value == true;

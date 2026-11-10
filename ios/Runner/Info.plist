@@ -37,6 +37,16 @@
 				<string>moonfin</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>app.getlambent.pair</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>lambent</string>
+			</array>
+		</dict>
 	</array>
 	<!-- Keep the engine's built-in deep linking off so raw moonfin:// URIs
 	     only reach DeepLinkService. -->
@@ -48,6 +58,7 @@
 	<array>
 		<string>audio</string>
 		<string>fetch</string>
+		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
 	<!-- Auto-download subscription check, see BackgroundRefreshScheduler.swift.
@@ -55,6 +66,8 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).autodownload.refresh</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).downloads.scheduled</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).downloads.continued.*</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -106,7 +119,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Lambent uses your local network to discover Jellyfin and Emby servers.</string>
+	<string>Lambent uses your local network to discover Jellyfin, Emby and Silo servers.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lambent needs microphone access for voice search.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -124,6 +137,7 @@
 		<string>_jellyfin._tcp</string>
 		<string>_emby._tcp</string>
 		<string>_vbridge._tcp</string>
+		<string>_silo._tcp</string>
 		<string>_googlecast._tcp</string>
 		<string>_CC1AD845._googlecast._tcp</string>
 	</array>

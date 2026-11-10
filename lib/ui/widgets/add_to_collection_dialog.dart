@@ -6,6 +6,7 @@ import 'package:moonfin_design/moonfin_design.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../data/repositories/item_mutation_repository.dart';
+import '../../data/services/item_membership_service.dart';
 import '../../data/services/media_server_client_factory.dart';
 import '../../l10n/app_localizations.dart';
 import '../../preference/user_preferences.dart';
@@ -95,13 +96,21 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
 
   Future<void> _loadCollections() async {
     try {
-      final data = await _client.itemsApi.getItems(
-        includeItemTypes: const ['BoxSet'],
-        recursive: true,
-        sortBy: 'SortName',
-        sortOrder: 'Ascending',
-      );
-      final items = (data['Items'] as List?) ?? [];
+      // A server that lets the user edit only some collections lists just
+      // those (Silo: the profile's own manual ones).
+      final api = _client.itemsApi;
+      final List<dynamic> items;
+      if (api is EditableCollectionsApi) {
+        items = await (api as EditableCollectionsApi).getEditableCollections();
+      } else {
+        final data = await api.getItems(
+          includeItemTypes: const ['BoxSet'],
+          recursive: true,
+          sortBy: 'SortName',
+          sortOrder: 'Ascending',
+        );
+        items = (data['Items'] as List?) ?? [];
+      }
       if (!mounted) return;
       setState(() {
         _collections = items.cast<Map<String, dynamic>>().map((raw) {
@@ -177,6 +186,11 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
   Future<void> _addToCollection(String collectionId) async {
     try {
       await _mutations.addToCollection(collectionId, widget.itemIds);
+      ItemMembershipService.instance.notifyItemAddedToCollection(
+        widget.serverId ?? '',
+        collectionId,
+        widget.itemIds,
+      );
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
       if (!mounted) return;
@@ -201,6 +215,11 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
 
       if (collectionId != null && widget.itemIds.isNotEmpty) {
         await _mutations.addToCollection(collectionId, widget.itemIds);
+        ItemMembershipService.instance.notifyItemAddedToCollection(
+          widget.serverId ?? '',
+          collectionId,
+          widget.itemIds,
+        );
       }
 
       if (!mounted) return;

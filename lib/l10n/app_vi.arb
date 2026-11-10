@@ -1,6 +1,6 @@
 {
     "@@locale": "vi",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent phiên bản {version}",
+    "appVersionFooter": "Moonfin phiên bản {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent không thể truy cập vào khóa hệ thống của bạn. Việc đăng nhập có thể tiếp tục nhưng việc lưu trữ mã thông báo an toàn có thể không khả dụng cho đến khi khóa được mở khóa.",
+    "secureStorageUnavailableMessage": "Moonfin không thể truy cập vào khóa hệ thống của bạn. Việc đăng nhập có thể tiếp tục nhưng việc lưu trữ mã thông báo an toàn có thể không khả dụng cho đến khi khóa được mở khóa.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Chuyển đổi giữa Lambent và Neon Pulse mà không cần khởi động lại ứng dụng",
+    "settingsAppearanceThemeSubtitle": "Chuyển đổi giữa Moonfin và Neon Pulse mà không cần khởi động lại ứng dụng",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Thoát khỏi Lambent?",
+    "exitApp": "Thoát khỏi Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Chưa được thiết lập. Lambent sẽ thử mpv.conf mặc định trong thư mục ứng dụng/dữ liệu.",
+    "notSetMpvConf": "Chưa được thiết lập. Moonfin sẽ thử mpv.conf mặc định trong thư mục ứng dụng/dữ liệu.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Chuyển đổi khả năng hiển thị trang chủ cho mỗi thư viện. Khởi động lại Lambent để các thay đổi có hiệu lực.",
+    "libraryVisibilityDescription": "Chuyển đổi khả năng hiển thị trang chủ cho mỗi thư viện. Khởi động lại Moonfin để các thay đổi có hiệu lực.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "Chọn giữa Lambent, MakD hoặc tắt thanh phương tiện",
+    "mediaBarModeDescription": "Chọn giữa Moonfin, MakD hoặc tắt thanh phương tiện",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Chơi ở Lambent",
+    "playInMoonfin": "Chơi ở Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Không tìm thấy mục trong thư viện Lambent của bạn",
+    "itemNotFoundInLibrary": "Không tìm thấy mục trong thư viện Moonfin của bạn",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Đang khởi động lại máy chủ",
-    "adminServerRebootMessage": "Máy chủ đang khởi động lại, vui lòng khởi động lại Lambent",
+    "adminServerRebootMessage": "Máy chủ đang khởi động lại, vui lòng khởi động lại Moonfin",
     "adminActiveSessions": "Phiên hoạt động",
     "adminSessionsLoadFailed": "Không tải được phiên",
     "adminNoActiveSessions": "Không có phiên hoạt động nào",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Hiển thị nút thể loại trong thanh điều hướng",
     "settingsShowFavoritesButtonInNavigation": "Hiển thị nút yêu thích trên thanh điều hướng",
     "settingsShowLibrariesButtonInNavigation": "Hiển thị nút thư viện trong thanh điều hướng",
-    "settingsLibraryVisibilitySubtitle": "Chuyển đổi khả năng hiển thị trang chủ cho mỗi thư viện. Khởi động lại Lambent để các thay đổi có hiệu lực.",
+    "settingsLibraryVisibilitySubtitle": "Chuyển đổi khả năng hiển thị trang chủ cho mỗi thư viện. Khởi động lại Moonfin để các thay đổi có hiệu lực.",
     "settingsMediaBarAndLocalPreviews": "Thanh phương tiện & bản xem trước cục bộ",
     "settingsVisualOverlays": "Lớp phủ trực quan",
     "settingsSeasonalSurprise": "Bất ngờ theo mùa",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Giấy phép",
     "settingsOpenSourceLicenseNotices": "Thông báo giấy phép nguồn mở",
     "settingsPrivacyPolicy": "Chính sách bảo mật",
-    "settingsPrivacyPolicySubtitle": "Cách Lambent xử lý dữ liệu của bạn",
+    "settingsPrivacyPolicySubtitle": "Cách Moonfin xử lý dữ liệu của bạn",
     "settingsCheckForUpdates": "Kiểm tra cập nhật",
-    "settingsCheckForUpdatesSubtitle": "Kiểm tra bản phát hành Lambent mới nhất",
+    "settingsCheckForUpdatesSubtitle": "Kiểm tra bản phát hành Moonfin mới nhất",
     "settingsPoweredByFlutter": "Được cung cấp bởi Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# thông báo giấy phép} other {# thông báo giấy phép}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Ưu tiên phụ đề SDH",
     "preferSdhSubtitlesSubtitle": "Ưu tiên các bản phụ đề SDH/CC khi tự động chọn.",
     "webDiagnostics": "Chẩn đoán web",
-    "webDiagnosticsTitle": "Lambent Chẩn đoán web",
+    "webDiagnosticsTitle": "Moonfin Chẩn đoán web",
     "webDiagnosticsIntro": "Sử dụng trang này để chẩn đoán các sự cố kết nối trình duyệt (CORS, nội dung hỗn hợp và cài đặt khám phá).",
     "webDiagnosticsDetectedMixedContentFailure": "Đã phát hiện lỗi nội dung hỗn hợp",
     "webDiagnosticsDetectedCorsPreflightFailure": "Đã phát hiện CORS/Lỗi trước ánh sáng",
-    "webDiagnosticsMixedContentFailureBody": "Lambent đã phát hiện thấy một trang HTTPS đang cố gọi URL máy chủ HTTP. Trình duyệt chặn yêu cầu này trước khi nó đến máy chủ của bạn.",
-    "webDiagnosticsCorsFailureBody": "Lambent đã phát hiện ra lỗi yêu cầu ở cấp trình duyệt thường xảy ra do thiếu tiêu đề CORS hoặc preflight trên máy chủ phương tiện.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin đã phát hiện thấy một trang HTTPS đang cố gọi URL máy chủ HTTP. Trình duyệt chặn yêu cầu này trước khi nó đến máy chủ của bạn.",
+    "webDiagnosticsCorsFailureBody": "Moonfin đã phát hiện ra lỗi yêu cầu ở cấp trình duyệt thường xảy ra do thiếu tiêu đề CORS hoặc preflight trên máy chủ phương tiện.",
     "webDiagnosticsTargetUrl": "URL mục tiêu: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "không được cấu hình",
     "webDiagnosticsMixedContent": "Nội dung hỗn hợp",
     "webDiagnosticsMixedContentDetected": "Trang này được tải qua HTTPS nhưng một hoặc nhiều URL được định cấu hình là HTTP. Trình duyệt chặn các trang HTTPS gọi API HTTP.",
-    "webDiagnosticsMixedContentFix": "Khắc phục: phân phối máy chủ phương tiện hoặc điểm cuối proxy của bạn qua HTTPS hoặc chỉ tải Lambent qua HTTP trên các mạng cục bộ đáng tin cậy.",
+    "webDiagnosticsMixedContentFix": "Khắc phục: phân phối máy chủ phương tiện hoặc điểm cuối proxy của bạn qua HTTPS hoặc chỉ tải Moonfin qua HTTP trên các mạng cục bộ đáng tin cậy.",
     "webDiagnosticsNoMixedContentDetected": "Không phát hiện thấy cấu hình nội dung hỗn hợp rõ ràng nào từ cài đặt thời gian chạy hiện tại.",
     "webDiagnosticsCorsChecklist": "Danh sách kiểm tra CORS",
     "webDiagnosticsCorsChecklistItem1": "• Cho phép nguồn gốc trình duyệt trong Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Cổ điển là bố cục Lambent gốc căn giữa. Hiện đại là bố cục điện ảnh tự điều chỉnh.",
+    "detailScreenStyleSubtitle": "Cổ điển là bố cục Moonfin gốc căn giữa. Hiện đại là bố cục điện ảnh tự điều chỉnh.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Dùng thuật toán Lambent Gợi ý dựa trên thư viện cục bộ hoặc Chỉ số tương đồng trực tuyến của TMDb. Lưu ý: Gợi ý trực tuyến cần tích hợp Seerr.",
+    "recommendationSystemSubtitle": "Dùng thuật toán Moonfin Gợi ý dựa trên thư viện cục bộ hoặc Chỉ số tương đồng trực tuyến của TMDb. Lưu ý: Gợi ý trực tuyến cần tích hợp Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Gợi ý",
+    "recommendationSystemMoonfin": "Moonfin Gợi ý",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Giới hạn gợi ý của Lambent Gợi ý theo xếp hạng độ tuổi của nội dung đích",
+    "recommendationsApplyParentalRatingCapSubtitle": "Giới hạn gợi ý của Moonfin Gợi ý theo xếp hạng độ tuổi của nội dung đích",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Chủ đề tùy chỉnh thay đổi các thành phần giao diện trên toàn Lambent. Hãy chọn một tùy chọn hợp với phong cách của bạn.",
+    "customThemeSubtitle": "Chủ đề tùy chỉnh thay đổi các thành phần giao diện trên toàn Moonfin. Hãy chọn một tùy chọn hợp với phong cách của bạn.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Đăng nhập Lambent trên điện thoại của bạn",
+    "carSignInPrompt": "Đăng nhập Moonfin trên điện thoại của bạn",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller là bộ kết xuất GPU hiện đại của Flutter, cho hoạt ảnh mượt hơn và ít giật hơn. Trên một số hộp TV và GPU đời cũ, nó có thể gây lỗi hiển thị hoặc video đen; hãy Tắt nếu bạn gặp tình trạng đó. Tự động sẽ chọn mặc định phù hợp nhất cho thiết bị của bạn. Khởi động lại Lambent để áp dụng.",
+    "impellerRenderingSubtitle": "Impeller là bộ kết xuất GPU hiện đại của Flutter, cho hoạt ảnh mượt hơn và ít giật hơn. Trên một số hộp TV và GPU đời cũ, nó có thể gây lỗi hiển thị hoặc video đen; hãy Tắt nếu bạn gặp tình trạng đó. Tự động sẽ chọn mặc định phù hợp nhất cho thiết bị của bạn. Khởi động lại Moonfin để áp dụng.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent cần khởi động lại để đổi công cụ kết xuất. Hãy đóng ứng dụng ngay bây giờ, sau đó mở lại để áp dụng.",
+    "impellerRestartMessage": "Moonfin cần khởi động lại để đổi công cụ kết xuất. Hãy đóng ứng dụng ngay bây giờ, sau đó mở lại để áp dụng.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

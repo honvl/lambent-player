@@ -1,6 +1,6 @@
 {
     "@@locale": "sl",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent različica {version}",
+    "appVersionFooter": "Moonfin različica {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent ni mogel dostopati do vašega sistemskega obeska za ključe. Prijava se lahko nadaljuje, vendar varno shranjevanje žetonov morda ne bo na voljo, dokler se obesek za ključe ne odklene.",
+    "secureStorageUnavailableMessage": "Moonfin ni mogel dostopati do vašega sistemskega obeska za ključe. Prijava se lahko nadaljuje, vendar varno shranjevanje žetonov morda ne bo na voljo, dokler se obesek za ključe ne odklene.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Preklapljajte med Lambent in Neon Pulse brez ponovnega zagona aplikacije",
+    "settingsAppearanceThemeSubtitle": "Preklapljajte med Moonfin in Neon Pulse brez ponovnega zagona aplikacije",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Želite zapustiti Lambent?",
+    "exitApp": "Želite zapustiti Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Ni nastavljeno. Lambent bo poskusil privzeti mpv.conf v mapah app/data.",
+    "notSetMpvConf": "Ni nastavljeno. Moonfin bo poskusil privzeti mpv.conf v mapah app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Preklopi vidnost domače strani na knjižnico. Znova zaženite Lambent, da spremembe začnejo veljati.",
+    "libraryVisibilityDescription": "Preklopi vidnost domače strani na knjižnico. Znova zaženite Moonfin, da spremembe začnejo veljati.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Igrajte v Lambent",
+    "playInMoonfin": "Igrajte v Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Predmeta ni bilo mogoče najti v vaši knjižnici Lambent",
+    "itemNotFoundInLibrary": "Predmeta ni bilo mogoče najti v vaši knjižnici Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Poteka ponovni zagon strežnika",
-    "adminServerRebootMessage": "Poteka ponovni zagon strežnika, znova zaženite Lambent",
+    "adminServerRebootMessage": "Poteka ponovni zagon strežnika, znova zaženite Moonfin",
     "adminActiveSessions": "Aktivne seje",
     "adminSessionsLoadFailed": "Nalaganje sej ni uspelo",
     "adminNoActiveSessions": "Ni aktivnih sej",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Pokaži gumb zvrsti v navigacijski vrstici",
     "settingsShowFavoritesButtonInNavigation": "Pokažite gumb priljubljenih v navigacijski vrstici",
     "settingsShowLibrariesButtonInNavigation": "Prikažite gumb za knjižnice v navigacijski vrstici",
-    "settingsLibraryVisibilitySubtitle": "Preklopi vidnost domače strani na knjižnico. Znova zaženite Lambent, da spremembe začnejo veljati.",
+    "settingsLibraryVisibilitySubtitle": "Preklopi vidnost domače strani na knjižnico. Znova zaženite Moonfin, da spremembe začnejo veljati.",
     "settingsMediaBarAndLocalPreviews": "Medijska vrstica in lokalni predogledi",
     "settingsVisualOverlays": "Vizualne prekrivke",
     "settingsSeasonalSurprise": "Sezonsko presenečenje",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licence",
     "settingsOpenSourceLicenseNotices": "Obvestila o odprtokodnih licencah",
     "settingsPrivacyPolicy": "Politika zasebnosti",
-    "settingsPrivacyPolicySubtitle": "Kako Lambent ravna z vašimi podatki",
+    "settingsPrivacyPolicySubtitle": "Kako Moonfin ravna z vašimi podatki",
     "settingsCheckForUpdates": "Preverite posodobitve",
-    "settingsCheckForUpdatesSubtitle": "Preverite najnovejšo izdajo Lambent",
+    "settingsCheckForUpdatesSubtitle": "Preverite najnovejšo izdajo Moonfin",
     "settingsPoweredByFlutter": "Poganja Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# licenčno obvestilo} two {# licenčni obvestili} few {# licenčna obvestila} other {# licenčnih obvestil}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Prednostno uporabi podnapise SDH",
     "preferSdhSubtitlesSubtitle": "Pri samodejni izbiri daj prednost sledem podnapisov SDH/CC.",
     "webDiagnostics": "Spletna diagnostika",
-    "webDiagnosticsTitle": "Spletna diagnostika Lambent",
+    "webDiagnosticsTitle": "Spletna diagnostika Moonfin",
     "webDiagnosticsIntro": "Na tej strani lahko diagnosticirate težave s povezljivostjo v brskalniku (CORS, mešana vsebina in nastavitve odkrivanja).",
     "webDiagnosticsDetectedMixedContentFailure": "Zaznana napaka zaradi mešane vsebine",
     "webDiagnosticsDetectedCorsPreflightFailure": "Zaznana napaka CORS/preflight",
-    "webDiagnosticsMixedContentFailureBody": "Lambent je zaznal, da stran HTTPS poskuša klicati URL strežnika prek HTTP. Brskalniki to zahtevo blokirajo, preden doseže vaš strežnik.",
-    "webDiagnosticsCorsFailureBody": "Lambent je zaznal napako zahteve na ravni brskalnika, ki jo običajno povzročijo manjkajoče glave CORS ali preflight na predstavnostnem strežniku.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin je zaznal, da stran HTTPS poskuša klicati URL strežnika prek HTTP. Brskalniki to zahtevo blokirajo, preden doseže vaš strežnik.",
+    "webDiagnosticsCorsFailureBody": "Moonfin je zaznal napako zahteve na ravni brskalnika, ki jo običajno povzročijo manjkajoče glave CORS ali preflight na predstavnostnem strežniku.",
     "webDiagnosticsTargetUrl": "Ciljni URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "ni nastavljeno",
     "webDiagnosticsMixedContent": "Mešana vsebina",
     "webDiagnosticsMixedContentDetected": "Ta stran je naložena prek HTTPS, vendar en ali več nastavljenih URL-jev uporablja HTTP. Brskalniki stranem HTTPS preprečujejo klice na vmesnike API prek HTTP.",
-    "webDiagnosticsMixedContentFix": "Rešitev: predstavnostni strežnik ali posredniško končno točko ponudite prek HTTPS ali pa Lambent nalagajte prek HTTP samo v zaupanja vrednih lokalnih omrežjih.",
+    "webDiagnosticsMixedContentFix": "Rešitev: predstavnostni strežnik ali posredniško končno točko ponudite prek HTTPS ali pa Moonfin nalagajte prek HTTP samo v zaupanja vrednih lokalnih omrežjih.",
     "webDiagnosticsNoMixedContentDetected": "V trenutnih nastavitvah izvajanja ni zaznane očitne konfiguracije z mešano vsebino.",
     "webDiagnosticsCorsChecklist": "Kontrolni seznam CORS",
     "webDiagnosticsCorsChecklistItem1": "• Dovolite origin brskalnika v Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klasični je izvirna sredinska postavitev Lambent. Sodobni je odzivna filmska postavitev.",
+    "detailScreenStyleSubtitle": "Klasični je izvirna sredinska postavitev Moonfin. Sodobni je odzivna filmska postavitev.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Uporabite algoritem Lambent priporoča za lokalno knjižnico ali spletne metrike podobnosti TMDb. Opomba: spletna priporočila zahtevajo integracijo Seerr.",
+    "recommendationSystemSubtitle": "Uporabite algoritem Moonfin priporoča za lokalno knjižnico ali spletne metrike podobnosti TMDb. Opomba: spletna priporočila zahtevajo integracijo Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent priporoča",
+    "recommendationSystemMoonfin": "Moonfin priporoča",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Omeji predloge funkcije Lambent priporoča glede na starševsko oceno ciljne vsebine",
+    "recommendationsApplyParentalRatingCapSubtitle": "Omeji predloge funkcije Moonfin priporoča glede na starševsko oceno ciljne vsebine",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Teme po meri spremenijo vizualne elemente po celotnem Lambentu. Izberite možnost, ki ustreza vašemu slogu.",
+    "customThemeSubtitle": "Teme po meri spremenijo vizualne elemente po celotnem Moonfinu. Izberite možnost, ki ustreza vašemu slogu.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Prijavite se v Lambent na telefonu",
+    "carSignInPrompt": "Prijavite se v Moonfin na telefonu",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8896,7 +8896,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller je sodobni GPU-izrisovalnik Flutterja za tekočejše animacije in manj zatikanja. Na nekaterih TV-škatlah in starejših grafičnih karticah lahko povzroči napake v prikazu ali črno sliko; v tem primeru ga izklopite. Samodejno izbere najboljšo privzeto nastavitev za vašo napravo. Za uveljavitev znova zaženite Lambent.",
+    "impellerRenderingSubtitle": "Impeller je sodobni GPU-izrisovalnik Flutterja za tekočejše animacije in manj zatikanja. Na nekaterih TV-škatlah in starejših grafičnih karticah lahko povzroči napake v prikazu ali črno sliko; v tem primeru ga izklopite. Samodejno izbere najboljšo privzeto nastavitev za vašo napravo. Za uveljavitev znova zaženite Moonfin.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8907,7 +8907,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Lambent se mora znova zagnati, da spremeni pogon za izrisovanje. Zaprite aplikacijo in jo znova odprite.",
+    "impellerRestartMessage": "Moonfin se mora znova zagnati, da spremeni pogon za izrisovanje. Zaprite aplikacijo in jo znova odprite.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

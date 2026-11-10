@@ -46,6 +46,7 @@
 		A28B0984853CBF7759E55954 /* NowPlayingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A71870DB153929F6FDDC901 /* NowPlayingController.swift */; };
 		AD10AD10AD10AD10AD100001 /* AppleTvAudioChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD10AD10AD10AD10AD100002 /* AppleTvAudioChannel.swift */; };
 		AD10AD10AD10AD10AD100003 /* AppleTvThemeMusicChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD10AD10AD10AD10AD100004 /* AppleTvThemeMusicChannel.swift */; };
+		A7C5D1000000000000000006 /* AppleArcadeSoundChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C5D1000000000000000005 /* AppleArcadeSoundChannel.swift */; };
 		BC59339B180C88464B1212F8 /* SubtitleOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A0477050CD294B7CB8C754 /* SubtitleOverlay.swift */; };
 		C1F1E8188A6812EC3C6A9EF1 /* AppleTvGameInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A868E735744FD641776321 /* AppleTvGameInputViewController.swift */; };
 		CAE8045C3AB63C66024FA6B7 /* AetherVideoChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78635028C38C060155519D22 /* AetherVideoChannel.swift */; };
@@ -57,6 +58,7 @@
 		C0A1E10300000000000000A3 /* ChannelCarouselOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A1E10400000000000000A4 /* ChannelCarouselOverlay.swift */; };
 		C0A1E10100000000000000A1 /* ChannelCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0A1E10200000000000000A2 /* ChannelCarousel.swift */; };
 		E0B5E10100000000000000B1 /* EpisodeBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B5E10200000000000000B2 /* EpisodeBrowser.swift */; };
+		57A7C9A100000000000000C1 /* WatchPartyOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A7C9A200000000000000C2 /* WatchPartyOverlay.swift */; };
 		E86325A97B10B11E8E226CFE /* SubtitleFontLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147184DF7C5FC0873513C3FA /* SubtitleFontLocator.swift */; };
 /* End PBXBuildFile section */
 
@@ -134,6 +136,7 @@
 		ACEF4B8C13F871646DA3AA02 /* ServiceProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ServiceProvider.swift; sourceTree = "<group>"; };
 		AD10AD10AD10AD10AD100002 /* AppleTvAudioChannel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppleTvAudioChannel.swift; sourceTree = "<group>"; };
 		AD10AD10AD10AD10AD100004 /* AppleTvThemeMusicChannel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppleTvThemeMusicChannel.swift; sourceTree = "<group>"; };
+		A7C5D1000000000000000005 /* AppleArcadeSoundChannel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppleArcadeSoundChannel.swift; sourceTree = "<group>"; };
 		AFC8523FE7AAB0D9378753BF /* MoonfinTopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MoonfinTopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C96906304636AD16C64D1AC9 /* PlayerTypes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PlayerTypes.swift; path = Aether/PlayerTypes.swift; sourceTree = "<group>"; };
 		CD0CCE08AF23DCECD17895AC /* GameSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GameSession.swift; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 		C0A1E10400000000000000A4 /* ChannelCarouselOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChannelCarouselOverlay.swift; sourceTree = "<group>"; };
 		C0A1E10200000000000000A2 /* ChannelCarousel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChannelCarousel.swift; sourceTree = "<group>"; };
 		E0B5E10200000000000000B2 /* EpisodeBrowser.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EpisodeBrowser.swift; sourceTree = "<group>"; };
+		57A7C9A200000000000000C2 /* WatchPartyOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchPartyOverlay.swift; sourceTree = "<group>"; };
 		DDC62E8B96B51BBBCBA1EC23 /* EngineTrustPolicy.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EngineTrustPolicy.swift; path = Aether/EngineTrustPolicy.swift; sourceTree = "<group>"; };
 		81BEA439F41D2A8701F2EC3E /* ClientIdentityStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ClientIdentityStore.swift; path = Aether/ClientIdentityStore.swift; sourceTree = "<group>"; };
 		1263D42B138D48499CB25F10 /* MoonfinURLSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MoonfinURLSession.swift; path = Aether/MoonfinURLSession.swift; sourceTree = "<group>"; };
@@ -257,6 +261,7 @@
 				C0A1E10400000000000000A4 /* ChannelCarouselOverlay.swift */,
 				C0A1E10200000000000000A2 /* ChannelCarousel.swift */,
 				E0B5E10200000000000000B2 /* EpisodeBrowser.swift */,
+				57A7C9A200000000000000C2 /* WatchPartyOverlay.swift */,
 				D59C7B5CE2E844F445D8B72B /* NativeApplePlayerChannel.swift */,
 				7B47F49C774D38D5782E3CF3 /* MoonfinTvosStubs.swift */,
 			);
@@ -304,6 +309,7 @@
 				A0D05FC70CE4F8BD2EC3962C /* AppleTvSystemChannel.swift */,
 				AD10AD10AD10AD10AD100002 /* AppleTvAudioChannel.swift */,
 				AD10AD10AD10AD10AD100004 /* AppleTvThemeMusicChannel.swift */,
+				A7C5D1000000000000000005 /* AppleArcadeSoundChannel.swift */,
 				4790983D8AB5249022D779CA /* Games */,
 			);
 			path = Runner;
@@ -573,6 +579,7 @@
 				6E8429C73DFB8688BD40C60F /* AppleTvSystemChannel.swift in Sources */,
 				AD10AD10AD10AD10AD100001 /* AppleTvAudioChannel.swift in Sources */,
 				AD10AD10AD10AD10AD100003 /* AppleTvThemeMusicChannel.swift in Sources */,
+				A7C5D1000000000000000006 /* AppleArcadeSoundChannel.swift in Sources */,
 				0BB4A7E017A41C2DC92AA740 /* AppleTvGameChannel.swift in Sources */,
 				C1F1E8188A6812EC3C6A9EF1 /* AppleTvGameInputViewController.swift in Sources */,
 				1DFED451953EAD7F2A8939DF /* GameAudioOutput.swift in Sources */,
@@ -601,6 +608,7 @@
 				C0A1E10300000000000000A3 /* ChannelCarouselOverlay.swift in Sources */,
 				C0A1E10100000000000000A1 /* ChannelCarousel.swift in Sources */,
 				E0B5E10100000000000000B1 /* EpisodeBrowser.swift in Sources */,
+				57A7C9A100000000000000C1 /* WatchPartyOverlay.swift in Sources */,
 				69A64DCAF44C6CBA903F3BC4 /* NativeApplePlayerChannel.swift in Sources */,
 				0520DB98CE279F2BA3B6E562 /* MoonfinTvosStubs.swift in Sources */,
 			);
@@ -692,12 +700,72 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				"OTHER_LDFLAGS[sdk=appletvos*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/device/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
+				"OTHER_LDFLAGS[sdk=appletvsimulator*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/simulator/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -724,7 +792,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -750,7 +818,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -833,12 +901,72 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				"OTHER_LDFLAGS[sdk=appletvos*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/device/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
+				"OTHER_LDFLAGS[sdk=appletvsimulator*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/simulator/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -915,12 +1043,72 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				"OTHER_LDFLAGS[sdk=appletvos*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/device/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
+				"OTHER_LDFLAGS[sdk=appletvsimulator*]" = (
+					"$(inherited)",
+					"-force_load",
+					"$(SRCROOT)/LambentTunnel/simulator/liblambent_tunnel.a",
+					"-framework",
+					SystemConfiguration,
+					"-framework",
+					Security,
+					"-framework",
+					Network,
+					"-lresolv",
+					"-u",
+					_lambent_tunnel_device_id,
+					"-u",
+					_lambent_tunnel_join,
+					"-u",
+					_lambent_tunnel_new_key,
+					"-u",
+					_lambent_tunnel_redeem,
+					"-u",
+					_lambent_tunnel_set_home,
+					"-u",
+					_lambent_tunnel_start,
+					"-u",
+					_lambent_tunnel_start_on,
+					"-u",
+					_lambent_tunnel_status,
+					"-u",
+					_lambent_tunnel_stop,
+				);
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -947,7 +1135,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
-				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.player.topshelf;
+				PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer.topshelf;
 				PRODUCT_NAME = MoonfinTopShelf;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
@@ -1014,7 +1202,7 @@
 			repositoryURL = "https://github.com/RadicalMuffinMan/AetherEngine";
 			requirement = {
 				kind = revision;
-				revision = 8f8fc7f83d6fe65f955f4bdf30486ce2bc514ebf;
+				revision = 93a024a5b72a735c996ca289e7dc0ed8d09dc787;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

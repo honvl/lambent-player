@@ -46,13 +46,21 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
-            <!-- moonfin://item?id=... / moonfin://play?id=... / moonfin://search?query=... deep links,
+            <!-- moonfin://item?id=... / moonfin://play?id=... / moonfin://search?query=... /
+                 moonfin://live-tv/guide / moonfin://live-tv/recordings deep links,
                  delivered to Dart by app_links. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="moonfin"/>
+            </intent-filter>
+            <!-- lambent://pair?id=...&token=... from a QR code in Lambent Server's window. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="lambent"/>
             </intent-filter>
             <!-- Keep the engine's built-in deep linking off so raw moonfin://
                  URIs only reach DeepLinkService. -->

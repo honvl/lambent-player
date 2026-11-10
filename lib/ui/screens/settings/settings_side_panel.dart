@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:go_router/go_router.dart';
 import 'package:custom_tv_text_field/custom_tv_text_field.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart' show CupertinoSlider;
@@ -16,9 +17,16 @@ import 'package:playback_core/playback_core.dart' show LambentEnhancement;
 import 'package:server_core/server_core.dart' hide ImageType;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../util/lambent_server.dart';
+import '../../../data/repositories/poster_badge_repository.dart';
 import '../../../data/services/achievements_service.dart';
 import '../../../data/services/lambent_enhance_service.dart';
+import '../../../data/services/enhance_purchases.dart';
+import '../../../data/services/lambent_device_capabilities.dart';
+import '../../../data/services/lambent_licence.dart';
+import '../../../data/services/player_licence.dart';
 import '../../../data/services/auto_download_service.dart';
+import '../../../data/services/moonbase_endpoint.dart';
 import '../../../data/services/plugin_sync_service.dart';
 import '../../../data/services/custom_external_lists_service.dart';
 import '../../../data/services/topshelf_service.dart';
@@ -29,7 +37,6 @@ import '../../../data/repositories/user_views_repository.dart';
 import '../../../data/services/seerr/seerr_discover_sliders.dart';
 import '../../../di/providers.dart';
 import '../../../util/idiom/app_ui_idiom.dart';
-import '../../../platform/web_runtime_config.dart';
 import '../../../playback/apple_player_ui.dart';
 import '../../../playback/display_hdr_probe.dart';
 import '../../../util/focus/dpad_keys.dart';
@@ -40,13 +47,14 @@ import '../../../util/language_codes.dart';
 import '../../../util/live_tv_library.dart';
 import '../../../util/locale_names.dart';
 import '../../util/home_row_title_localizer.dart';
+import '../../screensaver/screensaver_controller.dart';
 import '../../../util/overlay_color_palette.dart';
 import '../../../util/game_cores.dart';
 import '../../../util/platform_detection.dart';
-import '../../../util/playback_time_label.dart';
 import '../../../util/app_beta.dart';
 import '../../../util/app_distribution.dart';
 import '../../../util/pin_code_util.dart';
+import '../../../util/signed_in_server_features.dart';
 import '../../widgets/pin_entry_dialog.dart';
 import '../../widgets/app_update_dialog.dart';
 
@@ -72,32 +80,31 @@ import '../../../preference/seerr_preferences.dart';
 import '../../../preference/seerr_row_config.dart';
 import '../../navigation/destinations.dart';
 import '../admin/admin_nav.dart';
+import '../after_hours/after_hours_trigger.dart';
 import '../setup/setup_wizard_gate.dart';
+import '../setup/setup_wizard_previews.dart' show SetupPreviewData;
 import '../../widgets/adaptive/adaptive_dialog.dart';
 import '../../widgets/adaptive/adaptive_list_section.dart';
 import '../../widgets/keyboard_shortcuts/keyboard_shortcut_reference.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/client_certificate_dialog.dart';
-import '../../widgets/playback/playback_time_row.dart';
-import '../../widgets/playback/player_loading_overlay.dart';
-import '../../widgets/playback/loading_animation_widget.dart';
 import '../../widgets/settings/preference_binding.dart';
 import '../../widgets/settings/clean_settings_typography.dart';
 import '../../widgets/settings/button_layout_list.dart';
 import '../../widgets/settings/preference_tiles.dart';
 import '../../widgets/settings/settings_panel.dart';
+import '../../widgets/settings/settings_preview_scope.dart';
+import '../../widgets/sliding_pill_tabs.dart';
+import 'live_preview/settings_live_preview.dart';
 import '../../widgets/settings/settings_section_header.dart';
 import '../../widgets/bottom_nav/bottom_nav_destinations.dart';
 import '../../widgets/navigation_layout.dart';
+import '../../widgets/downloads_nav_slot.dart';
 import '../../widgets/support_dialog.dart';
-import '../../widgets/trickplay_settings_preview.dart';
 import '../../widgets/focus/request_initial_focus.dart';
 import '../home/home_view_model.dart';
-import 'appearance_theme_screen.dart';
 import 'diagnostics_settings_screen.dart';
 import 'download_settings_screen.dart';
-import 'saved_themes_screen.dart';
-import 'theme_store_screen.dart';
 import 'home_sections_screen.dart';
 import 'home_row_toggles_screen.dart';
 import 'home_rows_image_type_screen.dart';
@@ -121,7 +128,8 @@ import '../../../preference/detail_section_layout.dart';
 import '../detail/detail_buttons.dart';
 import '../detail/playlist_sort_filter_bar.dart';
 import '../playback/osd_buttons.dart';
-import '../syncplay/syncplay_screen.dart';
+import '../watch_party/watch_together_route.dart';
+import '../../../watch_party/silo_watch_party_manager.dart';
 
 part 'panel/settings_panel_infra.dart';
 part 'panel/settings_search_field.dart';
@@ -137,6 +145,7 @@ part 'panel/libraries_category_screen.dart';
 part 'panel/seasonal_effects_screen.dart';
 part 'panel/loading_animation_screen.dart';
 part 'panel/services_screen.dart';
+part 'panel/calendar_settings_screen.dart';
 part 'panel/external_lists_screen.dart';
 part 'panel/plugin_screen.dart';
 part 'panel/about_category_screen.dart';
@@ -156,8 +165,28 @@ part 'panel/advanced_options_screen.dart';
 part 'panel/syncplay_settings_screen.dart';
 part 'panel/settings_panel_tiles.dart';
 
-bool get _showThemeEditorEntry =>
-    PlatformDetection.isWeb && webRuntimeConfig.pluginMode;
+/// The Navigation Bar screen on its own, which the panel otherwise only opens
+/// from inside its private navigator.
+@visibleForTesting
+Widget navigationSettingsScreenForTesting() =>
+    const _NavigationCategoryScreen();
+
+@visibleForTesting
+Widget watchPartySettingsScreenForTesting() => const _SyncPlaySettingsScreen();
+
+/// Lambent has one theme, so the plugin's theme editor isn't offered.
+bool get _showThemeEditorEntry => false;
+
+/// Whether Integrations has anything to show: Seerr, which a signed-in server
+/// with the Moonfin plugin could offer, or the calendar and achievements,
+/// which the active server's plugin answered for.
+bool get _integrationsOffered =>
+    // Seerr shows only once Lambent's switch for it is on.
+    (lambentShowsSeerr && seerrOnAnySignedInServer()) ||
+    (GetIt.instance.isRegistered<PluginSyncService>() &&
+        GetIt.instance<PluginSyncService>().calendarAvailable) ||
+    (GetIt.instance.isRegistered<AchievementsService>() &&
+        GetIt.instance<AchievementsService>().available);
 
 Uri _resolveThemeEditorUri() {
   final base = Uri.base;
@@ -193,7 +222,62 @@ Future<void> _openThemeEditor(BuildContext context) async {
   }
 }
 
-class SettingsSidePanel extends ConsumerStatefulWidget {
+/// The largest text scale the category labels fit the strip's fixed height
+/// at. Past Large their descenders get cut off.
+final _pillMaxTextScale = DesktopUiScale.large.scaleFactor;
+
+/// The inspector's height at the default scale, split into the share its text
+/// takes, which grows with the user's scale, and its padding and gaps.
+const _inspectorTextHeight = 90.0;
+const _inspectorFixedHeight = 90.0;
+
+/// One pill segment of Settings and the page it opens in the list column.
+class _SettingsCategory {
+  final String title;
+  final String subtitle;
+  final Widget Function() screen;
+
+  /// Off for a category whose settings never change the live preview, so the
+  /// phone gives that room to the list.
+  final bool preview;
+
+  const _SettingsCategory(
+    this.title,
+    this.subtitle,
+    this.screen, {
+    this.preview = true,
+  });
+}
+
+/// A category page that is a short list of entries rather than settings:
+/// Administration, and the way out of Kids Mode.
+class _SettingsEntryListScreen extends StatelessWidget {
+  final String title;
+  final List<_PanelEntry> entries;
+
+  const _SettingsEntryListScreen({required this.title, required this.entries});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: buildSettingsAppBar(context, Text(title)),
+      body: ListView(
+        children: [
+          adaptiveListSection(
+            children: [for (final entry in entries) _PanelEntryTile(entry: entry)],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Settings with its live preview. The categories sit in the app's pill tabs,
+/// the chosen category's screens run in their own navigator in a list column,
+/// and the preview beside it (above it on a phone) redraws the screen the
+/// focused setting changes.
+class SettingsSidePanel extends ConsumerStatefulWidget
+    with FullScreenSettingsContent {
   const SettingsSidePanel({super.key});
 
   @override
@@ -201,11 +285,34 @@ class SettingsSidePanel extends ConsumerStatefulWidget {
 }
 
 class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
-  final _firstFocusNode = FocusNode(debugLabel: 'TvSettingsPanelFirstItem');
+  final _preview = SettingsPreviewController();
+  final _listNavKey = GlobalKey<NavigatorState>();
+  final _listScope = FocusScopeNode(debugLabel: 'SettingsListColumn');
+  final _pillFocus = FocusNode(debugLabel: 'SettingsCategoryPill');
   final _searchController = TextEditingController();
   final _searchFieldFocus = FocusNode(debugLabel: 'SettingsSearchField');
   final _searchTvFieldKey = GlobalKey<CustomTVTextFieldState>();
+  final _scenesFocus = FocusNode(debugLabel: 'SettingsPreviewScenes');
+
+  /// The setting Right crossed to the scenes from, for Left and Back to
+  /// return to.
+  FocusNode? _scenesReturnFocus;
   String _query = '';
+  List<_SettingsCategory> _categories = const [];
+  int _categoryIndex = 0;
+  String? _shownCategory;
+
+  /// The category a search result belongs to while its screen is open, since
+  /// that screen sits on top of whichever tab the search started from.
+  _SettingsCategory? _searchedCategory;
+
+  /// On a TV the list can't take focus while the pill or search has it, so a
+  /// category screen's own initial focus doesn't pull the D-pad off the pill
+  /// while categories are being browsed.
+  bool _topBarFocused = PlatformDetection.useLeanbackUi;
+
+  bool get _tv => PlatformDetection.useLeanbackUi;
+  bool get _phone => PlatformDetection.useMobileUi;
 
   /// Turns Kids Mode off once the PIN checks out. The PIN is the whole
   /// boundary, so a missing one leaves the mode on rather than opening it up.
@@ -239,50 +346,62 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     }
   }
 
-  void _requestInitialFocus({int attempt = 0}) {
-    if (!mounted) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final focusScope = FocusScope.of(context);
-      if (_firstFocusNode.context == null && attempt < 10) {
-        Future<void>.delayed(const Duration(milliseconds: 16), () {
-          _requestInitialFocus(attempt: attempt + 1);
-        });
-        return;
-      }
-      _firstFocusNode.requestFocus();
-      focusScope.requestFocus(_firstFocusNode);
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    if (!PlatformDetection.useMobileUi) {
-      _requestInitialFocus();
-    }
+    SettingsPanel.backHandlers.add(_handleBack);
     _searchController.addListener(_onSearchChanged);
+    _pillFocus.addListener(_onPillFocusChanged);
     if (PlatformDetection.useDesktopUi) {
       // Attached to the node so it runs before the text field consumes the
       // key. Down leaves the field for the list, left and right stay caret
       // moves.
       _searchFieldFocus.onKeyEvent = _onDesktopSearchKey;
     }
+    if (!_phone) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pillFocus.requestFocus();
+      });
+    }
   }
 
   @override
   void dispose() {
-    _firstFocusNode.dispose();
+    SettingsPanel.backHandlers.remove(_handleBack);
+    _preview.dispose();
+    _listScope.dispose();
+    _pillFocus.dispose();
+    _scenesFocus.dispose();
     _searchController.dispose();
     _searchFieldFocus.dispose();
     super.dispose();
+  }
+
+  /// Back leaves the scenes for the setting they were reached from, then
+  /// pops the list column, then (on a TV or desktop) returns to the category
+  /// pill, and only then lets the panel close.
+  bool _handleBack() {
+    if (_scenesFocus.hasFocus) {
+      _leaveScenes();
+      return true;
+    }
+    final navigator = _listNavKey.currentState;
+    if (navigator != null && navigator.canPop()) {
+      navigator.pop();
+      return true;
+    }
+    if (!_phone && !_pillFocus.hasFocus) {
+      _pillFocus.requestFocus();
+      return true;
+    }
+    return false;
   }
 
   void _onSearchChanged() {
     final query = _searchController.text.trim();
     if (query == _query) return;
     setState(() => _query = query);
-    if (PlatformDetection.useMobileUi) return;
+    if (_phone) return;
     // If the focused result just filtered away, fall back to the field so the
     // d-pad is never stranded on a dead node. Skipped while the TV keyboard
     // is up so it cannot pull key events away from the keyboard grid.
@@ -301,112 +420,245 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
       return KeyEventResult.ignored;
     }
     if (event.logicalKey.isDownKey) {
-      return node.focusInDirection(TraversalDirection.down)
-          ? KeyEventResult.handled
-          : KeyEventResult.ignored;
+      _enterList();
+      return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final kidsMode = ref.watch(kidsModeProvider);
-    final showAdmin =
-        !kidsMode &&
-        !PlatformDetection.isTV &&
-        ref.watch(isAdminProvider) &&
-        adminServerSupported();
-    final enablePanelAutofocus = !PlatformDetection.useMobileUi;
+  KeyEventResult _onTvSearchKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    if (event.logicalKey.isDownKey) {
+      _enterList();
+      return KeyEventResult.handled;
+    }
+    if (event.logicalKey.isLeftKey) {
+      _pillFocus.requestFocus();
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  /// Up past the top of a settings page climbs to the pill, and Right past a
+  /// setting's own controls crosses to the preview's scenes. Pickers
+  /// open over the list keep their own keys.
+  KeyEventResult _onListKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final up = event.logicalKey.isUpKey;
+    // Only a fresh press crosses, so holding Right along a row stops at its
+    // end instead of running on into the scenes.
+    final right = event.logicalKey.isRightKey && event is KeyDownEvent;
+    if (!up && !right) return KeyEventResult.ignored;
+    final primary = FocusManager.instance.primaryFocus;
+    final primaryContext = primary?.context;
+    if (primary == null || primaryContext == null) {
+      return KeyEventResult.ignored;
+    }
+    if (ModalRoute.of(primaryContext) is! PageRoute) {
+      return KeyEventResult.ignored;
+    }
+    if (primary.focusInDirection(
+      up ? TraversalDirection.up : TraversalDirection.right,
+    )) {
+      return KeyEventResult.handled;
+    }
+    if (up) {
+      _pillFocus.requestFocus();
+    } else {
+      _scenesReturnFocus = primary;
+      _scenesFocus.requestFocus();
+    }
+    return KeyEventResult.handled;
+  }
+
+  void _leaveScenes() {
+    final back = _scenesReturnFocus;
+    if (back != null && back.context?.mounted == true) {
+      back.requestFocus();
+    } else {
+      _enterList();
+    }
+  }
+
+  /// The inspector speaks for the category while the pill has focus, since
+  /// nothing else on screen says what the category holds.
+  void _onPillFocusChanged() {
+    if (_pillFocus.hasFocus && _categoryIndex < _categories.length) {
+      _describeCategory(_categories[_categoryIndex]);
+    }
+  }
+
+  void _enterList() {
+    if (_tv && _topBarFocused) setState(() => _topBarFocused = false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _listScope.requestFocus();
+      // A page that hasn't been focused yet has nothing to restore, so step
+      // onto its first tile.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final primary = FocusManager.instance.primaryFocus;
+        if (primary is FocusScopeNode && _listScope.hasFocus) {
+          primary.nextFocus();
+        }
+      });
+    });
+  }
+
+  void _selectCategory(int index) {
+    if (index < 0 || index >= _categories.length) return;
+    if (index == _categoryIndex && _shownCategory == _categories[index].title) {
+      return;
+    }
+    final keepPill = _pillFocus.hasFocus;
+    setState(() => _categoryIndex = index);
+    _showCategory(_categories[index]);
+    if (keepPill) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _pillFocus.requestFocus();
+      });
+    }
+  }
+
+  void _showCategory(_SettingsCategory category) {
+    _describeCategory(category);
+    _shownCategory = category.title;
+    final screen = category.screen();
+    _listNavKey.currentState?.pushAndRemoveUntil(
+      PageRouteBuilder<void>(
+        pageBuilder: (_, _, _) => SettingsPreviewPath(
+          path: [category.title],
+          child: SettingsCategoryRoot(child: screen),
+        ),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+      (_) => false,
+    );
+  }
+
+  /// The inspector speaks for the category until a setting takes focus.
+  void _describeCategory(_SettingsCategory category) {
+    _preview.focus(
+      SettingsPreviewEntry(title: category.title, description: category.subtitle),
+    );
+  }
+
+  List<_SettingsCategory> _buildCategories(
+    AppLocalizations l10n, {
+    required bool kidsMode,
+    required bool showAdmin,
+  }) {
     final prefs = GetIt.instance<UserPreferences>();
     final advanced = prefs.get(UserPreferences.showAdvancedSettings);
-
     // Kids Mode leaves one entry standing. Hiding settings outright would
     // leave no way back, and a hidden gesture is worse than an obvious tile.
-    final entries = kidsMode
-        ? <_PanelEntry>[
-            _PanelEntry(
-              icon: Icons.lock_open,
-              title: l10n.kidsModeExit,
-              subtitle: l10n.kidsModeExitSubtitle,
-              focusNode: enablePanelAutofocus ? _firstFocusNode : null,
-              onTap: () => unawaited(_exitKidsMode(context)),
-            ),
-          ]
-        : <_PanelEntry>[
-            if (showAdmin)
+    if (kidsMode) {
+      return [
+        _SettingsCategory(
+          l10n.kidsMode,
+          l10n.kidsModeExitSubtitle,
+          () => _SettingsEntryListScreen(
+            title: l10n.kidsMode,
+            entries: [
+              _PanelEntry(
+                icon: Icons.lock_open,
+                title: l10n.kidsModeExit,
+                subtitle: l10n.kidsModeExitSubtitle,
+                onTap: () => unawaited(_exitKidsMode(context)),
+              ),
+            ],
+          ),
+          preview: false,
+        ),
+      ];
+    }
+    return [
+      if (showAdmin)
+        _SettingsCategory(
+          l10n.administration,
+          l10n.settingsAdministrationSubtitle,
+          () => _SettingsEntryListScreen(
+            title: l10n.administration,
+            entries: [
               _PanelEntry(
                 icon: Icons.admin_panel_settings,
                 title: l10n.administration,
                 subtitle: l10n.settingsAdministrationSubtitle,
-                focusNode: enablePanelAutofocus ? _firstFocusNode : null,
                 onTap: () {
                   _closeSettingsPanel();
                   context.navigateTopLevel(Destinations.admin);
                 },
               ),
-            _PanelEntry(
-              icon: Icons.lock,
-              title: l10n.account,
-              subtitle: l10n.settingsAccountSubtitle,
-              focusNode: (!showAdmin && enablePanelAutofocus)
-                  ? _firstFocusNode
-                  : null,
-              onTap: () => context.pushSettingsScreen(const _AccountScreen()),
-            ),
-            _PanelEntry(
-              icon: Icons.tune,
-              title: l10n.general,
-              subtitle: l10n.settingsGeneralSubtitle,
-              onTap: () => context.pushSettingsScreen(const _GeneralScreen()),
-            ),
-            if (advanced)
-            _PanelEntry(
-              icon: Icons.palette,
-              title: l10n.appearance,
-              subtitle: l10n.settingsAppearanceSubtitle,
-              onTap: () => context.pushSettingsScreen(const _AppearanceScreen()),
-            ),
-            _PanelEntry(
-              icon: Icons.play_circle,
-              title: l10n.playback,
-              subtitle: l10n.settingsPlaybackSubtitle,
-              onTap: () =>
-                  context.pushSettingsScreen(const _PlaybackCategoryScreen()),
-            ),
-            // The image cache lives here, so the entry stays on every native
-            // platform. The download sections inside gate themselves.
-            if (advanced && !PlatformDetection.isWeb)
-              _PanelEntry(
-                icon: Icons.download_for_offline,
-                title: l10n.storageAndDownloads,
-                subtitle: l10n.settingsStorageSubtitle,
-                onTap: () =>
-                    context.pushSettingsScreen(const DownloadSettingsScreen()),
-              ),
-            if (!advanced)
-              _PanelEntry(
-                icon: Icons.nights_stay_outlined,
-                title: l10n.screensaver,
-                subtitle: 'The idle screen',
-                onTap: () =>
-                    context.pushSettingsScreen(const ScreensaverSettingsScreen()),
-              ),
-            if (advanced &&
-                (lambentShowsSeerr ||
-                    GetIt.instance<AchievementsService>().available))
-            _PanelEntry(
-              icon: Icons.hub,
-              title: l10n.integrations,
-              subtitle: l10n.settingsServicesSubtitle,
-              onTap: () => context.pushSettingsScreen(const _ServicesScreen()),
-            ),
-            _PanelEntry(
-              icon: Icons.info_outline,
-              title: l10n.aboutTitle,
-              subtitle: l10n.settingsAboutSubtitle,
-              onTap: () => context.pushSettingsScreen(const _AboutCategoryScreen()),
-            ),
+            ],
+          ),
+          preview: false,
+        ),
+      _SettingsCategory(
+        l10n.account,
+        l10n.settingsAccountSubtitle,
+        () => const _AccountScreen(),
+        preview: false,
+      ),
+      _SettingsCategory(
+        l10n.general,
+        l10n.settingsGeneralSubtitle,
+        () => const _GeneralScreen(),
+      ),
+      if (advanced)
+        _SettingsCategory(
+          l10n.appearance,
+          l10n.settingsAppearanceSubtitle,
+          () => const _AppearanceScreen(),
+        ),
+      _SettingsCategory(
+        l10n.playback,
+        l10n.settingsPlaybackSubtitle,
+        () => const _PlaybackCategoryScreen(),
+      ),
+      // The image cache lives here, so the entry stays on every native
+      // platform. The download sections inside gate themselves.
+      if (advanced && !PlatformDetection.isWeb)
+        _SettingsCategory(
+          l10n.storage,
+          l10n.settingsStorageSubtitle,
+          () => const DownloadSettingsScreen(),
+          preview: false,
+        ),
+      // Seerr and achievements both come from the Moonfin plugin. With
+      // neither on offer (only Silo signed in) the screen would be empty.
+      if (!advanced)
+        _SettingsCategory(
+          l10n.screensaver,
+          'The idle screen',
+          () => const ScreensaverSettingsScreen(),
+          preview: false,
+        ),
+      if (advanced && _integrationsOffered)
+        _SettingsCategory(
+          l10n.integrations,
+          seerrBrand(l10n.settingsServicesSubtitle),
+          () => const _ServicesScreen(),
+          preview: false,
+        ),
+      _SettingsCategory(
+        l10n.aboutTitle,
+        l10n.settingsAboutSubtitle,
+        () => const _AboutCategoryScreen(),
+        preview: false,
+      ),
+      _SettingsCategory(
+        'Advanced',
+        advanced
+            ? 'On: themes, layout, player tweaks and more'
+            : 'Off: only the everyday settings',
+        () => _SettingsEntryListScreen(
+          title: 'Advanced',
+          entries: [
             _PanelEntry(
               icon: advanced ? Icons.toggle_on : Icons.toggle_off_outlined,
               title: 'Show advanced settings',
@@ -418,45 +670,305 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                 setState(() {});
               },
             ),
-          ];
+          ],
+        ),
+        preview: false,
+      ),
+    ];
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final kidsMode = ref.watch(kidsModeProvider);
+    // Not for a server Moonfin can't administer (Silo has its own web app).
+    final showAdmin =
+        !kidsMode &&
+        !PlatformDetection.isTV &&
+        ref.watch(isAdminProvider) &&
+        adminServerSupported() &&
+        activeServerSupports((f) => f.supportsAdmin);
+
+    final previous = _shownCategory;
+    _categories = _buildCategories(
+      l10n,
+      kidsMode: kidsMode,
+      showAdmin: showAdmin,
+    );
+    // Keep the open category when the set changes around it, and swap the
+    // page when the category itself went away (Kids Mode turning on or off).
+    final kept = previous == null
+        ? -1
+        : _categories.indexWhere((c) => c.title == previous);
+    if (kept >= 0) {
+      _categoryIndex = kept;
+    } else {
+      _categoryIndex = _categoryIndex.clamp(0, _categories.length - 1);
+      if (previous != null) {
+        final category = _categories[_categoryIndex];
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _showCategory(category);
+        });
+      }
+    }
+
+    final searching = _query.isNotEmpty && !kidsMode;
+    final list = _buildListColumn(context, l10n, showAdmin, searching);
+    // The strip keeps a fixed height, so its labels stop growing at the scale
+    // that still fits it. It measures its labels once, so a new scale gets a
+    // fresh strip that measures them again.
+    final pill = MediaQuery.withClampedTextScaling(
+      maxScaleFactor: _pillMaxTextScale,
+      child: SlidingPillTabs(
+        key: ValueKey(MediaQuery.textScalerOf(context)),
+        labels: [for (final category in _categories) category.title],
+        selectedIndex: _categoryIndex,
+        onChanged: _selectCategory,
+        focusNode: _pillFocus,
+        alignment: _phone ? Alignment.centerLeft : Alignment.center,
+        onVerticalNavigation: (isUp) {
+          if (isUp || _phone) return false;
+          _enterList();
+          return true;
+        },
+        onExitRight: () => _searchFieldFocus.requestFocus(),
+      ),
+    );
+    final search = _SettingsSearchField(
+      controller: _searchController,
+      focusNode: _searchFieldFocus,
+      tvFieldKey: _searchTvFieldKey,
+      hint: l10n.settingsSearchHint,
+      onClear: _searchController.clear,
+    );
+
+    return SettingsPreviewScope(
+      controller: _preview,
+      child: _phone
+          ? _buildPhone(context, l10n, pill, search, list, searching)
+          : _buildWide(context, l10n, pill, search, list),
+    );
+  }
+
+  Widget _buildListColumn(
+    BuildContext context,
+    AppLocalizations l10n,
+    bool showAdmin,
+    bool searching,
+  ) {
+    Widget body = Stack(
+      children: [
+        Visibility(
+          visible: !searching,
+          maintainState: true,
+          child: Navigator(
+            key: _listNavKey,
+            onGenerateRoute: (_) {
+              final category = _categories[_categoryIndex];
+              _shownCategory = category.title;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && _preview.focused == null) {
+                  _describeCategory(category);
+                }
+              });
+              return MaterialPageRoute<void>(
+                builder: (_) => SettingsPreviewPath(
+                  path: [category.title],
+                  child: SettingsCategoryRoot(child: category.screen()),
+                ),
+              );
+            },
+          ),
+        ),
+        if (searching)
+          Positioned.fill(child: _buildSearchResults(context, l10n, showAdmin)),
+      ],
+    );
+    body = FocusScope(node: _listScope, child: body);
+    if (_tv) {
+      body = ExcludeFocus(
+        excluding: _topBarFocused,
+        child: Focus(
+          canRequestFocus: false,
+          skipTraversal: true,
+          onKeyEvent: _onListKey,
+          child: body,
+        ),
+      );
+    }
+    return body;
+  }
+
+  Widget _buildWide(
+    BuildContext context,
+    AppLocalizations l10n,
+    Widget pill,
+    Widget search,
+    Widget list,
+  ) {
+    final topBar = Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onFocusChange: (focused) {
+        if (_tv && focused != _topBarFocused) {
+          setState(() => _topBarFocused = focused);
+        }
+      },
+      child: SizedBox(
+        height: 56,
+        child: Row(
+          children: [
+            // A TV leaves with its remote's Back, but desktop needs a way out.
+            if (!_tv) ...[
+              BackButton(
+                color: AppColorScheme.onSurface,
+                onPressed: _closeSettingsPanel,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              l10n.settings,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: AppColorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(child: Center(child: pill)),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: 230,
+              child: _tv
+                  ? Focus(
+                      canRequestFocus: false,
+                      skipTraversal: true,
+                      onKeyEvent: _onTvSearchKey,
+                      child: search,
+                    )
+                  : search,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return Material(
+      color: AppColorScheme.background.withValues(alpha: 0.96),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(32, 20, 32, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              topBar,
+              const SizedBox(height: 18),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      width: 440,
+                      child: ClipRRect(
+                        borderRadius: AppRadius.circular(20),
+                        child: ColoredBox(
+                          color: AppColorScheme.surface,
+                          child: list,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: SettingsLivePreview(
+                              sceneFocus: _tv ? _scenesFocus : null,
+                              onLeaveScenes: _leaveScenes,
+                              // Up climbs to the category pill and Down stays.
+                              onScenesVertical: (isUp) {
+                                if (isUp) _pillFocus.requestFocus();
+                                return true;
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // A fixed height, so the preview above doesn't
+                          // resize as descriptions get longer or shorter.
+                          Container(
+                            height:
+                                _inspectorFixedHeight +
+                                MediaQuery.textScalerOf(
+                                  context,
+                                ).scale(_inspectorTextHeight),
+                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                            decoration: BoxDecoration(
+                              color: AppColorScheme.surface,
+                              borderRadius: AppRadius.circular(18),
+                            ),
+                            child: const SingleChildScrollView(
+                              physics: NeverScrollableScrollPhysics(),
+                              child: SettingsPreviewInspector(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhone(
+    BuildContext context,
+    AppLocalizations l10n,
+    Widget pill,
+    Widget search,
+    Widget list,
+    bool searching,
+  ) {
+    final prefs = GetIt.instance<UserPreferences>();
+    final previewHidden = prefs.get(UserPreferences.settingsPreviewHidden);
+    final category = _searchedCategory ?? _categories[_categoryIndex];
     return Scaffold(
       appBar: AppBar(
-        leading: PlatformDetection.isTV
-            ? null
-            : IconButton(
-                onPressed: _closeSettingsPanel,
-                icon: const Icon(Icons.close),
-              ),
+        leading: IconButton(
+          onPressed: _closeSettingsPanel,
+          icon: const Icon(Icons.close),
+        ),
         automaticallyImplyLeading: false,
         title: Text(l10n.settings),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: _SettingsSearchField(
-              controller: _searchController,
-              focusNode: _searchFieldFocus,
-              tvFieldKey: _searchTvFieldKey,
-              hint: l10n.settingsSearchHint,
-              onClear: _searchController.clear,
+          Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: search),
+          if (_categories.length > 1)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: pill,
             ),
-          ),
-          Expanded(
-            child: (_query.isEmpty || kidsMode)
-                ? ListView(
-                    children: [
-                      adaptiveListSection(
-                        children: [
-                          for (final entry in entries)
-                            _PanelEntryTile(entry: entry),
-                        ],
-                      ),
-                    ],
-                  )
-                : _buildSearchResults(context, l10n, showAdmin),
-          ),
+          if (!searching && category.preview)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: _PhoneLivePreview(
+                hidden: previewHidden,
+                onToggle: () async {
+                  await prefs.set(
+                    UserPreferences.settingsPreviewHidden,
+                    !previewHidden,
+                  );
+                  if (mounted) setState(() {});
+                },
+              ),
+            ),
+          Expanded(child: list),
         ],
       ),
     );
@@ -467,11 +979,37 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     AppLocalizations l10n,
     bool showAdmin,
   ) {
+    // Set by the result being opened, so its screen keeps its real place in
+    // Settings rather than the category it was searched from.
+    List<String>? openingPath;
     final index = _buildSettingsSearchIndex(
       l10n: l10n,
       showAdmin: showAdmin,
       showThemeEditor: _showThemeEditorEntry,
-      push: (screen) => context.pushSettingsScreen(screen),
+      push: (screen) {
+        final navigatorContext = _listNavKey.currentContext;
+        _searchController.clear();
+        if (navigatorContext == null) return;
+        final before = _searchedCategory;
+        final title = openingPath?.firstOrNull;
+        setState(() {
+          _searchedCategory = _categories
+              .where((c) => c.title == title)
+              .firstOrNull;
+        });
+        // Switching tabs removes the screen, which also completes this future.
+        unawaited(
+          navigatorContext
+              .pushSettingsScreen(
+                screen,
+                returnFocus: _phone ? null : _pillFocus,
+                previewPath: openingPath,
+              )
+              .then((_) {
+                if (mounted) setState(() => _searchedCategory = before);
+              }),
+        );
+      },
       openAdmin: () {
         _closeSettingsPanel();
         context.navigateTopLevel(Destinations.admin);
@@ -500,13 +1038,77 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                     ? null
                     : Text(result.subtitle),
                 onTap: () {
-                  if (PlatformDetection.useMobileUi) {
+                  if (_phone) {
                     _searchFieldFocus.unfocus();
                   }
+                  openingPath = result.path;
                   result.onOpen();
                 },
               ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// The phone's preview strip: the show/hide toggle ahead of the scenes, the
+/// mock screen at the phone's own proportions, and the touched setting spelled
+/// out beside it. Hidden leaves only the scenes row, so the toggle stays put.
+class _PhoneLivePreview extends StatelessWidget {
+  final bool hidden;
+  final VoidCallback onToggle;
+
+  const _PhoneLivePreview({required this.hidden, required this.onToggle});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context
+        .dependOnInheritedWidgetOfExactType<SettingsPreviewScope>()
+        ?.notifier;
+    if (controller == null) return const SizedBox.shrink();
+    final scenes = SettingsPreviewScenes(
+      controller: controller,
+      onSceneTap: hidden ? onToggle : null,
+      leading: IconButton(
+        tooltip: AppLocalizations.of(context).settingsLivePreview,
+        isSelected: !hidden,
+        visualDensity: VisualDensity.compact,
+        iconSize: 20,
+        icon: const Icon(Icons.visibility_off_outlined),
+        selectedIcon: const Icon(Icons.visibility_outlined),
+        onPressed: onToggle,
+      ),
+    );
+    if (hidden) return scenes;
+    final landscape = controller.scene == SettingsPreviewScene.player;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        scenes,
+        const SizedBox(height: 10),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: landscape
+              ? const SizedBox(
+                  height: 168,
+                  child: Center(child: SettingsLivePreview(showHeader: false)),
+                )
+              : SizedBox(
+                  height: 250,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      SettingsLivePreview(showHeader: false),
+                      SizedBox(width: 14),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: SettingsPreviewInspector(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ],
     );

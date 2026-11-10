@@ -1,6 +1,6 @@
 {
     "@@locale": "pt_BR",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent versão {version}",
+    "appVersionFooter": "Moonfin versão {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent não conseguiu acessar o chaveiro do seu sistema. O login pode continuar, mas o armazenamento seguro de tokens pode ficar indisponível até que o chaveiro seja desbloqueado.",
+    "secureStorageUnavailableMessage": "Moonfin não conseguiu acessar o chaveiro do seu sistema. O login pode continuar, mas o armazenamento seguro de tokens pode ficar indisponível até que o chaveiro seja desbloqueado.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Sair do Lambent?",
+    "exitApp": "Sair do Moonfin?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Não definido. Lambent tentará um mpv.conf padrão nas pastas app/data.",
+    "notSetMpvConf": "Não definido. Moonfin tentará um mpv.conf padrão nas pastas app/data.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Alternar a visibilidade da página inicial por biblioteca. Reinicie o Lambent para que as alterações tenham efeito.",
+    "libraryVisibilityDescription": "Alternar a visibilidade da página inicial por biblioteca. Reinicie o Moonfin para que as alterações tenham efeito.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Reproduzir no Lambent",
+    "playInMoonfin": "Reproduzir no Moonfin",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Item não encontrado em sua biblioteca Lambent",
+    "itemNotFoundInLibrary": "Item não encontrado em sua biblioteca Moonfin",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Reinicialização do servidor em andamento",
-    "adminServerRebootMessage": "Reinicialização do servidor em andamento, reinicie o Lambent",
+    "adminServerRebootMessage": "Reinicialização do servidor em andamento, reinicie o Moonfin",
     "adminActiveSessions": "Sessões ativas",
     "adminSessionsLoadFailed": "Falha ao carregar sessões",
     "adminNoActiveSessions": "Nenhuma sessão ativa",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Mostrar o botão de gêneros na barra de navegação",
     "settingsShowFavoritesButtonInNavigation": "Mostrar o botão de favoritos na barra de navegação",
     "settingsShowLibrariesButtonInNavigation": "Mostrar o botão de bibliotecas na barra de navegação",
-    "settingsLibraryVisibilitySubtitle": "Alternar a visibilidade da página inicial por biblioteca. Reinicie o Lambent para que as alterações tenham efeito.",
+    "settingsLibraryVisibilitySubtitle": "Alternar a visibilidade da página inicial por biblioteca. Reinicie o Moonfin para que as alterações tenham efeito.",
     "settingsMediaBarAndLocalPreviews": "Barra de mídia e visualizações locais",
     "settingsVisualOverlays": "Sobreposições visuais",
     "settingsSeasonalSurprise": "Surpresa sazonal",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Licenças",
     "settingsOpenSourceLicenseNotices": "Avisos de licença de código aberto",
     "settingsPrivacyPolicy": "política de Privacidade",
-    "settingsPrivacyPolicySubtitle": "Como Lambent trata seus dados",
+    "settingsPrivacyPolicySubtitle": "Como Moonfin trata seus dados",
     "settingsCheckForUpdates": "Verifique se há atualizações",
-    "settingsCheckForUpdatesSubtitle": "Verifique o último lançamento do Lambent",
+    "settingsCheckForUpdatesSubtitle": "Verifique o último lançamento do Moonfin",
     "settingsPoweredByFlutter": "Desenvolvido com Flutter",
     "settingsLicenseNoticesCount": "{count, plural, one {# aviso de licença} other {# avisos de licença}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Preferir legendas SDH",
     "preferSdhSubtitlesSubtitle": "Priorizar as faixas de legenda SDH/CC na seleção automática.",
     "webDiagnostics": "Diagnóstico da web",
-    "webDiagnosticsTitle": "Diagnóstico da Web do Lambent",
+    "webDiagnosticsTitle": "Diagnóstico da Web do Moonfin",
     "webDiagnosticsIntro": "Use esta página para diagnosticar problemas de conectividade do navegador (CORS, conteúdo misto e configurações de descoberta).",
     "webDiagnosticsDetectedMixedContentFailure": "Falha de conteúdo misto detectada",
     "webDiagnosticsDetectedCorsPreflightFailure": "Falha de CORS/preflight detectada",
-    "webDiagnosticsMixedContentFailureBody": "O Lambent detectou uma página HTTPS tentando chamar uma URL de servidor HTTP. Os navegadores bloqueiam essa solicitação antes que ela chegue ao seu servidor.",
-    "webDiagnosticsCorsFailureBody": "O Lambent detectou uma falha de solicitação no nível do navegador, geralmente causada pela ausência de cabeçalhos CORS ou de preflight no servidor de mídia.",
+    "webDiagnosticsMixedContentFailureBody": "O Moonfin detectou uma página HTTPS tentando chamar uma URL de servidor HTTP. Os navegadores bloqueiam essa solicitação antes que ela chegue ao seu servidor.",
+    "webDiagnosticsCorsFailureBody": "O Moonfin detectou uma falha de solicitação no nível do navegador, geralmente causada pela ausência de cabeçalhos CORS ou de preflight no servidor de mídia.",
     "webDiagnosticsTargetUrl": "URL de destino: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "não configurado",
     "webDiagnosticsMixedContent": "Conteúdo misto",
     "webDiagnosticsMixedContentDetected": "Esta página é carregada por HTTPS, mas uma ou mais URLs configuradas usam HTTP. Os navegadores impedem que páginas HTTPS chamem APIs HTTP.",
-    "webDiagnosticsMixedContentFix": "Correção: sirva seu servidor de mídia ou endpoint de proxy via HTTPS ou carregue o Lambent por HTTP apenas em redes locais confiáveis.",
+    "webDiagnosticsMixedContentFix": "Correção: sirva seu servidor de mídia ou endpoint de proxy via HTTPS ou carregue o Moonfin por HTTP apenas em redes locais confiáveis.",
     "webDiagnosticsNoMixedContentDetected": "Nenhuma configuração óbvia de conteúdo misto foi detectada nas configurações de execução atuais.",
     "webDiagnosticsCorsChecklist": "Lista de verificação de CORS",
     "webDiagnosticsCorsChecklistItem1": "• Permita a origem do navegador em Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "O Clássico é o layout original e centrado do Lambent. O Moderno é um layout cinematográfico e responsivo. O Destaque é um layout focado na imagem principal (hero) com cartões de conteúdo em pop-up. O Nouveau é um layout em tela cheia com seções empilhadas ao longo da página. O Minimalista traz apenas a arte de capa, um botão de reproduzir e os episódios.",
+    "detailScreenStyleSubtitle": "O Clássico é o layout original e centrado do Moonfin. O Moderno é um layout cinematográfico e responsivo. O Destaque é um layout focado na imagem principal (hero) com cartões de conteúdo em pop-up. O Nouveau é um layout em tela cheia com seções empilhadas ao longo da página. O Minimalista traz apenas a arte de capa, um botão de reproduzir e os episódios.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Use o algoritmo de biblioteca local Lambent Recommends, o mecanismo de servidor Jellyfin Recommends ou as métricas de similaridade online do TMDb. Observação: recomendações online exigem integração com o Seerr.",
+    "recommendationSystemSubtitle": "Use o algoritmo de biblioteca local Moonfin Recommends, o mecanismo de servidor Jellyfin Recommends ou as métricas de similaridade online do TMDb. Observação: recomendações online exigem integração com o Seerr.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent Recomenda",
+    "recommendationSystemMoonfin": "Moonfin Recomenda",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Limitar as sugestões do Lambent Recommends pela classificação indicativa da mídia de destino",
+    "recommendationsApplyParentalRatingCapSubtitle": "Limitar as sugestões do Moonfin Recommends pela classificação indicativa da mídia de destino",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Temas personalizados alteram elementos visuais em todo o Lambent. Escolha uma destas opções para combinar com o seu estilo.",
+    "customThemeSubtitle": "Temas personalizados alteram elementos visuais em todo o Moonfin. Escolha uma destas opções para combinar com o seu estilo.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Entre no Lambent pelo seu celular",
+    "carSignInPrompt": "Entre no Moonfin pelo seu celular",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "O Impeller é o renderizador de GPU moderno do Flutter, com animações mais suaves e menos travamentos. Em alguns TV boxes e GPUs antigas, ele pode causar falhas visuais ou vídeo preto; desative-o se isso acontecer. Automático escolhe o melhor padrão para o seu dispositivo. Reinicie o Lambent para aplicar.",
+    "impellerRenderingSubtitle": "O Impeller é o renderizador de GPU moderno do Flutter, com animações mais suaves e menos travamentos. Em alguns TV boxes e GPUs antigas, ele pode causar falhas visuais ou vídeo preto; desative-o se isso acontecer. Automático escolhe o melhor padrão para o seu dispositivo. Reinicie o Moonfin para aplicar.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "O Lambent precisa ser reiniciado para alterar o mecanismo de renderização. Feche o aplicativo agora e abra-o novamente para aplicar.",
+    "impellerRestartMessage": "O Moonfin precisa ser reiniciado para alterar o mecanismo de renderização. Feche o aplicativo agora e abra-o novamente para aplicar.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },
@@ -9228,7 +9228,7 @@
     "@interfaceLayout": {
         "description": "Setting to override which UI layout the app uses"
     },
-    "interfaceLayoutSubtitle": "Substituir o layout detectado quando este dispositivo for identificado incorretamente. Reinicie o Lambent para que as alterações tenham efeito.",
+    "interfaceLayoutSubtitle": "Substituir o layout detectado quando este dispositivo for identificado incorretamente. Reinicie o Moonfin para que as alterações tenham efeito.",
     "@interfaceLayoutSubtitle": {
         "description": "Subtitle for the interface layout setting"
     },
@@ -9930,7 +9930,7 @@
     "@loadingAnimationImage": {
         "description": "Title for loading animation image selection"
     },
-    "loadingAnimationImageMoonfinLogo": "Logo do Lambent",
+    "loadingAnimationImageMoonfinLogo": "Logo do Moonfin",
     "@loadingAnimationImageMoonfinLogo": {
         "description": "Loading animation image option: Moonfin Logo"
     },
@@ -9946,7 +9946,7 @@
     "@loadingAnimationImageMoonPhases": {
         "description": "Loading animation image option: Moon Phases"
     },
-    "loadingAnimationImageMoonfinPhases": "Fases do Lambent",
+    "loadingAnimationImageMoonfinPhases": "Fases do Moonfin",
     "@loadingAnimationImageMoonfinPhases": {
         "description": "Loading animation image option: Moonfin Phases in brand gradient"
     },
@@ -10486,7 +10486,7 @@
     "@screensaverBackdropBlack": {
         "description": "Screensaver backdrop: Black"
     },
-    "screensaverBackdropMoonfin": "Lambent",
+    "screensaverBackdropMoonfin": "Moonfin",
     "@screensaverBackdropMoonfin": {
         "description": "Screensaver backdrop: Moonfin"
     },
@@ -10506,7 +10506,7 @@
     "@screensaverAdditionalComponent": {
         "description": "Setting for screensaver additional component"
     },
-    "screensaverComponentMoonfinLogo": "Logo do Lambent",
+    "screensaverComponentMoonfinLogo": "Logo do Moonfin",
     "@screensaverComponentMoonfinLogo": {
         "description": "Screensaver component: Moonfin Logo"
     },

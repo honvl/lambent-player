@@ -90,6 +90,7 @@ void main() {
     client = _MockClient();
     when(() => client.baseUrl).thenReturn('http://plugin.test');
     when(() => client.accessToken).thenReturn('token');
+    when(() => client.serverType).thenReturn(ServerType.jellyfin);
     when(() => client.deviceInfo).thenReturn(
       const DeviceInfo(
         id: 'dev1',
@@ -183,6 +184,20 @@ void main() {
 
     expect(prefs.get(UserPreferences.sinceYouWatched2Enabled), isTrue);
     expect(prefs.get(UserPreferences.sinceYouWatched3Enabled), isFalse);
+  });
+
+  test('a row order without sections keeps Watching Now on when its switch '
+      'is', () async {
+    await prefs.set(UserPreferences.mdblistWatchingNowEnabled, true);
+    adapter.resolvedProfile = {
+      'homeRowOrder': ['resume'],
+    };
+    await service.handleServerEvent(client, {'type': 'settingsUpdated'});
+
+    final watchingNow = prefs.homeSectionsConfig.firstWhere(
+      (c) => c.type == HomeSectionType.mdblistWatchingNow,
+    );
+    expect(watchingNow.enabled, isTrue);
   });
 
   group('Seerr slider rows', () {

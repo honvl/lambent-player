@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart';
 /// (`LambentEnhancement.clientSteps`): "Auto HDR", "AI upscale" (the Neural
 /// Engine), "Shader upscale" or two of them ("Auto HDR · Shader upscale"),
 /// from the iPad's and Apple TV's native player (LambentHDRLift.swift's
-/// `lambentUpscale` event); [lambentDeviceNotNeeded] when the plan asked but
+/// `lambentUpscale` event) or Android's (Media3VideoView.kt's);
+/// [lambentDeviceNotNeeded] when the plan asked but
 /// nothing was worth doing here; null before it has decided. The player's chip and
 /// enhancement panel show it.
 final lambentDeviceUpscale = ValueNotifier<String?>(null);

@@ -80,6 +80,7 @@ void main() {
     );
 
     client = _MockClient();
+    when(() => client.serverType).thenReturn(ServerType.jellyfin);
     when(() => client.baseUrl).thenReturn('http://plugin.test');
     when(() => client.accessToken).thenReturn('token');
     when(() => client.deviceInfo).thenReturn(

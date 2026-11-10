@@ -61,7 +61,8 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     /// Structured playback errors for the Dart transcode-fallback machinery.
     /// Payloads: `{"event": "playerError", "kind": ..., "recoverable": ...,
-    /// "message": ...}`.
+    /// "message": ...}`, and `{"event": "credentialsRefused", "status": ...}`
+    /// when the server refuses the session's credentials mid-play.
     var onPlayerError: (([String: Any]) -> Void)?
 
     /// What runs on this device right now (`LambentClientUpscale.label`: "Auto HDR", "AI upscale", "Auto HDR · Shader upscale"), nil
@@ -70,7 +71,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     #if os(iOS)
         /// The plan's client steps for the stream playing (`play`), so they come back after PiP.
-        private var lambentUpscalePlan: (lines: Int?, lift: Bool, compare: Bool)?
+        private var lambentUpscalePlan: (lines: Int?, lift: Bool, compare: Bool, free: Bool)?
 
         /// PiP shows AVPlayer's own picture, which the upscale hides: the upscale stops while PiP is on.
         func setLambentUpscaleSuspended(_ suspended: Bool) {
@@ -79,7 +80,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 return
             }
             guard let plan = lambentUpscalePlan, ownsEngine, let engine = Self.sharedEngine() else { return }
-            _ = hdrLift?.start(engine: engine, in: playerView, planHeight: plan.lines, lift: plan.lift, compare: plan.compare)
+            _ = hdrLift?.start(engine: engine, in: playerView, planHeight: plan.lines, lift: plan.lift, compare: plan.compare, free: plan.free)
         }
     #endif
 
@@ -112,8 +113,8 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     #endif
 
     private let playerView = AetherPlayerView()
-    #if os(tvOS) || os(iOS)
-        /// Lambent Enhance's steps on the device when the plan asks: the upscale and the HDR lift (Playback/Lambent/LambentHDRLift.swift).
+    #if os(tvOS) || os(iOS) || os(macOS)
+        /// The picture's work on the device: the plan's upscale and HDR lift, else the free RAVU-lite (Playback/Lambent/LambentHDRLift.swift).
         private lazy var hdrLift: LambentHDRLift? = {
             let lift = LambentHDRLift()
             lift?.onUpscale = { [weak self] label in self?.onLambentUpscale?(label) }
@@ -322,6 +323,17 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         engine.$playbackPhase
             .receive(on: DispatchQueue.main)
             .sink { [weak self] phase in self?.applyPhase(phase) }
+            .store(in: &cancellables)
+
+        // The server refused the session's credentials (an expired token).
+        // The engine holds the session a few seconds for new ones, so Dart is
+        // told to renew them rather than wait for the failure.
+        engine.sourceAuthorizationRefused
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self, self.ownsEngine else { return }
+                self.onPlayerError?(["event": "credentialsRefused", "status": status])
+            }
             .store(in: &cancellables)
 
         // A stall reports nothing new while the buffer drains under it, so
@@ -602,6 +614,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             sawPlaybackThisLoad = false
         case .playing:
             state = .playing
+            if !sawPlaybackThisLoad { scheduleCadenceCheck() }
             sawPlaybackThisLoad = true
         case .paused: state = .paused
         case .seeking: state = .buffering(bufferProgress)
@@ -615,7 +628,8 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             if !didEmitLoadError {
                 let info = Self.sharedEngine()?.errorInfo
                 let kind = Self.classifySessionError(
-                    engineKind: info?.kind.rawValue, underlyingDomain: info?.underlyingDomain)
+                    engineKind: info?.kind.rawValue, underlyingDomain: info?.underlyingDomain,
+                    afterPlayback: sawPlaybackThisLoad)
                 emitError(kind: kind, recoverable: true, message: message)
             }
         }
@@ -967,6 +981,46 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         var externalSubtitles: [ExternalSubtitleTrack] = []
         var subtitleDelay: Double = 0
         var secondarySubtitle = SecondarySubtitleConfiguration()
+        /// The steps a licensed player gives itself where there is no Lambent Server's plan (ENTITLEMENTS.md section 8.3).
+        var lambentLines: Int?
+        var lambentLift = false
+        var cadenceSlowdown = false
+        var cadenceTip: CadenceTip?
+    }
+
+    /// The Match Frame Rate hint, localized on the Dart side.
+    struct CadenceTip {
+        var title: String
+        var message: String
+        var slowdownHint: String
+        var button: String
+    }
+
+    static func cadenceTip(from args: [String: Any]) -> CadenceTip? {
+        guard let title = args["cadenceTipTitle"] as? String,
+            let message = args["cadenceTipMessage"] as? String,
+            let hint = args["cadenceTipSlowdownHint"] as? String,
+            let button = args["cadenceTipButton"] as? String
+        else { return nil }
+        return CadenceTip(title: title, message: message, slowdownHint: hint, button: button)
+    }
+
+    /// Every frame gets the same number of refreshes (3:2 pulldown counts)
+    /// when twice the panel rate over the frame rate is a whole number.
+    /// 23.976 on 59.94 Hz fits, 24.000 there drops a frame every 42 s.
+    static func cadenceFits(contentFps: Double, panelHz: Double) -> Bool {
+        guard contentFps > 0, panelHz > 0 else { return true }
+        let ratio = 2 * panelHz / contentFps
+        return abs(ratio - ratio.rounded()) / ratio < 2e-4
+    }
+
+    static let cadenceSlowdownFactor: Float = 1000.0 / 1001.0
+
+    /// True when playing 0.1% slower turns a rate that doesn't fit into one
+    /// that does, as 24.000 into 23.976. 25 fps on 59.94 Hz has no such fix.
+    static func cadenceSlowdownApplies(contentFps: Double, panelHz: Double) -> Bool {
+        !cadenceFits(contentFps: contentFps, panelHz: panelHz)
+            && cadenceFits(contentFps: contentFps * Double(cadenceSlowdownFactor), panelHz: panelHz)
     }
 
     struct SecondarySubtitleSelection: Equatable {
@@ -1030,6 +1084,34 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         sourceConfiguration = configuration
     }
 
+    /// Gives the open stream new request headers, renewed credentials, from
+    /// its next request on. A route whose requests AVFoundation
+    /// makes fixed them at load, so that one reloads at the playhead to carry
+    /// them, the way a background return does.
+    func updateRequestHeaders(_ headers: [String: String]) {
+        sourceConfiguration.headers = headers
+        guard ownsEngine, let engine = Self.sharedEngine() else { return }
+        guard engine.updateRequestHeaders(headers) == .installedForNextRebuild else { return }
+        let generation = loadGeneration
+        // Only a viewer pause stays paused: a buffering stream meant to play.
+        let wasPaused = state == .paused
+        secondaryReloadSelection.beginReload(previouslyActive: lastReadySecondaryActive)
+        primaryReloadSelection.beginReload(previouslyActive: lastReadyPrimaryActive)
+        Task { @MainActor [weak self] in
+            do {
+                try await engine.reloadAtCurrentPosition()
+            } catch {
+                // The stream keeps its old credentials, and fails over to the
+                // manager's reconnect once the server refuses them.
+                return
+            }
+            guard let self, self.ownsEngine, generation == self.loadGeneration else { return }
+            self.reapplySecondaryAfterReload(force: true)
+            if engine.isSessionReady { self.reapplyPrimaryAfterReload(force: true) }
+            if wasPaused { engine.pause() }
+        }
+    }
+
     func setForceSubtitlesDisabledOnStart(_ force: Bool) {
         forceSubtitlesDisabledOnStart = force
     }
@@ -1067,7 +1149,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         #endif
         endNativePrimaryBridge(restoreNative: false)
         nativePrimaryBridgeFailure = nil
-        #if os(tvOS) || os(iOS)
+        #if os(tvOS) || os(iOS) || os(macOS)
             hdrLift?.stop()
         #endif
         // A load from a healthy or just ended session goes straight to
@@ -1115,6 +1197,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         state = .opening
         loadGeneration &+= 1
         let generation = loadGeneration
+        resetCadence()
 
         if !audioOnly {
             await waitForSurface()
@@ -1137,7 +1220,6 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             httpHeaders: sourceConfiguration.headers,
             dolbyVisionHandling: sourceConfiguration.dolbyVisionBaseLayerOnly
                 ? .baseLayerOnly : .automatic,
-            preferDualLayerDolbyVision: true,
             matchContentEnabled: displayCriteriaMatchingEnabled(),
             panelIsInHDRMode: panelIsInHDRMode(),
             audioBridgeMode: sourceConfiguration.audioBridgeLossless ? .lossless : .surroundCompat,
@@ -1145,7 +1227,8 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             audioOnly: audioOnly,
             dvrWindowSeconds: isLiveSession && !isRemotePlaylist ? 1800 : nil,
             liveJoinProfile: .fastZap,
-            nativeRemoteHLS: isLiveSession && isRemotePlaylist,
+            // A Lambent ladder: AVPlayer itself has to see the variants to switch among them.
+            nativeRemoteHLS: isRemotePlaylist && (isLiveSession || url.query?.contains("ladder=") == true),
             preserveASSMarkup: preserveASS,
             probesize: isLiveSession ? Self.liveProbeBytes : nil,
             maxAnalyzeDuration: isLiveSession ? Self.liveProbeMicroseconds : nil,
@@ -1193,21 +1276,23 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 }
                 nowPlaying.setIntervalSkipsEnabled(!audioOnly)
             #endif
-            #if os(tvOS) || os(iOS)
-                // Only when Lambent Server's plan gives this device the upscale (`cup`) or the HDR lift (`chdr=1`;
-                // LambentClientUpscale.swift).
+            #if os(tvOS) || os(iOS) || os(macOS)
+                // When Lambent Server's plan or this player's own licence gives this device the upscale (`cup`) or the HDR lift (`chdr=1`),
+                // else the free RAVU-lite (LambentClientUpscale.swift).
                 #if os(iOS)
                     lambentUpscalePlan = nil
                 #endif
-                let lines = LambentClientUpscale.planHeight(url), lift = LambentClientUpscale.planLift(url)
-                if !audioOnly, lines != nil || lift {
+                let lines = LambentClientUpscale.planHeight(url) ?? sourceConfiguration.lambentLines
+                let lift = LambentClientUpscale.planLift(url) || sourceConfiguration.lambentLift
+                let free = lines == nil && !lift && LambentClientUpscale.freeUpscale(url)
+                if !audioOnly, lines != nil || lift || free {
                     let compare = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
                         .contains { $0.name == "cmp" && $0.value == "1" } ?? false
                     #if os(iOS)
-                        lambentUpscalePlan = (lines, lift, compare)
+                        lambentUpscalePlan = (lines, lift, compare, free)
                     #endif
                     if !engine.pictureInPictureActive {
-                        _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, lift: lift, compare: compare)
+                        _ = hdrLift?.start(engine: engine, in: playerView, planHeight: lines, lift: lift, compare: compare, free: free)
                     }
                 }
             #endif
@@ -1262,6 +1347,13 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         return ("unsupported_container", message)
     }
 
+    /// Engine error kinds where the server refused the session's
+    /// credentials. Once the stream has played that is a token that lapsed,
+    /// and renewed ones open the same stream again.
+    private nonisolated static let credentialErrorKinds: Set<String> = [
+        PlaybackErrorKind.sourceRefused.rawValue,
+    ]
+
     /// Engine error kinds where the connection failed, not the stream.
     private nonisolated static let transportErrorKinds: Set<String> = [
         PlaybackErrorKind.vodSourceFailed.rawValue,
@@ -1272,11 +1364,16 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     /// A mid-play failure only carries a message, so the engine's `errorInfo`
     /// is the only way to tell a dropped connection from a stream it can't
-    /// play. Only the second is worth a server transcode.
+    /// play. Only the second is worth a server transcode. A refusal before
+    /// the stream ever played still goes to one: the server may only be
+    /// refusing this route.
     nonisolated static func classifySessionError(
-        engineKind: String?, underlyingDomain: String?
+        engineKind: String?, underlyingDomain: String?, afterPlayback: Bool = false
     ) -> String {
         if underlyingDomain == NSURLErrorDomain { return "network" }
+        if afterPlayback, let engineKind, credentialErrorKinds.contains(engineKind) {
+            return "source_refused"
+        }
         if let engineKind, transportErrorKinds.contains(engineKind) { return "network" }
         return "unsupported_container"
     }
@@ -1305,7 +1402,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func stop() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
-        #if os(tvOS) || os(iOS)
+        #if os(tvOS) || os(iOS) || os(macOS)
             hdrLift?.stop()
         #endif
         #if os(iOS)
@@ -1328,7 +1425,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func shutdown() {
         loadGeneration &+= 1
         resetSecondarySubtitle()
-        #if os(tvOS) || os(iOS)
+        #if os(tvOS) || os(iOS) || os(macOS)
             hdrLift?.stop()
         #endif
         stopObservingForegroundReturn()
@@ -1389,9 +1486,119 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
     func setRate(_ newRate: Float) {
         guard let engine = Self.sharedEngine() else { return }
         let clamped = min(max(newRate, 0), engine.maxSupportedRate)
-        engine.setRate(clamped)
+        engine.setRate(clamped * cadenceFactor)
         rate = clamped == 0 ? rate : clamped
     }
+
+    // MARK: - Display cadence
+
+    /// Applied under the viewer's speed, which `rate` keeps reporting.
+    private var cadenceFactor: Float = 1
+    private var cadenceCheck: Task<Void, Never>?
+    private static let cadenceTipShownKey = "moonfin.cadenceTipShown"
+    /// tvOS runs two wrappers over the shared engine, and only the one that
+    /// started the load may change its speed.
+    private static weak var cadenceOwner: AetherPlayerWrapper?
+
+    private func resetCadence() {
+        Self.cadenceOwner = self
+        cadenceCheck?.cancel()
+        cadenceCheck = nil
+        cadenceFactor = 1
+    }
+
+    /// Runs when a load first plays, after any frame rate switch has settled,
+    /// and again after a reload, since an audio switch can change the route.
+    private func scheduleCadenceCheck() {
+        #if os(tvOS)
+            guard !isAudioOnlySession, Self.cadenceOwner === self else { return }
+            let generation = loadGeneration
+            cadenceCheck?.cancel()
+            cadenceCheck = Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, !Task.isCancelled, generation == self.loadGeneration,
+                    let engine = Self.sharedEngine(),
+                    let content = engine.sourceVideoFrameRate,
+                    let panel = await Self.panelRefreshRate(),
+                    !Task.isCancelled, generation == self.loadGeneration
+                else { return }
+                let fits = Self.cadenceFits(contentFps: content, panelHz: panel)
+                let canSlow = Self.cadenceSlowdownApplies(contentFps: content, panelHz: panel)
+                    && engine.audioDelivery != .streamCopy
+                let wanted = canSlow && sourceConfiguration.cadenceSlowdown
+                    ? Self.cadenceSlowdownFactor : 1
+                if !fits {
+                    hostLog(
+                        "cadence: \(String(format: "%.3f", content)) fps on "
+                            + "\(String(format: "%.3f", panel)) Hz, slowdown "
+                            + (canSlow ? (wanted == 1 ? "off" : "on") : "unavailable"))
+                }
+                if wanted != cadenceFactor {
+                    cadenceFactor = wanted
+                    engine.setRate(rate * wanted)
+                }
+                if !fits, wanted == 1 { presentCadenceTipOnce(mentionSlowdown: canSlow) }
+            }
+        #endif
+    }
+
+    #if os(tvOS)
+        private func presentCadenceTipOnce(mentionSlowdown: Bool) {
+            let defaults = UserDefaults.standard
+            guard let tip = sourceConfiguration.cadenceTip,
+                !defaults.bool(forKey: Self.cadenceTipShownKey),
+                var top = Self.keyWindow()?.rootViewController
+            else { return }
+            while let presented = top.presentedViewController { top = presented }
+            guard !(top is UIAlertController) else { return }
+            defaults.set(true, forKey: Self.cadenceTipShownKey)
+            let message = mentionSlowdown ? "\(tip.message)\n\n\(tip.slowdownHint)" : tip.message
+            let alert = UIAlertController(title: tip.title, message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: tip.button, style: .default))
+            top.present(alert, animated: true)
+        }
+
+        private static func keyWindow() -> UIWindow? {
+            guard
+                let scene = UIApplication.shared.connectedScenes
+                    .compactMap({ $0 as? UIWindowScene }).first
+            else { return nil }
+            return scene.windows.first(where: { $0.isKeyWindow }) ?? scene.windows.first
+        }
+
+        /// The panel's current rate from one display link tick.
+        private static func panelRefreshRate() async -> Double? {
+            guard let screen = keyWindow()?.screen else { return nil }
+            let probe = RefreshRateProbe()
+            probe.start(screen: screen)
+            defer { probe.stop() }
+            for _ in 0..<50 {
+                if probe.rate != nil { break }
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            return probe.rate
+        }
+
+        private final class RefreshRateProbe: NSObject {
+            private var link: CADisplayLink?
+            private(set) var rate: Double?
+
+            func start(screen: UIScreen) {
+                link = screen.displayLink(withTarget: self, selector: #selector(tick(_:)))
+                link?.add(to: .main, forMode: .common)
+            }
+
+            func stop() {
+                link?.invalidate()
+                link = nil
+            }
+
+            @objc private func tick(_ link: CADisplayLink) {
+                let duration = link.targetTimestamp - link.timestamp
+                if duration > 0 { rate = 1 / duration }
+            }
+        }
+    #endif
 
     // MARK: - Volume / ReplayGain
 
@@ -2189,12 +2396,17 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     func applySubtitleStyle(
         textColor: Int?, backgroundColor: Int?, strokeColor: Int?,
-        fontSize: Double?, fontWeight: Int?, verticalOffset: Double?
+        fontSize: Double?, fontWeight: Int?, verticalOffset: Double?,
+        strokeScale: Double?, shadowColor: Int?, shadowOffset: Double?,
+        shadowBlur: Double?, fontPath: String?, boldFontPath: String?
     ) {
         subtitleOverlay.applyStyle(
             textColor: textColor, backgroundColor: backgroundColor,
             strokeColor: strokeColor, fontSize: fontSize,
-            fontWeight: fontWeight, verticalOffset: verticalOffset)
+            fontWeight: fontWeight, verticalOffset: verticalOffset,
+            strokeScale: strokeScale, shadowColor: shadowColor,
+            shadowOffset: shadowOffset, shadowBlur: shadowBlur,
+            fontPath: fontPath, boldFontPath: boldFontPath)
         secondarySubtitleOverlay.applySecondaryStyle(
             from: subtitleOverlay, fontSize: secondaryFontSize, textColor: secondaryTextColor)
         if let verticalOffset {
@@ -2272,13 +2484,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
 
     private func displayCriteriaMatchingEnabled() -> Bool {
         #if os(tvOS)
-            guard
-                let windowScene = UIApplication.shared.connectedScenes
-                    .compactMap({ $0 as? UIWindowScene }).first,
-                let window = windowScene.windows.first(where: { $0.isKeyWindow })
-                    ?? windowScene.windows.first
-            else { return false }
-            return window.avDisplayManager.isDisplayCriteriaMatchingEnabled
+            return Self.keyWindow()?.avDisplayManager.isDisplayCriteriaMatchingEnabled ?? false
         #else
             // Display-criteria matching is a tvOS concept. iOS panels manage
             // EDR themselves.

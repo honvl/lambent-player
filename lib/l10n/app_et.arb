@@ -1,6 +1,6 @@
 {
     "@@locale": "et",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent versioon {version}",
+    "appVersionFooter": "Moonfin versioon {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent ei pääsenud teie süsteemi võtmehoidjale juurde. Sisselogimine võib jätkuda, kuid žetoonide turvaline salvestus ei pruugi olla saadaval enne, kui võtmehoidja on lukust avatud.",
+    "secureStorageUnavailableMessage": "Moonfin ei pääsenud teie süsteemi võtmehoidjale juurde. Sisselogimine võib jätkuda, kuid žetoonide turvaline salvestus ei pruugi olla saadaval enne, kui võtmehoidja on lukust avatud.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "Lülitage Lambenti ja Neon Pulse vahel ilma rakendust taaskäivitamata",
+    "settingsAppearanceThemeSubtitle": "Lülitage Moonfini ja Neon Pulse vahel ilma rakendust taaskäivitamata",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Kas lahkuda Lambentist?",
+    "exitApp": "Kas lahkuda Moonfinist?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "Pole määratud. Lambent proovib rakenduste/andmete kaustades vaikefaili mpv.conf.",
+    "notSetMpvConf": "Pole määratud. Moonfin proovib rakenduste/andmete kaustades vaikefaili mpv.conf.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "Avalehe nähtavuse sisse- ja väljalülitamine teegi kaupa. Muudatuste jõustumiseks taaskäivitage Lambent.",
+    "libraryVisibilityDescription": "Avalehe nähtavuse sisse- ja väljalülitamine teegi kaupa. Muudatuste jõustumiseks taaskäivitage Moonfin.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Mängi Lambentis",
+    "playInMoonfin": "Mängi Moonfinis",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "Üksust ei leitud teie Lambenti teegist",
+    "itemNotFoundInLibrary": "Üksust ei leitud teie Moonfini teegist",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "Serveri taaskäivitamine on pooleli",
-    "adminServerRebootMessage": "Serveri taaskäivitamine on pooleli, taaskäivitage Lambent",
+    "adminServerRebootMessage": "Serveri taaskäivitamine on pooleli, taaskäivitage Moonfin",
     "adminActiveSessions": "Aktiivsed seansid",
     "adminSessionsLoadFailed": "Seansside laadimine ebaõnnestus",
     "adminNoActiveSessions": "Aktiivseid seansse pole",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "Kuvage navigeerimisribal žanrite nupp",
     "settingsShowFavoritesButtonInNavigation": "Kuvage navigeerimisribal lemmikute nupp",
     "settingsShowLibrariesButtonInNavigation": "Kuvage navigeerimisribal teekide nupp",
-    "settingsLibraryVisibilitySubtitle": "Avalehe nähtavuse sisse- ja väljalülitamine teegi kaupa. Muudatuste jõustumiseks taaskäivitage Lambent.",
+    "settingsLibraryVisibilitySubtitle": "Avalehe nähtavuse sisse- ja väljalülitamine teegi kaupa. Muudatuste jõustumiseks taaskäivitage Moonfin.",
     "settingsMediaBarAndLocalPreviews": "Meediumiriba ja kohalikud eelvaated",
     "settingsVisualOverlays": "Visuaalsed ülekatted",
     "settingsSeasonalSurprise": "Hooajaline üllatus",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "Litsentsid",
     "settingsOpenSourceLicenseNotices": "Avatud lähtekoodiga litsentsi teatised",
     "settingsPrivacyPolicy": "Privaatsuspoliitika",
-    "settingsPrivacyPolicySubtitle": "Kuidas Lambent teie andmeid käsitleb",
+    "settingsPrivacyPolicySubtitle": "Kuidas Moonfin teie andmeid käsitleb",
     "settingsCheckForUpdates": "Kontrollige värskendusi",
-    "settingsCheckForUpdatesSubtitle": "Kontrollige uusimat Lambenti väljaannet",
+    "settingsCheckForUpdatesSubtitle": "Kontrollige uusimat Moonfini väljaannet",
     "settingsPoweredByFlutter": "Töötab Flutteri baasil",
     "settingsLicenseNoticesCount": "{count, plural, one {# litsentsiteade} other {# litsentsiteadet}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "Eelista SDH subtiitreid",
     "preferSdhSubtitlesSubtitle": "Seadistage automaatsel valimisel prioriteediks SDH/CC subtiitrirajad.",
     "webDiagnostics": "Veebi diagnostika",
-    "webDiagnosticsTitle": "Lambent Veebidiagnostika",
+    "webDiagnosticsTitle": "Moonfin Veebidiagnostika",
     "webDiagnosticsIntro": "Kasutage seda lehte brauseri ühenduvusprobleemide diagnoosimiseks (CORS, segasisu ja avastusseaded).",
     "webDiagnosticsDetectedMixedContentFailure": "Tuvastatud segasisu tõrge",
     "webDiagnosticsDetectedCorsPreflightFailure": "Tuvastatud CORS-i/lennueelse rike",
-    "webDiagnosticsMixedContentFailureBody": "Lambent tuvastas HTTPS-i lehe, mis üritas helistada HTTP-serveri URL-ile. Brauserid blokeerivad selle päringu enne, kui see teie serverisse jõuab.",
-    "webDiagnosticsCorsFailureBody": "Lambent tuvastas brauseri tasemel päringu tõrke, mille tavaliselt põhjustab meediumiserveris puuduv CORS või eelkontrolli päised.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin tuvastas HTTPS-i lehe, mis üritas helistada HTTP-serveri URL-ile. Brauserid blokeerivad selle päringu enne, kui see teie serverisse jõuab.",
+    "webDiagnosticsCorsFailureBody": "Moonfin tuvastas brauseri tasemel päringu tõrke, mille tavaliselt põhjustab meediumiserveris puuduv CORS või eelkontrolli päised.",
     "webDiagnosticsTargetUrl": "Siht-URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "pole konfigureeritud",
     "webDiagnosticsMixedContent": "Segatud sisu",
     "webDiagnosticsMixedContentDetected": "See leht laaditakse HTTPS-i kaudu, kuid üks või mitu konfigureeritud URL-i on HTTP. Brauserid blokeerivad HTTPS-i lehtedel HTTP API-de kutsumise.",
-    "webDiagnosticsMixedContentFix": "Parandus: teenindage oma meediumiserverit või puhverserveri lõpp-punkti HTTPS-i kaudu või laadige Lambent HTTP kaudu ainult usaldusväärsetes kohalikes võrkudes.",
+    "webDiagnosticsMixedContentFix": "Parandus: teenindage oma meediumiserverit või puhverserveri lõpp-punkti HTTPS-i kaudu või laadige Moonfin HTTP kaudu ainult usaldusväärsetes kohalikes võrkudes.",
     "webDiagnosticsNoMixedContentDetected": "Praeguste käitusaja seadete põhjal ei tuvastatud ilmset segasisu konfiguratsiooni.",
     "webDiagnosticsCorsChecklist": "CORSi kontrollnimekiri",
     "webDiagnosticsCorsChecklistItem1": "• Luba brauseri lähtekoht valikus Access-Control-Allow-Origin.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "Klassikaline on algne keskjoondatud Lambenti paigutus. Moodne on kohanduv kinolik paigutus.",
+    "detailScreenStyleSubtitle": "Klassikaline on algne keskjoondatud Moonfini paigutus. Moodne on kohanduv kinolik paigutus.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Kasuta kohalikul meediakogul põhinevat algoritmi „Lambent soovitab“ või TMDb võrgupõhiseid sarnasusmõõdikuid. Märkus: võrgusoovitused vajavad Seerri integratsiooni.",
+    "recommendationSystemSubtitle": "Kasuta kohalikul meediakogul põhinevat algoritmi „Moonfin soovitab“ või TMDb võrgupõhiseid sarnasusmõõdikuid. Märkus: võrgusoovitused vajavad Seerri integratsiooni.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent soovitab",
+    "recommendationSystemMoonfin": "Moonfin soovitab",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "Piira „Lambent soovitab“ ettepanekuid sihtmeedia vanusepiirangu järgi",
+    "recommendationsApplyParentalRatingCapSubtitle": "Piira „Moonfin soovitab“ ettepanekuid sihtmeedia vanusepiirangu järgi",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "Kohandatud teemad muudavad Lambenti visuaalseid elemente kõikjal. Vali oma stiiliga sobiv variant.",
+    "customThemeSubtitle": "Kohandatud teemad muudavad Moonfini visuaalseid elemente kõikjal. Vali oma stiiliga sobiv variant.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "Logi telefonis Lambenti sisse",
+    "carSignInPrompt": "Logi telefonis Moonfini sisse",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8893,7 +8893,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller on Flutteri moodne GPU-renderdaja, mis annab sujuvamad animatsioonid ja vähem tõrkeid. Mõnes TV-boksis ja vanemas GPU-s võib see põhjustada häireid või musta pilti; sel juhul lülita see välja. Automaatne valib sinu seadme jaoks parima vaikeväärtuse. Muudatuse rakendamiseks käivita Lambent uuesti.",
+    "impellerRenderingSubtitle": "Impeller on Flutteri moodne GPU-renderdaja, mis annab sujuvamad animatsioonid ja vähem tõrkeid. Mõnes TV-boksis ja vanemas GPU-s võib see põhjustada häireid või musta pilti; sel juhul lülita see välja. Automaatne valib sinu seadme jaoks parima vaikeväärtuse. Muudatuse rakendamiseks käivita Moonfin uuesti.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8904,7 +8904,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "Renderdusmootori muutmiseks tuleb Lambent taaskäivitada. Sulge rakendus nüüd ja ava see uuesti, et muudatus rakenduks.",
+    "impellerRestartMessage": "Renderdusmootori muutmiseks tuleb Moonfin taaskäivitada. Sulge rakendus nüüd ja ava see uuesti, et muudatus rakenduks.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

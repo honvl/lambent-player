@@ -5,17 +5,17 @@ import 'package:get_it/get_it.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:jellyfin_preference/jellyfin_preference.dart';
 
+import '../../../playback/subtitle_fonts.dart';
 import '../../../playback/subtitle_style.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../util/idiom/app_ui_idiom.dart';
 import '../../../util/platform_detection.dart';
-import '../../widgets/overlay_sheet.dart';
 import '../../widgets/settings/clean_settings_typography.dart';
 import '../../widgets/settings/preference_binding.dart';
 import '../../widgets/settings/preference_tiles.dart';
+import '../../widgets/settings/settings_preview_scope.dart';
 import '../../widgets/settings/settings_section_header.dart';
-import '../../widgets/subtitle_preview.dart';
 import 'settings_app_bar.dart';
 import '../../widgets/focus/request_initial_focus.dart';
 
@@ -176,7 +176,6 @@ class _SubtitleCustomizationScreenState
             bottom: MediaQuery.of(context).padding.bottom + 16,
           ),
           children: [
-            const SubtitlePreview(),
             _ColorPickerTile(
               title: l10n.textFillColor,
               icon: Icons.format_color_text,
@@ -188,16 +187,31 @@ class _SubtitleCustomizationScreenState
               icon: Icons.border_color,
               preference: UserPreferences.subtitleTextStrokeColor,
             ),
+            IntPickerPreferenceTile(
+              preference: UserPreferences.subtitlesStrokeWidth,
+              title: l10n.subtitleStrokeWidth,
+              icon: Icons.line_weight,
+              options: {
+                100: l10n.defaultLabel,
+                150: l10n.medium,
+                200: l10n.large,
+              },
+            ),
             _ColorPickerTile(
               title: l10n.backgroundColor,
               icon: Icons.format_color_fill,
               preference: UserPreferences.subtitlesBackgroundColor,
+            ),
+            _BoldTile(
+              title: l10n.subtitleBold,
+              preference: UserPreferences.subtitlesTextWeight,
             ),
             _sliderTile(
               context: context,
               icon: Icons.format_size,
               label: l10n.subtitleSize,
               binding: _sizeBind,
+              previewKey: UserPreferences.subtitlesTextSize.key,
               outerNode: _sizeOuterNode,
               innerNode: _sizeInnerNode,
               focused: _sizeFocused,
@@ -217,6 +231,7 @@ class _SubtitleCustomizationScreenState
               icon: Icons.vertical_align_bottom,
               label: l10n.verticalOffset,
               binding: _offsetBind,
+              previewKey: UserPreferences.subtitlesOffsetPosition.key,
               outerNode: _offsetOuterNode,
               innerNode: _offsetInnerNode,
               focused: _offsetFocused,
@@ -231,6 +246,52 @@ class _SubtitleCustomizationScreenState
               step: 0.02,
               normalizeStepGrid: true,
               labelBuilder: (v) => l10n.percentValue((v * 100).round()),
+            ),
+            const _FontTile(),
+            SwitchPreferenceTile(
+              preference: UserPreferences.subtitlesShadow,
+              title: l10n.subtitleShadow,
+              icon: Icons.flip_to_back,
+            ),
+            ListenableBuilder(
+              listenable: GetIt.instance<UserPreferences>(),
+              builder: (context, _) =>
+                  GetIt.instance<UserPreferences>().get(
+                    UserPreferences.subtitlesShadow,
+                  )
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SliderPreferenceTile(
+                          preference: UserPreferences.subtitlesShadowIntensity,
+                          title: l10n.subtitleShadowIntensity,
+                          icon: Icons.opacity,
+                          min: 10,
+                          max: 100,
+                          divisions: 9,
+                          labelOf: l10n.percentValue,
+                        ),
+                        SliderPreferenceTile(
+                          preference: UserPreferences.subtitlesShadowOffset,
+                          title: l10n.subtitleShadowOffset,
+                          icon: Icons.south_east,
+                          min: 0,
+                          max: 8,
+                          divisions: 8,
+                          labelOf: (v) => '$v',
+                        ),
+                        SliderPreferenceTile(
+                          preference: UserPreferences.subtitlesShadowBlur,
+                          title: l10n.subtitleShadowBlur,
+                          icon: Icons.blur_on,
+                          min: 0,
+                          max: 8,
+                          divisions: 8,
+                          labelOf: (v) => '$v',
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
             ),
             SettingsSectionHeader(l10n.hdr),
             SwitchPreferenceTile(
@@ -265,11 +326,16 @@ class _SubtitleCustomizationScreenState
                           preference:
                               UserPreferences.subtitlesHdrBackgroundColor,
                         ),
+                        _BoldTile(
+                          title: l10n.subtitleBold,
+                          preference: UserPreferences.subtitlesHdrTextWeight,
+                        ),
                         _sliderTile(
                           context: context,
                           icon: Icons.format_size,
                           label: l10n.subtitleSize,
                           binding: _hdrSizeBind,
+                          previewKey: UserPreferences.subtitlesHdrTextSize.key,
                           outerNode: _hdrSizeOuterNode,
                           innerNode: _hdrSizeInnerNode,
                           focused: _hdrSizeFocused,
@@ -289,6 +355,8 @@ class _SubtitleCustomizationScreenState
                           icon: Icons.vertical_align_bottom,
                           label: l10n.verticalOffset,
                           binding: _hdrOffsetBind,
+                          previewKey:
+                              UserPreferences.subtitlesHdrOffsetPosition.key,
                           outerNode: _hdrOffsetOuterNode,
                           innerNode: _hdrOffsetInnerNode,
                           focused: _hdrOffsetFocused,
@@ -321,6 +389,7 @@ class _SubtitleCustomizationScreenState
     required IconData icon,
     required String label,
     required PreferenceBinding<double> binding,
+    required String previewKey,
     required FocusNode outerNode,
     required FocusNode innerNode,
     required bool focused,
@@ -336,7 +405,7 @@ class _SubtitleCustomizationScreenState
     final colorScheme = Theme.of(context).colorScheme;
     final useTvFocusStyling = PlatformDetection.isTV;
     final activeFocusStyling = useTvFocusStyling && focused;
-    return ValueListenableBuilder<double>(
+    final tile = ValueListenableBuilder<double>(
       valueListenable: binding,
       builder: (context, value, _) => Padding(
         padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
@@ -422,6 +491,10 @@ class _SubtitleCustomizationScreenState
         ),
       ),
     );
+    return SettingsPreviewReporter(
+      describe: () => SettingsPreviewEntry(prefKey: previewKey, title: label),
+      child: tile,
+    );
   }
 }
 
@@ -506,6 +579,16 @@ class _ColorPickerTileState extends State<_ColorPickerTile> {
 
   @override
   Widget build(BuildContext context) {
+    return SettingsPreviewReporter(
+      describe: () => SettingsPreviewEntry(
+        prefKey: widget.preference.key,
+        title: widget.title,
+      ),
+      child: _buildTile(context),
+    );
+  }
+
+  Widget _buildTile(BuildContext context) {
     return TvFocusHighlight(
       builder: (context, _) => ValueListenableBuilder<int>(
         valueListenable: _binding,
@@ -536,47 +619,187 @@ class _ColorPickerTileState extends State<_ColorPickerTile> {
     _pickerOpen = true;
     final l10n = AppLocalizations.of(context);
     final current = _binding.value;
-    final isTV = PlatformDetection.isTV;
+    final preview = SettingsPreviewScope.maybeOf(context);
+    final key = widget.preference.key;
     final entries = widget.allowTransparent
         ? subtitlePresetColors.entries
         : subtitlePresetColors.entries.where((e) => Color(e.value).a > 0);
-    var picked = false;
-    final result = await showFocusRestoringDialog<int>(
-      context: context,
-      useRootNavigator: false,
-      builder: (ctx) => SimpleDialog(
-        title: Text(widget.title),
-        children: entries.map((e) {
-          final selected = e.value == current;
-          return TvFocusHighlight(
-            builder: (_, _) => ListTile(
-              autofocus: isTV && selected,
-              leading: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: Color(e.value),
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(
-                    ThemeRegistry.active.borders.chipBorder,
-                  ),
-                ),
-              ),
-              title: Text(subtitleColorLabel(e.key, l10n) ?? e.key),
-              trailing: selected ? const Icon(Icons.check) : null,
-              onTap: () {
-                if (picked) return;
-                picked = true;
-                Navigator.pop(ctx, e.value);
-              },
-            ),
-          );
-        }).toList(),
+    final names = {for (final e in entries) e.value: e.key};
+    final result = await showSettingsPicker<int>(
+      context,
+      title: widget.title,
+      values: names.keys.toList(),
+      current: current,
+      labelOf: (v) {
+        final name = names[v]!;
+        return subtitleColorLabel(name, l10n) ?? name;
+      },
+      leadingOf: (v) => Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: Color(v),
+          shape: BoxShape.circle,
+          border: Border.fromBorderSide(
+            ThemeRegistry.active.borders.chipBorder,
+          ),
+        ),
       ),
+      onTry: preview == null ? null : (v, _) => preview.tryValue(key, v),
     );
+    preview?.clearTry(key);
     if (!mounted) return;
     _pickerOpen = false;
     if (result == null || result == _binding.value) return;
     _binding.value = result;
+  }
+}
+
+/// Bold as a switch over the stored weight, which the players read as bold
+/// from 600 up.
+class _BoldTile extends StatefulWidget {
+  final String title;
+  final Preference<int> preference;
+
+  const _BoldTile({required this.title, required this.preference});
+
+  @override
+  State<_BoldTile> createState() => _BoldTileState();
+}
+
+class _BoldTileState extends State<_BoldTile> {
+  late final PreferenceBinding<int> _binding;
+
+  @override
+  void initState() {
+    super.initState();
+    _binding = PreferenceBinding(
+      GetIt.instance<PreferenceStore>(),
+      widget.preference,
+    );
+  }
+
+  @override
+  void dispose() {
+    _binding.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsPreviewReporter(
+      describe: () => SettingsPreviewEntry(
+        prefKey: widget.preference.key,
+        title: widget.title,
+      ),
+      child: TvFocusHighlight(
+        builder: (context, _) => ValueListenableBuilder<int>(
+          valueListenable: _binding,
+          builder: (context, weight, _) => SwitchListTile.adaptive(
+            secondary: const Icon(Icons.format_bold),
+            title: Text(widget.title),
+            value: weight >= 600,
+            onChanged: (bold) => _binding.value = bold ? 700 : 400,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Picks a subtitle font, downloading it first when it isn't on the device.
+/// The choice is only saved once the files are here, so a failed download
+/// leaves the old font in place.
+class _FontTile extends StatefulWidget {
+  const _FontTile();
+
+  @override
+  State<_FontTile> createState() => _FontTileState();
+}
+
+class _FontTileState extends State<_FontTile> {
+  late final PreferenceBinding<String> _binding;
+  String? _downloading;
+  bool _pickerOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _binding = PreferenceBinding(
+      GetIt.instance<PreferenceStore>(),
+      UserPreferences.subtitlesFont,
+    );
+  }
+
+  @override
+  void dispose() {
+    _binding.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SettingsPreviewReporter(
+      describe: () => SettingsPreviewEntry(
+        prefKey: UserPreferences.subtitlesFont.key,
+        title: l10n.subtitleFont,
+        description: l10n.subtitleFontDescription,
+      ),
+      child: TvFocusHighlight(
+        builder: (context, focused) => ValueListenableBuilder<String>(
+          valueListenable: _binding,
+          builder: (context, family, _) => ListTile(
+            focusColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            leading: const Icon(Icons.font_download_outlined),
+            title: Text(l10n.subtitleFont),
+            subtitle: Text(l10n.subtitleFontDescription),
+            trailing: buildSettingsSelectionBubble(
+              context,
+              _downloading != null
+                  ? l10n.downloadingStatus
+                  : family.isEmpty
+                  ? l10n.defaultLabel
+                  : family,
+              focused,
+            ),
+            onTap: () => _pick(context, family),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pick(BuildContext context, String current) async {
+    if (_pickerOpen || _downloading != null) return;
+    _pickerOpen = true;
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final fonts = SubtitleFonts.instance;
+    final picked = await showSettingsPicker<String>(
+      context,
+      title: l10n.subtitleFont,
+      values: ['', for (final font in subtitleFonts) font.family],
+      current: current,
+      labelOf: (family) => family.isEmpty ? l10n.defaultLabel : family,
+      subtitleOf: (family) =>
+          family.isEmpty || fonts.isDownloaded(family) ? null : l10n.download,
+    );
+    _pickerOpen = false;
+    if (!mounted || picked == null || picked == current) return;
+    if (picked.isNotEmpty) {
+      setState(() => _downloading = picked);
+      final loaded = await fonts.load(picked);
+      if (!mounted) return;
+      setState(() => _downloading = null);
+      if (!loaded) {
+        messenger?.showSnackBar(
+          SnackBar(content: Text(l10n.subtitleFontDownloadFailed(picked))),
+        );
+        return;
+      }
+    }
+    _binding.value = picked;
   }
 }

@@ -1,6 +1,6 @@
 {
     "@@locale": "si",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent අනුවාදය {version}",
+    "appVersionFooter": "Moonfin අනුවාදය {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent හට ඔබගේ පද්ධති යතුරුකරණයට ප්‍රවේශ විය නොහැක. පුරනය දිගටම කරගෙන යා හැක, නමුත් යතුර අගුලු හරින තෙක් ආරක්ෂිත ටෝකන ගබඩාව නොතිබිය හැක.",
+    "secureStorageUnavailableMessage": "Moonfin හට ඔබගේ පද්ධති යතුරුකරණයට ප්‍රවේශ විය නොහැක. පුරනය දිගටම කරගෙන යා හැක, නමුත් යතුර අගුලු හරින තෙක් ආරක්ෂිත ටෝකන ගබඩාව නොතිබිය හැක.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "යෙදුම නැවත ආරම්භ නොකර Lambent සහ Neon Pulse අතර මාරු වන්න",
+    "settingsAppearanceThemeSubtitle": "යෙදුම නැවත ආරම්භ නොකර Moonfin සහ Neon Pulse අතර මාරු වන්න",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Lambent වෙතින් පිටවන්නද?",
+    "exitApp": "Moonfin වෙතින් පිටවන්නද?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "සකසා නැත. Lambent යෙදුම්/දත්ත ෆෝල්ඩරවල පෙරනිමි mpv.conf එකක් උත්සාහ කරනු ඇත.",
+    "notSetMpvConf": "සකසා නැත. Moonfin යෙදුම්/දත්ත ෆෝල්ඩරවල පෙරනිමි mpv.conf එකක් උත්සාහ කරනු ඇත.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "පුස්තකාලයකට මුල් පිටුව දෘශ්‍යතාව ටොගල් කරන්න. වෙනස්කම් බලාත්මක වීමට Lambent නැවත ආරම්භ කරන්න.",
+    "libraryVisibilityDescription": "පුස්තකාලයකට මුල් පිටුව දෘශ්‍යතාව ටොගල් කරන්න. වෙනස්කම් බලාත්මක වීමට Moonfin නැවත ආරම්භ කරන්න.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "Lambent, MakD අතර තෝරන්න, නැතහොත් මාධ්‍ය තීරුව අක්‍රිය කරන්න",
+    "mediaBarModeDescription": "Moonfin, MakD අතර තෝරන්න, නැතහොත් මාධ්‍ය තීරුව අක්‍රිය කරන්න",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Lambent හි සෙල්ලම් කරන්න",
+    "playInMoonfin": "Moonfin හි සෙල්ලම් කරන්න",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "ඔබගේ Lambent පුස්තකාලයේ අයිතමය හමු නොවීය",
+    "itemNotFoundInLibrary": "ඔබගේ Moonfin පුස්තකාලයේ අයිතමය හමු නොවීය",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "සේවාදායකය නැවත ආරම්භ කිරීම සිදු වෙමින් පවතී",
-    "adminServerRebootMessage": "සේවාදායකය නැවත ආරම්භ කිරීම සිදු වෙමින් පවතී, කරුණාකර Lambent නැවත ආරම්භ කරන්න",
+    "adminServerRebootMessage": "සේවාදායකය නැවත ආරම්භ කිරීම සිදු වෙමින් පවතී, කරුණාකර Moonfin නැවත ආරම්භ කරන්න",
     "adminActiveSessions": "ක්රියාකාරී සැසි",
     "adminSessionsLoadFailed": "සැසි පූරණය කිරීමට අසමත් විය",
     "adminNoActiveSessions": "සක්‍රිය සැසි නැත",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "සංචාලන තීරුවේ ප්‍රභේද බොත්තම පෙන්වන්න",
     "settingsShowFavoritesButtonInNavigation": "සංචාලන තීරුවේ ප්‍රියතම බොත්තම පෙන්වන්න",
     "settingsShowLibrariesButtonInNavigation": "සංචාලන තීරුවේ පුස්තකාල බොත්තම පෙන්වන්න",
-    "settingsLibraryVisibilitySubtitle": "පුස්තකාලයකට මුල් පිටුව දෘශ්‍යතාව ටොගල් කරන්න. වෙනස්කම් බලාත්මක වීමට Lambent නැවත ආරම්භ කරන්න.",
+    "settingsLibraryVisibilitySubtitle": "පුස්තකාලයකට මුල් පිටුව දෘශ්‍යතාව ටොගල් කරන්න. වෙනස්කම් බලාත්මක වීමට Moonfin නැවත ආරම්භ කරන්න.",
     "settingsMediaBarAndLocalPreviews": "මාධ්‍ය තීරුව සහ දේශීය පෙරදසුන්",
     "settingsVisualOverlays": "දෘශ්ය ආවරණ",
     "settingsSeasonalSurprise": "සෘතුමය පුදුමය",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "බලපත්ර",
     "settingsOpenSourceLicenseNotices": "විවෘත මූලාශ්‍ර බලපත්‍ර දැන්වීම්",
     "settingsPrivacyPolicy": "රහස්යතා ප්රතිපත්තිය",
-    "settingsPrivacyPolicySubtitle": "Lambent ඔබේ දත්ත හසුරුවන ආකාරය",
+    "settingsPrivacyPolicySubtitle": "Moonfin ඔබේ දත්ත හසුරුවන ආකාරය",
     "settingsCheckForUpdates": "යාවත්කාලීන සඳහා පරීක්ෂා කරන්න",
-    "settingsCheckForUpdatesSubtitle": "නවතම Lambent නිකුතුව සඳහා පරීක්ෂා කරන්න",
+    "settingsCheckForUpdatesSubtitle": "නවතම Moonfin නිකුතුව සඳහා පරීක්ෂා කරන්න",
     "settingsPoweredByFlutter": "Flutter මගින් බල ගැන්වේ",
     "settingsLicenseNoticesCount": "{count, plural, one {බලපත්‍ර දැන්වීම් #} other {බලපත්‍ර දැන්වීම් #}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH උපසිරැසිවලට මුල් තැන දෙන්න",
     "preferSdhSubtitlesSubtitle": "ස්වයංක්‍රීයව තෝරන විට SDH/CC උපසිරැසි පථවලට ප්‍රමුඛත්වය දෙන්න.",
     "webDiagnostics": "වෙබ් දෝෂ නිර්ණය",
-    "webDiagnosticsTitle": "Lambent වෙබ් දෝෂ නිර්ණය",
+    "webDiagnosticsTitle": "Moonfin වෙබ් දෝෂ නිර්ණය",
     "webDiagnosticsIntro": "බ්‍රවුසර සම්බන්ධතා ගැටලු (CORS, මිශ්‍ර අන්තර්ගතය සහ සොයාගැනීමේ සැකසීම්) විනිශ්චය කිරීමට මෙම පිටුව භාවිත කරන්න.",
     "webDiagnosticsDetectedMixedContentFailure": "මිශ්‍ර-අන්තර්ගත අසාර්ථකත්වයක් හඳුනාගන්නා ලදී",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/Preflight අසාර්ථකත්වයක් හඳුනාගන්නා ලදී",
-    "webDiagnosticsMixedContentFailureBody": "HTTP සේවාදායක URL එකක් ඇමතීමට උත්සාහ කරන HTTPS පිටුවක් Lambent හඳුනාගත්තේය. බ්‍රවුසර මෙම ඉල්ලීම ඔබේ සේවාදායකයට ළඟා වීමට පෙර අවහිර කරයි.",
-    "webDiagnosticsCorsFailureBody": "මාධ්‍ය සේවාදායකයේ අස්ථානගත වූ CORS හෝ preflight ශීර්ෂ නිසා බහුලව ඇතිවන බ්‍රවුසර මට්ටමේ ඉල්ලීම් අසාර්ථකත්වයක් Lambent හඳුනාගත්තේය.",
+    "webDiagnosticsMixedContentFailureBody": "HTTP සේවාදායක URL එකක් ඇමතීමට උත්සාහ කරන HTTPS පිටුවක් Moonfin හඳුනාගත්තේය. බ්‍රවුසර මෙම ඉල්ලීම ඔබේ සේවාදායකයට ළඟා වීමට පෙර අවහිර කරයි.",
+    "webDiagnosticsCorsFailureBody": "මාධ්‍ය සේවාදායකයේ අස්ථානගත වූ CORS හෝ preflight ශීර්ෂ නිසා බහුලව ඇතිවන බ්‍රවුසර මට්ටමේ ඉල්ලීම් අසාර්ථකත්වයක් Moonfin හඳුනාගත්තේය.",
     "webDiagnosticsTargetUrl": "ඉලක්ක URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "වින්‍යාස කර නැත",
     "webDiagnosticsMixedContent": "මිශ්‍ර අන්තර්ගතය",
     "webDiagnosticsMixedContentDetected": "මෙම පිටුව HTTPS හරහා පූරණය වී ඇත, නමුත් වින්‍යාස කළ URL එකක් හෝ කිහිපයක් HTTP වේ. බ්‍රවුසර HTTPS පිටුවලට HTTP API ඇමතීම අවහිර කරයි.",
-    "webDiagnosticsMixedContentFix": "විසඳුම: ඔබේ මාධ්‍ය සේවාදායකය හෝ ප්‍රොක්සි අන්තය HTTPS හරහා සපයන්න, නැතහොත් Lambent HTTP හරහා විශ්වාසනීය දේශීය ජාලවල පමණක් පූරණය කරන්න.",
+    "webDiagnosticsMixedContentFix": "විසඳුම: ඔබේ මාධ්‍ය සේවාදායකය හෝ ප්‍රොක්සි අන්තය HTTPS හරහා සපයන්න, නැතහොත් Moonfin HTTP හරහා විශ්වාසනීය දේශීය ජාලවල පමණක් පූරණය කරන්න.",
     "webDiagnosticsNoMixedContentDetected": "වත්මන් ධාවන කාල සැකසීම්වලින් පැහැදිලි මිශ්‍ර-අන්තර්ගත වින්‍යාසයක් හඳුනාගත නොහැකි විය.",
     "webDiagnosticsCorsChecklist": "CORS පිරික්සුම් ලැයිස්තුව",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Origin හි බ්‍රවුසර මූලාරම්භයට ඉඩ දෙන්න.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "සම්භාව්‍ය යනු Lambent හි මුල් මධ්‍යගත සැකැස්මයි. නවීන යනු ප්‍රතිචාරාත්මක සිනමාත්මක සැකැස්මකි.",
+    "detailScreenStyleSubtitle": "සම්භාව්‍ය යනු Moonfin හි මුල් මධ්‍යගත සැකැස්මයි. නවීන යනු ප්‍රතිචාරාත්මක සිනමාත්මක සැකැස්මකි.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Lambent නිර්දේශ නම් දේශීය පුස්තකාල ඇල්ගොරිතමය හෝ මාර්ගගත TMDb සමානතා මිතික භාවිත කරන්න. සටහන: මාර්ගගත නිර්දේශ සඳහා Seerr ඒකාබද්ධතාව අවශ්‍ය වේ.",
+    "recommendationSystemSubtitle": "Moonfin නිර්දේශ නම් දේශීය පුස්තකාල ඇල්ගොරිතමය හෝ මාර්ගගත TMDb සමානතා මිතික භාවිත කරන්න. සටහන: මාර්ගගත නිර්දේශ සඳහා Seerr ඒකාබද්ධතාව අවශ්‍ය වේ.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent නිර්දේශ",
+    "recommendationSystemMoonfin": "Moonfin නිර්දේශ",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "ඉලක්ක මාධ්‍යයේ මාපිය ශ්‍රේණිගත කිරීම අනුව Lambent නිර්දේශ යෝජනා සීමා කරන්න",
+    "recommendationsApplyParentalRatingCapSubtitle": "ඉලක්ක මාධ්‍යයේ මාපිය ශ්‍රේණිගත කිරීම අනුව Moonfin නිර්දේශ යෝජනා සීමා කරන්න",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "අභිරුචි තේමා Lambent පුරා දෘශ්‍ය අංග වෙනස් කරයි. ඔබේ විලාසයට ගැළපෙන විකල්පයක් තෝරන්න.",
+    "customThemeSubtitle": "අභිරුචි තේමා Moonfin පුරා දෘශ්‍ය අංග වෙනස් කරයි. ඔබේ විලාසයට ගැළපෙන විකල්පයක් තෝරන්න.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "ඔබේ දුරකථනයෙන් Lambent වෙත පුරන්න",
+    "carSignInPrompt": "ඔබේ දුරකථනයෙන් Moonfin වෙත පුරන්න",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller යනු සුමට සජීවීකරණ සහ අඩු ගැහීම් සඳහා Flutter හි නවීන GPU විදැහුම්කරුයි. සමහර TV පෙට්ටි සහ පැරණි GPU වල එය දෝෂ හෝ කළු වීඩියෝ ඇති කළ හැක; ඒවා දුටුවහොත් එය ක්‍රියාවිරහිත කරන්න. ස්වයංක්‍රීය මඟින් ඔබේ උපාංගයට හොඳම පෙරනිමිය තෝරයි. යෙදීමට Lambent නැවත අරඹන්න.",
+    "impellerRenderingSubtitle": "Impeller යනු සුමට සජීවීකරණ සහ අඩු ගැහීම් සඳහා Flutter හි නවීන GPU විදැහුම්කරුයි. සමහර TV පෙට්ටි සහ පැරණි GPU වල එය දෝෂ හෝ කළු වීඩියෝ ඇති කළ හැක; ඒවා දුටුවහොත් එය ක්‍රියාවිරහිත කරන්න. ස්වයංක්‍රීය මඟින් ඔබේ උපාංගයට හොඳම පෙරනිමිය තෝරයි. යෙදීමට Moonfin නැවත අරඹන්න.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "විදැහුම්කරණ එන්ජිම වෙනස් කිරීමට Lambent නැවත ඇරඹිය යුතුය. දැන් යෙදුම වසා, යෙදීමට එය නැවත විවෘත කරන්න.",
+    "impellerRestartMessage": "විදැහුම්කරණ එන්ජිම වෙනස් කිරීමට Moonfin නැවත ඇරඹිය යුතුය. දැන් යෙදුම වසා, යෙදීමට එය නැවත විවෘත කරන්න.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

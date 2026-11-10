@@ -11,11 +11,15 @@ import '../../../data/services/plex_tv_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../preference/user_preferences.dart';
 import '../../../util/focus/dpad_keys.dart';
+import '../../../util/lambent_server.dart';
 import '../../../util/platform_detection.dart';
+import '../../../remote/remote_access.dart';
+import '../../../util/silo_failure_message.dart';
 import '../../widgets/allow_self_signed_dialog.dart';
 import '../../widgets/client_certificate_dialog.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/server_type_icon.dart';
+import '../../widgets/silo_native_offer_dialog.dart';
 
 /// Where the server screen goes once [AddServerDialog] closes.
 sealed class AddServerOutcome {
@@ -84,12 +88,17 @@ const _warningText = Color(0xFFFFD27A);
     tile: const Color(0x24E5A00D),
     glyph: const Color(0xFFF2BC45),
   ),
+  ServerType.silo => (
+    tile: const Color(0x245EC7BC),
+    glyph: const Color(0xFF5EC7BC),
+  ),
 };
 
 String _brand(ServerType type) => switch (type) {
   ServerType.jellyfin => 'Jellyfin',
   ServerType.emby => 'Emby',
   ServerType.plex => 'Plex',
+  ServerType.silo => 'Silo',
 };
 
 ButtonStyle _primaryStyle({bool compact = false}) {
@@ -149,9 +158,10 @@ ButtonStyle _noticeButtonStyle() {
 }
 
 class AddServerButton extends StatefulWidget {
-  const AddServerButton({super.key, required this.onPressed});
+  const AddServerButton({super.key, required this.onPressed, this.focusNode});
 
   final VoidCallback? onPressed;
+  final FocusNode? focusNode;
 
   @override
   State<AddServerButton> createState() => _AddServerButtonState();
@@ -191,6 +201,7 @@ class _AddServerButtonState extends State<AddServerButton> {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: widget.onPressed,
+            focusNode: widget.focusNode,
             onHover: (hovered) => setState(() => _hovered = hovered),
             onFocusChange: (focused) => setState(() => _focused = focused),
             borderRadius: BorderRadius.circular(16),
@@ -267,7 +278,7 @@ class _AddServerButtonState extends State<AddServerButton> {
 
 enum _Step { choose, address, found }
 
-enum _Failure { none, unreachable, untrusted, clientCert }
+enum _Failure { none, unreachable, untrusted, clientCert, siloUpdate }
 
 class AddServerDialog extends StatefulWidget {
   final AppLocalizations l10n;
@@ -301,6 +312,10 @@ class _AddServerDialogState extends State<AddServerDialog> {
   _Failure _failure = _Failure.none;
   String? _untrustedAddress;
   String? _clientCertAddress;
+
+  /// Why the PC or the tunnel turned a pairing link down, shown in place of the general advice.
+  String? _pairingProblem;
+  String? _siloUpdateMessage;
   Server? _found;
   bool _foundIsNew = false;
   bool _dismissed = false;
@@ -322,6 +337,11 @@ class _AddServerDialogState extends State<AddServerDialog> {
     _step = _startedOnAddress ? _Step.address : _Step.choose;
     _addressFocus.addListener(_onAddressFocusChanged);
     _focusLater(_startedOnAddress ? _addressFocus : _firstChoiceFocus);
+    if (RemoteAccess.isPairingLink(widget.controller.text)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _submit();
+      });
+    }
   }
 
   @override
@@ -406,10 +426,23 @@ class _AddServerDialogState extends State<AddServerDialog> {
       _failure = _Failure.none;
       _untrustedAddress = null;
       _clientCertAddress = null;
+      _pairingProblem = null;
     });
 
     try {
-      final server = await widget.serverRepo.addServer(address);
+      // A Lambent pairing link: the server is reached through its tunnel.
+      if (RemoteAccess.isPairingLink(address)) {
+        address = await RemoteAccess.instance.pairWithLink(
+          address,
+          name: joiningName,
+          kind: joiningKind,
+        );
+      }
+      final server = await widget.serverRepo.addServer(
+        address,
+        offerSiloNative: (offer) async =>
+            mounted && await confirmSiloNativeServer(context, offer),
+      );
       if (!mounted) return;
       if (server != null) {
         setState(() {
@@ -421,8 +454,8 @@ class _AddServerDialogState extends State<AddServerDialog> {
         _focusLater(_continueFocus);
         return;
       }
-      // Only Jellyfin and Emby answer that probe, so a Plex server goes to its
-      // plex.tv sign-in.
+      // Only Jellyfin, Emby and Silo answer that probe, so a Plex server goes
+      // to its plex.tv sign-in.
       final plexUri = GetIt.instance.isRegistered<PlexTvService>()
           ? await GetIt.instance<PlexTvService>().findServerAt(address)
           : null;
@@ -432,6 +465,14 @@ class _AddServerDialogState extends State<AddServerDialog> {
         return;
       }
       final failure = widget.serverRepo.lastFailure;
+      final unsupportedSilo = failure?.unsupportedSilo;
+      if (unsupportedSilo != null) {
+        _siloUpdateMessage = SiloUpdateRequired.of(
+          unsupportedSilo,
+        ).message(widget.l10n);
+        _fail(_Failure.siloUpdate);
+        return;
+      }
       final clientCert = failure?.clientCertCandidate;
       if (clientCert != null) {
         _clientCertAddress = clientCert;
@@ -453,6 +494,10 @@ class _AddServerDialogState extends State<AddServerDialog> {
       }
       _untrustedAddress = untrusted;
       _fail(_Failure.untrusted, focus: _allowFocus);
+    } on RemoteAccessException catch (error) {
+      if (!mounted) return;
+      _pairingProblem = error.message;
+      _fail(_Failure.unreachable);
     } catch (_) {
       if (!mounted) return;
       _fail(_Failure.unreachable);
@@ -775,7 +820,7 @@ class _AddServerDialogState extends State<AddServerDialog> {
           _Notice(
             warning: false,
             title: l10n.unableToConnectToServer,
-            body: l10n.addServerUnreachableDetail,
+            body: _pairingProblem ?? l10n.addServerUnreachableDetail,
             actions: [if (_clientCertAddress != null) _clientCertButton(l10n)],
           ),
         ],
@@ -802,6 +847,10 @@ class _AddServerDialogState extends State<AddServerDialog> {
             body: l10n.clientCertRequired,
             actions: [_clientCertButton(l10n)],
           ),
+        ],
+        if (_failure == _Failure.siloUpdate) ...[
+          const SizedBox(height: 14),
+          _Notice(warning: false, body: _siloUpdateMessage!),
         ],
       ],
     );
@@ -1035,7 +1084,7 @@ class _AddServerDialogState extends State<AddServerDialog> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      server.displayAddress ?? server.address,
+                      serverAddressLabel(server),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

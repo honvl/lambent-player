@@ -1,6 +1,6 @@
 {
     "@@locale": "te",
-    "appTitle": "Lambent",
+    "appTitle": "Moonfin",
     "@appTitle": {
         "description": "The application title"
     },
@@ -82,7 +82,7 @@
     "@selectServer": {
         "description": "Button to navigate back to server selection"
     },
-    "appVersionFooter": "Lambent వెర్షన్ {version}",
+    "appVersionFooter": "Moonfin వెర్షన్ {version}",
     "@appVersionFooter": {
         "description": "App version shown in footer",
         "placeholders": {
@@ -156,7 +156,7 @@
     "@secureStorageUnavailable": {
         "description": "Dialog title when system keyring is inaccessible"
     },
-    "secureStorageUnavailableMessage": "Lambent మీ సిస్టమ్ కీరింగ్‌ని యాక్సెస్ చేయలేకపోయింది. లాగిన్ కొనసాగవచ్చు, కానీ కీరింగ్ అన్‌లాక్ చేయబడే వరకు సురక్షిత టోకెన్ నిల్వ అందుబాటులో ఉండకపోవచ్చు.",
+    "secureStorageUnavailableMessage": "Moonfin మీ సిస్టమ్ కీరింగ్‌ని యాక్సెస్ చేయలేకపోయింది. లాగిన్ కొనసాగవచ్చు, కానీ కీరింగ్ అన్‌లాక్ చేయబడే వరకు సురక్షిత టోకెన్ నిల్వ అందుబాటులో ఉండకపోవచ్చు.",
     "@secureStorageUnavailableMessage": {
         "description": "Explanation when secure storage is not available"
     },
@@ -168,7 +168,7 @@
     "@settingsAppearanceTheme": {
         "description": "Title for the theme selection screen and theme settings entry"
     },
-    "settingsAppearanceThemeSubtitle": "యాప్‌ని పునఃప్రారంభించకుండానే Lambent మరియు Neon Pulse మధ్య మారండి",
+    "settingsAppearanceThemeSubtitle": "యాప్‌ని పునఃప్రారంభించకుండానే Moonfin మరియు Neon Pulse మధ్య మారండి",
     "@settingsAppearanceThemeSubtitle": {
         "description": "Subtitle for the theme selection screen and theme settings entry"
     },
@@ -249,7 +249,7 @@
             }
         }
     },
-    "exitApp": "Lambent నుండి నిష్క్రమించాలా?",
+    "exitApp": "Moonfin నుండి నిష్క్రమించాలా?",
     "@exitApp": {
         "description": "Title of exit confirmation dialog"
     },
@@ -3080,7 +3080,7 @@
     "@customMpvConfPath": {
         "description": "Setting for custom mpv.conf path"
     },
-    "notSetMpvConf": "సెట్ కాలేదు. Lambent యాప్/డేటా ఫోల్డర్‌లలో డిఫాల్ట్ mpv.confని ప్రయత్నిస్తుంది.",
+    "notSetMpvConf": "సెట్ కాలేదు. Moonfin యాప్/డేటా ఫోల్డర్‌లలో డిఫాల్ట్ mpv.confని ప్రయత్నిస్తుంది.",
     "@notSetMpvConf": {
         "description": "Description when no custom mpv.conf is set"
     },
@@ -3475,7 +3475,7 @@
     "@libraryVisibility": {
         "description": "Section title for library visibility"
     },
-    "libraryVisibilityDescription": "లైబ్రరీకి హోమ్ పేజీ విజిబిలిటీని టోగుల్ చేయండి. మార్పులు అమలులోకి రావడానికి Lambentని పునఃప్రారంభించండి.",
+    "libraryVisibilityDescription": "లైబ్రరీకి హోమ్ పేజీ విజిబిలిటీని టోగుల్ చేయండి. మార్పులు అమలులోకి రావడానికి Moonfinని పునఃప్రారంభించండి.",
     "@libraryVisibilityDescription": {
         "description": "Explanation shown on the library visibility settings screen"
     },
@@ -3520,7 +3520,7 @@
     "@mediaBarMode": {
         "description": "Setting for choosing media bar style"
     },
-    "mediaBarModeDescription": "Lambent, MakD మధ్య ఎంచుకోండి లేదా మీడియా బార్‌ను ఆఫ్ చేయండి",
+    "mediaBarModeDescription": "Moonfin, MakD మధ్య ఎంచుకోండి లేదా మీడియా బార్‌ను ఆఫ్ చేయండి",
     "@mediaBarModeDescription": {
         "description": "Description for media bar style setting"
     },
@@ -4252,7 +4252,7 @@
     "@cancelRequest": {
         "description": "Button/dialog title to cancel a media request"
     },
-    "playInMoonfin": "Lambentలో ఆడండి",
+    "playInMoonfin": "Moonfinలో ఆడండి",
     "@playInMoonfin": {
         "description": "Button to play available media in Moonfin"
     },
@@ -4306,7 +4306,7 @@
     "@keep": {
         "description": "Button to keep/dismiss a cancel dialog"
     },
-    "itemNotFoundInLibrary": "మీ Lambent లైబ్రరీలో అంశం కనుగొనబడలేదు",
+    "itemNotFoundInLibrary": "మీ Moonfin లైబ్రరీలో అంశం కనుగొనబడలేదు",
     "@itemNotFoundInLibrary": {
         "description": "Snackbar when Seerr item cannot be found in Jellyfin"
     },
@@ -4610,7 +4610,7 @@
         }
     },
     "adminServerRebootInProgress": "సర్వర్ రీబూట్ ప్రోగ్రెస్‌లో ఉంది",
-    "adminServerRebootMessage": "సర్వర్ రీబూట్ ప్రోగ్రెస్‌లో ఉంది, దయచేసి Lambentని పునఃప్రారంభించండి",
+    "adminServerRebootMessage": "సర్వర్ రీబూట్ ప్రోగ్రెస్‌లో ఉంది, దయచేసి Moonfinని పునఃప్రారంభించండి",
     "adminActiveSessions": "క్రియాశీల సెషన్లు",
     "adminSessionsLoadFailed": "సెషన్‌లను లోడ్ చేయడంలో విఫలమైంది",
     "adminNoActiveSessions": "సక్రియ సెషన్‌లు లేవు",
@@ -6498,7 +6498,7 @@
     "settingsShowGenresButtonInNavigation": "నావిగేషన్ బార్‌లో కళా ప్రక్రియల బటన్‌ను చూపండి",
     "settingsShowFavoritesButtonInNavigation": "నావిగేషన్ బార్‌లో ఇష్టమైనవి బటన్‌ను చూపండి",
     "settingsShowLibrariesButtonInNavigation": "నావిగేషన్ బార్‌లో లైబ్రరీల బటన్‌ను చూపండి",
-    "settingsLibraryVisibilitySubtitle": "లైబ్రరీకి హోమ్ పేజీ విజిబిలిటీని టోగుల్ చేయండి. మార్పులు అమలులోకి రావడానికి Lambentని పునఃప్రారంభించండి.",
+    "settingsLibraryVisibilitySubtitle": "లైబ్రరీకి హోమ్ పేజీ విజిబిలిటీని టోగుల్ చేయండి. మార్పులు అమలులోకి రావడానికి Moonfinని పునఃప్రారంభించండి.",
     "settingsMediaBarAndLocalPreviews": "మీడియా బార్ & స్థానిక ప్రివ్యూలు",
     "settingsVisualOverlays": "విజువల్ ఓవర్లేస్",
     "settingsSeasonalSurprise": "కాలానుగుణ ఆశ్చర్యం",
@@ -6522,9 +6522,9 @@
     "settingsLicenses": "లైసెన్స్‌లు",
     "settingsOpenSourceLicenseNotices": "ఓపెన్ సోర్స్ లైసెన్స్ నోటీసులు",
     "settingsPrivacyPolicy": "గోప్యతా విధానం",
-    "settingsPrivacyPolicySubtitle": "Lambent మీ డేటాను ఎలా నిర్వహిస్తుంది",
+    "settingsPrivacyPolicySubtitle": "Moonfin మీ డేటాను ఎలా నిర్వహిస్తుంది",
     "settingsCheckForUpdates": "నవీకరణల కోసం తనిఖీ చేయండి",
-    "settingsCheckForUpdatesSubtitle": "తాజా Lambent విడుదల కోసం తనిఖీ చేయండి",
+    "settingsCheckForUpdatesSubtitle": "తాజా Moonfin విడుదల కోసం తనిఖీ చేయండి",
     "settingsPoweredByFlutter": "Flutter ద్వారా ఆధారితం",
     "settingsLicenseNoticesCount": "{count, plural, one {# లైసెన్స్ నోటీసు} other {# లైసెన్స్ నోటీసులు}}",
     "@settingsLicenseNoticesCount": {
@@ -7057,12 +7057,12 @@
     "preferSdhSubtitles": "SDH ఉపశీర్షికలకు ప్రాధాన్యత ఇవ్వండి",
     "preferSdhSubtitlesSubtitle": "స్వీయ-ఎంపిక చేసేటప్పుడు SDH/CC ఉపశీర్షిక ట్రాక్‌లకు ప్రాధాన్యత ఇవ్వండి.",
     "webDiagnostics": "వెబ్ డయాగ్నస్టిక్స్",
-    "webDiagnosticsTitle": "Lambent వెబ్ డయాగ్నోస్టిక్స్",
+    "webDiagnosticsTitle": "Moonfin వెబ్ డయాగ్నోస్టిక్స్",
     "webDiagnosticsIntro": "బ్రౌజర్ కనెక్టివిటీ సమస్యలను (CORS, మిశ్రమ కంటెంట్ మరియు ఆవిష్కరణ సెట్టింగ్‌లు) నిర్ధారించడానికి ఈ పేజీని ఉపయోగించండి.",
     "webDiagnosticsDetectedMixedContentFailure": "మిశ్రమ-కంటెంట్ వైఫల్యం గుర్తించబడింది",
     "webDiagnosticsDetectedCorsPreflightFailure": "CORS/ప్రీఫ్లైట్ వైఫల్యం గుర్తించబడింది",
-    "webDiagnosticsMixedContentFailureBody": "Lambent HTTP సర్వర్ URLకి కాల్ చేయడానికి ప్రయత్నిస్తున్న HTTPS పేజీని గుర్తించింది. ఈ అభ్యర్థన మీ సర్వర్‌ను చేరుకోవడానికి ముందే బ్రౌజర్‌లు బ్లాక్ చేస్తాయి.",
-    "webDiagnosticsCorsFailureBody": "Lambent మీడియా సర్వర్‌లో CORS లేదా ప్రీఫ్లైట్ హెడర్‌లు మిస్ కావడం వల్ల సాధారణంగా సంభవించే బ్రౌజర్-స్థాయి అభ్యర్థన వైఫల్యాన్ని గుర్తించింది.",
+    "webDiagnosticsMixedContentFailureBody": "Moonfin HTTP సర్వర్ URLకి కాల్ చేయడానికి ప్రయత్నిస్తున్న HTTPS పేజీని గుర్తించింది. ఈ అభ్యర్థన మీ సర్వర్‌ను చేరుకోవడానికి ముందే బ్రౌజర్‌లు బ్లాక్ చేస్తాయి.",
+    "webDiagnosticsCorsFailureBody": "Moonfin మీడియా సర్వర్‌లో CORS లేదా ప్రీఫ్లైట్ హెడర్‌లు మిస్ కావడం వల్ల సాధారణంగా సంభవించే బ్రౌజర్-స్థాయి అభ్యర్థన వైఫల్యాన్ని గుర్తించింది.",
     "webDiagnosticsTargetUrl": "లక్ష్య URL: {url}",
     "@webDiagnosticsTargetUrl": {
         "description": "Target URL shown in diagnostics summary",
@@ -7092,7 +7092,7 @@
     "notConfigured": "కాన్ఫిగర్ చేయబడలేదు",
     "webDiagnosticsMixedContent": "మిశ్రమ కంటెంట్",
     "webDiagnosticsMixedContentDetected": "ఈ పేజీ HTTPS ద్వారా లోడ్ చేయబడింది, కానీ ఒకటి లేదా అంతకంటే ఎక్కువ కాన్ఫిగర్ చేయబడిన URLలు HTTP. HTTP APIలకు కాల్ చేయకుండా బ్రౌజర్‌లు HTTPS పేజీలను బ్లాక్ చేస్తాయి.",
-    "webDiagnosticsMixedContentFix": "పరిష్కరించండి: HTTPS ద్వారా మీ మీడియా సర్వర్ లేదా ప్రాక్సీ ఎండ్‌పాయింట్‌ను అందించండి లేదా విశ్వసనీయ స్థానిక నెట్‌వర్క్‌లలో మాత్రమే HTTP ద్వారా Lambentని లోడ్ చేయండి.",
+    "webDiagnosticsMixedContentFix": "పరిష్కరించండి: HTTPS ద్వారా మీ మీడియా సర్వర్ లేదా ప్రాక్సీ ఎండ్‌పాయింట్‌ను అందించండి లేదా విశ్వసనీయ స్థానిక నెట్‌వర్క్‌లలో మాత్రమే HTTP ద్వారా Moonfinని లోడ్ చేయండి.",
     "webDiagnosticsNoMixedContentDetected": "ప్రస్తుత రన్‌టైమ్ సెట్టింగ్‌ల నుండి స్పష్టమైన మిశ్రమ-కంటెంట్ కాన్ఫిగరేషన్ కనుగొనబడలేదు.",
     "webDiagnosticsCorsChecklist": "CORS చెక్‌లిస్ట్",
     "webDiagnosticsCorsChecklistItem1": "• Access-Control-Allow-Originలో బ్రౌజర్ మూలాన్ని అనుమతించండి.",
@@ -7288,7 +7288,7 @@
     "@detailScreenStyle": {
         "description": "Label for the media detail screen layout style setting"
     },
-    "detailScreenStyleSubtitle": "క్లాసిక్ అనేది Lambent అసలైన మధ్యస్థ లేఅవుట్. మోడర్న్ అనేది స్క్రీన్‌కు అనుగుణంగా మారే సినిమాటిక్ లేఅవుట్.",
+    "detailScreenStyleSubtitle": "క్లాసిక్ అనేది Moonfin అసలైన మధ్యస్థ లేఅవుట్. మోడర్న్ అనేది స్క్రీన్‌కు అనుగుణంగా మారే సినిమాటిక్ లేఅవుట్.",
     "@detailScreenStyleSubtitle": {
         "description": "Explanation under the detail screen style setting"
     },
@@ -7320,11 +7320,11 @@
     "@recommendationSystem": {
         "description": "Label for the Recommendation System setting"
     },
-    "recommendationSystemSubtitle": "Lambent సిఫార్సులు అనే స్థానిక-లైబ్రరీ అల్గారిథమ్‌ను లేదా ఆన్‌లైన్ TMDb సారూప్య కొలమానాలను ఉపయోగించండి. గమనిక: ఆన్‌లైన్ సిఫార్సులకు Seerr ఇంటిగ్రేషన్ అవసరం.",
+    "recommendationSystemSubtitle": "Moonfin సిఫార్సులు అనే స్థానిక-లైబ్రరీ అల్గారిథమ్‌ను లేదా ఆన్‌లైన్ TMDb సారూప్య కొలమానాలను ఉపయోగించండి. గమనిక: ఆన్‌లైన్ సిఫార్సులకు Seerr ఇంటిగ్రేషన్ అవసరం.",
     "@recommendationSystemSubtitle": {
         "description": "Explanation under the recommendation system setting"
     },
-    "recommendationSystemMoonfin": "Lambent సిఫార్సులు",
+    "recommendationSystemMoonfin": "Moonfin సిఫార్సులు",
     "@recommendationSystemMoonfin": {
         "description": "Recommendation system option: Moonfin Recommends"
     },
@@ -7336,7 +7336,7 @@
     "@recommendationsApplyParentalRatingCap": {
         "description": "Label for the toggle that controls whether similar suggestions are capped by target media parental rating"
     },
-    "recommendationsApplyParentalRatingCapSubtitle": "లక్ష్య మీడియా పేరెంటల్ రేటింగ్ ఆధారంగా Lambent సిఫార్సులను పరిమితం చేస్తుంది",
+    "recommendationsApplyParentalRatingCapSubtitle": "లక్ష్య మీడియా పేరెంటల్ రేటింగ్ ఆధారంగా Moonfin సిఫార్సులను పరిమితం చేస్తుంది",
     "@recommendationsApplyParentalRatingCapSubtitle": {
         "description": "Explanation under the parental rating cap setting toggle"
     },
@@ -7384,7 +7384,7 @@
     "@customThemeTitle": {
         "description": "Title for the custom theme settings section"
     },
-    "customThemeSubtitle": "అనుకూల థీమ్‌లు Lambent అంతటా దృశ్య అంశాలను మారుస్తాయి. మీ శైలికి సరిపోయేలా వీటిలో ఒకదాన్ని ఎంచుకోండి.",
+    "customThemeSubtitle": "అనుకూల థీమ్‌లు Moonfin అంతటా దృశ్య అంశాలను మారుస్తాయి. మీ శైలికి సరిపోయేలా వీటిలో ఒకదాన్ని ఎంచుకోండి.",
     "@customThemeSubtitle": {
         "description": "Description under custom themes section"
     },
@@ -7557,7 +7557,7 @@
     "@shuffleAllMusic": {
         "description": "Car browse action that shuffles the whole music library"
     },
-    "carSignInPrompt": "మీ ఫోన్‌లో Lambentకి సైన్ ఇన్ చేయండి",
+    "carSignInPrompt": "మీ ఫోన్‌లో Moonfinకి సైన్ ఇన్ చేయండి",
     "@carSignInPrompt": {
         "description": "Shown in the car when no account is signed in"
     },
@@ -8897,7 +8897,7 @@
     "@impellerRendering": {
         "description": "Title of the setting that selects the Flutter rendering engine (Impeller vs. legacy)."
     },
-    "impellerRenderingSubtitle": "Impeller అనేది సున్నితమైన యానిమేషన్‌లు మరియు తక్కువ స్టటర్ కోసం Flutter ఆధునిక GPU రెండరర్. కొన్ని TV బాక్స్‌లు మరియు పాత GPUలలో ఇది గ్లిచ్‌లు లేదా బ్లాక్ వీడియోను కలిగిస్తుంది; అవి కనిపిస్తే దీన్ని ఆఫ్ చేయండి. ఆటోమేటిక్ మీ పరికరానికి ఉత్తమ డిఫాల్ట్‌ను ఎంచుకుంటుంది. వర్తింపజేయడానికి Lambentను పునఃప్రారంభించండి.",
+    "impellerRenderingSubtitle": "Impeller అనేది సున్నితమైన యానిమేషన్‌లు మరియు తక్కువ స్టటర్ కోసం Flutter ఆధునిక GPU రెండరర్. కొన్ని TV బాక్స్‌లు మరియు పాత GPUలలో ఇది గ్లిచ్‌లు లేదా బ్లాక్ వీడియోను కలిగిస్తుంది; అవి కనిపిస్తే దీన్ని ఆఫ్ చేయండి. ఆటోమేటిక్ మీ పరికరానికి ఉత్తమ డిఫాల్ట్‌ను ఎంచుకుంటుంది. వర్తింపజేయడానికి Moonfinను పునఃప్రారంభించండి.",
     "@impellerRenderingSubtitle": {
         "description": "Explanatory description under the rendering engine setting."
     },
@@ -8908,7 +8908,7 @@
     "@impellerRestartTitle": {
         "description": "Title of the dialog shown after changing the rendering engine."
     },
-    "impellerRestartMessage": "రెండరింగ్ ఇంజిన్‌ను మార్చడానికి Lambent పునఃప్రారంభం కావాలి. ఇప్పుడు యాప్‌ను మూసివేసి, వర్తింపజేయడానికి మళ్లీ తెరవండి.",
+    "impellerRestartMessage": "రెండరింగ్ ఇంజిన్‌ను మార్చడానికి Moonfin పునఃప్రారంభం కావాలి. ఇప్పుడు యాప్‌ను మూసివేసి, వర్తింపజేయడానికి మళ్లీ తెరవండి.",
     "@impellerRestartMessage": {
         "description": "Body of the dialog shown after changing the rendering engine."
     },

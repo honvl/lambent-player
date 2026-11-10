@@ -6,6 +6,7 @@ import 'package:playback_core/playback_core.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../preference/user_preferences.dart';
+import '../../util/platform_detection.dart';
 import '../models/aggregated_item.dart';
 import 'theme_audio_player.dart';
 
@@ -108,6 +109,14 @@ class ThemeMusicService implements AudioOwnable {
       fadeOutAndStop();
       return;
     }
+    if (item.serverId == 'seerr') {
+      if (_player == null) {
+        stop();
+      } else {
+        fadeOutAndStop();
+      }
+      return;
+    }
 
     final themeItemId =
         (item.type == 'Episode' || item.type == 'Season') &&
@@ -144,7 +153,13 @@ class ThemeMusicService implements AudioOwnable {
 
       final song = songs[Random().nextInt(songs.length)];
       final songId = song['Id']?.toString() ?? '';
-      final url = _buildAudioUrl(songId);
+      final ownerId = songsResult?['OwnerId']?.toString() ?? themeItemId;
+      final url = await _audioUrl(ownerId, songId);
+      if (url == null ||
+          generation != _playGeneration ||
+          _activeDetailScreens.isEmpty) {
+        return;
+      }
 
       _targetVolume = _prefs.get(UserPreferences.themeMusicVolume) / 100.0;
 
@@ -189,6 +204,9 @@ class ThemeMusicService implements AudioOwnable {
   }
 
   Future<void> _safeDispose(ThemeAudioPlayer player) async {
+    // A load dropped partway can leave its player as the current one, which a
+    // fade would otherwise keep driving.
+    if (identical(_player, player)) _player = null;
     try {
       await player.setVolume(0);
     } catch (_) {}
@@ -200,6 +218,46 @@ class ThemeMusicService implements AudioOwnable {
     } catch (_) {}
   }
 
+  /// The song's stream: a link the server makes for this play when it hands
+  /// out theme music that way (Silo's grants), else Jellyfin's and Emby's
+  /// audio stream with the account's token.
+  Future<String?> _audioUrl(String ownerId, String songId) async {
+    final Object items = _client.itemsApi;
+    if (items is ThemeSongStreamApi) {
+      return items.themeSongStreamUrl(
+        ownerId,
+        songId,
+        accepts: PlatformDetection.useApplePreviewPlayer
+            ? _appleThemeFormats
+            : _mpvThemeFormats,
+      );
+    }
+    return _buildAudioUrl(songId);
+  }
+
+  /// What libmpv (media_kit) plays: every usual theme format.
+  static const List<ThemeAudioFormat> _mpvThemeFormats = [
+    (container: 'mp3', codec: null),
+    (container: 'mp4', codec: null),
+    (container: 'm4a', codec: null),
+    (container: 'aac', codec: null),
+    (container: 'flac', codec: null),
+    (container: 'ogg', codec: null),
+    (container: 'opus', codec: null),
+    (container: 'wav', codec: null),
+  ];
+
+  /// What AVPlayer plays. Silo converts anything else to AAC in MP4.
+  static const List<ThemeAudioFormat> _appleThemeFormats = [
+    (container: 'mp3', codec: 'mp3'),
+    (container: 'mp4', codec: 'aac'),
+    (container: 'mp4', codec: 'alac'),
+    (container: 'm4a', codec: 'aac'),
+    (container: 'm4a', codec: 'alac'),
+    (container: 'aac', codec: 'aac'),
+    (container: 'wav', codec: 'pcm'),
+  ];
+
   String _buildAudioUrl(String songId) {
     final token = _client.accessToken ?? '';
     // A Plex theme song's id is the path it plays from.
@@ -209,10 +267,26 @@ class ThemeMusicService implements AudioOwnable {
     return '${_client.baseUrl}/Audio/$songId/stream?static=true&audioCodec=mp3&audioBitrate=128000&${_client.serverType.tokenQueryParam}=$token';
   }
 
+  /// The fade-in step that matches the player's [current] volume. A fresh
+  /// player is silent and starts at 0, while a fade-out that gets reversed
+  /// carries on from where it is instead of dropping to silence first.
+  @visibleForTesting
+  static int fadeInStartStep({
+    required double current,
+    required double target,
+    required int steps,
+  }) => target > 0
+      ? ((current / target) * steps).clamp(0, steps - 1).floor()
+      : 0;
+
   void _fadeIn(int generation) {
     _fadeTimer?.cancel();
     final steps = _fadeDurationMs ~/ _fadeStepMs;
-    var step = 0;
+    var step = fadeInStartStep(
+      current: _player?.currentVolume ?? 0,
+      target: _targetVolume * 100,
+      steps: steps,
+    );
     _fadeTimer = Timer.periodic(Duration(milliseconds: _fadeStepMs), (timer) {
       if (generation != _playGeneration || _player == null) {
         timer.cancel();
@@ -232,7 +306,9 @@ class ThemeMusicService implements AudioOwnable {
     _fadeTimer?.cancel();
     _fadingOut = true;
     _fadeCompleter = Completer<void>();
-    final generation = _playGeneration;
+    // A fade ends whatever theme was still loading, so it can't start once
+    // the fade has begun.
+    final generation = ++_playGeneration;
     final currentVolume = player.currentVolume;
     final steps = _fadeDurationMs ~/ _fadeStepMs;
     var step = 0;

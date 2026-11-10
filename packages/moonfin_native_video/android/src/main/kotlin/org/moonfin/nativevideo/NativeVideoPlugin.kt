@@ -2,6 +2,8 @@ package org.moonfin.nativevideo
 
 import android.content.Context
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -10,7 +12,11 @@ import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
 
-class NativeVideoPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
+class NativeVideoPlugin :
+    FlutterPlugin,
+    ActivityAware,
+    MethodChannel.MethodCallHandler,
+    EventChannel.StreamHandler {
     private var media3ControlChannel: MethodChannel? = null
     private var media3EventsChannel: EventChannel? = null
     private var media3ActivityChannel: MethodChannel? = null
@@ -112,6 +118,24 @@ class NativeVideoPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventC
 
         Media3Transmux.clearEventSink(registeredTransmuxSink)
         registeredTransmuxSink = null
+    }
+
+    // The activity is what an early display mode switch points at, before any
+    // player view exists to reach it through its own context.
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Media3Bridge.attachActivity(binding.activity)
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        Media3Bridge.attachActivity(null)
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Media3Bridge.attachActivity(binding.activity)
+    }
+
+    override fun onDetachedFromActivity() {
+        Media3Bridge.attachActivity(null)
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {

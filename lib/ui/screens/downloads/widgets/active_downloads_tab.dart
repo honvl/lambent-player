@@ -5,6 +5,7 @@ import 'package:moonfin_design/moonfin_design.dart';
 import '../../../../data/models/download_source.dart';
 import '../../../../data/services/download_service.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../l10n/lambent_strings.dart';
 import '../../../../util/download_utils.dart';
 import '../../../../util/platform_detection.dart';
 import '../../../widgets/focus/dpad_list_tile.dart';

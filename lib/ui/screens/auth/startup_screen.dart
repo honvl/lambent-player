@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -37,6 +39,9 @@ class _StartupScreenState extends State<StartupScreen>
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
 
+  static const _giveUpAfter = Duration(seconds: 6);
+  Timer? _slowStart;
+
   @override
   void initState() {
     super.initState();
@@ -49,11 +54,16 @@ class _StartupScreenState extends State<StartupScreen>
       curve: Curves.easeIn,
     );
     _fadeController.forward();
+    // A saved server that doesn't answer must not hold the app: its checks can take far longer than anyone waits at a spinner.
+    _slowStart = Timer(_giveUpAfter, () {
+      if (mounted) context.go(Destinations.serverSelect);
+    });
     _initialize();
   }
 
   @override
   void dispose() {
+    _slowStart?.cancel();
     _fadeController.dispose();
     super.dispose();
   }

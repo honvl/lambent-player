@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../../../util/lambent_server.dart';
 import '../../../navigation/destinations.dart';
 import '../../../widgets/adaptive/adaptive_dialog.dart';
 import '../../detail/modern/widgets/details_tab_bar.dart';
@@ -662,6 +663,7 @@ class _AdminUserEditScreenState extends ConsumerState<AdminUserEditScreen>
         if (!_emby) ...[
           _intField('LoginAttemptsBeforeLockout',
               l10n.adminLoginAttemptsBeforeLockout, l10n.adminLoginAttemptsHint),
+          if (syncPlayOffered())
           adminFieldRow(
             label: l10n.adminSyncPlayAccess,
             child: DropdownButtonFormField<String>(

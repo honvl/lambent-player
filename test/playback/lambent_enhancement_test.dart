@@ -9,8 +9,51 @@ void main() {
   tearDown(() {
     LambentEnhancement.overrides = LambentEnhancement.none;
     LambentEnhancement.enhancementOff = false;
-    LambentEnhancement.screenDefaults = const {};
+    LambentEnhancement.screenDefaults = () => const {};
     LambentEnhancement.compareOnly = false;
+    LambentEnhancement.interpolateInsist = false;
+    LambentEnhancement.dolbyVisionWithHdr = true;
+  });
+
+  group('frame interpolation', () {
+    test('a stream is interpolated by its fi, plain or insisted', () {
+      expect(LambentEnhancement.interpolated(_url), isFalse);
+      expect(LambentEnhancement.interpolated('$_url&fi=1'), isTrue);
+      expect(LambentEnhancement.interpolated('$_url&fi=2'), isTrue);
+      expect(LambentEnhancement.interpolated('http://h/a.mkv?fi=1'), isFalse);
+    });
+
+    test('the stream runs twice the source, or fx tenths of it', () {
+      expect(LambentEnhancement.interpolationFactor(_url), 1);
+      expect(LambentEnhancement.interpolationFactor('$_url&fi=1'), 2);
+      expect(LambentEnhancement.interpolationFactor('$_url&fi=1&fx=25'), 2.5);
+      expect(LambentEnhancement.interpolationFactor('$_url&fi=2&fx=24'), 2.4);
+      expect(LambentEnhancement.interpolationFactor('$_url&fx=25'), 1);
+    });
+
+    test('a field-rate stream is not interpolated', () {
+      expect(LambentEnhancement.fieldRate('$_url&di=1'), isTrue);
+      expect(LambentEnhancement.interpolated('$_url&di=1'), isFalse);
+    });
+
+    test('the insist goes with the screen defaults while it is set', () {
+      LambentEnhancement.screenDefaults = () => {'Interpolate2D': true};
+      LambentEnhancement.interpolateInsist = true;
+      expect(LambentEnhancement.decoratePlaybackInfo({})['Lambent'], {
+        'Interpolate2D': true,
+        'InterpolateInsist': true,
+      });
+      LambentEnhancement.interpolateInsist = false;
+      expect(LambentEnhancement.decoratePlaybackInfo({})['Lambent'], {
+        'Interpolate2D': true,
+      });
+    });
+
+    test('the overrides keep fi', () {
+      LambentEnhancement.overrides = const LambentEnhancement(quality: 2);
+      final url = LambentEnhancement.applyOverrides('$_url&fi=2');
+      expect(Uri.parse(url).queryParameters['fi'], '2');
+    });
   });
 
   group('compareOnly (no Enhance, no trial)', () {
@@ -29,7 +72,7 @@ void main() {
 
     test('tells the server in PlaybackInfo', () {
       LambentEnhancement.compareOnly = true;
-      LambentEnhancement.screenDefaults = {'RtxHdr': true};
+      LambentEnhancement.screenDefaults = () => {'RtxHdr': true};
       final body = LambentEnhancement.decoratePlaybackInfo({});
       expect(body['Lambent'], {'RtxHdr': true, 'Compare': true});
     });
@@ -38,6 +81,60 @@ void main() {
       LambentEnhancement.compareOnly = true;
       const original = 'http://host/Videos/1/stream?static=true';
       expect(LambentEnhancement.applyOverrides(original), original);
+    });
+  });
+
+  group('picture controls on a running stream', () {
+    test('lookUri is the stream with look for its file, and the overrides', () {
+      LambentEnhancement.overrides = const LambentEnhancement(saturation: 80);
+      final uri = LambentEnhancement.lookUri(
+        'http://h:47800/v1/enhanced/plex-1~1/master.m3u8?tv=1&sat=100&t=abc',
+      )!;
+      expect(uri.path, '/v1/enhanced/plex-1~1/look');
+      expect(uri.queryParameters['sat'], '80');
+      expect(uri.queryParameters['t'], 'abc');
+    });
+
+    test('lookUri is null for what is not an enhanced stream', () {
+      expect(LambentEnhancement.lookUri('http://h/video.mkv'), isNull);
+    });
+
+    test('only the others are a new stream', () {
+      const base = LambentEnhancement(quality: 4, saturation: 100, peakNits: 1000);
+      expect(base.sameStream(base.copyWith(saturation: 60, contrast: 80, middleGray: 40, hue: 5, wideColour: 0)), isTrue);
+      expect(base.sameStream(base.copyWith(peakNits: 800)), isFalse);
+      expect(base.sameStream(base.copyWith(quality: 2)), isFalse);
+      expect(base.withLookOf(base.copyWith(saturation: 60, peakNits: 800)).peakNits, 1000);
+      expect(base.withLookOf(base.copyWith(saturation: 60)).saturation, 60);
+    });
+  });
+
+  group('HDR strength', () {
+    test('only a server that names it offers it', () {
+      expect(LambentEnhancement.fromUrl(_url).hdrStrength, isNull);
+      expect(LambentEnhancement.fromUrl('$_url&str=100').hdrStrength, 100);
+      expect(LambentEnhancement.fromUrl('$_url&str=400').hdrStrength, 100);
+    });
+
+    test('an override reaches only a stream whose server has it', () {
+      LambentEnhancement.overrides = const LambentEnhancement(hdrStrength: 40);
+      expect(
+        LambentEnhancement.fromUrl(
+          LambentEnhancement.applyOverrides('$_url&str=100'),
+        ).hdrStrength,
+        40,
+      );
+      expect(
+        Uri.parse(LambentEnhancement.applyOverrides(_url)).queryParameters,
+        isNot(contains('str')),
+      );
+    });
+
+    test('changes on a running stream', () {
+      const base = LambentEnhancement(hdrStrength: 100);
+      expect(base.sameStream(base.copyWith(hdrStrength: 40)), isTrue);
+      expect(base.withLookOf(base.copyWith(hdrStrength: 40)).hdrStrength, 40);
+      expect(base.copyWith(hdrStrength: 40).changesFrom(base).hdrStrength, 40);
     });
   });
 
@@ -58,7 +155,7 @@ void main() {
     });
 
     test('sends the screen defaults as the Lambent object', () {
-      LambentEnhancement.screenDefaults = {'DolbyVision': false, 'Saturation': 115};
+      LambentEnhancement.screenDefaults = () => {'DolbyVision': false, 'Saturation': 115};
       final body = LambentEnhancement.decoratePlaybackInfo({});
       expect(body['Lambent'], {'DolbyVision': false, 'Saturation': 115});
     });
@@ -165,6 +262,32 @@ void main() {
       final out = Uri.parse(LambentEnhancement.applyOverrides(_url));
       expect(out.queryParameters['q'], '4');
       expect(out.queryParameters['sat'], '0');
+    });
+  });
+
+  group('Dolby Vision with HDR', () {
+    const sdr =
+        'http://192.168.1.118:47800/v1/enhanced/plex-694844/index.m3u8'
+        '?tv=1&q=4&hdr=0&dv=0&blacks=1&sat=100&str=100';
+
+    test('HDR turned on over an SDR offer brings Dolby Vision', () {
+      LambentEnhancement.overrides = const LambentEnhancement(hdr: true);
+      final q = Uri.parse(LambentEnhancement.applyOverrides(sdr)).queryParameters;
+      expect(q['hdr'], '1');
+      expect(q['dv'], '1');
+    });
+
+    test('but not when the viewer turned Dolby Vision off, or in a browser', () {
+      LambentEnhancement.overrides = const LambentEnhancement(hdr: true, dolbyVision: false);
+      expect(Uri.parse(LambentEnhancement.applyOverrides(sdr)).queryParameters['dv'], '0');
+      LambentEnhancement.overrides = const LambentEnhancement(hdr: true);
+      LambentEnhancement.dolbyVisionWithHdr = false;
+      expect(Uri.parse(LambentEnhancement.applyOverrides(sdr)).queryParameters['dv'], '0');
+    });
+
+    test('an HDR offer keeps the server\'s Dolby Vision', () {
+      LambentEnhancement.overrides = const LambentEnhancement(saturation: 110);
+      expect(Uri.parse(LambentEnhancement.applyOverrides('${_url.replaceFirst('dv=1', 'dv=0')}&sat=100')).queryParameters['dv'], '0');
     });
   });
 

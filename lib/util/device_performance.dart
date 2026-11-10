@@ -60,6 +60,21 @@ const skiaCacheBytesAt1080p = _pixelsAt1080p * 12 * 4;
 int? skiaCacheCapFor(double physicalPixels) =>
     physicalPixels > _pixelsAt1080p ? skiaCacheBytesAt1080p : null;
 
+/// The decoded artwork a TV box keeps while a video plays: what the player's own
+/// menus show, not the library's posters behind it.
+const artworkBytesDuringPlayback = 32 << 20;
+
+/// Skia's GPU cache while a video plays: three frames of the UI instead of the
+/// engine's twelve, which the player's menus fit in.
+int? skiaCacheBytesDuringPlayback(double physicalPixels) =>
+    physicalPixels <= 0 ? null : (physicalPixels * 3 * 4).round();
+
+/// Skia's GPU cache once the player closes: the cap the app sets at start, or
+/// the engine's own twelve frames when it set none.
+int? skiaCacheBytesAfterPlayback(double physicalPixels) => physicalPixels <= 0
+    ? null
+    : skiaCacheCapFor(physicalPixels) ?? (physicalPixels * 12 * 4).round();
+
 /// Whether an inline trailer may play. Off on the reduced tier even when the
 /// user asked for it, because the decoder is what takes these devices down.
 bool inlinePreviewAllowed({

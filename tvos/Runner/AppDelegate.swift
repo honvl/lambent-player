@@ -1,5 +1,6 @@
 import Flutter
 import GameController
+import TVServices
 import UIKit
 
 /// Hosts the Flutter view so a game controller can be kept away from the UI.
@@ -47,6 +48,7 @@ class AppDelegate: FlutterAppDelegate {
     private var systemChannel: AppleTvSystemChannel?
     private var audioChannel: AppleTvAudioChannel?
     private var themeMusicChannel: AppleTvThemeMusicChannel?
+    private var arcadeSoundChannel: AppleArcadeSoundChannel?
     private var sfSymbolChannel: AppleTvSfSymbolChannel?
     private var gameChannel: AppleTvGameChannel?
     private var bonjourChannel: AppleTvBonjourChannel?
@@ -91,6 +93,8 @@ class AppDelegate: FlutterAppDelegate {
             messenger: flutterViewController.binaryMessenger)
         themeMusicChannel = AppleTvThemeMusicChannel(
             messenger: flutterViewController.binaryMessenger)
+        arcadeSoundChannel = AppleArcadeSoundChannel(
+            messenger: flutterViewController.binaryMessenger)
         sfSymbolChannel = AppleTvSfSymbolChannel(
             messenger: flutterViewController.binaryMessenger)
         gameChannel = AppleTvGameChannel(
@@ -115,6 +119,25 @@ class AppDelegate: FlutterAppDelegate {
     ) -> Bool {
         topShelfChannel?.deliverDeepLink(url, isLaunch: false)
         return true
+    }
+
+    /// A remote's Guide button, which only the Live TV player acts on.
+    override func application(
+        _ application: UIApplication,
+        continue userActivity: NSUserActivity,
+        restorationHandler: @escaping ([any UIUserActivityRestoring]?) -> Void
+    ) -> Bool {
+        guard userActivity.activityType == TVUserActivityTypeBrowsingChannelGuide else {
+            return super.application(
+                application, continue: userActivity, restorationHandler: restorationHandler)
+        }
+        handleGuideButton()
+        return true
+    }
+
+    /// The Guide button, from the scene or the app.
+    fileprivate func handleGuideButton() {
+        nativeApplePlayerChannel?.handleGuideButton()
     }
 
     fileprivate func deliverDeepLink(_ url: URL, isLaunch: Bool) {
@@ -153,6 +176,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let appDelegate = UIApplication.shared.delegate as? AppDelegate
         else { return }
         appDelegate.deliverDeepLink(url, isLaunch: false)
+    }
+
+    // A scene app gets the remote's Guide button here, not at the app delegate.
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard userActivity.activityType == TVUserActivityTypeBrowsingChannelGuide,
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else { return }
+        appDelegate.handleGuideButton()
     }
 }
 

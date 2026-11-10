@@ -10,6 +10,8 @@ Lambent is a modified version of [Moonfin](https://github.com/Moonfin-Client/Moo
 
 ## Commits
 
+- 2026-11-09 Lambent's name goes into upstream's strings as they load (tool/gen_lambent_l10n.py), so the translation files stay as upstream ships them
+- 2026-11-09 Merge upstream Moonfin main (637 commits)
 - 2026-11-04 Direct play: upscale and HDR lift on the device for a paid screen
 - 2026-11-04 Apple TV: upscale and HDR lift only when the plan asks (cup, chdr=1)
 - 2026-11-04 TV libraries keep the floating sidebar, no home button

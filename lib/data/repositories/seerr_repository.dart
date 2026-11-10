@@ -2,11 +2,13 @@ import 'package:jellyfin_preference/jellyfin_preference.dart';
 import 'package:server_core/server_core.dart';
 
 import '../../auth/repositories/session_repository.dart';
+import '../../auth/services/silo_token_storage.dart';
 import '../services/seerr/seerr_api_models.dart';
 import '../services/seerr/seerr_discover_sliders.dart';
 import '../services/seerr/seerr_http_client.dart';
 import '../services/seerr/seerr_models.dart';
 import '../../util/lambent_features.dart';
+import '../services/seerr/silo_seerr_http_client.dart';
 
 class SeerrRepository {
   final PreferenceStore _store;
@@ -142,6 +144,25 @@ class SeerrRepository {
   }
 
   Future<void> _initMoonfinMode() async {
+    // Silo has requests of its own, and its session is the requests session.
+    final silo = siloClientOf(_client);
+    if (silo != null) {
+      _httpClient?.close();
+      _httpClient = SiloSeerrHttpClient(silo);
+      _cachedPublicSettings = null;
+      _discoverSliders = null;
+      _isMoonfinMode = true;
+      try {
+        final status = await _httpClient!.getMoonfinStatus();
+        _isAvailable = status.authenticated;
+        _serverReportsEnabled = status.enabled;
+      } catch (_) {
+        _isAvailable = false;
+        _serverReportsEnabled = false;
+      }
+      return;
+    }
+
     final baseUrl = _client.baseUrl;
     final token = _client.accessToken;
     if (baseUrl.isEmpty || token == null || token.isEmpty) {
@@ -692,6 +713,7 @@ class SeerrRepository {
     int? profileId,
     String? rootFolder,
     int? serverId,
+    int? tvdbId,
   }) => _withClient(
     (c) async => SeerrRequest.fromJson(
       await c.createRequest(
@@ -703,6 +725,7 @@ class SeerrRepository {
         profileId: profileId,
         rootFolder: rootFolder,
         serverId: serverId,
+        tvdbId: tvdbId,
       ),
     ),
   );
@@ -894,6 +917,20 @@ class SeerrRepository {
         (c) async => SeerrServiceServerDetails.fromJson(
           await c.getSonarrServerDetails(serverId),
         ),
+      );
+
+  /// Sonarr's matches for a series TMDB has no TVDB id for. A match without a
+  /// TVDB id is no use for the request, so it is left out.
+  Future<List<SeerrSonarrSeries>> lookupSonarrSeries(int tmdbId) =>
+      _withClient(
+        (c) async => [
+          for (final e in await c.lookupSonarrSeries(tmdbId))
+            if (e is Map<String, dynamic> &&
+                e['tvdbId'] is num &&
+                (e['tvdbId'] as num) > 0 &&
+                e['title'] is String)
+              SeerrSonarrSeries.fromJson(e),
+        ],
       );
 
   Future<List<SeerrRadarrSettings>> getRadarrSettings() => _withClient(

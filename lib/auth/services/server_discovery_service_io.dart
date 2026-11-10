@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -11,8 +12,31 @@ import '../../data/services/log_service.dart';
 import '../../util/platform_detection.dart';
 
 import 'server_discovery_types.dart';
+import 'silo_lan_discovery.dart';
+
+/// Confirms a Silo address found on the network: the native probe's answer,
+/// or null when nothing Silo answers there.
+typedef SiloLanProbe = Future<ServerProbeResult?> Function(String baseUrl);
 
 class ServerDiscoveryService {
+  /// Jellyfin and Emby answer a UDP broadcast on 7359, and Silo advertises
+  /// `_silo._tcp` over mDNS instead. Both run at once and feed one list.
+  /// [siloBrowser] and [siloProbe] are replaceable for tests.
+  ServerDiscoveryService({
+    Future<List<SiloLanAdvert>> Function()? siloBrowser,
+    SiloLanProbe? siloProbe,
+    this._udpBroadcast = true,
+  }) : _siloBrowser = siloBrowser ?? const SiloLanBrowser().browse,
+       _siloProbe = siloProbe ?? _probeSiloOverLan;
+
+  final Future<List<SiloLanAdvert>> Function() _siloBrowser;
+  final SiloLanProbe _siloProbe;
+  final bool _udpBroadcast;
+
+  static const _platformChannel = MethodChannel(
+    'org.moonfin.androidtv/platform',
+  );
+
   static const _discoveryPort = 7359;
   static const _jellyfinMessage = 'who is JellyfinServer?';
   static const _embyMessage = 'who is EmbyServer?';
@@ -24,7 +48,7 @@ class ServerDiscoveryService {
   /// Lambent Server advertises itself over Bonjour and does not answer
   /// Jellyfin's UDP discovery on 7359, so it is found here instead.
   static const _lambentService = '_vbridge._tcp.local';
-  static const _multicastLock = MethodChannel('org.moonfin/multicast_lock');
+  static const _lambentMulticastLock = MethodChannel('org.moonfin/multicast_lock');
   static const _bonjour = MethodChannel('org.moonfin/bonjour');
 
   Stream<DiscoveredServer> discoverLocalServers() async* {
@@ -46,9 +70,25 @@ class ServerDiscoveryService {
       }
       plexHeld.clear();
     }
+
     RawDatagramSocket? socket;
     Timer? rebroadcastTimer;
     Timer? stopTimer;
+
+    // The list closes once both the broadcast's listening window and the
+    // Silo browse (with its identity checks) are over.
+    var running = 2;
+    void finishOne() {
+      if (--running == 0 && !controller.isClosed) controller.close();
+    }
+
+    unawaited(_discoverSilo(emit).whenComplete(finishOne));
+
+    if (!_udpBroadcast) {
+      finishOne();
+      yield* controller.stream;
+      return;
+    }
 
     try {
       socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
@@ -99,7 +139,7 @@ class ServerDiscoveryService {
       });
       stopTimer = Timer(_listenDuration, () {
         releasePlex();
-        if (!controller.isClosed) controller.close();
+        finishOne();
       });
 
       yield* controller.stream;
@@ -113,7 +153,9 @@ class ServerDiscoveryService {
           error: error,
         );
       }
-      if (!controller.isClosed) await controller.close();
+      // Silo's browse runs on its own sockets and may still find servers.
+      finishOne();
+      yield* controller.stream;
     } finally {
       rebroadcastTimer?.cancel();
       stopTimer?.cancel();
@@ -122,20 +164,52 @@ class ServerDiscoveryService {
     }
   }
 
+  /// What one Bonjour browse for Lambent Server has found so far, and who is
+  /// waiting on it. The server list and the check of a paired PC's address can
+  /// ask together; the Android multicast lock and the native browse take one at
+  /// a time.
+  static Future<void>? _browsing;
+  static final _browsed = <DiscoveredServer>[];
+  static final _browsers = <void Function(DiscoveredServer)>[];
+
+  /// The Lambent Servers Bonjour finds within the listen time.
+  Future<List<DiscoveredServer>> findLambentServers() async {
+    final servers = <DiscoveredServer>[];
+    await _discoverLambent(servers.add);
+    return servers;
+  }
+
   /// Browses Bonjour for Lambent Server, calling [found] for each one that
   /// resolves to an IPv4 address. Lambent Server answers as a Jellyfin server.
-  Future<void> _discoverLambent(void Function(DiscoveredServer) found) async {
+  Future<void> _discoverLambent(void Function(DiscoveredServer) found) {
+    _browsed.forEach(found);
+    _browsers.add(found);
+    final browsing = _browsing ??= _browseLambent().whenComplete(() {
+      _browsing = null;
+      _browsed.clear();
+    });
+    return browsing.whenComplete(() => _browsers.remove(found));
+  }
+
+  void _announceLambent(DiscoveredServer server) {
+    _browsed.add(server);
+    for (final found in [..._browsers]) {
+      found(server);
+    }
+  }
+
+  Future<void> _browseLambent() async {
     // Apple TV and iOS only let the system's Bonjour browse (the app holds no
     // multicast entitlement), so the native side does it there.
     if (PlatformDetection.isAppleTV || PlatformDetection.isIOS) {
-      return _discoverLambentNative(found);
+      return _discoverLambentNative(_announceLambent);
     }
     final client = MDnsClient();
     try {
       // Wi-Fi drops multicast on Android unless the app holds a lock.
       if (Platform.isAndroid) {
         try {
-          await _multicastLock.invokeMethod<bool>('acquire');
+          await _lambentMulticastLock.invokeMethod<bool>('acquire');
         } catch (_) {}
       }
       await client.start();
@@ -162,12 +236,13 @@ class ServerDiscoveryService {
           )) {
             final name = txt['name'] ??
                 ptr.domainName.split('.').first;
-            found(
+            _announceLambent(
               DiscoveredServer(
                 id: 'lambent:${txt['id'] ?? ptr.domainName}',
                 name: name,
                 address: 'http://${ip.address.address}:${srv.port}',
                 serverType: ServerType.jellyfin,
+                irohId: txt['iroh'],
               ),
             );
             break;
@@ -187,7 +262,7 @@ class ServerDiscoveryService {
       client.stop();
       if (Platform.isAndroid) {
         try {
-          await _multicastLock.invokeMethod<void>('release');
+          await _lambentMulticastLock.invokeMethod<void>('release');
         } catch (_) {}
       }
     }
@@ -211,6 +286,7 @@ class ServerDiscoveryService {
             name: txt['name'] ?? name,
             address: 'http://${result['host']}:${result['port']}',
             serverType: ServerType.jellyfin,
+            irohId: txt['iroh'],
           ),
         );
       }
@@ -222,6 +298,105 @@ class ServerDiscoveryService {
           error: error,
         );
       }
+    }
+  }
+
+  /// Browses for `_silo._tcp` and lists each advertised server once its
+  /// address confirms the advertised id. The advert is only a hint (anyone on
+  /// the network can send one), so a server is listed under the address that
+  /// answered `GET /api/v2/system/identity` with the TXT `id`, and named from
+  /// its branding, as Silo's discovery guide asks.
+  Future<void> _discoverSilo(void Function(DiscoveredServer) emit) async {
+    final List<SiloLanAdvert> adverts;
+    final locked = await _multicastLock(true);
+    try {
+      adverts = await _siloBrowser();
+    } catch (error) {
+      _log('Silo LAN discovery failed', error);
+      return;
+    } finally {
+      if (locked) await _multicastLock(false);
+    }
+
+    // One deployment can be heard several times (several API processes, or
+    // one per interface): group by its id.
+    final byId = <String, List<SiloLanAdvert>>{};
+    for (final advert in adverts) {
+      final id = advert.serverId;
+      if (id != null) (byId[id] ??= []).add(advert);
+    }
+    await Future.wait([
+      for (final MapEntry(key: id, value: found) in byId.entries)
+        _confirmSilo(id, found, emit),
+    ]);
+  }
+
+  Future<void> _confirmSilo(
+    String id,
+    List<SiloLanAdvert> adverts,
+    void Function(DiscoveredServer) emit,
+  ) async {
+    for (final advert in adverts) {
+      for (final baseUrl in advert.baseUrls) {
+        ServerProbeResult? result;
+        try {
+          result = await _siloProbe(baseUrl);
+        } catch (_) {
+          continue;
+        }
+        if (result == null || result.serverType != ServerType.silo) continue;
+        if (result.info['Id'] != id) continue;
+        emit(
+          DiscoveredServer(
+            id: id,
+            name: result.info['ServerName'] as String? ?? advert.instanceName,
+            address: baseUrl,
+            serverType: ServerType.silo,
+          ),
+        );
+        return;
+      }
+    }
+  }
+
+  static Future<ServerProbeResult?> _probeSiloOverLan(String baseUrl) async {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 2),
+        receiveTimeout: const Duration(seconds: 3),
+        followRedirects: false,
+        validateStatus: (status) => status != null && status < 400,
+      ),
+    );
+    configureServerDio(dio);
+    try {
+      return await probeSiloServer(dio, baseUrl);
+    } finally {
+      dio.close();
+    }
+  }
+
+  /// Android drops multicast packets on Wi-Fi unless a multicast lock is
+  /// held, so mDNS answers would never arrive. Elsewhere this is a no-op.
+  Future<bool> _multicastLock(bool acquire) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      await _platformChannel.invokeMethod<void>(
+        acquire ? 'acquireMulticastLock' : 'releaseMulticastLock',
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _log(String message, Object error) {
+    if (GetIt.instance.isRegistered<LogService>()) {
+      GetIt.instance<LogService>().network(
+        message,
+        level: LogLevel.warning,
+        error: error,
+      );
     }
   }
 
