@@ -1,13 +1,24 @@
+import StoreKitTest
 import XCTest
 
 /// Presses the Siri Remote on the simulator, in the Lambent app (or `DRIVE_APP`), step by step.
 ///
 /// `DRIVE_STEPS` is a comma list: `up`, `down`, `left`, `right`, `select`, `menu`, `play`, `home` (each with an optional
-/// `:count`), `hold:seconds` (select held), `type:text` (no commas), `wait:seconds`, and `shot:name` (a PNG in `DRIVE_OUT`). `DRIVE_LAUNCH=1`
+/// `:count`), `hold:seconds` (select held), `relaunch`, `type:text` (no commas), `wait:seconds`, and `shot:name` (a PNG in `DRIVE_OUT`). `DRIVE_LAUNCH=1`
 /// launches the app afresh; otherwise it is brought forward as it is.
 final class Driver: XCTestCase {
     func testDrive() throws {
         let env = ProcessInfo.processInfo.environment
+        // `DRIVE_STOREKIT` names a .storekit file: purchases then complete against a local test store, with no Apple account.
+        // The session lives as long as the test, so one drive does the whole purchase.
+        var session: SKTestSession?
+        if let file = env["DRIVE_STOREKIT"], !file.isEmpty {
+            let s = try SKTestSession(contentsOf: URL(fileURLWithPath: file))
+            s.disableDialogs = false
+            s.clearTransactions()
+            session = s
+        }
+        defer { withExtendedLifetime(session) {} }
         let app = XCUIApplication(bundleIdentifier: env["DRIVE_APP"] ?? "app.getlambent.viewer")
         if env["DRIVE_LAUNCH"] == "1" { app.launch() } else { app.activate() }
         let out = URL(fileURLWithPath: env["DRIVE_OUT"] ?? NSTemporaryDirectory())
@@ -38,6 +49,10 @@ final class Driver: XCTestCase {
             } else if name == "type" {
                 // Into the focused text field, through the system keyboard.
                 app.typeText(arg)
+            } else if name == "relaunch" {
+                // The app is closed and opened again, as when someone leaves it and comes back.
+                app.terminate()
+                app.launch()
             } else if name == "wait" {
                 usleep(useconds_t((Double(arg) ?? 1) * 1_000_000))
             } else if name == "shot" {

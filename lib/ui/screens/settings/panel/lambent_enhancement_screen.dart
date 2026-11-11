@@ -181,6 +181,23 @@ class _EnhanceSubscriptionSectionState
     // The store may have had nothing to offer at launch (offline, or not
     // signed in to the App Store yet).
     LambentEnhanceService.instance.current?.loadProducts();
+    // What the server says now, not what it said at launch.
+    unawaited(LambentEnhanceService.instance.freshen());
+    // A read that failed (the server or its tunnel not up yet after a launch)
+    // would otherwise leave "Checking your Lambent Server…" on screen for good.
+    _retry = Timer.periodic(const Duration(seconds: 5), (_) {
+      final purchases = LambentEnhanceService.instance.current;
+      if (purchases == null || purchases.licence != null) return;
+      unawaited(purchases.freshen());
+    });
+  }
+
+  Timer? _retry;
+
+  @override
+  void dispose() {
+    _retry?.cancel();
+    super.dispose();
   }
 
   @override
@@ -199,7 +216,7 @@ class _EnhanceSubscriptionSectionState
         final licence = purchases.licence;
         final locale = Localizations.localeOf(context).toLanguageTag();
         String date(DateTime d) => DateFormat.yMMMd(locale).format(d);
-        final needsEnhance = licence == null || !licence.enhanced;
+        final needsEnhance = licence == null || licence.offersPurchase;
         final buyUrl = licence?.buyUrl;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -228,6 +245,13 @@ class _EnhanceSubscriptionSectionState
                         )
                       : null,
                 ),
+                // Straight under the status, where a TV shows it without
+                // scrolling past the plans.
+                if (purchases.message case final message?)
+                  ListTile(
+                    leading: const Icon(Icons.info_outline_rounded),
+                    title: Text(message),
+                  ),
                 if (needsEnhance && purchases.canBuyInApp)
                   for (final product in purchases.products)
                     _EnhanceActionTile(
@@ -244,14 +268,28 @@ class _EnhanceSubscriptionSectionState
                         '${product.lifetime ? 'once' : (product.yearly ? 'a year' : 'a month')}, for '
                         'every screen on your server',
                       ),
-                      enabled: !purchases.busy,
+                      waiting: purchases.busy,
                       onTap: () => purchases.buy(product),
                     ),
+                if (licence != null && licence.canClaimHome)
+                  _EnhanceActionTile(
+                    leading: const Icon(Icons.home_outlined),
+                    title: const Text('Use this server as my home'),
+                    subtitle: const Text(
+                      'Its other screens get Lambent Enhance from this device',
+                    ),
+                    waiting: purchases.busy,
+                    onTap: purchases.claimHome,
+                  ),
                 if (purchases.store != null)
                   _EnhanceActionTile(
                     leading: const Icon(Icons.restore_rounded),
                     title: const Text('Restore purchases'),
-                    enabled: !purchases.busy,
+                    subtitle: switch (purchases.restoreMessage) {
+                      final said? => Text(said),
+                      null => null,
+                    },
+                    waiting: purchases.busy,
                     onTap: purchases.restore,
                   ),
                 if (needsEnhance && _mayLinkOut && buyUrl != null)
@@ -261,11 +299,6 @@ class _EnhanceSubscriptionSectionState
                     subtitle: const Text('Opens the checkout for your server'),
                     onTap: () =>
                         launchUrl(buyUrl, mode: LaunchMode.externalApplication),
-                  ),
-                if (purchases.message case final message?)
-                  ListTile(
-                    leading: const Icon(Icons.info_outline_rounded),
-                    title: Text(message),
                   ),
               ],
             ),
@@ -351,6 +384,11 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                         ].join(' '),
                       ),
                     ),
+                    if (purchases.message case final message?)
+                      ListTile(
+                        leading: const Icon(Icons.info_outline_rounded),
+                        title: Text(message),
+                      ),
                     if (state != EnhanceState.active && purchases.canBuyInApp)
                       for (final product in purchases.products)
                         _EnhanceActionTile(
@@ -366,14 +404,18 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                             '${product.price} '
                             '${product.lifetime ? 'once' : (product.yearly ? 'a year' : 'a month')}',
                           ),
-                          enabled: !purchases.busy,
+                          waiting: purchases.busy,
                           onTap: () => purchases.buy(product),
                         ),
                     if (purchases.store != null)
                       _EnhanceActionTile(
                         leading: const Icon(Icons.restore_rounded),
                         title: const Text('Restore purchases'),
-                        enabled: !purchases.busy,
+                        subtitle: switch (purchases.restoreMessage) {
+                          final said? => Text(said),
+                          null => null,
+                        },
+                        waiting: purchases.busy,
                         onTap: purchases.restore,
                       ),
                     if (state != EnhanceState.active &&
@@ -398,11 +440,6 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                         builder: (_) => _PlayerSignInDialog(player: player),
                       ),
                     ),
-                    if (purchases.message case final message?)
-                      ListTile(
-                        leading: const Icon(Icons.info_outline_rounded),
-                        title: Text(message),
-                      ),
                   ],
                 ),
               ],
@@ -493,32 +530,55 @@ class _EnhanceActionTile extends StatelessWidget {
     this.leading,
     required this.title,
     this.subtitle,
-    this.enabled = true,
+    this.waiting = false,
     this.onTap,
   });
 
   final Widget? leading;
   final Widget title;
   final Widget? subtitle;
-  final bool enabled;
+
+  /// A purchase is under way: the row dims and ignores presses but keeps the
+  /// focus. Disabling it instead would drop a TV remote's focus onto another
+  /// row, and the next press would buy a different plan.
+  final bool waiting;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return TvFocusHighlight(
-      enabled: enabled,
       builder: (context, focused) {
         final invert = focused && settingsTileInvertsOnFocus;
-        return ListTile(
-          enabled: enabled,
-          focusColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-          textColor: invert ? AppColors.black.withValues(alpha: 0.87) : null,
-          iconColor: invert ? AppColors.black.withValues(alpha: 0.7) : null,
-          leading: leading,
-          title: title,
-          subtitle: subtitle,
-          onTap: onTap,
+        // The outcome lines come and go, which moves and resizes these rows:
+        // keep the one the remote is on in view (Restore sits at the bottom
+        // edge of a TV and was pushed off it). Not ensureSettingsTileVisible:
+        // it goes by the framework's highlight mode, which a system purchase
+        // dialog on Apple TV leaves on touch, while [focused] already means a
+        // remote or keyboard is in use.
+        if (focused) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            Scrollable.ensureVisible(
+              context,
+              alignment: 0.9,
+              alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+              duration: const Duration(milliseconds: 120),
+              curve: Curves.easeOut,
+            );
+          });
+        }
+        return Opacity(
+          opacity: waiting ? 0.45 : 1,
+          child: ListTile(
+            focusColor: Colors.transparent,
+            hoverColor: Colors.transparent,
+            textColor: invert ? AppColors.black.withValues(alpha: 0.87) : null,
+            iconColor: invert ? AppColors.black.withValues(alpha: 0.7) : null,
+            leading: leading,
+            title: title,
+            subtitle: subtitle,
+            onTap: waiting ? () {} : onTap,
+          ),
         );
       },
     );

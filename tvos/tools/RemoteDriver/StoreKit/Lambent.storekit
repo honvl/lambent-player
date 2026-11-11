@@ -1,0 +1,62 @@
+{
+  "identifier" : "9A4F0D7E",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "79.99",
+      "familyShareable" : false,
+      "internalID" : "6A000003",
+      "localizations" : [
+        { "description" : "Lambent Enhance for every screen, once", "displayName" : "Lambent Enhance, lifetime", "locale" : "en_US" }
+      ],
+      "productID" : "app.getlambent.enhance.lifetime",
+      "referenceName" : "Enhance lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : { "_failTransactionsEnabled" : false, "_locale" : "en_US", "_storefront" : "USA", "_storeKitErrors" : [] },
+  "subscriptionGroups" : [
+    {
+      "id" : "21A0B0C0",
+      "localizations" : [],
+      "name" : "Lambent Enhance",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6A000001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            { "description" : "Lambent Enhance for every screen, monthly", "displayName" : "Lambent Enhance, monthly", "locale" : "en_US" }
+          ],
+          "productID" : "app.getlambent.enhance.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Enhance monthly",
+          "subscriptionGroupID" : "21A0B0C0",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "39.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6A000002",
+          "introductoryOffer" : null,
+          "localizations" : [
+            { "description" : "Lambent Enhance for every screen, yearly", "displayName" : "Lambent Enhance, yearly", "locale" : "en_US" }
+          ],
+          "productID" : "app.getlambent.enhance.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Enhance yearly",
+          "subscriptionGroupID" : "21A0B0C0",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : { "major" : 3, "minor" : 0 }
+}

@@ -4073,10 +4073,11 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: 0.0,
   );
 
-  /// Hides the live preview above the phone's settings list.
+  /// Hides the live preview above the settings list on phones and tablets.
+  /// Hidden until the eye shows it: the preview takes room from the list.
   static final settingsPreviewHidden = Preference(
     key: 'pref_settings_preview_hidden',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   static final pluginSyncEnabled = Preference(

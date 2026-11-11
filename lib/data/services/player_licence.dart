@@ -389,7 +389,11 @@ class PlayerLicence extends ChangeNotifier {
 
   /// This player's own lease, shown to [to], while it grants Enhance. A lease
   /// it was shown goes no further: only the key a lease names can show it.
-  Future<LeasePresentation?> presentTo(String to) async {
+  ///
+  /// With [claim] the presentation also carries the player's signature that
+  /// it wants [to] as its home (section 8.5). Only the person's own act asks
+  /// for that, never the presentation on every connection.
+  Future<LeasePresentation?> presentTo(String to, {bool claim = false}) async {
     await start();
     final lease = _own;
     if (lease == null || lease.enhanceUntil(_now()) == null) return null;
@@ -398,11 +402,18 @@ class PlayerLicence extends ChangeNotifier {
       utf8.encode(LeasePresentation.message(to, ts, lease.compact)),
       keyPair: _key!,
     );
+    final claimSignature = claim
+        ? await _ed25519.sign(
+            utf8.encode(LeasePresentation.homeMessage(to, ts, lease.compact)),
+            keyPair: _key!,
+          )
+        : null;
     return LeasePresentation(
       lease: lease.compact,
       tsMs: ts,
       to: to,
       sig: _b64Encode(signature.bytes),
+      claim: claimSignature == null ? null : _b64Encode(claimSignature.bytes),
     );
   }
 

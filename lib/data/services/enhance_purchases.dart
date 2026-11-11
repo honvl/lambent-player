@@ -79,7 +79,19 @@ abstract class EnhanceStore {
 /// and every purchase passed to the server before the store is told it is
 /// done.
 class EnhancePurchases extends ChangeNotifier {
-  EnhancePurchases({required this.client, this.store, this.player});
+  EnhancePurchases({
+    required this.client,
+    this.store,
+    this.player,
+    DateTime Function()? now,
+    this.restoreSettle = const Duration(milliseconds: 800),
+  }) : _now = now ?? DateTime.now;
+
+  /// How long Restore purchases waits for the store's answers, which arrive
+  /// on [EnhanceStore.updates] a moment after the store's call returns.
+  final Duration restoreSettle;
+
+  final DateTime Function() _now;
 
   final LambentLicenceClient client;
 
@@ -115,6 +127,12 @@ class EnhancePurchases extends ChangeNotifier {
   /// A line for the person about the last purchase, or null.
   String? get message => _message;
 
+  String? _restoreMessage;
+
+  /// What the last Restore purchases came to, or null. Its own line, shown on
+  /// the Restore row: on a TV that row sits a screen below [message]'s place.
+  String? get restoreMessage => _restoreMessage;
+
   /// Purchases the server has not confirmed yet. Kept open in the store.
   final List<StoreTransaction> _unconfirmed = [];
   int get unconfirmedCount => _unconfirmed.length;
@@ -128,7 +146,7 @@ class EnhancePurchases extends ChangeNotifier {
     if (store != null) {
       _sub ??= store.updates.listen(_onUpdates);
     }
-    await refresh();
+    await freshen();
     await loadProducts();
   }
 
@@ -155,11 +173,61 @@ class EnhancePurchases extends ChangeNotifier {
     }();
   }
 
+  /// When the server last answered with its licence.
+  DateTime? _readAt;
+  Future<void>? _freshening;
+
+  /// A paid licence is read again in the background once it is this old.
+  static const settledAge = Duration(minutes: 10);
+
+  /// Without Enhance, or on a trial, the next play depends on the answer, so
+  /// it is read again before each one; this only spares the two or three
+  /// requests one play makes.
+  static const unsettledAge = Duration(seconds: 15);
+
+  /// The longest a play waits for the server's answer.
+  static const playWait = Duration(milliseconds: 1500);
+
+  /// Reads the licence again unless the server answered within [maxAge]. Calls
+  /// made while one is under way share it. A server that turned out not to be
+  /// Lambent Server is not asked again.
+  Future<void> freshen({Duration maxAge = Duration.zero}) {
+    if (!_isLambent) return Future.value();
+    final readAt = _readAt;
+    if (readAt != null && _now().difference(readAt) < maxAge) {
+      return Future.value();
+    }
+    return _freshening ??= refresh().whenComplete(() => _freshening = null);
+  }
+
+  /// Before a play. The licence is read at launch, and a purchase made on
+  /// another device, or a trial running out, changes it with nothing to tell
+  /// this app: without this a TV left running stays in compare long after the
+  /// household has paid. While Enhance isn't settled (none, a trial, or a
+  /// paid-through time that has passed) the play waits for the answer, up to
+  /// [wait]; a paid licence is only checked in the background now and then.
+  Future<void> freshenForPlay({Duration wait = playWait}) async {
+    if (!_isLambent) return;
+    final licence = _licence;
+    final until = licence?.until;
+    final settled =
+        licence != null &&
+        licence.enhance == EnhanceState.active &&
+        (until == null || _now().isBefore(until));
+    final reading = freshen(maxAge: settled ? settledAge : unsettledAge);
+    if (settled) {
+      unawaited(reading);
+      return;
+    }
+    await reading.timeout(wait, onTimeout: () {});
+  }
+
   /// Asks the server for the licence again.
   Future<void> refresh() async {
     try {
       await player?.start();
       final licence = await client.fetch(player: player?.id);
+      _readAt = _now();
       _isLambent = licence != null;
       _licence = licence;
       await _meet(licence);
@@ -189,9 +257,12 @@ class EnhancePurchases extends ChangeNotifier {
 
   Future<void> buy(EnhanceProduct product) async {
     final store = this.store;
-    if (store == null) return;
+    // The rows stay focusable while a purchase is under way (a TV remote
+    // would lose its place otherwise), so a second press lands here.
+    if (store == null || _busy) return;
     _busy = true;
     _message = null;
+    _restoreMessage = null;
     notifyListeners();
     try {
       await store.buy(product);
@@ -202,12 +273,101 @@ class EnhancePurchases extends ChangeNotifier {
     }
   }
 
+  /// Purchases the store handed over since the last [restore] began.
+  int _delivered = 0;
+
+  /// Purchases being confirmed with the server right now.
+  int _confirming = 0;
+
   Future<void> restore() async {
     final store = this.store;
-    if (store == null) return;
+    if (store == null || _busy) return;
+    _busy = true;
+    _message = null;
+    _restoreMessage = null;
+    _delivered = 0;
+    notifyListeners();
+    var failed = false;
+    try {
+      // A player with a licence of its own also moves its home here (section
+      // 8.5). The store's purchases are restored whatever the server says.
+      await _claimHome(quiet: true);
+      await store.restore();
+      await Future<void>.delayed(restoreSettle);
+    } catch (e) {
+      debugPrint('EnhancePurchases: restore failed: $e');
+      failed = true;
+    }
+    // A purchase that came back and is still with the server: [_confirm] says
+    // what came of it and ends the busy state itself.
+    if (_confirming > 0) return;
+    _busy = false;
+    if (_delivered == 0) {
+      _restoreMessage ??= failed
+          ? "The store couldn't be reached. Try again in a moment."
+          : 'No Lambent Enhance purchase was found on this store account.';
+    }
+    notifyListeners();
+  }
+
+  /// "Use this server as my home": shows the server this player's lease again
+  /// with a signed `claim`, and says what came of it.
+  Future<void> claimHome() async {
+    if (_busy) return;
+    _busy = true;
     _message = null;
     notifyListeners();
-    await store.restore();
+    try {
+      await _claimHome(quiet: false);
+    } finally {
+      _busy = false;
+      notifyListeners();
+    }
+  }
+
+  /// Sends the claim. Quiet, it reports only a home that cannot move yet, for
+  /// Restore purchases, which has its own story to tell.
+  Future<void> _claimHome({required bool quiet}) async {
+    final player = this.player;
+    final household = _licence?.household;
+    if (player == null || household == null) return;
+    final ours = await player.presentTo(household, claim: true);
+    if (ours == null) return;
+    try {
+      final answer = await client.present(ours);
+      if (answer == null) {
+        if (!quiet) _message = "Your Lambent Server couldn't be reached.";
+        return;
+      }
+      _licence = answer;
+      await refresh();
+      if (!quiet) {
+        _message = _licence?.homeElsewhere == true
+            ? "This server couldn't be made your home. Try again later."
+            : 'This server is now your home.';
+      }
+    } on LicenceException catch (e) {
+      debugPrint('EnhancePurchases: the claim failed: $e');
+      if (e.code == 'already_linked') {
+        // Quiet is Restore purchases, which has its own line.
+        if (quiet) {
+          _restoreMessage = _movedRecently(e.retryMs);
+        } else {
+          _message = _movedRecently(e.retryMs);
+        }
+      } else if (!quiet) {
+        _message = "Your Lambent Server couldn't be reached.";
+      }
+    }
+  }
+
+  String _movedRecently(int? retryMs) {
+    const moved = 'Your home was moved recently';
+    if (retryMs == null) return '$moved. You can move it again later.';
+    final days = (Duration(milliseconds: retryMs).inHours / 24).ceil();
+    if (days <= 0) return '$moved. You can move it again now.';
+    return '$moved. You can move it again in '
+        '${days == 1 ? '1 day' : '$days days'}.';
   }
 
   /// Sends every purchase the server has not confirmed yet again, for a
@@ -226,6 +386,7 @@ class EnhancePurchases extends ChangeNotifier {
           _message = 'Waiting for the store to finish the purchase.';
         case StoreTransactionStatus.purchased:
         case StoreTransactionStatus.restored:
+          _delivered++;
           await _confirm(t);
         case StoreTransactionStatus.error:
           _busy = false;
@@ -261,12 +422,15 @@ class EnhancePurchases extends ChangeNotifier {
     }
     final confirmed = Completer<bool>();
     if (id != null) _forwards[id] = confirmed.future;
+    final restored = t.status == StoreTransactionStatus.restored;
     _busy = true;
+    _confirming++;
     notifyListeners();
     try {
       final player = this.player;
       if (_isLambent || player == null) {
         _licence = await client.forward(proof);
+        _readAt = _now();
         _isLambent = true;
       } else {
         // No Lambent Server to pass it on: this player holds it.
@@ -275,11 +439,13 @@ class EnhancePurchases extends ChangeNotifier {
       confirmed.complete(true);
       _unconfirmed.removeWhere((u) => identical(u.handle, t.handle));
       await _finishQuietly(t);
-      _message = t.status == StoreTransactionStatus.purchased
-          ? (_isLambent
-                ? 'Lambent Enhance is on for your server.'
-                : 'Lambent Enhance is on for this device.')
-          : null;
+      if (restored) {
+        _restoreMessage = 'Your Lambent Enhance purchase was restored.';
+      } else {
+        _message = _isLambent
+            ? 'Lambent Enhance is on for your server.'
+            : 'Lambent Enhance is on for this device.';
+      }
     } on LicenceException catch (e) {
       confirmed.complete(false);
       // A later retry forwards it again.
@@ -289,12 +455,18 @@ class EnhancePurchases extends ChangeNotifier {
       if (!_unconfirmed.any((u) => identical(u.handle, t.handle))) {
         _unconfirmed.add(t);
       }
-      _message = e.transient
+      final said = e.transient
           ? "Your purchase is safe, but your Lambent Server couldn't confirm "
                 "it yet. It will try again the next time Lambent opens."
           : 'Your Lambent Server refused the purchase'
                 '${e.message == null ? '.' : ': ${e.message}'}';
+      if (restored) {
+        _restoreMessage = said;
+      } else {
+        _message = said;
+      }
     } finally {
+      _confirming--;
       _busy = false;
     }
   }

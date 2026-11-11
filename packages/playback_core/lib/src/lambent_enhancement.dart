@@ -89,6 +89,18 @@ class LambentEnhancement {
   /// is a compare (`cmp=1`), and PlaybackInfo says so (`Lambent.Compare`).
   static bool compareOnly = false;
 
+  /// Run before the PlaybackInfo request a play starts from, and waited for:
+  /// the app reads Lambent Server's licence again here when it may have
+  /// changed, so [compareOnly] and [enhancementOff] are right for this play.
+  static Future<void> Function()? beforePlay;
+
+  /// Runs [beforePlay]. Nothing it does may stop a play.
+  static Future<void> prepareForPlay() async {
+    try {
+      await beforePlay?.call();
+    } catch (_) {}
+  }
+
   /// This screen's own defaults, sent as PlaybackInfo's `Lambent` object
   /// (`RtxHdr`, `DeepenBlacks`, `DolbyVision`, `Saturation`, `Contrast`,
   /// `Brightness`, `Peak`, `Hue`, `Gamut`, `LosslessAudio`,

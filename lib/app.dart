@@ -23,6 +23,7 @@ import 'data/services/cast/cast_service.dart';
 import 'data/services/connectivity_service.dart';
 import 'data/services/remove_watched_service.dart';
 import 'data/services/download_service.dart';
+import 'data/services/lambent_enhance_service.dart';
 import 'data/services/seerr_notification_service.dart';
 import 'data/services/plugin_sync_service.dart';
 import 'data/services/server_messages_service.dart';
@@ -105,6 +106,8 @@ class _MoonfinAppState extends State<MoonfinApp> {
     AppUiIdiomResolver.setOverride(_prefs.get(UserPreferences.interfaceStyle));
     GlassCapability.apply(_prefs.get(UserPreferences.glassQuality));
     bindLambentEnhancementDefaults(_prefs);
+    LambentEnhancement.beforePlay =
+        LambentEnhanceService.instance.freshenForPlay;
     _prefs.addListener(_syncThemeFromPrefs);
     _prefs.addListener(_syncLocaleFromPrefs);
     _prefs.addListener(_syncIdiomFromPrefs);

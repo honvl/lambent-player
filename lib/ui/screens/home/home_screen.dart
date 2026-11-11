@@ -414,6 +414,8 @@ class _HomeShellState extends State<_HomeShell>
       _partyRooms?.setForeground(false);
     }
     if (state == AppLifecycleState.resumed) {
+      // A purchase made elsewhere while the app was away.
+      unawaited(LambentEnhanceService.instance.freshen());
       _viewModel.refresh(preserveExisting: true);
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||

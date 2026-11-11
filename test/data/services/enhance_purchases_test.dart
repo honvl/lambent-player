@@ -29,8 +29,12 @@ class FakeLambentServer {
     _server.listen(_handle);
   }
 
+  /// How long each answer takes.
+  Duration delay = Duration.zero;
+
   Future<void> _handle(HttpRequest request) async {
     tokens.add(request.headers.value('X-Emby-Token'));
+    if (delay > Duration.zero) await Future<void>.delayed(delay);
     final response = request.response
       ..headers.contentType = ContentType.json;
     final path = request.uri.path;
@@ -211,6 +215,16 @@ void main() {
     expect(of('none').mayPlayEnhanced, isFalse);
   });
 
+  test('the plans stay on sale through a trial, until Enhance is paid for', () {
+    LambentLicence of(String state) => LambentLicence.fromJson({
+      'enhance': {'state': state},
+    });
+    expect(of('trial').offersPurchase, isTrue);
+    expect(of('none').offersPurchase, isTrue);
+    expect(of('preview').offersPurchase, isTrue);
+    expect(of('active').offersPurchase, isFalse);
+  });
+
   test('loads the licence and products, sending the session token', () async {
     await purchases.start();
     expect(purchases.isLambentServer, isTrue);
@@ -363,6 +377,189 @@ void main() {
     expect(server.forwarded, isEmpty);
     expect(store.finished, hasLength(2));
     expect(purchases.busy, isFalse);
+  });
+
+  group('Restore purchases', () {
+    late EnhancePurchases quick;
+
+    setUp(() async {
+      quick = EnhancePurchases(
+        client: LambentLicenceClient(baseUrl: server.baseUrl),
+        store: store,
+        restoreSettle: const Duration(milliseconds: 20),
+      );
+      await quick.start();
+    });
+
+    tearDown(() => quick.dispose());
+
+    test('says so when the store has nothing to restore', () async {
+      final restoring = quick.restore();
+      expect(quick.busy, isTrue);
+      await restoring;
+      expect(store.restores, 1);
+      expect(quick.busy, isFalse);
+      expect(
+        quick.restoreMessage,
+        'No Lambent Enhance purchase was found on this store account.',
+      );
+      expect(quick.message, isNull);
+    });
+
+    test('a purchase the store hands back is confirmed and said to be '
+        'restored', () async {
+      final restoring = quick.restore();
+      store.deliver([
+        StoreTransaction(
+          productId: 'app.getlambent.enhance.monthly',
+          status: StoreTransactionStatus.restored,
+          proof: const AppStoreProof('jws-restored'),
+          needsFinish: true,
+          handle: Object(),
+          id: 'r1',
+        ),
+      ]);
+      await restoring;
+      await settle();
+      expect(server.forwarded, hasLength(1));
+      expect(store.finished, hasLength(1));
+      expect(quick.busy, isFalse);
+      expect(
+        quick.restoreMessage,
+        'Your Lambent Enhance purchase was restored.',
+      );
+      expect(quick.message, isNull);
+    });
+
+    test('a second press while one is under way does nothing', () async {
+      final first = quick.restore();
+      await quick.restore();
+      await quick.buy(quick.products.first);
+      await first;
+      expect(store.restores, 1);
+      expect(store.bought, isEmpty);
+    });
+  });
+
+  group('a licence that changes while the app runs', () {
+    late DateTime clock;
+    late EnhancePurchases timed;
+
+    setUp(() {
+      clock = DateTime(2026, 11, 10, 17, 29);
+      timed = EnhancePurchases(
+        client: LambentLicenceClient(baseUrl: server.baseUrl),
+        now: () => clock,
+      );
+    });
+
+    tearDown(() => timed.dispose());
+
+    void bought() => server.licence = {
+      ...server.licence,
+      'enhance': {
+        'state': 'active',
+        'until_ms': clock
+            .add(const Duration(days: 30))
+            .millisecondsSinceEpoch,
+        'source': 'play',
+      },
+    };
+
+    test('a purchase made on another device is seen at the next play, '
+        'with no restart', () async {
+      await timed.start();
+      expect(timed.licence!.mayPlayEnhanced, isFalse);
+      // Hours later, bought on a phone: nothing tells this app.
+      clock = clock.add(const Duration(hours: 4, minutes: 38));
+      bought();
+      expect(timed.licence!.mayPlayEnhanced, isFalse);
+      var told = 0;
+      timed.addListener(() => told++);
+      await timed.freshenForPlay();
+      expect(timed.licence!.enhance, EnhanceState.active);
+      expect(told, greaterThan(0), reason: 'compare-only is lifted');
+    });
+
+    test('one play reads it once, however many requests it makes', () async {
+      await timed.start();
+      final before = server.tokens.length;
+      await timed.freshenForPlay();
+      expect(server.tokens.length, before, reason: 'just read at launch');
+      clock = clock.add(const Duration(minutes: 1));
+      await timed.freshenForPlay();
+      clock = clock.add(const Duration(seconds: 3));
+      await timed.freshenForPlay();
+      await Future.wait([timed.freshen(), timed.freshen()]);
+      expect(server.tokens.length - before, 2, reason: 'the play, the pair');
+    });
+
+    test('a paid licence is not waited for, and is checked again only '
+        'after a while', () async {
+      bought();
+      await timed.start();
+      final before = server.tokens.length;
+      clock = clock.add(const Duration(minutes: 5));
+      await timed.freshenForPlay();
+      await settle();
+      expect(server.tokens.length, before);
+      clock = clock.add(const Duration(minutes: 6));
+      server.licence = {
+        ...server.licence,
+        'enhance': {'state': 'none', 'until_ms': null, 'source': null},
+      };
+      await timed.freshenForPlay();
+      expect(timed.licence!.enhance, EnhanceState.active, reason: 'no wait');
+      await settle();
+      expect(timed.licence!.enhance, EnhanceState.none);
+    });
+
+    test('a paid-through time that has passed is checked before the play',
+        () async {
+      bought();
+      await timed.start();
+      clock = clock.add(const Duration(days: 31));
+      server.licence = {
+        ...server.licence,
+        'enhance': {'state': 'none', 'until_ms': null, 'source': null},
+      };
+      await timed.freshenForPlay();
+      expect(timed.licence!.mayPlayEnhanced, isFalse);
+    });
+
+    test('a slow server holds a play up only briefly', () async {
+      await timed.start();
+      clock = clock.add(const Duration(minutes: 1));
+      bought();
+      server.delay = const Duration(milliseconds: 400);
+      final watch = Stopwatch()..start();
+      await timed.freshenForPlay(wait: const Duration(milliseconds: 50));
+      expect(watch.elapsedMilliseconds, lessThan(300));
+      expect(timed.licence!.enhance, EnhanceState.none);
+      // The answer still lands, for the play after.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      expect(timed.licence!.enhance, EnhanceState.active);
+    });
+
+    test('a server that is not Lambent Server is asked once', () async {
+      server.hasLicenceRoute = false;
+      await timed.start();
+      final before = server.tokens.length;
+      clock = clock.add(const Duration(hours: 1));
+      await timed.freshenForPlay();
+      await timed.freshen();
+      expect(server.tokens.length, before);
+    });
+
+    test('an unreachable server changes nothing and is tried again', () async {
+      await timed.start();
+      await server.stop();
+      clock = clock.add(const Duration(minutes: 1));
+      await timed.freshenForPlay();
+      expect(timed.isLambentServer, isTrue);
+      expect(timed.licence!.enhance, EnhanceState.none);
+      await server.start();
+    });
   });
 
   test('without a store there is nothing to buy in the app', () async {

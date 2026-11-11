@@ -8,6 +8,9 @@ import 'package:http/http.dart' as http;
 /// reports it (ENTITLEMENTS.md section 7).
 enum EnhanceState { active, trial, preview, none }
 
+/// Whom Lambent Enhance covers on a server (ENTITLEMENTS.md section 8.5).
+enum EnhanceScope { household, device }
+
 /// The body of Lambent Server's `GET /v1/licence`.
 @immutable
 class LambentLicence {
@@ -19,6 +22,8 @@ class LambentLicence {
     this.buyUrl,
     this.household,
     this.present,
+    this.scope = EnhanceScope.household,
+    this.homeElsewhere = false,
   });
 
   factory LambentLicence.fromJson(Map<String, dynamic> json) {
@@ -41,6 +46,11 @@ class LambentLicence {
       buyUrl: buy is String ? Uri.tryParse(buy) : null,
       household: json['household'] as String?,
       present: LeasePresentation.fromJson(json['present']),
+      // Older servers say nothing, and then the household has it.
+      scope: e['scope'] == 'device'
+          ? EnhanceScope.device
+          : EnhanceScope.household,
+      homeElsewhere: e['home'] == 'elsewhere',
     );
   }
 
@@ -62,9 +72,32 @@ class LambentLicence {
   /// The server's own lease, shown to the player that asked (section 8.2).
   final LeasePresentation? present;
 
+  /// Whom `enhance` covers: the whole household, or only this player because
+  /// of the lease it showed (section 8.5).
+  final EnhanceScope scope;
+
+  /// The licence service refused this server as the home of this player's
+  /// licence, because another server is (section 8.5).
+  final bool homeElsewhere;
+
+  /// Enhanced for this player alone: its other screens here get nothing.
+  bool get deviceOnly => enhanced && scope == EnhanceScope.device;
+
+  /// Whether the person can ask for this server to become the player's home.
+  /// A device-only licence is enough: the server is not this player's home,
+  /// and the server asks the licence service in the background, so it may not
+  /// have heard yet that the home is [homeElsewhere] when it first answers.
+  bool get canClaimHome => deviceOnly;
+
   /// Whether the household has Enhance, bought or on trial.
   bool get enhanced =>
       enhance == EnhanceState.active || enhance == EnhanceState.trial;
+
+  /// Whether Lambent Enhance is still for sale here: until it is paid for. A
+  /// trial plays enhanced, and its plans and prices stay on show, so a person
+  /// can buy before it runs out. A player's own licence covers its own plays
+  /// only, so the server's other screens still need one.
+  bool get offersPurchase => enhance != EnhanceState.active || deviceOnly;
 
   /// Whether the player may play a title enhanced full screen. Without
   /// Enhance or a trial it may only compare it with the original side by
@@ -73,6 +106,7 @@ class LambentLicence {
 
   /// The settings line: "Enhanced by your Lambent Server" or why not.
   String get headline => switch (enhance) {
+    _ when deviceOnly => 'Enhanced on this device',
     EnhanceState.active => 'Enhanced by your Lambent Server',
     EnhanceState.trial => 'Enhanced by your Lambent Server (trial)',
     EnhanceState.preview ||
@@ -83,6 +117,9 @@ class LambentLicence {
   String? detail(String Function(DateTime) formatDate) {
     final until = this.until;
     return switch (enhance) {
+      _ when deviceOnly =>
+        'Other screens here need Lambent Enhance of their own, or make this '
+            'your home server.',
       EnhanceState.active when until != null =>
         'Renews or ends ${formatDate(until)}',
       EnhanceState.trial when until != null =>
@@ -103,12 +140,18 @@ class LeasePresentation {
     required this.tsMs,
     required this.to,
     required this.sig,
+    this.claim,
   });
 
   final String lease;
   final int tsMs;
   final String to;
   final String sig;
+
+  /// Present only when the person asked for the receiver to become the home of
+  /// this licence (section 8.5): the holder's own signature over [homeMessage],
+  /// so that a server cannot claim home for a player that visits it.
+  final String? claim;
 
   static LeasePresentation? fromJson(Object? json) {
     if (json is! Map) return null;
@@ -125,11 +168,16 @@ class LeasePresentation {
     'ts_ms': tsMs,
     'to': to,
     'sig': sig,
+    if (claim != null) 'claim': claim!,
   };
 
   /// What the holder signs.
   static String message(String to, int tsMs, String lease) =>
       'lambent-present\n$to\n$tsMs\n$lease';
+
+  /// What the holder signs to claim the receiver as its home.
+  static String homeMessage(String to, int tsMs, String lease) =>
+      'lambent-home\n$to\n$tsMs\n$lease';
 }
 
 /// The proof a store hands over for one purchase, in the shape Lambent Server
@@ -177,10 +225,14 @@ class PlayProof extends StoreProof {
 /// HTTP status (502 when the licence service can't be reached), [code] the
 /// server's `error` value when it sent one.
 class LicenceException implements Exception {
-  const LicenceException(this.status, {this.code, this.message});
+  const LicenceException(this.status, {this.code, this.message, this.retryMs});
   final int status;
   final String? code;
   final String? message;
+
+  /// With `already_linked` (section 8.5): the milliseconds still to wait
+  /// until the home can move again.
+  final int? retryMs;
 
   /// Worth trying again later: the server or the service was unreachable,
   /// not a verdict on the purchase.
@@ -248,7 +300,8 @@ class LambentLicenceClient {
 
   /// Shows the server this player's lease: the household then has Enhance as
   /// long as the lease does (section 8.2). Null from a server too old to know
-  /// the route.
+  /// the route. A [presentation] with a `claim` asks for this server to become the home
+  /// of the player's licence (section 8.5).
   Future<LambentLicence?> present(LeasePresentation presentation) async {
     final http.Response response;
     try {
@@ -297,11 +350,18 @@ class LambentLicenceClient {
       }
       throw LicenceException(response.statusCode, code: 'bad_body');
     }
-    final error = body is Map ? body : const {};
+    // The licence service's refusals pass through flat (`error` is the code);
+    // the server's own errors nest the code and message under `error`.
+    final flat = body is Map ? body : const {};
+    final nested = flat['error'];
+    final error = nested is Map ? nested : flat;
     throw LicenceException(
       response.statusCode,
-      code: error['error'] as String?,
+      code: (nested is Map ? nested['code'] : nested) as String?,
       message: error['message'] as String?,
+      retryMs: error['retry_ms'] is num
+          ? (error['retry_ms'] as num).toInt()
+          : null,
     );
   }
 

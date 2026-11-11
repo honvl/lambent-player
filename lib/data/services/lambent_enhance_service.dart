@@ -82,6 +82,14 @@ class LambentEnhanceService {
     return purchases;
   }
 
+  /// Reads the signed-in server's licence again, when the app comes back to
+  /// the front or the person opens Lambent's settings to look.
+  Future<void> freshen() async =>
+      current?.freshen(maxAge: const Duration(seconds: 5));
+
+  /// Before a play starts ([EnhancePurchases.freshenForPlay]).
+  Future<void> freshenForPlay() async => current?.freshenForPlay();
+
   /// Without Lambent Enhance or a trial the player may only compare
   /// (LambentLicence.mayPlayEnhanced).
   void _applyLicence(LambentLicence? licence) {

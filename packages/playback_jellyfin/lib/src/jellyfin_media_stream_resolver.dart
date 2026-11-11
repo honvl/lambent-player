@@ -81,6 +81,7 @@ class JellyfinMediaStreamResolver implements MediaStreamResolver {
     );
 
     Future<PlaybackInfoResult> fetchPlaybackInfo(String? sourceId) async {
+      await LambentEnhancement.prepareForPlay();
       final request = PlaybackInfoRequest(
         itemId: itemId,
         mediaSourceId: sourceId,

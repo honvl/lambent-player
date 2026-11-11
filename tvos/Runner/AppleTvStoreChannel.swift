@@ -57,7 +57,11 @@ final class AppleTvStoreChannel {
                     @unknown default:
                         self.send(["productId": id, "status": "error"])
                     }
+                } catch StoreKitError.userCancelled {
+                    // Backing out of the sheet can also arrive as a thrown error.
+                    self.send(["productId": id, "status": "canceled"])
                 } catch {
+                    NSLog("Lambent store: purchase of %@ failed: %@", id, String(describing: error))
                     self.send(["productId": id, "status": "error"])
                 }
                 result(nil)

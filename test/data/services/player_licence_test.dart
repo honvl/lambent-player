@@ -281,6 +281,211 @@ void main() {
     });
   });
 
+  group('the home server (section 8.5)', () {
+    Map<String, dynamic> body({String? scope, String? home}) => {
+      'household': server,
+      'enhance': {
+        'state': 'active',
+        'until_ms': null,
+        'source': 'player',
+        'scope': ?scope,
+        'home': ?home,
+      },
+    };
+
+    /// A server whose claim answers [claim]; every other call gets [plain].
+    EnhancePurchases claimant(
+      List<http.Request> seen,
+      Map<String, dynamic> plain,
+      http.Response Function() claim, {
+      EnhanceStore? store,
+    }) {
+      serviceLease = lease;
+      return EnhancePurchases(
+        player: make(vectorStore()),
+        store: store,
+        client: LambentLicenceClient(
+          baseUrl: 'http://server',
+          client: MockClient((request) async {
+            seen.add(request);
+            if (request.method == 'POST' &&
+                jsonDecode(request.body).containsKey('claim')) {
+              return claim();
+            }
+            return http.Response(jsonEncode(plain), 200);
+          }),
+        ),
+      );
+    }
+
+    List<http.Request> claims(List<http.Request> seen) => seen
+        .where(
+          (r) => r.method == 'POST' && jsonDecode(r.body).containsKey('claim'),
+        )
+        .toList();
+
+    test('scope and home are read; no scope means the household', () {
+      final device = LambentLicence.fromJson(
+        body(scope: 'device', home: 'elsewhere'),
+      );
+      expect(device.scope, EnhanceScope.device);
+      expect(device.homeElsewhere, isTrue);
+      expect(device.canClaimHome, isTrue);
+      expect(device.headline, 'Enhanced on this device');
+      expect(device.detail((_) => ''), contains('home server'));
+      expect(device.offersPurchase, isTrue);
+      final old = LambentLicence.fromJson(body());
+      expect(old.scope, EnhanceScope.household);
+      expect(old.deviceOnly, isFalse);
+      expect(old.canClaimHome, isFalse);
+      expect(old.headline, 'Enhanced by your Lambent Server');
+      // The server may not have heard yet that the home is elsewhere, so a
+      // device-only licence is enough to offer the claim.
+      expect(
+        LambentLicence.fromJson(body(scope: 'device')).canClaimHome,
+        isTrue,
+      );
+    });
+
+    test(
+      'the claim is the player\'s own signature over lambent-home',
+      () async {
+        serviceLease = lease;
+        final licence = make(vectorStore());
+        final plain = await licence.presentTo(server);
+        expect(plain!.claim, isNull);
+        expect(plain.toJson().containsKey('claim'), isFalse);
+        final claimed = (await licence.presentTo(server, claim: true))!;
+        expect(claimed.sig, presentSig);
+        final algo = Ed25519();
+        final key = await algo.newKeyPairFromSeed(seedOf(9));
+        final publicKey = await key.extractPublicKey();
+        List<int> unb64(String v) => base64Url.decode(base64Url.normalize(v));
+        expect(
+          await algo.verify(
+            utf8.encode('lambent-home\n$server\n$ts\n$lease'),
+            signature: Signature(unb64(claimed.claim!), publicKey: publicKey),
+          ),
+          isTrue,
+        );
+        // Not the ordinary presentation's message.
+        expect(
+          await algo.verify(
+            utf8.encode(LeasePresentation.message(server, ts, lease)),
+            signature: Signature(unb64(claimed.claim!), publicKey: publicKey),
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('presenting on a connection never claims', () async {
+      final seen = <http.Request>[];
+      final p = claimant(
+        seen,
+        body(scope: 'device', home: 'elsewhere'),
+        () => http.Response('{}', 500),
+      );
+      await p.refresh();
+      expect(seen.where((r) => r.method == 'POST'), hasLength(1));
+      expect(jsonDecode(seen.last.body).containsKey('claim'), isFalse);
+    });
+
+    test('Use this server as my home sends the claim and refreshes', () async {
+      final seen = <http.Request>[];
+      var moved = false;
+      final plain = body(scope: 'device', home: 'elsewhere');
+      final p = claimant(seen, plain, () {
+        moved = true;
+        plain
+          ..clear()
+          ..addAll(body(scope: 'household'));
+        return http.Response(jsonEncode(plain), 200);
+      });
+      await p.refresh();
+      await p.claimHome();
+      expect(moved, isTrue);
+      final sent = jsonDecode(claims(seen).single.body) as Map;
+      expect([sent['to'], sent['sig']], [server, presentSig]);
+      expect(sent['claim'], isA<String>());
+      expect(p.message, 'This server is now your home.');
+      expect(p.busy, isFalse);
+    });
+
+    test('a home moved recently says when it can move again', () async {
+      final seen = <http.Request>[];
+      final p = claimant(
+        seen,
+        body(scope: 'device', home: 'elsewhere'),
+        () => http.Response(
+          jsonEncode({
+            'error': 'already_linked',
+            'retry_ms': 3 * 24 * 3600 * 1000 - 1000,
+          }),
+          409,
+        ),
+      );
+      await p.refresh();
+      await p.claimHome();
+      expect(
+        p.message,
+        'Your home was moved recently. You can move it again in 3 days.',
+      );
+      expect(p.licence!.canClaimHome, isTrue);
+    });
+
+    test('any other failure says the server could not be reached', () async {
+      final seen = <http.Request>[];
+      final p = claimant(
+        seen,
+        body(scope: 'device', home: 'elsewhere'),
+        // The server's own errors nest the code under `error`.
+        () => http.Response(
+          '{"error":{"code":"licence_unreachable","message":"the licence service could not be reached"}}',
+          502,
+        ),
+      );
+      await p.refresh();
+      await p.claimHome();
+      expect(p.message, "Your Lambent Server couldn't be reached.");
+    });
+
+    test('Restore purchases claims when the player holds a lease', () async {
+      final seen = <http.Request>[];
+      final store = _CountingStore();
+      final p = claimant(
+        seen,
+        body(scope: 'device', home: 'elsewhere'),
+        () => http.Response(jsonEncode(body(scope: 'household')), 200),
+        store: store,
+      );
+      await p.refresh();
+      await p.restore();
+      expect(claims(seen), hasLength(1));
+      expect(store.restores, 1);
+    });
+
+    test('Restore purchases sends no claim without a lease', () async {
+      final seen = <http.Request>[];
+      final store = _CountingStore();
+      final p = EnhancePurchases(
+        player: make(MemoryStore({'seed': b64(seedOf(9))})),
+        store: store,
+        client: LambentLicenceClient(
+          baseUrl: 'http://server',
+          client: MockClient((request) async {
+            seen.add(request);
+            return http.Response(jsonEncode(body()), 200);
+          }),
+        ),
+      );
+      await p.refresh();
+      await p.restore();
+      expect(seen.where((r) => r.method == 'POST'), isEmpty);
+      expect(store.restores, 1);
+    });
+  });
+
   test('capabilities name what the device can run', () {
     const all = LambentDeviceCapabilities(ai: true, shader: true, hdr: true);
     expect(all.summary, 'AI upscaling and HDR');
@@ -290,4 +495,27 @@ void main() {
     expect(shaderOnly.worthBuying, isFalse);
     expect(LambentDeviceCapabilities.fromMap({'hdr': true}).summary, 'HDR');
   });
+}
+
+/// A store with nothing in it, which counts how often it was asked to restore.
+class _CountingStore implements EnhanceStore {
+  int restores = 0;
+
+  @override
+  Stream<List<StoreTransaction>> get updates => const Stream.empty();
+
+  @override
+  Future<bool> isAvailable() async => true;
+
+  @override
+  Future<List<EnhanceProduct>> products() async => const [];
+
+  @override
+  Future<void> buy(EnhanceProduct product) async {}
+
+  @override
+  Future<void> restore() async => restores++;
+
+  @override
+  Future<void> finish(StoreTransaction transaction) async {}
 }

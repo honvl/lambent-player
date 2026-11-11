@@ -216,9 +216,9 @@ Future<void> _openThemeEditor(BuildContext context) async {
 
   if (!ok && context.mounted) {
     final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.adminCouldNotOpenUrl('$uri'))),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.adminCouldNotOpenUrl('$uri'))));
   }
 }
 
@@ -230,6 +230,9 @@ final _pillMaxTextScale = DesktopUiScale.large.scaleFactor;
 /// takes, which grows with the user's scale, and its padding and gaps.
 const _inspectorTextHeight = 90.0;
 const _inspectorFixedHeight = 90.0;
+
+/// The settings list's width on a TV, which shows it alone.
+const _tvListWidth = 820.0;
 
 /// One pill segment of Settings and the page it opens in the list column.
 class _SettingsCategory {
@@ -264,7 +267,9 @@ class _SettingsEntryListScreen extends StatelessWidget {
       body: ListView(
         children: [
           adaptiveListSection(
-            children: [for (final entry in entries) _PanelEntryTile(entry: entry)],
+            children: [
+              for (final entry in entries) _PanelEntryTile(entry: entry),
+            ],
           ),
         ],
       ),
@@ -292,11 +297,6 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
   final _searchController = TextEditingController();
   final _searchFieldFocus = FocusNode(debugLabel: 'SettingsSearchField');
   final _searchTvFieldKey = GlobalKey<CustomTVTextFieldState>();
-  final _scenesFocus = FocusNode(debugLabel: 'SettingsPreviewScenes');
-
-  /// The setting Right crossed to the scenes from, for Left and Back to
-  /// return to.
-  FocusNode? _scenesReturnFocus;
   String _query = '';
   List<_SettingsCategory> _categories = const [];
   int _categoryIndex = 0;
@@ -371,20 +371,14 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     _preview.dispose();
     _listScope.dispose();
     _pillFocus.dispose();
-    _scenesFocus.dispose();
     _searchController.dispose();
     _searchFieldFocus.dispose();
     super.dispose();
   }
 
-  /// Back leaves the scenes for the setting they were reached from, then
-  /// pops the list column, then (on a TV or desktop) returns to the category
-  /// pill, and only then lets the panel close.
+  /// Back pops the list column, then (on a TV or desktop) returns to the
+  /// category pill, and only then lets the panel close.
   bool _handleBack() {
-    if (_scenesFocus.hasFocus) {
-      _leaveScenes();
-      return true;
-    }
     final navigator = _listNavKey.currentState;
     if (navigator != null && navigator.canPop()) {
       navigator.pop();
@@ -441,18 +435,13 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     return KeyEventResult.ignored;
   }
 
-  /// Up past the top of a settings page climbs to the pill, and Right past a
-  /// setting's own controls crosses to the preview's scenes. Pickers
-  /// open over the list keep their own keys.
+  /// Up past the top of a settings page climbs to the pill. Pickers open
+  /// over the list keep their own keys.
   KeyEventResult _onListKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final up = event.logicalKey.isUpKey;
-    // Only a fresh press crosses, so holding Right along a row stops at its
-    // end instead of running on into the scenes.
-    final right = event.logicalKey.isRightKey && event is KeyDownEvent;
-    if (!up && !right) return KeyEventResult.ignored;
+    if (!event.logicalKey.isUpKey) return KeyEventResult.ignored;
     final primary = FocusManager.instance.primaryFocus;
     final primaryContext = primary?.context;
     if (primary == null || primaryContext == null) {
@@ -461,27 +450,10 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     if (ModalRoute.of(primaryContext) is! PageRoute) {
       return KeyEventResult.ignored;
     }
-    if (primary.focusInDirection(
-      up ? TraversalDirection.up : TraversalDirection.right,
-    )) {
-      return KeyEventResult.handled;
-    }
-    if (up) {
+    if (!primary.focusInDirection(TraversalDirection.up)) {
       _pillFocus.requestFocus();
-    } else {
-      _scenesReturnFocus = primary;
-      _scenesFocus.requestFocus();
     }
     return KeyEventResult.handled;
-  }
-
-  void _leaveScenes() {
-    final back = _scenesReturnFocus;
-    if (back != null && back.context?.mounted == true) {
-      back.requestFocus();
-    } else {
-      _enterList();
-    }
   }
 
   /// The inspector speaks for the category while the pill has focus, since
@@ -544,7 +516,10 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
   /// The inspector speaks for the category until a setting takes focus.
   void _describeCategory(_SettingsCategory category) {
     _preview.focus(
-      SettingsPreviewEntry(title: category.title, description: category.subtitle),
+      SettingsPreviewEntry(
+        title: category.title,
+        description: category.subtitle,
+      ),
     );
   }
 
@@ -863,12 +838,14 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
             children: [
               topBar,
               const SizedBox(height: 18),
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      width: 440,
+              // A TV has no live preview: it took more than half the screen
+              // and its description box repeated the focused tile, so the
+              // list gets the room instead.
+              if (_tv)
+                Expanded(
+                  child: Center(
+                    child: SizedBox(
+                      width: _tvListWidth,
                       child: ClipRRect(
                         borderRadius: AppRadius.circular(20),
                         child: ColoredBox(
@@ -877,47 +854,58 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 24),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: SettingsLivePreview(
-                              sceneFocus: _tv ? _scenesFocus : null,
-                              onLeaveScenes: _leaveScenes,
-                              // Up climbs to the category pill and Down stays.
-                              onScenesVertical: (isUp) {
-                                if (isUp) _pillFocus.requestFocus();
-                                return true;
-                              },
-                            ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        width: 440,
+                        child: ClipRRect(
+                          borderRadius: AppRadius.circular(20),
+                          child: ColoredBox(
+                            color: AppColorScheme.surface,
+                            child: list,
                           ),
-                          const SizedBox(height: 16),
-                          // A fixed height, so the preview above doesn't
-                          // resize as descriptions get longer or shorter.
-                          Container(
-                            height:
-                                _inspectorFixedHeight +
-                                MediaQuery.textScalerOf(
-                                  context,
-                                ).scale(_inspectorTextHeight),
-                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                            decoration: BoxDecoration(
-                              color: AppColorScheme.surface,
-                              borderRadius: AppRadius.circular(18),
-                            ),
-                            child: const SingleChildScrollView(
-                              physics: NeverScrollableScrollPhysics(),
-                              child: SettingsPreviewInspector(),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 24),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(child: SettingsLivePreview()),
+                            const SizedBox(height: 16),
+                            // A fixed height, so the preview above doesn't
+                            // resize as descriptions get longer or shorter.
+                            Container(
+                              height:
+                                  _inspectorFixedHeight +
+                                  MediaQuery.textScalerOf(context)
+                                      .scale(_inspectorTextHeight),
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                16,
+                                20,
+                                16,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColorScheme.surface,
+                                borderRadius: AppRadius.circular(18),
+                              ),
+                              child: const SingleChildScrollView(
+                                physics: NeverScrollableScrollPhysics(),
+                                child: SettingsPreviewInspector(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -948,7 +936,10 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 8), child: search),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: search,
+          ),
           if (_categories.length > 1)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
