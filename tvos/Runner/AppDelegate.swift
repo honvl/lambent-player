@@ -46,6 +46,7 @@ class AppDelegate: FlutterAppDelegate {
     private var topShelfChannel: TopShelfChannel?
     private var previewChannel: AppleTvPreviewChannel?
     private var systemChannel: AppleTvSystemChannel?
+    private var storeChannel: AppleTvStoreChannel?
     private var audioChannel: AppleTvAudioChannel?
     private var themeMusicChannel: AppleTvThemeMusicChannel?
     private var arcadeSoundChannel: AppleArcadeSoundChannel?
@@ -89,6 +90,8 @@ class AppDelegate: FlutterAppDelegate {
         systemChannel = AppleTvSystemChannel(
             messenger: flutterViewController.binaryMessenger,
             gamepadHost: gamepadHost)
+        storeChannel = AppleTvStoreChannel(
+            messenger: flutterViewController.binaryMessenger)
         audioChannel = AppleTvAudioChannel(
             messenger: flutterViewController.binaryMessenger)
         themeMusicChannel = AppleTvThemeMusicChannel(

@@ -88,7 +88,8 @@ class EnhancePurchases extends ChangeNotifier {
   final PlayerLicence? player;
 
   /// Null for builds that may not sell through a store (sideloaded Android,
-  /// unsigned iOS, Apple TV): those show the server's buy page instead.
+  /// unsigned iOS and Apple TV): sideloaded Android shows the server's buy
+  /// page instead.
   final EnhanceStore? store;
 
   StreamSubscription<List<StoreTransaction>>? _sub;

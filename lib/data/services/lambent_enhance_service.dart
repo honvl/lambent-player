@@ -6,6 +6,7 @@ import '../../util/lambent_enhancement_defaults.dart';
 import '../../util/platform_detection.dart';
 import 'enhance_purchases.dart';
 import 'enhance_store_iap.dart';
+import 'enhance_store_tvos.dart';
 import 'lambent_licence.dart';
 import 'player_licence.dart';
 
@@ -21,6 +22,8 @@ class LambentEnhanceService {
 
   final EnhanceStore? _store = InAppPurchaseEnhanceStore.supported
       ? InAppPurchaseEnhanceStore()
+      : AppleTvEnhanceStore.supported
+      ? AppleTvEnhanceStore()
       : null;
 
   /// This player's own licence, whatever server it is signed in to.

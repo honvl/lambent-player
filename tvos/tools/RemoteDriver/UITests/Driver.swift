@@ -3,7 +3,7 @@ import XCTest
 /// Presses the Siri Remote on the simulator, in the Lambent app (or `DRIVE_APP`), step by step.
 ///
 /// `DRIVE_STEPS` is a comma list: `up`, `down`, `left`, `right`, `select`, `menu`, `play`, `home` (each with an optional
-/// `:count`), `hold:seconds` (select held), `wait:seconds`, and `shot:name` (a PNG in `DRIVE_OUT`). `DRIVE_LAUNCH=1`
+/// `:count`), `hold:seconds` (select held), `type:text` (no commas), `wait:seconds`, and `shot:name` (a PNG in `DRIVE_OUT`). `DRIVE_LAUNCH=1`
 /// launches the app afresh; otherwise it is brought forward as it is.
 final class Driver: XCTestCase {
     func testDrive() throws {
@@ -35,6 +35,9 @@ final class Driver: XCTestCase {
                 }
             } else if name == "hold" {
                 remote.press(.select, forDuration: Double(arg) ?? 1)
+            } else if name == "type" {
+                // Into the focused text field, through the system keyboard.
+                app.typeText(arg)
             } else if name == "wait" {
                 usleep(useconds_t((Double(arg) ?? 1) * 1_000_000))
             } else if name == "shot" {

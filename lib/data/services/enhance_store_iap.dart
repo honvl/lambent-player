@@ -40,6 +40,7 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
   /// sell through their store (Apple 3.1.1, Play billing policy). Sideloaded
   /// and unsigned builds get the server's buy page instead.
   static bool get supported {
+    // The plugin has no tvOS side: AppleTvEnhanceStore sells there.
     if (PlatformDetection.isAppleTV) return false;
     return switch (AppDistribution.channel) {
       DistributionChannel.aab ||

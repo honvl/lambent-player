@@ -230,7 +230,7 @@ class _EnhanceSubscriptionSectionState
                 ),
                 if (needsEnhance && purchases.canBuyInApp)
                   for (final product in purchases.products)
-                    ListTile(
+                    _EnhanceActionTile(
                       leading: const Icon(Icons.shopping_bag_outlined),
                       title: Text(
                         product.lifetime
@@ -248,21 +248,19 @@ class _EnhanceSubscriptionSectionState
                       onTap: () => purchases.buy(product),
                     ),
                 if (purchases.store != null)
-                  ListTile(
+                  _EnhanceActionTile(
                     leading: const Icon(Icons.restore_rounded),
                     title: const Text('Restore purchases'),
                     enabled: !purchases.busy,
                     onTap: purchases.restore,
                   ),
                 if (needsEnhance && _mayLinkOut && buyUrl != null)
-                  ListTile(
+                  _EnhanceActionTile(
                     leading: const Icon(Icons.open_in_new_rounded),
                     title: const Text('Get Lambent Enhance'),
                     subtitle: const Text('Opens the checkout for your server'),
-                    onTap: () => launchUrl(
-                      buyUrl,
-                      mode: LaunchMode.externalApplication,
-                    ),
+                    onTap: () =>
+                        launchUrl(buyUrl, mode: LaunchMode.externalApplication),
                   ),
                 if (purchases.message case final message?)
                   ListTile(
@@ -355,7 +353,7 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                     ),
                     if (state != EnhanceState.active && purchases.canBuyInApp)
                       for (final product in purchases.products)
-                        ListTile(
+                        _EnhanceActionTile(
                           leading: const Icon(Icons.shopping_bag_outlined),
                           title: Text(
                             product.lifetime
@@ -372,7 +370,7 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                           onTap: () => purchases.buy(product),
                         ),
                     if (purchases.store != null)
-                      ListTile(
+                      _EnhanceActionTile(
                         leading: const Icon(Icons.restore_rounded),
                         title: const Text('Restore purchases'),
                         enabled: !purchases.busy,
@@ -381,16 +379,18 @@ class _PlayerEnhanceSectionState extends State<_PlayerEnhanceSection> {
                     if (state != EnhanceState.active &&
                         widget.mayLinkOut &&
                         buyUrl != null)
-                      ListTile(
+                      _EnhanceActionTile(
                         leading: const Icon(Icons.open_in_new_rounded),
                         title: const Text('Get Lambent Enhance'),
-                        subtitle: const Text('Opens the checkout for this device'),
+                        subtitle: const Text(
+                          'Opens the checkout for this device',
+                        ),
                         onTap: () => launchUrl(
                           buyUrl,
                           mode: LaunchMode.externalApplication,
                         ),
                       ),
-                    ListTile(
+                    _EnhanceActionTile(
                       leading: const Icon(Icons.login_rounded),
                       title: const Text('Already bought it? Sign in'),
                       onTap: () => showDialog<void>(
@@ -482,4 +482,45 @@ class _PlayerSignInDialogState extends State<_PlayerSignInDialog> {
       ),
     ],
   );
+}
+
+/// A row in the Lambent Enhance section that does something when chosen. A
+/// plain [ListTile]'s focus tint can't be seen from a sofa, so this draws the
+/// settings rows' own focus, which is what tells someone with a remote which
+/// plan they are about to buy.
+class _EnhanceActionTile extends StatelessWidget {
+  const _EnhanceActionTile({
+    this.leading,
+    required this.title,
+    this.subtitle,
+    this.enabled = true,
+    this.onTap,
+  });
+
+  final Widget? leading;
+  final Widget title;
+  final Widget? subtitle;
+  final bool enabled;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return TvFocusHighlight(
+      enabled: enabled,
+      builder: (context, focused) {
+        final invert = focused && settingsTileInvertsOnFocus;
+        return ListTile(
+          enabled: enabled,
+          focusColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          textColor: invert ? AppColors.black.withValues(alpha: 0.87) : null,
+          iconColor: invert ? AppColors.black.withValues(alpha: 0.7) : null,
+          leading: leading,
+          title: title,
+          subtitle: subtitle,
+          onTap: onTap,
+        );
+      },
+    );
+  }
 }

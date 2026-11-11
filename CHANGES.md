@@ -10,6 +10,8 @@ Lambent is a modified version of [Moonfin](https://github.com/Moonfin-Client/Moo
 
 ## Commits
 
+- 2026-11-10 TV: the Lambent Enhance purchase rows show which one the remote is on
+- 2026-11-10 Apple TV: Lambent Enhance bought in the app through StoreKit 2 (tvos/Runner/AppleTvStoreChannel.swift), and the version shown at start-up comes from the build
 - 2026-11-09 Lambent's name goes into upstream's strings as they load (tool/gen_lambent_l10n.py), so the translation files stay as upstream ships them
 - 2026-11-09 Merge upstream Moonfin main (637 commits)
 - 2026-11-04 Direct play: upscale and HDR lift on the device for a paid screen

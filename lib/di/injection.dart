@@ -162,6 +162,11 @@ Future<String> _resolveAppVersion() async {
     if (native != null && native.isNotEmpty && native != 'Unknown') {
       return native;
     }
+    // The capability probe that carries it hasn't run this early, and
+    // package_info_plus has no tvOS side, so store builds pass it in
+    // (--dart-define=LAMBENT_APP_VERSION=x.y.z).
+    const built = String.fromEnvironment('LAMBENT_APP_VERSION');
+    if (built.isNotEmpty) return built;
   }
   try {
     final info = await pkg.PackageInfo.fromPlatform();
