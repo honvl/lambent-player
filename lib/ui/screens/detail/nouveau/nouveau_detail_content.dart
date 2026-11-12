@@ -70,6 +70,37 @@ class NouveauDetailContent extends StatefulWidget {
 class NouveauDetailContentState extends State<NouveauDetailContent> {
   late final ScrollController _scrollController = ScrollController();
 
+  // The episode focused in the episodes row, which the TV hero describes in
+  // place of the page's item, as Plex's does. It follows once the D-pad
+  // settles, so a held press doesn't rebuild the hero every step.
+  final ValueNotifier<AggregatedItem?> _focusedEpisode = ValueNotifier(null);
+  static const double _tvEpisodesBottomMargin = 28;
+  Timer? _focusedEpisodeTimer;
+
+  void _onEpisodeFocused(AggregatedItem? episode) {
+    if (!PlatformDetection.isTV) return;
+    _focusedEpisodeTimer?.cancel();
+    if (episode == null) {
+      _focusedEpisode.value = null;
+      return;
+    }
+    if (_focusedEpisode.value?.id == episode.id) return;
+    _focusedEpisodeTimer = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+      final full = _vm.fullEpisode(episode.id);
+      _focusedEpisode.value = full ?? episode;
+      if (full != null) return;
+      // The row's episodes carry no media sources or scores: fetch the whole
+      // one, and show it if focus is still there.
+      _vm.loadFullEpisode(episode).then((loaded) {
+        if (!mounted || loaded == null) return;
+        if (_focusedEpisode.value?.id == loaded.id) {
+          _focusedEpisode.value = loaded;
+        }
+      });
+    });
+  }
+
   final GlobalKey<DetailActionButtonsState> _actionButtonsKey =
       GlobalKey<DetailActionButtonsState>();
 
@@ -716,6 +747,19 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
       return null;
     }
 
+    // On a TV the episodes rise only as far as they must to sit on screen,
+    // so the hero above (which follows the focused episode) stays in view,
+    // as on Plex's season page.
+    final episodesRail =
+        _episodesSectionKey.currentState?.artworkRailAnchorKey;
+    if (PlatformDetection.isTV && target == episodesRail) {
+      final bottom = viewport.getOffsetToReveal(targetObject, 1.0).offset;
+      return (bottom + _tvEpisodesBottomMargin).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      );
+    }
+
     final alignment = target == _detailsRevealKey ? 0.0 : 0.5;
 
     final revealed = viewport.getOffsetToReveal(targetObject, alignment);
@@ -1005,6 +1049,8 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
 
   @override
   void dispose() {
+    _focusedEpisodeTimer?.cancel();
+    _focusedEpisode.dispose();
     if (NavigationLayout.focusDetailsPlayButtonNotifier.value ==
         widget.initialFocusNode) {
       NavigationLayout.focusDetailsPlayButtonNotifier.value = null;
@@ -1058,9 +1104,12 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
               onNavigateDown: _focusPersonTabs,
               onExternalFocusEntry: _handleExternalPersonHeroFocusEntry,
             )
-          : NouveauHero(
+          : ValueListenableBuilder<AggregatedItem?>(
+              valueListenable: _focusedEpisode,
+              builder: (context, focusedEpisode, _) => NouveauHero(
               key: _heroKey,
               item: item,
+              focusedEpisode: focusedEpisode,
               viewModel: _vm,
               actionButtonsKey: _actionButtonsKey,
               selectedMediaSourceId: widget.selectedMediaSourceId,
@@ -1072,6 +1121,7 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
               onNavigateDown: () => _moveDown(_heroKey),
               prefs: widget.prefs,
               visibility: _visibility,
+            ),
             ),
     );
 
@@ -1213,6 +1263,7 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
           prefs: widget.prefs,
           actionButtonsKey: _actionButtonsKey,
           onBackdropItemFocused: widget.onBackdropItemFocused,
+          onEpisodeFocused: _onEpisodeFocused,
           onNavigateUp: () => _moveUp(_episodesSectionKey),
           onNavigateDown: () => _moveDown(_episodesSectionKey),
         ),

@@ -4894,9 +4894,14 @@ class DetailActionButtons extends StatefulWidget {
   /// take a lighter platter when focused, with the label floating above.
   final bool frosted;
 
+  /// The episode Play (and Restart) names and plays in place of the page's
+  /// own: on a TV, the one focused in the episode row, as Plex's buttons do.
+  final AggregatedItem? playEpisode;
+
   const DetailActionButtons({
     super.key,
     required this.viewModel,
+    this.playEpisode,
     this.itemId,
     this.selectedMediaSourceId,
     required this.onSelectedMediaSourceChanged,
@@ -7169,8 +7174,22 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
 
     final plexEpisode = isSeries ? _plexOnDeck(viewModel) : null;
 
+    // The episode focused in the row, when it isn't the page's own.
+    final focusedEpisode = widget.playEpisode?.id == item.id
+        ? null
+        : widget.playEpisode;
+    final focusedHasProgress =
+        (focusedEpisode?.playbackPosition ?? Duration.zero) > Duration.zero;
+
     final String playButtonLabel;
-    if (isPhoto) {
+    if (focusedEpisode != null) {
+      // As on the episode's own page: the time left sits beside the label.
+      playButtonLabel = focusedHasProgress
+          ? l10n.resumeFrom(
+              _formatResumePosition(focusedEpisode.playbackPosition),
+            )
+          : _withEpisodeName(l10n.play, focusedEpisode);
+    } else if (isPhoto) {
       playButtonLabel = l10n.view;
     } else if (isBook) {
       playButtonLabel = hasProgress ? l10n.resumeReading : l10n.read;
@@ -7238,7 +7257,9 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
       focusNode: _tvPlayFocusNode,
       autofocus: autofocusPlay,
       onPressed: () {
-        if (isSeason && viewModel.episodes.isNotEmpty) {
+        if (focusedEpisode != null) {
+          _play(context, focusedEpisode, resume: focusedHasProgress);
+        } else if (isSeason && viewModel.episodes.isNotEmpty) {
           final targetEp = seasonNextUpEp ?? viewModel.episodes[0];
           _play(context, targetEp, resume: seasonNextUpEp != null);
         } else if (plexEpisode != null) {
@@ -7259,7 +7280,7 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
         }
       },
       onLongPress: isVideo
-          ? () => _showAdvancedPlaybackMenu(context, item)
+          ? () => _showAdvancedPlaybackMenu(context, focusedEpisode ?? item)
           : null,
     );
 
@@ -7280,18 +7301,20 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
           icon: Icons.shuffle_rounded,
           onPressed: () => _shuffle(context, item),
         ),
-      if (item.type == 'Series' ||
-          (isBoxSet
-              ? !(boxSetAllWatched || boxSetAllUnwatched)
-              : (hasProgress && !isPhoto)))
+      if (focusedEpisode != null
+          ? focusedHasProgress
+          : (item.type == 'Series' ||
+              (isBoxSet
+                  ? !(boxSetAllWatched || boxSetAllUnwatched)
+                  : (hasProgress && !isPhoto))))
         DetailButton.restart: _DetailActionButton(
           label: isBook ? l10n.startOver : l10n.restart,
           icon: Icons.restart_alt,
-          onPressed: () => _play(context, item),
+          onPressed: () => _play(context, focusedEpisode ?? item),
           onLongPress: isVideo
               ? () => _showAdvancedPlaybackMenu(
                   context,
-                  item,
+                  focusedEpisode ?? item,
                   forceStartOver: true,
                 )
               : null,
@@ -7682,9 +7705,14 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
       final primaryFocusNode =
           widget.tvPlayFocusNode ?? _primaryFocusNode(0);
 
-      final runtime = item.runtime;
+      // The bar and time left under Play are the episode it plays.
+      final playsItem = widget.playEpisode == null ||
+              widget.playEpisode!.id == item.id
+          ? item
+          : widget.playEpisode!;
+      final runtime = playsItem.runtime;
       final playbackPosition =
-          item.playbackPosition ?? Duration.zero;
+          playsItem.playbackPosition ?? Duration.zero;
 
       double? playbackProgress;
       String? remainingLabel;

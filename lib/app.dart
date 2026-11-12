@@ -514,12 +514,31 @@ class _GlobalShortcutScopeState extends State<_GlobalShortcutScope>
     }
   }
 
+  // The deprecated key message API is still the only public door to the
+  // focus tree (see GamepadKeySynthesizer).
+  // ignore: deprecated_member_use
+  KeyMessageHandler? _keyMessageHandler;
+  // ignore: deprecated_member_use
+  KeyMessageHandler? _focusKeyMessageHandler;
+
   @override
   void initState() {
     super.initState();
     globalShortcutFocusNode = _focusNode;
     _hardwareKeyHandler = _onHardwareKeyEvent;
     HardwareKeyboard.instance.addHandler(_hardwareKeyHandler);
+    // A HardwareKeyboard handler can't stop the focus system: Flutter hands it
+    // every key event afterwards. The press that wakes the screensaver is
+    // dropped here, before it reaches the focused widget.
+    // ignore: deprecated_member_use
+    final keyEvents = ServicesBinding.instance.keyEventManager;
+    // ignore: deprecated_member_use
+    final focusKeyHandler = keyEvents.keyMessageHandler;
+    _focusKeyMessageHandler = focusKeyHandler;
+    // ignore: deprecated_member_use
+    keyEvents.keyMessageHandler = _keyMessageHandler = (message) =>
+        _screensaverController.swallowsKeyMessage(message) ||
+        (focusKeyHandler?.call(message) ?? false);
     _screensaverController.visible.addListener(_onScreensaverVisibleChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _screensaverController.refreshWakeLock();
@@ -1004,6 +1023,13 @@ class _GlobalShortcutScopeState extends State<_GlobalShortcutScope>
     }
     WidgetsBinding.instance.removeObserver(this);
     HardwareKeyboard.instance.removeHandler(_hardwareKeyHandler);
+    // ignore: deprecated_member_use
+    final keyEvents = ServicesBinding.instance.keyEventManager;
+    // ignore: deprecated_member_use
+    if (keyEvents.keyMessageHandler == _keyMessageHandler) {
+      // ignore: deprecated_member_use
+      keyEvents.keyMessageHandler = _focusKeyMessageHandler;
+    }
     _screensaverController.visible.removeListener(_onScreensaverVisibleChanged);
     _focusNode.dispose();
     super.dispose();

@@ -73,6 +73,7 @@ import '../screens/playback/next_up_screen.dart';
 import '../screens/playback/photo_player_screen.dart';
 import '../screens/playback/still_watching_screen.dart';
 import '../screens/playback/trailer_player_screen.dart';
+import '../screens/lambent_sample/lambent_sample_screen.dart';
 import '../screens/playback/video_player_screen.dart';
 import '../screens/playback/appletv_player_host_screen.dart';
 import '../screens/playback/appletv_livetv_player_host_screen.dart';
@@ -93,6 +94,8 @@ const _authRoutes = {
   Destinations.webDiagnostics,
   Destinations.server,
   Destinations.login,
+  // Plays a fixed clip; nobody needs to be signed in.
+  Destinations.lambentSample,
 };
 
 /// Whether first-run setup still has something to ask about.
@@ -684,6 +687,13 @@ final appRouter = GoRouter(
         child: useNativeApplePlayerForRoute(state.pageKey)
             ? const AppleTvPlayerHostScreen()
             : const VideoPlayerScreen(),
+      ),
+    ),
+    GoRoute(
+      path: Destinations.lambentSample,
+      pageBuilder: (context, state) => _opaqueFullScreenPage<void>(
+        state: state,
+        child: const LambentSampleScreen(),
       ),
     ),
     GoRoute(

@@ -31,6 +31,7 @@ import '../../navigation/destinations.dart';
 import '../../widgets/adaptive/adaptive_dialog.dart';
 import '../../widgets/allow_self_signed_dialog.dart';
 import '../../widgets/lambent_server_setup_card.dart';
+import '../../widgets/lambent_sample_button.dart';
 import '../../widgets/login_scaffold.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/server_type_icon.dart';
@@ -644,6 +645,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
               !_isDiscovering &&
               !_isWebPluginMode)
             LambentServerSetupCard(foreground: _loginForeground(0.95)),
+          if (!_isWebPluginMode)
+            LambentSampleButton(foreground: _loginForeground(0.95)),
           if (_isDiscovering && discovered.isNotEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 4, bottom: 8),

@@ -29,6 +29,10 @@ class NouveauEpisodesSection extends StatefulWidget {
   final GlobalKey<DetailActionButtonsState> actionButtonsKey;
   final UserPreferences prefs;
   final ValueChanged<AggregatedItem>? onBackdropItemFocused;
+
+  /// The episode the row's focus is on, and null once focus leaves the row,
+  /// so the hero can describe it as Plex's does.
+  final ValueChanged<AggregatedItem?>? onEpisodeFocused;
   final bool Function()? onNavigateUp;
   final bool Function()? onNavigateDown;
 
@@ -38,6 +42,7 @@ class NouveauEpisodesSection extends StatefulWidget {
     required this.actionButtonsKey,
     required this.prefs,
     this.onBackdropItemFocused,
+    this.onEpisodeFocused,
     this.onNavigateUp,
     this.onNavigateDown,
   });
@@ -651,6 +656,15 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
     }
   }
 
+  bool get _rowHasFocus {
+    final row = _episodeRowKey.currentState;
+    final focused = FocusManager.instance.primaryFocus?.context;
+    return row != null &&
+        focused != null &&
+        focused.findAncestorStateOfType<LockedFocusRowState<AggregatedItem>>() ==
+            row;
+  }
+
   void _handleEpisodeDetailsFocusChange(AggregatedItem episode, bool hasFocus) {
     if (!mounted) {
       return;
@@ -1100,6 +1114,10 @@ class NouveauEpisodesSectionState extends State<NouveauEpisodesSection> {
               },
               onIndexChanged: (index, episode) {
                 _handleEpisodeIndexChanged(index, episode);
+                if (_rowHasFocus) widget.onEpisodeFocused?.call(episode);
+              },
+              onFocusChange: (hasFocus) {
+                if (!hasFocus) widget.onEpisodeFocused?.call(null);
               },
               onVerticalNavigation: (isUp) {
                 return _handleEpisodeVerticalNavigation(isUp, episodes);

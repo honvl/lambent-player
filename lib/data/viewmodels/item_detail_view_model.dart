@@ -435,6 +435,34 @@ class ItemDetailViewModel extends ChangeNotifier {
   Map<String, double> _ratings = const {};
   Map<String, double> get ratings => _ratings;
 
+  // Episodes from the row, fetched whole (media sources, scores) once one is
+  // focused, so the TV hero can show its formats and scores as Plex's does.
+  final Map<String, AggregatedItem> _fullEpisodes = {};
+  final Map<String, Future<AggregatedItem?>> _fullEpisodeLoads = {};
+
+  AggregatedItem? fullEpisode(String id) => _fullEpisodes[id];
+
+  Future<AggregatedItem?> loadFullEpisode(AggregatedItem episode) {
+    final cached = _fullEpisodes[episode.id];
+    if (cached != null) return Future.value(cached);
+    return _fullEpisodeLoads[episode.id] ??= () async {
+      try {
+        final data = await _client.itemsApi.getItem(episode.id);
+        final full = AggregatedItem(
+          id: episode.id,
+          serverId: episode.serverId,
+          rawData: data,
+        );
+        _fullEpisodes[episode.id] = full;
+        return full;
+      } catch (_) {
+        return null;
+      } finally {
+        _fullEpisodeLoads.remove(episode.id);
+      }
+    }();
+  }
+
   List<AggregatedItem> _albums = const [];
   List<AggregatedItem> get albums => _albums;
 

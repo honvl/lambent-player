@@ -13,6 +13,7 @@ import '../../../../../preference/user_preferences.dart';
 import '../../../../../util/overview_text.dart';
 import '../../../../../util/platform_detection.dart';
 import '../../../../../util/playback_time_label.dart';
+import '../../../../../util/server_scores.dart';
 import '../../../../widgets/logo_view.dart';
 import '../../../../widgets/navigation_layout.dart';
 import '../../../../widgets/offline_aware_image.dart';
@@ -40,6 +41,10 @@ class NouveauHero extends StatefulWidget {
   final GlobalKey<DetailActionButtonsState> actionButtonsKey;
   final bool Function()? onNavigateDown;
 
+  /// The episode focused in the row below. On a TV the hero describes it (its
+  /// line and summary) while the buttons stay the page's, as Plex's does.
+  final AggregatedItem? focusedEpisode;
+
   const NouveauHero({
     super.key,
     required this.item,
@@ -54,6 +59,7 @@ class NouveauHero extends StatefulWidget {
     required this.onActionsExpandedChanged,
     required this.actionButtonsKey,
     this.onNavigateDown,
+    this.focusedEpisode,
   });
 
   @override
@@ -249,7 +255,19 @@ class NouveauHeroState extends State<NouveauHero> {
     final series = item.type == 'BookSeries' ? item : null;
     item = viewModel.seriesFeaturedBook ?? item;
 
-    final overview = cleanOverview(item.overview?.trim());
+    final focusedEpisode = widget.focusedEpisode;
+    final episodeFocus = _plexTv &&
+            focusedEpisode != null &&
+            focusedEpisode.id != item.id &&
+            (item.type == 'Series' || isSeason || isEpisode)
+        ? focusedEpisode
+        : null;
+
+    // A page with an episode row keeps room for a summary of three lines and
+    // for the metadata line, so moving along the row never moves the row.
+    final steadyHero = _plexTv && (item.type == 'Series' || isSeason || isEpisode);
+
+    final overview = cleanOverview((episodeFocus ?? item).overview?.trim());
 
     final hideOverview = hidesMediaDescription(
       itemType: item.type,
@@ -284,17 +302,31 @@ class NouveauHeroState extends State<NouveauHero> {
     final reserveGenreRow = !_plexTv &&
         genres.isEmpty && (item.type == 'Episode' || item.type == 'Season');
 
-    final metadata = _plexTv
+    final metadata = episodeFocus != null
+        // An episode page names its episode under the show's art instead.
+        ? (isEpisode
+            ? _plexMetadataContent(context, episodeFocus)
+            : [_plexEpisodeLine(context, episodeFocus)])
+        : _plexTv
         ? _plexMetadataContent(context, item)
         : _metadataContent(context, item, scale);
 
     final ratingsRow = RatingsRow.forDetailScreen(
-      item: item,
-      extraRatings: widget.viewModel.ratings,
+      item: episodeFocus ?? item,
+      extraRatings: episodeFocus != null
+          ? serverScores(episodeFocus.rawData)
+          : widget.viewModel.ratings,
       prefs: widget.prefs,
     );
 
-    final technicalDetails = _technicalDetailsContent(item, scale);
+    final technicalDetails = _technicalDetailsContent(
+      episodeFocus ?? item,
+      scale,
+      // The page's chosen version is the page's own; another episode shows
+      // its first.
+      selectedMediaSourceId:
+          episodeFocus != null ? null : widget.selectedMediaSourceId,
+    );
 
     final showStatus = !hiddenMetadata.contains(DetailMetadataItem.status.id);
     final status = showStatus ? _normalizedSeriesStatus(item) : null;
@@ -398,7 +430,11 @@ class NouveauHeroState extends State<NouveauHero> {
       title: itemName,
       logoUrl: logoUrl,
       // Plex names the episode under its show's title art.
-      companionTitle: isSeason || (_plexTv && isEpisode) ? item.name : null,
+      companionTitle: isSeason
+          ? item.name
+          : _plexTv && isEpisode
+          ? (episodeFocus ?? item).name
+          : null,
       stackCompanion: _plexTv,
       titleStyle: titleStyle,
       maxWidth: logoMaxWidth,
@@ -411,6 +447,7 @@ class NouveauHeroState extends State<NouveauHero> {
     final actions = DetailActionButtons(
       key: widget.actionButtonsKey,
       viewModel: viewModel,
+      playEpisode: episodeFocus,
       itemId: item.id,
       selectedMediaSourceId: widget.selectedMediaSourceId,
       onSelectedMediaSourceChanged: widget.onSelectedMediaSourceChanged,
@@ -513,6 +550,13 @@ class NouveauHeroState extends State<NouveauHero> {
                 technicalDetails: technicalDetails,
                 actions: actions,
                 scale: scale,
+                steady: steadyHero,
+                reserveRatings: steadyHero &&
+                    widget.prefs.effectiveShowDetailRatings,
+                reserveTechnical: steadyHero &&
+                    widget.prefs.get(
+                      UserPreferences.detailShowTechnicalDetails,
+                    ),
               ),
       ),
     );
@@ -655,6 +699,9 @@ class NouveauHeroState extends State<NouveauHero> {
     required List<Widget> technicalDetails,
     required Widget actions,
     required double scale,
+    bool steady = false,
+    bool reserveRatings = false,
+    bool reserveTechnical = false,
   }) {
     final foreground = AppColorScheme.onSurface;
 
@@ -698,12 +745,16 @@ class NouveauHeroState extends State<NouveauHero> {
             SizedBox(height: (14.0 * scale).clamp(12.0, 15.0)),
           ],
 
-          if (metadata.isNotEmpty)
-            Wrap(
-              spacing: _plexTv ? 11.0 : (7.0 * scale).clamp(6.0, 8.0),
-              runSpacing: (6.0 * scale).clamp(5.0, 7.0),
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: metadata,
+          if (metadata.isNotEmpty || steady)
+            ConstrainedBox(
+              // The age rating's outline is the line's tallest part.
+              constraints: BoxConstraints(minHeight: steady ? 19.0 : 0.0),
+              child: Wrap(
+                spacing: _plexTv ? 11.0 : (7.0 * scale).clamp(6.0, 8.0),
+                runSpacing: (6.0 * scale).clamp(5.0, 7.0),
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: metadata,
+              ),
             ),
 
           _incompleteLine(),
@@ -717,26 +768,42 @@ class NouveauHeroState extends State<NouveauHero> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (technicalDetails.isNotEmpty) ...[
+          if (technicalDetails.isNotEmpty || reserveTechnical) ...[
             SizedBox(height: (15.0 * scale).clamp(13.0, 17.0)),
-            Wrap(
-              spacing: (7.0 * scale).clamp(6.0, 8.0),
-              runSpacing: (7.0 * scale).clamp(6.0, 8.0),
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: technicalDetails,
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: reserveTechnical ? _steadyChipRowHeight : 0.0,
+              ),
+              child: Wrap(
+                spacing: (7.0 * scale).clamp(6.0, 8.0),
+                runSpacing: (7.0 * scale).clamp(6.0, 8.0),
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: technicalDetails,
+              ),
             ),
           ],
 
-          if (overview.isNotEmpty && !hideOverview) ...[
+          if ((overview.isNotEmpty || steady) && !hideOverview) ...[
             SizedBox(height: _plexTv ? 14.0 : (22.0 * scale).clamp(19.0, 24.0)),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: _plexTv ? 485.0 : descriptionMaxWidth),
-              child: _NouveauOverview(
-                text: overview,
-                maxLines: 3,
-                style: overviewStyle,
-                focusNode: _overviewFocusNode,
-                onFocusableChanged: _handleOverviewFocusableChanged,
+              constraints: BoxConstraints(
+                maxWidth: _plexTv ? 485.0 : descriptionMaxWidth,
+                minHeight: steady
+                    ? (overviewStyle.fontSize ?? 15.0) *
+                        (overviewStyle.height ?? 1.36) *
+                        MediaQuery.textScalerOf(context).scale(1.0) *
+                        3
+                    : 0.0,
+              ),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: _NouveauOverview(
+                  text: overview,
+                  maxLines: 3,
+                  style: overviewStyle,
+                  focusNode: _overviewFocusNode,
+                  onFocusableChanged: _handleOverviewFocusableChanged,
+                ),
               ),
             ),
           ],
@@ -749,11 +816,11 @@ class NouveauHeroState extends State<NouveauHero> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         textContent,
-        if (ratingsRow != null) ...[
+        if (ratingsRow != null || reserveRatings) ...[
           SizedBox(height: _plexTv ? 9.0 : (13.0 * scale).clamp(11.0, 15.0)),
           ConstrainedBox(
             constraints: BoxConstraints(maxWidth: ratingsMaxWidth),
-            child: ratingsRow,
+            child: ratingsRow ?? _ratingsPlaceholder(),
           ),
         ],
         belowRatings,
@@ -763,7 +830,11 @@ class NouveauHeroState extends State<NouveauHero> {
     );
   }
 
-  List<Widget> _technicalDetailsContent(AggregatedItem item, double scale) {
+  List<Widget> _technicalDetailsContent(
+    AggregatedItem item,
+    double scale, {
+    String? selectedMediaSourceId,
+  }) {
     final showTechnicalDetails = widget.prefs.get(
       UserPreferences.detailShowTechnicalDetails,
     );
@@ -774,7 +845,7 @@ class NouveauHeroState extends State<NouveauHero> {
 
     final selectedSource = selectedMediaSourceForItem(
       item,
-      widget.selectedMediaSourceId,
+      selectedMediaSourceId,
     );
 
     final tech = technicalDetailsFor(item, selectedSource);
@@ -892,6 +963,73 @@ class NouveauHeroState extends State<NouveauHero> {
   /// Plex's TV layout: its hero is smaller and sits higher, and its
   /// metadata line reads "2022  23m  Animation, Comedy  TV-14".
   bool get _plexTv => PlatformDetection.isTV;
+
+  // The height a steady TV hero keeps for its format chips while an episode
+  // without them (not fetched yet) is focused.
+  static const double _steadyChipRowHeight = 22.0;
+
+  /// A score badge laid out but not shown, so an episode without scores keeps
+  /// the row's height (Plex leaves the same gap).
+  Widget _ratingsPlaceholder() {
+    final row = RatingsRow.forDetailScreen(
+      item: AggregatedItem(
+        id: '',
+        serverId: '',
+        rawData: const {
+          'LambentScores': [
+            {'Source': 'themoviedb', 'Value': 7.0},
+          ],
+        },
+      ),
+      extraRatings: const {'tmdb_episode': 7.0},
+      prefs: widget.prefs,
+    );
+    if (row == null) return const SizedBox.shrink();
+    return ExcludeSemantics(
+      child: Visibility(
+        visible: false,
+        maintainSize: true,
+        maintainAnimation: true,
+        maintainState: true,
+        child: row,
+      ),
+    );
+  }
+
+  /// A focused episode's line under the show's art: its title, then
+  /// "S2 • E3", the air date, the runtime and the age rating. One line, so the
+  /// hero keeps its height along the row.
+  Widget _plexEpisodeLine(BuildContext context, AggregatedItem episode) {
+    final foreground = AppColorScheme.onSurface;
+    final children = <Widget>[];
+    final name = episode.name.trim();
+    if (name.isNotEmpty) {
+      children.add(
+        Flexible(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: foreground,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
+            ),
+          ),
+        ),
+      );
+    }
+    for (final value in _plexMetadataContent(context, episode)) {
+      if (children.isNotEmpty) children.add(const SizedBox(width: 11.0));
+      children.add(value);
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: children,
+    );
+  }
 
   /// The line under Plex's title art, spaced without dots: the year, the
   /// runtime and two genres for a show or film; "S2 • E3", the air date and

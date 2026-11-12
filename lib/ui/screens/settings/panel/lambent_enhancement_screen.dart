@@ -31,6 +31,24 @@ class _LambentEnhancementScreen extends StatelessWidget {
             return ListView(
               children: [
                 const _EnhanceSubscriptionSection(),
+                // What Enhance looks like, without a PC. Not while something
+                // plays in the mini player: the sample takes its player.
+                if (LambentSample.available &&
+                    !VideoMiniPlayerController.instance.visible.value)
+                  adaptiveListSection(
+                    children: [
+                      _TvSettingsListTile(
+                        leading: const Icon(Icons.compare_rounded),
+                        title: const Text('See the difference'),
+                        subtitle: const Text(
+                          "A short film clip, the original beside Lambent's "
+                          'picture',
+                        ),
+                        onTap: () =>
+                            GoRouter.of(context).push(Destinations.lambentSample),
+                      ),
+                    ],
+                  ),
                 // Without Enhance or a trial titles always open on the
                 // original; the player's chip offers the compare.
                 if (!LambentEnhancement.compareOnly)

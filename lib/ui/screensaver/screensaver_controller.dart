@@ -52,6 +52,33 @@ class ScreensaverController {
   bool _screenHandedBack = false;
   bool _duringAudioCache = false;
   final Set<LogicalKeyboardKey> _consumedKeys = {};
+
+  // The key events the screensaver took. Flutter still hands every key event
+  // to the focus system after all HardwareKeyboard handlers have run, whatever
+  // they return, so the press that woke the screen also pressed the focused
+  // button under it. The app drops these at the focus system's door
+  // ([swallowsKeyMessage]).
+  final Set<KeyEvent> _consumedEvents = Set.identity();
+
+  /// Whether [message] carries a key event the screensaver took, so the focus
+  /// system must not act on it.
+  // ignore: deprecated_member_use
+  bool swallowsKeyMessage(KeyMessage message) {
+    if (_consumedEvents.isEmpty) return false;
+    var swallowed = false;
+    for (final event in message.events) {
+      if (_consumedEvents.remove(event)) swallowed = true;
+    }
+    return swallowed;
+  }
+
+  bool _consume(KeyEvent event) {
+    // Every taken event reaches the focus system right after, so this stays
+    // tiny; the cap only guards against a path that never dispatches.
+    if (_consumedEvents.length > 16) _consumedEvents.clear();
+    _consumedEvents.add(event);
+    return true;
+  }
   bool _enabledCache = false;
   ScreensaverTimeout _timeoutCache = ScreensaverTimeout.m5;
   bool _activityPaused = false;
@@ -144,8 +171,15 @@ class ScreensaverController {
   }
 
   bool handleKeyEvent(KeyEvent event) {
+    // The release (and any repeats) of the press that woke the screen come
+    // after it has gone, and are that press's too: a select acts on release.
+    if (event is! KeyDownEvent && _consumedKeys.contains(event.logicalKey)) {
+      if (event is KeyUpEvent) _consumedKeys.remove(event.logicalKey);
+      return _consume(event);
+    }
     if (!visible.value) {
       if (event is KeyDownEvent) {
+        _consumedKeys.remove(event.logicalKey);
         notifyInteraction();
       }
       return false;
@@ -153,9 +187,9 @@ class ScreensaverController {
     if (event is KeyDownEvent || event is KeyRepeatEvent) {
       _consumedKeys.add(event.logicalKey);
       dismiss();
-      return true;
+      return _consume(event);
     }
-    return _consumedKeys.remove(event.logicalKey);
+    return _consumedKeys.remove(event.logicalKey) && _consume(event);
   }
 
   void _onPlayingChanged(bool playing) {

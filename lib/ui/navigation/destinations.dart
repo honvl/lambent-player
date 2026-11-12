@@ -119,6 +119,8 @@ class Destinations {
   static const bookReader = '/player/book/:itemId';
   static const photoPlayer = '/player/photo/:itemId';
   static const trailerPlayer = '/player/trailer';
+  /// Lambent's "See the difference" sample; plays without a server.
+  static const lambentSample = '/lambent-sample';
   static const nextUp = '/player/next-up/:itemId';
   static const stillWatching = '/player/still-watching/:itemId';
 

@@ -79,6 +79,8 @@ import '../../../preference/home_section_config.dart';
 import '../../../preference/seerr_preferences.dart';
 import '../../../preference/seerr_row_config.dart';
 import '../../navigation/destinations.dart';
+import '../lambent_sample/lambent_sample.dart';
+import '../../widgets/video_mini_player.dart';
 import '../admin/admin_nav.dart';
 import '../after_hours/after_hours_trigger.dart';
 import '../setup/setup_wizard_gate.dart';
