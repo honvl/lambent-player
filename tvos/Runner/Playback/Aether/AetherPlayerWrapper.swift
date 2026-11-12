@@ -986,6 +986,9 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
         var lambentLift = false
         var cadenceSlowdown = false
         var cadenceTip: CadenceTip?
+        /// A picture already enhanced elsewhere (Lambent's "See the difference" sample, whose left half is the original): no plan
+        /// steps, no HDR lift and no free RAVU-lite on top of it.
+        var noClientEnhancement = false
     }
 
     /// The Match Frame Rate hint, localized on the Dart side.
@@ -1285,7 +1288,7 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
                 let lines = LambentClientUpscale.planHeight(url) ?? sourceConfiguration.lambentLines
                 let lift = LambentClientUpscale.planLift(url) || sourceConfiguration.lambentLift
                 let free = lines == nil && !lift && LambentClientUpscale.freeUpscale(url)
-                if !audioOnly, lines != nil || lift || free {
+                if !audioOnly, !sourceConfiguration.noClientEnhancement, lines != nil || lift || free {
                     let compare = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?
                         .contains { $0.name == "cmp" && $0.value == "1" } ?? false
                     #if os(iOS)
@@ -1413,6 +1416,27 @@ final class AetherPlayerWrapper: NSObject, ObservableObject {
             }
         #else
             Self.sharedEngine()?.stop(resetDisplayCriteria: false)
+        #endif
+        resetStallTracking()
+        state = .stopped
+        subtitleOverlay.clear()
+        resetAssState()
+    }
+
+    /// Stops playback and puts the panel back to its own mode: a screen that played something by itself (Lambent's sample) and
+    /// isn't followed by another title. On iOS only while this wrapper holds the engine, as stop().
+    func stopAndResetDisplay() {
+        loadGeneration &+= 1
+        resetSecondarySubtitle()
+        #if os(tvOS) || os(iOS) || os(macOS)
+            hdrLift?.stop()
+        #endif
+        #if os(iOS)
+            if ownsEngine && !isShutDown {
+                Self.sharedEngine()?.stop(resetDisplayCriteria: true)
+            }
+        #else
+            Self.sharedEngine()?.stop(resetDisplayCriteria: true)
         #endif
         resetStallTracking()
         state = .stopped

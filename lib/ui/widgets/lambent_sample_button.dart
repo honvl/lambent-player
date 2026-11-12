@@ -40,6 +40,27 @@ class LambentSampleButton extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
+            // A remote has no pointer: a focused button must be plain to see.
+            style: ButtonStyle(
+              side: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.focused)
+                    ? BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      )
+                    : null,
+              ),
+            ),
+            // A remote moving onto it brings it into view, as the list's
+            // other rows do.
+            onFocusChange: (focused) {
+              if (!focused) return;
+              Scrollable.ensureVisible(
+                context,
+                alignment: 0.5,
+                duration: const Duration(milliseconds: 200),
+              );
+            },
             onPressed: () => context.push(Destinations.lambentSample),
             icon: const Icon(Icons.compare_rounded, size: 18),
             label: const Text('See the difference'),

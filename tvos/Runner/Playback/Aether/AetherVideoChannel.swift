@@ -70,6 +70,10 @@ final class AetherVideoChannel: NSObject, FlutterStreamHandler {
                 #endif
                 return
             }
+            if call.method == "displayShowsHdr" {
+                Task { @MainActor in result(AetherVideoCapabilities.screenShowsHdr) }
+                return
+            }
             if call.method == "getLambentCapabilities" {
                 Task { @MainActor in result(LambentClientUpscale.capabilities()) }
                 return
@@ -123,6 +127,9 @@ final class AetherVideoChannel: NSObject, FlutterStreamHandler {
             player.pause()
         case "stop":
             player.stop()
+            stopStateTimer()
+        case "stopAndResetDisplay":
+            player.stopAndResetDisplay()
             stopStateTimer()
         case "seek":
             player.seek(to: ms(args["positionMs"]))
@@ -254,7 +261,8 @@ final class AetherVideoChannel: NSObject, FlutterStreamHandler {
                 lambentLines: (args["lambentLines"] as? NSNumber)?.intValue,
                 lambentLift: (args["lambentLift"] as? Bool) ?? false,
                 cadenceSlowdown: (args["cadenceSlowdown"] as? Bool) ?? false,
-                cadenceTip: AetherPlayerWrapper.cadenceTip(from: args)))
+                cadenceTip: AetherPlayerWrapper.cadenceTip(from: args),
+                noClientEnhancement: (args["noClientEnhancement"] as? Bool) ?? false))
         player.setForceSubtitlesDisabledOnStart(
             (args["forceSubtitlesDisabledOnStart"] as? Bool) ?? false)
         player.setReplayGainDb((args["normalizationGainDb"] as? NSNumber)?.doubleValue)
@@ -356,6 +364,22 @@ final class AetherVideoChannel: NSObject, FlutterStreamHandler {
 /// advertised only when the display has the headroom to show them, and an SDR
 /// monitor gets a tone mapped transcode instead.
 enum AetherVideoCapabilities {
+    /// Whether the screen in front of the viewer shows HDR now: the panel's EDR headroom on a phone, tablet or Mac, and what
+    /// AVFoundation says of the TV an Apple TV is plugged into. For Lambent's sample, which plays its HDR10 encode only where it
+    /// looks like HDR.
+    @MainActor static var screenShowsHdr: Bool {
+        #if os(macOS)
+            return displaySupportsHdr
+        #elseif os(tvOS)
+            return AVPlayer.eligibleForHDRPlayback
+        #else
+            if #available(iOS 16.0, *) {
+                return AVPlayer.eligibleForHDRPlayback && UIScreen.main.potentialEDRHeadroom > 1.0
+            }
+            return AVPlayer.eligibleForHDRPlayback
+        #endif
+    }
+
     private static var displaySupportsHdr: Bool {
         #if os(macOS)
             guard let screen = NSScreen.main else { return false }

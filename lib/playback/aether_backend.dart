@@ -1,4 +1,5 @@
 import '../data/services/lambent_enhance_service.dart';
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -30,7 +31,8 @@ import 'subtitle_fonts.dart';
 /// music, audiobooks and offline playback. Unlike the tvOS sibling there is
 /// no native player UI: Flutter owns the OSD and the video arrives through
 /// the `moonfin/aether_video` platform view.
-class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
+class AetherBackend
+    with SubtitleDelayState, AppleSecondarySubtitleControls
     implements PlayerBackend, SubtitleLoadingBackend, SecondarySubtitleBackend {
   AetherBackend(this._prefs) {
     _eventSub = _events.receiveBroadcastStream().listen(
@@ -136,8 +138,7 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
   Future<T?> invokeAppleSecondaryControl<T>(
     String method, [
     dynamic arguments,
-  ]) =>
-      _invoke<T>(method, arguments);
+  ]) => _invoke<T>(method, arguments);
 
   @override
   bool get isSubtitleLoading => _isSubtitleLoading;
@@ -196,8 +197,9 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
         _completedStream.add(_completed);
       case 'lambentUpscale':
         final label = map['label'];
-        lambentDeviceUpscale.value =
-            label is String && label.isNotEmpty ? label : null;
+        lambentDeviceUpscale.value = label is String && label.isNotEmpty
+            ? label
+            : null;
       case 'engineLog':
         _logEngineLine(map['line']);
       case 'play':
@@ -323,9 +325,15 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
     });
 
     _liveSeekWindow = null;
-    final lambentSteps = LambentEnhanceService.instance.localSteps;
+    // A picture already enhanced elsewhere (Lambent's sample) gets nothing on
+    // top, and doesn't ask the licence (which could start the trial).
+    final noClientEnhancement = payload['noClientEnhancement'] == true;
+    final lambentSteps = noClientEnhancement
+        ? null
+        : LambentEnhanceService.instance.localSteps;
     await _invoke<void>('setSource', {
       'url': url,
+      'noClientEnhancement': noClientEnhancement,
       'lambentLines': lambentSteps?.lines,
       'lambentLift': lambentSteps?.lift ?? false,
       'headers': headers,
@@ -339,8 +347,8 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
       ),
       'isLive': payload['isLive'] == true,
       'mediaType': payload['mediaType']?.toString() ?? 'video',
-      'normalizationGainDb':
-          (payload['normalizationGainDb'] as num?)?.toDouble(),
+      'normalizationGainDb': (payload['normalizationGainDb'] as num?)
+          ?.toDouble(),
       'speed': _playbackSpeed,
       'forceSubtitlesDisabledOnStart':
           payload['mediaType']?.toString() != 'audio' &&
@@ -395,10 +403,27 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
   @override
   LiveSeekWindow? get liveSeekWindow => _liveSeekWindow;
 
+  /// Stops and puts an Apple TV's display back to its own mode. stop() keeps
+  /// the mode for the next title; a screen that played something by itself
+  /// (Lambent's sample) ends with this instead.
+  Future<void> stopAndResetDisplay() => _stop('stopAndResetDisplay');
+
+  /// Whether the screen shows HDR now (EDR headroom, or the TV an Apple TV is
+  /// plugged into). False where the platform doesn't answer.
+  static Future<bool> screenShowsHdr() async {
+    try {
+      return await _control.invokeMethod<bool>('displayShowsHdr') ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
-  Future<void> stop() async {
+  Future<void> stop() => _stop('stop');
+
+  Future<void> _stop(String command) async {
     _pendingEmbeddedSubtitle = null;
-    await _invoke<void>('stop');
+    await _invoke<void>(command);
     _stopStallWatchdog();
     if (_isPlaying) {
       _isPlaying = false;
@@ -697,9 +722,11 @@ class AetherBackend with SubtitleDelayState, AppleSecondarySubtitleControls
     _audioDelayDebounce = Timer(const Duration(milliseconds: 350), () {
       _audioDelayDebounce = null;
       if (_disposed) return;
-      unawaited(_invoke<void>('setAudioDelay', {
-        'delayMs': (_audioDelaySeconds * 1000).round(),
-      }));
+      unawaited(
+        _invoke<void>('setAudioDelay', {
+          'delayMs': (_audioDelaySeconds * 1000).round(),
+        }),
+      );
     });
   }
 

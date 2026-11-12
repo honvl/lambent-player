@@ -3,23 +3,31 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:moonfin_native_video/moonfin_native_video.dart';
 import 'package:playback_core/playback_core.dart' show RepeatMode;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../playback/aether_backend.dart';
 import '../../../playback/display_hdr_probe.dart';
 import '../../../playback/media3_player_backend.dart';
 import '../../../util/form_factor.dart';
 import '../../../util/platform_detection.dart';
 import '../../../util/system_ui.dart';
+import '../../navigation/destinations.dart';
+import '../../widgets/aether_video_view.dart';
 import '../../widgets/lambent_server_setup_card.dart'
-    show lambentServerSetupUrl;
+    show lambentServerSetupAddress, lambentServerSetupUrl;
+import '../../widgets/sign_in_qr_code.dart';
 import 'lambent_sample.dart';
 
-/// Plays [LambentSample] full screen, looping, through the app's Media3 player
-/// (a SurfaceView in the HDR window, so HDR10 reaches the panel), with plain
-/// labels over each half, the film's credit and a link to Lambent Server.
-/// Needs no server.
+/// Plays [LambentSample] full screen, looping, with plain labels over each
+/// half, the playing film's credit and where to get Lambent Server. Needs no
+/// server. Android plays it through the app's Media3 player (a SurfaceView in
+/// the HDR window; a TV switches to 24 Hz from the frame rate given), Apple
+/// devices through AetherEngine (HDR on an EDR layer; an Apple TV matches the
+/// TV's dynamic range and rate when Match Content is on), each with no
+/// enhancement of its own on top.
 class LambentSampleScreen extends StatefulWidget {
   const LambentSampleScreen({super.key});
 
@@ -27,81 +35,54 @@ class LambentSampleScreen extends StatefulWidget {
   State<LambentSampleScreen> createState() => _LambentSampleScreenState();
 }
 
-class _LambentSampleScreenState extends State<LambentSampleScreen>
-    with ImmersiveSystemUi {
+/// The two ways the sample plays.
+abstract class _SamplePlayer {
+  static _SamplePlayer? create() {
+    if (PlatformDetection.isAndroid &&
+        GetIt.instance.isRegistered<Media3PlayerBackend>()) {
+      return _Media3SamplePlayer(GetIt.instance<Media3PlayerBackend>());
+    }
+    // isApple leaves out the Apple TV, which uses the same engine.
+    if ((PlatformDetection.isApple || PlatformDetection.isAppleTV) &&
+        GetIt.instance.isRegistered<AetherBackend>()) {
+      return _AetherSamplePlayer(GetIt.instance<AetherBackend>());
+    }
+    return null;
+  }
+
+  Widget view();
+  Stream<bool> get playing;
+  Stream<Map<String, dynamic>> get errors;
+  Stream<Duration> get position;
+  Future<bool> screenShowsHdr();
+  Future<void> play(LambentSampleVariant variant);
+  Future<void> stop();
+
+  /// Anything the player keeps listening to, cancelled with the screen.
+  List<StreamSubscription<Object?>> get extraSubscriptions => const [];
+}
+
+class _Media3SamplePlayer extends _SamplePlayer {
+  _Media3SamplePlayer(this.backend);
+
   static const _platform = MethodChannel('org.moonfin.androidtv/platform');
-  static const _openTimeout = Duration(seconds: 20);
-
-  final Media3PlayerBackend? _backend =
-      GetIt.instance.isRegistered<Media3PlayerBackend>()
-      ? GetIt.instance<Media3PlayerBackend>()
-      : null;
-
-  final _subscriptions = <StreamSubscription<Object?>>[];
-  List<LambentSampleVariant> _order = const [];
-  int _index = -1;
-  bool _playing = false;
-  bool _failed = false;
-  bool _phoneLocked = false;
-  bool _disposed = false;
-
-  LambentSampleVariant? get _current =>
-      _index >= 0 && _index < _order.length ? _order[_index] : null;
+  final Media3PlayerBackend backend;
 
   @override
-  void initState() {
-    super.initState();
-    setImmersive(true);
-    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
-    // A phone shows the wide picture sideways; a tablet plays the way it's held.
-    if (view != null && FormFactor.ofView(view).isPhone) {
-      _phoneLocked = true;
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    }
-    final backend = _backend;
-    if (backend == null) {
-      _failed = true;
-      return;
-    }
-    _subscriptions
-      ..add(
-        backend.errorStream.listen(
-          (e) => _fail(_index, '${e['kind'] ?? e['errorCodeName'] ?? e}'),
-        ),
-      )
-      ..add(
-        backend.playingStream.listen((playing) {
-          if (playing && !_playing && mounted) {
-            setState(() => _playing = true);
-            _showChrome();
-          }
-        }),
-      );
-    // The platform view must exist before the player is pointed at it.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
-  }
+  Widget view() => const Media3VideoView(fill: Colors.black);
 
-  Future<void> _start() async {
-    final hdrScreen = await _screenShowsHdr10();
-    if (_disposed) return;
-    _order = LambentSample.order(
-      hdrScreen: hdrScreen,
-      hevcHdr10: PlatformDetection.supportsHevcHdr10,
-    );
-    debugPrint(
-      '[LambentSample] HDR10 screen $hdrScreen, HEVC Main 10 decoder '
-      '${PlatformDetection.supportsHevcHdr10}: trying '
-      '${_order.map((v) => v.hdr ? 'HDR10' : 'SDR ${v.width}').join(', ')}',
-    );
-    await _next();
-  }
+  @override
+  Stream<bool> get playing => backend.playingStream;
 
-  /// Whether the panel takes HDR10. A phone isn't probed at launch (only an
-  /// Android TV is), so this asks the display directly.
-  Future<bool> _screenShowsHdr10() async {
+  @override
+  Stream<Map<String, dynamic>> get errors => backend.errorStream;
+
+  @override
+  Stream<Duration> get position => backend.positionStream;
+
+  /// A TV was probed at launch; a phone isn't, so this asks the display.
+  @override
+  Future<bool> screenShowsHdr() async {
     if (PlatformDetection.isTV) return PlatformDetection.supportsHdr10;
     try {
       final raw = await _platform.invokeMethod<Map<dynamic, dynamic>>(
@@ -118,12 +99,174 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
     }
   }
 
+  @override
+  Future<void> play(LambentSampleVariant variant) async {
+    // An inline preview may have left the shared player quiet.
+    await backend.setVolume(100);
+    await backend.play(<String, dynamic>{
+      'url': variant.url,
+      'mediaType': 'video',
+      'container': 'mp4',
+      // HDR10 says so; the SDR picture is already upscaled, so it isn't
+      // marked SDR (that would start the device's own upscaler too).
+      if (variant.hdr) 'videoRangeType': 'HDR10',
+      // A TV switches its refresh rate only from a rate it is given.
+      'videoRealFrameRate': 24.0,
+      'videoWidth': variant.width,
+      'videoHeight': variant.height,
+    });
+    await backend.setRepeatMode(RepeatMode.repeatOne);
+  }
+
+  @override
+  Future<void> stop() async {
+    await backend.setRepeatMode(RepeatMode.none);
+    // Restores a TV's display mode as well.
+    await backend.stop();
+  }
+}
+
+class _AetherSamplePlayer extends _SamplePlayer {
+  _AetherSamplePlayer(this.backend) {
+    // AetherEngine has no repeat: start over when the end is reached.
+    _loop = backend.completedStream.listen((done) {
+      if (!done || _stopped) return;
+      unawaited(backend.seekTo(Duration.zero).then((_) => backend.resume()));
+    });
+  }
+
+  final AetherBackend backend;
+  late final StreamSubscription<bool> _loop;
+  bool _stopped = false;
+
+  @override
+  Widget view() => const AetherVideoView(zoomMode: 'fit');
+
+  @override
+  Stream<bool> get playing => backend.playingStream;
+
+  @override
+  Stream<Map<String, dynamic>> get errors => backend.errorStream;
+
+  @override
+  Stream<Duration> get position => backend.positionStream;
+
+  @override
+  Future<bool> screenShowsHdr() => AetherBackend.screenShowsHdr();
+
+  @override
+  Future<void> play(LambentSampleVariant variant) async {
+    await backend.setVolume(100);
+    await backend.play(<String, dynamic>{
+      'url': variant.url,
+      'mediaType': 'video',
+      'noClientEnhancement': true,
+    });
+  }
+
+  @override
+  Future<void> stop() async {
+    _stopped = true;
+    await backend.stopAndResetDisplay();
+  }
+
+  @override
+  List<StreamSubscription<Object?>> get extraSubscriptions => [_loop];
+}
+
+class _LambentSampleScreenState extends State<LambentSampleScreen>
+    with ImmersiveSystemUi {
+  static const _openTimeout = Duration(seconds: 20);
+
+  final _SamplePlayer? _player = _SamplePlayer.create();
+  final _subscriptions = <StreamSubscription<Object?>>[];
+  final _focus = FocusNode(debugLabel: 'lambent-sample');
+  List<LambentSampleVariant> _order = const [];
+  int _index = -1;
+  bool _playing = false;
+  bool _failed = false;
+  bool _phoneLocked = false;
+  bool _disposed = false;
+  LambentSampleScene _scene = LambentSample.scenes.first;
+
+  LambentSampleVariant? get _current =>
+      _index >= 0 && _index < _order.length ? _order[_index] : null;
+
+  @override
+  void initState() {
+    super.initState();
+    setImmersive(true);
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+    // A phone shows the wide picture sideways; a tablet plays the way it's held.
+    if (!PlatformDetection.isTV &&
+        view != null &&
+        FormFactor.ofView(view).isPhone) {
+      _phoneLocked = true;
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+    final player = _player;
+    if (player == null) {
+      _failed = true;
+      return;
+    }
+    _subscriptions
+      ..add(
+        player.errors.listen(
+          (e) => _fail(_index, '${e['kind'] ?? e['errorCodeName'] ?? e}'),
+        ),
+      )
+      ..add(
+        player.playing.listen((playing) {
+          if (playing && !_playing && mounted) {
+            setState(() => _playing = true);
+            _showChrome();
+          }
+        }),
+      )
+      ..add(
+        player.position.listen((position) {
+          final scene = LambentSample.sceneAt(position);
+          if (!identical(scene, _scene) && mounted) {
+            setState(() => _scene = scene);
+          }
+        }),
+      )
+      ..addAll(player.extraSubscriptions);
+    // The platform view must exist before the player is pointed at it.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+  }
+
+  Future<void> _start() async {
+    final player = _player;
+    if (player == null) return;
+    final hdrScreen = await player.screenShowsHdr();
+    if (_disposed) return;
+    // Every Apple device this runs on decodes HEVC Main 10; whether its
+    // screen shows HDR is the question there.
+    final hevcHdr10 = PlatformDetection.isApple || PlatformDetection.isAppleTV
+        ? true
+        : PlatformDetection.supportsHevcHdr10;
+    _order = LambentSample.order(
+      hdrScreen: hdrScreen,
+      hevcHdr10: hevcHdr10,
+      bigScreen: PlatformDetection.isTV || PlatformDetection.isMacOS,
+    );
+    debugPrint(
+      '[LambentSample] HDR screen $hdrScreen, HEVC Main 10 decoder '
+      '$hevcHdr10: trying ${_order.map((v) => v.label).join(', ')}',
+    );
+    await _next();
+  }
+
   /// Variant [index] stopped (the player's error, or a call that threw or
   /// timed out): move to the next one. A failure is counted once, and one
   /// reported for a variant already left behind is ignored.
   void _fail(int index, String why) {
     if (index != _index || !_failures.add(index)) return;
-    debugPrint('[LambentSample] ${_label(_current)} failed: $why');
+    debugPrint('[LambentSample] ${_current?.label} failed: $why');
     unawaited(_next());
   }
 
@@ -132,63 +275,50 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   /// Plays the next variant, the first one to begin with. Out of variants,
   /// says so.
   Future<void> _next() async {
-    final backend = _backend;
-    if (_disposed || backend == null || _failed) return;
+    final player = _player;
+    if (_disposed || player == null || _failed) return;
     _index++;
     final variant = _current;
     if (variant == null) {
       if (mounted) setState(() => _failed = true);
-      unawaited(backend.stop());
+      unawaited(player.stop());
       return;
     }
     if (mounted) setState(() => _playing = false);
     final opened = _index;
     try {
-      // An inline preview may have left the shared player quiet.
-      await backend.setVolume(100);
-      await backend
-          .play(<String, dynamic>{
-            'url': variant.url,
-            'mediaType': 'video',
-            'container': 'mp4',
-            // HDR10 says so; the SDR picture is already upscaled, so it isn't
-            // marked SDR (that would start the device's own upscaler too).
-            if (variant.hdr) 'videoRangeType': 'HDR10',
-          })
-          .timeout(_openTimeout);
-      await backend.setRepeatMode(RepeatMode.repeatOne);
-      debugPrint('[LambentSample] playing ${_label(variant)}');
+      await player.play(variant).timeout(_openTimeout);
+      debugPrint('[LambentSample] playing ${variant.label}');
     } catch (error) {
       _fail(opened, '$error');
     }
   }
 
-  static String _label(LambentSampleVariant? v) =>
-      v == null ? 'none' : (v.hdr ? 'HDR10' : 'SDR ${v.width}');
-
   @override
   void dispose() {
     _disposed = true;
     _chromeTimer?.cancel();
+    _focus.dispose();
     for (final s in _subscriptions) {
       unawaited(s.cancel());
     }
-    final backend = _backend;
-    if (backend != null) {
-      unawaited(backend.setRepeatMode(RepeatMode.none));
-      unawaited(backend.stop());
-    }
+    unawaited(_player?.stop());
     if (_phoneLocked) SystemChrome.setPreferredOrientations([]);
     super.dispose();
   }
 
   void _close() {
-    final navigator = Navigator.of(context);
-    if (navigator.canPop()) navigator.pop();
+    debugPrint('[LambentSample] back');
+    final router = GoRouter.of(context);
+    if (router.canPop()) {
+      router.pop();
+    } else {
+      router.go(Destinations.serverSelect);
+    }
   }
 
   /// The back button and the caption, until the picture has been watched a
-  /// moment; a tap shows them again.
+  /// moment; a tap (or any key on a remote) shows them again.
   bool _chrome = true;
   Timer? _chromeTimer;
   static const _chromeFor = Duration(seconds: 6);
@@ -213,27 +343,33 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   @override
   Widget build(BuildContext context) {
     final hdr = _current?.hdr ?? false;
-    return PopScope(
+    final aspect = (_current ?? LambentSample.phoneHdr10).aspectRatio;
+    final tv = PlatformDetection.isTV;
+    // A remote has no pointer: the screen takes the keys, shows the caption
+    // on any of them and leaves Back to the route.
+    return Focus(
+      focusNode: _focus,
+      autofocus: true,
+      onKeyEvent: (_, event) {
+        if (event is KeyDownEvent) _showChrome();
+        return KeyEventResult.ignored;
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: LayoutBuilder(
           builder: (context, constraints) {
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
-            // The picture as BoxFit.contain places it: full width on a phone
-            // held sideways, with bars above and below.
-            final videoW = w / h > LambentSample.aspectRatio
-                ? h * LambentSample.aspectRatio
-                : w;
-            final videoH = videoW / LambentSample.aspectRatio;
+            // The picture as BoxFit.contain places it: full width on a wide
+            // screen, with bars above and below.
+            final videoW = w / h > aspect ? h * aspect : w;
+            final videoH = videoW / aspect;
             final left = (w - videoW) / 2;
             final top = (h - videoH) / 2;
-            final labelSize = (videoH * 0.045).clamp(12.0, 18.0);
+            final labelSize = (videoH * 0.045).clamp(12.0, tv ? 26.0 : 18.0);
             return Stack(
               children: [
-                const Positioned.fill(
-                  child: Media3VideoView(fill: Colors.black),
-                ),
+                if (_player != null) Positioned.fill(child: _player.view()),
                 if (_playing) ...[
                   Positioned(
                     top: top + 10,
@@ -266,32 +402,39 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
                     onTap: _showChrome,
                   ),
                 ),
-                _fading(
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: _GlassButton(
-                          tooltip: 'Back',
-                          onPressed: _close,
-                          child: const Icon(
-                            Icons.chevron_left_rounded,
-                            color: Colors.white,
-                            size: 28,
+                // A remote's Back closes it; a touch screen gets a button.
+                if (!tv)
+                  _fading(
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: _GlassButton(
+                            tooltip: 'Back',
+                            onPressed: _close,
+                            child: const Icon(
+                              Icons.chevron_left_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
                 _fading(
                   SafeArea(
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                        child: _Footer(hdr: hdr),
+                        padding: EdgeInsets.fromLTRB(
+                          tv ? 48 : 16,
+                          0,
+                          tv ? 48 : 16,
+                          tv ? 32 : 10,
+                        ),
+                        child: _Footer(hdr: hdr, scene: _scene, tv: tv),
                       ),
                     ),
                   ),
@@ -305,11 +448,14 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   }
 }
 
-/// What the picture shows, the film's credit, and where to get the server.
+/// What the picture shows, the playing film's credit, and where to get the
+/// server: a button on a touch screen, the address and a QR code on a TV.
 class _Footer extends StatelessWidget {
-  const _Footer({required this.hdr});
+  const _Footer({required this.hdr, required this.scene, required this.tv});
 
   final bool hdr;
+  final LambentSampleScene scene;
+  final bool tv;
 
   @override
   Widget build(BuildContext context) {
@@ -318,13 +464,58 @@ class _Footer extends StatelessWidget {
               'turns it into HDR as it plays. Left: the film as it is.'
         : 'Right: Lambent Server on a PC upscales the film to this screen as '
               'it plays. Left: the film as it is.';
+    final scale = tv ? 1.4 : 1.0;
+    final getServer = tv
+        ? Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Get Lambent Server',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 14 * scale,
+                    ),
+                  ),
+                  Text(
+                    lambentServerSetupAddress,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16 * scale,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              const ExcludeSemantics(
+                child: SignInQrCode(data: lambentServerSetupUrl, size: 88),
+              ),
+            ],
+          )
+        : FilledButton.icon(
+            onPressed: () => launchUrl(
+              Uri.parse(lambentServerSetupUrl),
+              mode: LaunchMode.externalApplication,
+            ),
+            icon: const Icon(Icons.download_rounded, size: 18),
+            label: const Text('Get Lambent Server'),
+          );
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.55),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14 * scale),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+        padding: EdgeInsets.fromLTRB(
+          14 * scale,
+          8 * scale,
+          8 * scale,
+          8 * scale,
+        ),
         child: Row(
           children: [
             Expanded(
@@ -334,28 +525,21 @@ class _Footer extends StatelessWidget {
                 children: [
                   Text(
                     caption,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: Colors.white, fontSize: 13 * scale),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    LambentSample.credit,
+                    '${scene.credit}. ${LambentSample.changes}',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 11,
+                      fontSize: 11 * scale,
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            FilledButton.icon(
-              onPressed: () => launchUrl(
-                Uri.parse(lambentServerSetupUrl),
-                mode: LaunchMode.externalApplication,
-              ),
-              icon: const Icon(Icons.download_rounded, size: 18),
-              label: const Text('Get Lambent Server'),
-            ),
+            getServer,
           ],
         ),
       ),
