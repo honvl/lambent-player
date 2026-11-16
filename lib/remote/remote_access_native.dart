@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../auth/services/server_discovery_service.dart';
+import '../util/mac_keychain.dart';
 
 /// Reaching a Lambent Server with no account: this device keeps its own key and joins the PC once, on its own at home or
 /// with a pairing link from elsewhere. A joined PC is one server at a loopback address, and every connection from there
@@ -27,7 +28,9 @@ class RemoteAccess {
   static const _pairedName = 'lambent_remote_paired';
   static const _firstPort = 47810;
   static const _statusEvery = Duration(seconds: 3);
-  static const _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage(
+    mOptions: lambentMacKeychain,
+  );
 
   static final DynamicLibrary? _library = _open();
 

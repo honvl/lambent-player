@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'client_certificate_store_base.dart';
+import '../../util/mac_keychain.dart';
 
 class ClientCertificateStoreImpl implements ClientCertificateStore {
-  // macOS's data protection keychain refuses writes from an app signed
-  // without a keychain access group, so this keeps to the file based one.
+  // macOS: lambentMacKeychain, as CredentialStoreImpl says why.
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+    mOptions: lambentMacKeychain,
   );
   bool _unavailable = false;
 

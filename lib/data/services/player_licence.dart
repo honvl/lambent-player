@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import 'lambent_licence.dart';
+import '../../util/mac_keychain.dart';
 
 /// Where this player keeps its key, leases and trial.
 abstract class PlayerLicenceStore {
@@ -19,9 +20,9 @@ abstract class PlayerLicenceStore {
 /// The Keychain or Android Keystore. Every call answers rather than throwing:
 /// a player that can't keep its key still plays, just without a licence.
 class SecurePlayerLicenceStore implements PlayerLicenceStore {
-  // macOS: the file based keychain, as CredentialStoreImpl says why.
+  // macOS: lambentMacKeychain, as CredentialStoreImpl says why.
   static const _storage = FlutterSecureStorage(
-    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+    mOptions: lambentMacKeychain,
   );
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'credential_store_base.dart';
+import '../../util/mac_keychain.dart';
 
 /// Every call answers rather than throwing. A platform with no plugin
 /// registered raises MissingPluginException, which is not a PlatformException,
@@ -8,13 +9,12 @@ import 'credential_store_base.dart';
 /// the session needs is already in hand. Losing the stored copy costs a sign
 /// in on the next launch and nothing more.
 class CredentialStoreImpl implements CredentialStore {
-  // macOS defaults to the data protection keychain, which only accepts an app
-  // signed with a keychain access group. Without one every write is refused,
-  // so the token lives only as long as the session that signed in and the next
-  // launch comes up with nothing to reach the server with. The file based
-  // keychain carries no such requirement.
+  // macOS: lambentMacKeychain picks the keychain. The data protection one
+  // refuses every write from a build without a keychain access group (the
+  // Developer ID download), so that build keeps the file based keychain; the
+  // App Store build has one and never sees a login password prompt.
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    mOptions: MacOsOptions(usesDataProtectionKeychain: false),
+    mOptions: lambentMacKeychain,
   );
   bool _unavailable = false;
 
