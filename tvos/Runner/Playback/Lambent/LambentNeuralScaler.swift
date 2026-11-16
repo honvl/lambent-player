@@ -14,8 +14,8 @@ import QuartzCore
 ///
 /// One picture: Metal `pack` turns the decoded Y'CbCr into the network's 16 half-size channels and keeps the same R'G'B' at the picture's
 /// size; Core ML runs the network on the Neural Engine (its tanh residual, 48 half-size channels); Metal `finish` adds the residual,
-/// pixel-shuffled, to a bicubic 2x and writes what the lift processor's `prep` pass writes, at twice the size: Y' (full range, Deepen
-/// blacks' bend applied) and the 2 x 2 blocks' chroma. The processor's last pass then scales to the screen as for the shader prescalers.
+/// pixel-shuffled, to a bicubic 2x and writes what the lift processor's `prep` pass writes, at twice the size: Y' (full range) and the
+/// 2 x 2 blocks' chroma. The processor's last pass then scales to the screen as for the shader prescalers.
 /// A picture up to 1920 x 1088 (one fixed-size model per network; a smaller one is edge-padded).
 final class LambentNeuralScaler {
     static let modelSize = (1920, 1088)
@@ -218,7 +218,7 @@ final class LambentNeuralScaler {
         guard Self.fits(w, h), let base = textures(slot, w, h) else { throw Failure("\(w)x\(h) does not fit") }
         var params = NeuralParams(
             inW: UInt32(w), inH: UInt32(h), gw: UInt32(Self.modelSize.0 / f), gh: UInt32(Self.modelSize.1 / f), f: UInt32(f),
-            codeScale: codeScale, lift: 0, knee: 0.5)
+            codeScale: codeScale)
         guard let buffer = queue.makeCommandBuffer(), let encoder = buffer.makeComputeCommandEncoder() else { throw Failure("no command buffer") }
         encoder.setComputePipelineState(packPipeline)
         encoder.setTextures([inY, inC, base], range: 0..<3)
@@ -245,13 +245,13 @@ final class LambentNeuralScaler {
     }
 
     /// The slot's residual onto a bicubic 2x, in `buffer`: Y' at twice the picture's size and the 2 x 2 blocks' chroma (the picture's
-    /// size), as the processor's `prep` writes them, Deepen blacks' bend (`lift`, 0: none) applied.
-    func encodeFinish(_ slot: Slot, _ buffer: MTLCommandBuffer, lift: Float, knee: Float) -> (luma: MTLTexture, chroma: MTLTexture)? {
+    /// size), as the processor's `prep` writes them.
+    func encodeFinish(_ slot: Slot, _ buffer: MTLCommandBuffer) -> (luma: MTLTexture, chroma: MTLTexture)? {
         guard let base = slot.base, let luma = slot.luma, let chroma = slot.chroma, let encoder = buffer.makeComputeCommandEncoder()
         else { return nil }
         var params = NeuralParams(
             inW: UInt32(base.width), inH: UInt32(base.height), gw: UInt32(Self.modelSize.0 / f), gh: UInt32(Self.modelSize.1 / f),
-            f: UInt32(f), codeScale: 0, lift: lift, knee: knee)
+            f: UInt32(f), codeScale: 0)
         encoder.setComputePipelineState(finishPipeline)
         encoder.setTextures([base, luma, chroma], range: 0..<3)
         encoder.setBuffer(slot.output, offset: 0, index: 0)
@@ -263,14 +263,15 @@ final class LambentNeuralScaler {
     }
 
     /// `encodeFinish` and the processor's last pass in one, for an output exactly twice the picture: straight into the output's P010
-    /// planes (`outY` r16Unorm, `outC` rg16Unorm), PQ through the lift's table `lut` when `hdr`, else the picture's own SDR Y'CbCr.
+    /// planes (`outY` r16Unorm, `outC` rg16Unorm), PQ through the picture's Auto HDR table `lut` when `hdr`, else the picture's own SDR
+    /// Y'CbCr.
     func encodeFinishOut(
-        _ slot: Slot, _ buffer: MTLCommandBuffer, outY: MTLTexture, outC: MTLTexture, lut: MTLTexture, hdr: Bool, lift: Float, knee: Float
+        _ slot: Slot, _ buffer: MTLCommandBuffer, outY: MTLTexture, outC: MTLTexture, lut: MTLTexture, hdr: Bool
     ) -> Bool {
         guard let base = slot.base, let encoder = buffer.makeComputeCommandEncoder() else { return false }
         var params = NeuralParams(
             inW: UInt32(base.width), inH: UInt32(base.height), gw: UInt32(Self.modelSize.0 / f), gh: UInt32(Self.modelSize.1 / f),
-            f: UInt32(f), codeScale: 0, lift: lift, knee: knee, hdr: hdr ? 1 : 0)
+            f: UInt32(f), codeScale: 0, hdr: hdr ? 1 : 0)
         encoder.setComputePipelineState(finishOutPipeline)
         encoder.setTextures([base, outY, outC, lut], range: 0..<4)
         encoder.setBuffer(slot.output, offset: 0, index: 0)
@@ -285,8 +286,7 @@ final class LambentNeuralScaler {
 private struct NeuralParams {
     var inW: UInt32, inH: UInt32, gw: UInt32, gh: UInt32, f: UInt32
     var codeScale: Float
-    var lift: Float, knee: Float
-    /// `finish_out`: write PQ through the lift's table (1) or the picture's own SDR Y'CbCr (0).
+    /// `finish_out`: write PQ through the picture's Auto HDR table (1) or the picture's own SDR Y'CbCr (0).
     var hdr: UInt32 = 0
 }
 
@@ -297,7 +297,7 @@ private let neuralSource = """
     using namespace metal;
 
     // gw x gh: the network's grid (the padded picture over f); f: pixels packed per side.
-    struct Params { uint inW, inH, gw, gh, f; float codeScale; float lift; float knee; uint hdr; };
+    struct Params { uint inW, inH, gw, gh, f; float codeScale; uint hdr; };
 
     constant float KR = 0.2126, KB = 0.0722;
 
@@ -339,11 +339,11 @@ private let neuralSource = """
     constant float ODD[4]  = {-0.10546875, 0.87890625, 0.26171875, -0.03515625};   // inputs i-1 .. i+2
 
     // One thread a picture pixel: the bicubic 2x of its 2 x 2 output pixels from the 5 x 5 pixels around it (even outputs take offsets
-    // -2..1 with EVEN, odd ones -1..2 with ODD), the residual added; their Y' (Deepen blacks' bend as in the processor's `prep`) and the
-    // block's chroma, scaled with the bend.
+    // -2..1 with EVEN, odd ones -1..2 with ODD), the residual added; their Y' and the
+    // block's chroma.
     // The picture pixel g's 2 x 2 output pixels: the bicubic 2x from the 5 x 5 pixels around it (even outputs take offsets -2..1 with
-    // EVEN, odd ones -1..2 with ODD), the residual added; their Y' (Deepen blacks' bend as in the processor's `prep`) in ys, and the
-    // block's chroma, scaled with the bend, returned.
+    // EVEN, odd ones -1..2 with ODD), the residual added; their Y' in ys, and the
+    // block's chroma, returned.
     static float2 doubled(texture2d<half, access::read> base, device const half* res, constant Params& p, uint2 g, thread float* ys) {
         float3 he[5], ho[5];
         for (int j = 0; j < 5; j++) {
@@ -355,7 +355,6 @@ private let neuralSource = """
         }
         uint plane = p.gw * p.gh, r = 2 * p.f, rr = r * r;
         float3 sum = 0.0;
-        float k = 0.0;
         for (uint n = 0; n < 4; n++) {
             uint dx = n & 1, dy = n >> 1;
             uint2 at = g * 2 + uint2(dx, dy);
@@ -366,18 +365,11 @@ private let neuralSource = """
             float3 res3 = float3(res[(0 * rr + sub) * plane + a], res[(1 * rr + sub) * plane + a], res[(2 * rr + sub) * plane + a]);
             float3 rgb = clamp((acc + res3) * 0.5 + 0.5, 0.0, 1.0);
             sum += rgb;
-            float y = dot(rgb, float3(KR, 1.0 - KR - KB, KB));
-            float rb = 1.0;
-            if (p.lift > 0.0) {
-                float t = saturate(1.0 - y / p.knee);
-                rb = y > 1e-4 ? saturate((y - p.lift * t * t) / y) : 0.0;
-            }
-            k += rb;
-            ys[n] = saturate(y * rb);
+            ys[n] = saturate(dot(rgb, float3(KR, 1.0 - KR - KB, KB)));
         }
         float3 m = sum * 0.25;
         float ym = dot(m, float3(KR, 1.0 - KR - KB, KB));
-        return float2((m.b - ym) / (2.0 * (1.0 - KB)), (m.r - ym) / (2.0 * (1.0 - KR))) * (k * 0.25);
+        return float2((m.b - ym) / (2.0 * (1.0 - KB)), (m.r - ym) / (2.0 * (1.0 - KR)));
     }
 
     // One thread a picture pixel: its 2 x 2 output pixels' Y' and the block's chroma, as the processor's `prep` writes them.
@@ -392,7 +384,7 @@ private let neuralSource = """
     }
 
     // `finish` and the processor's last pass in one, when the output is exactly twice the picture (1080p -> 2160p): straight to P010,
-    // PQ through the lift's table (`hdr`, as `scale_lift` reading the doubled luma directly) or the picture's own SDR Y'CbCr (as
+    // PQ through the picture's Auto HDR table (`hdr`, as `scale_lift` reading the doubled luma directly) or the picture's own SDR Y'CbCr (as
     // `scale_sdr`). Saves writing and reading the doubled luma.
     constexpr sampler lutSampler(coord::normalized, filter::linear, address::clamp_to_edge);
 

@@ -46,6 +46,7 @@ class InAppPurchaseEnhanceStore implements EnhanceStore {
       DistributionChannel.aab ||
       DistributionChannel.androidTvAab => PlatformDetection.isAndroid,
       DistributionChannel.iosSigned => PlatformDetection.isIOS,
+      DistributionChannel.macosPkg => PlatformDetection.isMacOS,
       _ => false,
     };
   }

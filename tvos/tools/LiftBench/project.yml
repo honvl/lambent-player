@@ -17,7 +17,7 @@ targets:
       - ../../Runner/Playback/Lambent/LambentLiftProcessor.swift
       - ../../Runner/Playback/Lambent/LambentPrescaler.swift
       - ../../Runner/Playback/Lambent/LambentNeuralScaler.swift
-      - ../../Runner/Playback/Lambent/LambentTrueHDRTables.swift
+      - ../../Runner/Playback/Lambent/LambentAutoHDR.swift
       - ../../Runner/Playback/Lambent/LambentClientUpscale.swift
       - path: ../../Runner/Shaders
         type: folder
@@ -41,7 +41,7 @@ targets:
       - ../../Runner/Playback/Lambent/LambentLiftProcessor.swift
       - ../../Runner/Playback/Lambent/LambentPrescaler.swift
       - ../../Runner/Playback/Lambent/LambentNeuralScaler.swift
-      - ../../Runner/Playback/Lambent/LambentTrueHDRTables.swift
+      - ../../Runner/Playback/Lambent/LambentAutoHDR.swift
       - ../../Runner/Playback/Lambent/LambentClientUpscale.swift
       - path: ../../Runner/Shaders
         type: folder

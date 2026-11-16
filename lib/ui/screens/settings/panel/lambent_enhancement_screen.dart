@@ -184,8 +184,10 @@ class _EnhanceSubscriptionSectionState
   /// builds sell only through their store, and iOS and Apple TV builds
   /// without a store link out to nothing.
   static bool get _mayLinkOut =>
-      // The Mac build is distributed directly, with no store to sell through.
-      PlatformDetection.isMacOS ||
+      // The direct Mac build has no store to sell through; the Mac App Store
+      // build sells only through it.
+      PlatformDetection.isMacOS &&
+          AppDistribution.channel != DistributionChannel.macosPkg ||
       PlatformDetection.isAndroid &&
           switch (AppDistribution.channel) {
             DistributionChannel.aab ||

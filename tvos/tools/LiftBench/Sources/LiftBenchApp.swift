@@ -179,7 +179,7 @@ final class PlayerHost: UIView {
         // The HDR lift on the iPad (SDR in, HDR10 out): at the picture's own size, and in Catmull-Rom's last pass at the screen's.
         for (what, size, sc) in [("1080p at its size", nil, LambentLiftProcessor.Scaler.none), ("to the screen with Catmull-Rom", Optional(runSize), .catmullRom)] {
             guard let p = LambentLiftProcessor() else { continue }
-            p.reset(deepen: true)
+            p.reset()
             p.force(sc)
             p.outputSize = size
             for i in 0..<48 { _ = p.process(pictures[i % pictures.count], deadline: .infinity) }
@@ -239,7 +239,7 @@ final class PlayerHost: UIView {
             let name = clip.deletingPathExtension().lastPathComponent
             for (tag, sc) in [("ai", LambentLiftProcessor.Scaler.neural(fast: false)), ("student", .neural(fast: true)), ("catrom", .catmullRom)] {
                 guard let p = LambentLiftProcessor() else { continue }
-                p.reset(deepen: false)
+                p.reset()
                 p.hdr = false
                 p.force(sc)
                 p.neuralAnyScale = true
@@ -288,7 +288,7 @@ final class PlayerHost: UIView {
     private func iPadCapacity(_ scalers: [LambentLiftProcessor.Scaler], _ pictures: [CVPixelBuffer], label: String) {
         for sc in scalers {
             guard let p = LambentLiftProcessor() else { continue }
-            p.reset(deepen: false)
+            p.reset()
             p.hdr = false
             p.force(sc)
             p.neuralAnyScale = true
@@ -339,20 +339,6 @@ final class PlayerHost: UIView {
         reader.startReading()
         var pictures: [CVPixelBuffer] = []
         while pictures.count < 24, let s = out.copyNextSampleBuffer() { if let b = CMSampleBufferGetImageBuffer(s) { pictures.append(b) } }
-        LiftKernelBench.run(pictures[min(12, pictures.count - 1)])
-        // The lift's table against the lift itself: 10-bit code differences of the whole output, on three pictures of the clip and on
-        // a ramp through every hue and level, at the picture's size and upscaled.
-        if let ramp = colourRamp() {
-            for (name, pic) in [("clip 0", pictures[0]), ("clip 8", pictures[8]), ("clip 16", pictures[16]), ("ramp", ramp)] {
-                for size: (Int, Int)? in [nil, (3840, 2160)] {
-                    guard let a = LambentLiftProcessor(), let b = LambentLiftProcessor() else { continue }
-                    for q in [a, b] { q.force(.catmullRom); q.outputSize = size; q.reset(deepen: false) }
-                    b.exactLift = true
-                    guard let oa = a.process(pic, deadline: .infinity), let ob = b.process(pic, deadline: .infinity) else { continue }
-                    print("BENCH lift table vs exact, \(name)\(size == nil ? "" : " upscaled"): \(codeDiff(oa, ob))")
-                }
-            }
-        }
         // A fingerprint of each scaler's output on the first picture (mean Y' code, and mean |difference| from Catmull-Rom's), to
         // compare with the same on a Mac: a prescaler that skipped passes would not match.
         var catrom: CVPixelBuffer?
@@ -363,17 +349,12 @@ final class PlayerHost: UIView {
             guard let o = p.process(pictures[0], deadline: .infinity) else { continue }
             if sc == .catmullRom && catrom == nil { catrom = o; continue }
             print(String(format: "BENCH fingerprint %@: %@", "\(sc)", fingerprint(o, catrom)))
-            // The AI upscaler at exactly 2x takes the fused finish-and-last-pass kernel; the exact lift takes the two passes.
-            if sc.isNeural, let q = LambentLiftProcessor() {
-                q.force(sc); q.outputSize = (3840, 2160); q.exactLift = true
-                if let o2 = q.process(pictures[0], deadline: .infinity) { print("BENCH fused vs two passes (exact lift): \(codeDiff(o, o2))") }
-            }
         }
         // The AI upscaler twice: its network for a low bitrate (neural-low) and for a high one (neural-hb).
         let timed = scalers.flatMap { sc -> [(LambentLiftProcessor.Scaler, Int64)] in sc.isNeural ? [(sc, Int64(0)), (sc, Int64(200_000_000))] : [(sc, Int64(0))] }
         for (sc, bitrate) in timed {
             guard let p = LambentLiftProcessor() else { continue }
-            p.reset(deepen: true)
+            p.reset()
             p.force(sc)
             p.sourceBitrate = bitrate
             p.outputSize = (3840, 2160)
@@ -411,9 +392,8 @@ final class PlayerHost: UIView {
                              r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
                 // Experiments (LIFT_EXP): the network's stage with no GPU stage beside it, and the GPU stage with SDR output.
                 if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
-                    for variant in ["no GPU stage", "SDR out", "exact lift"] {
+                    for variant in ["no GPU stage", "SDR out"] {
                         p.hdr = variant != "SDR out"
-                        p.exactLift = variant == "exact lift"
                         var ane: [Double] = [], packs: [Double] = []
                         let t1 = CACurrentMediaTime()
                         for i in 0..<120 {
@@ -439,7 +419,6 @@ final class PlayerHost: UIView {
                                      ane.reduce(0, +) / Double(max(ane.count, 1)), packs.reduce(0, +) / Double(max(packs.count, 1)), gpu))
                     }
                     p.hdr = true
-                    p.exactLift = false
                 }
                 continue
             }
@@ -514,7 +493,7 @@ final class PlayerHost: UIView {
         guard let url = Bundle.main.url(forResource: "Videos/\(clip)", withExtension: "mp4"), let processor = LambentLiftProcessor() else {
             print("BENCH \(label): missing clip or processor"); return next()
         }
-        processor.reset(deepen: runHDR && !name.contains("SDR out"))
+        processor.reset())
         processor.hdr = runHDR && !name.contains("SDR out")
         processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }

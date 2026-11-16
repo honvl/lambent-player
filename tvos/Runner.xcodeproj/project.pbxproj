@@ -29,7 +29,7 @@
 		6E8429C73DFB8688BD40C60F /* AppleTvSystemChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D05FC70CE4F8BD2EC3962C /* AppleTvSystemChannel.swift */; };
 		5C0A11E57043E0B1A7E5D001 /* AppleTvStoreChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0A11E57043E0B1A7E5D002 /* AppleTvStoreChannel.swift */; };
 		76204B7FA09C5286ACA2FE6C /* AssRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */; };
-		AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */; };
+		AE6D89BBE542A843A359C534 /* LambentAutoHDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F82A0D1BB35A93AB818318 /* LambentAutoHDR.swift */; };
 		8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */; };
 		78881C895CCFB1BC9086906F /* LambentPrescaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */; };
 		A1B2C3D4E5F60718293A4B5C /* LambentNeuralScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */; };
@@ -159,7 +159,7 @@
 		613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentPrescaler.swift; path = Lambent/LambentPrescaler.swift; sourceTree = "<group>"; };
 		0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentNeuralScaler.swift; path = Lambent/LambentNeuralScaler.swift; sourceTree = "<group>"; };
 		1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentHDRLift.swift; path = Lambent/LambentHDRLift.swift; sourceTree = "<group>"; };
-		C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentTrueHDRTables.swift; path = Lambent/LambentTrueHDRTables.swift; sourceTree = "<group>"; };
+		C3F82A0D1BB35A93AB818318 /* LambentAutoHDR.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentAutoHDR.swift; path = Lambent/LambentAutoHDR.swift; sourceTree = "<group>"; };
 		F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AssRenderer.swift; path = Aether/AssRenderer.swift; sourceTree = "<group>"; };
 		F2A0477050CD294B7CB8C754 /* SubtitleOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SubtitleOverlay.swift; path = Aether/SubtitleOverlay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -246,7 +246,7 @@
 				78635028C38C060155519D22 /* AetherVideoChannel.swift */,
 				A3E7D10600000000000000C2 /* AetherVideoPlatformView.swift */,
 				F0BD358BD8ADA249714B0CC1 /* AssRenderer.swift */,
-				C3F82A0D1BB35A93AB818318 /* LambentTrueHDRTables.swift */,
+				C3F82A0D1BB35A93AB818318 /* LambentAutoHDR.swift */,
 				1957573048FCCD9E13ABC0FE /* LambentHDRLift.swift */,
 				613D30136DC6E2E5FBE41DDA /* LambentPrescaler.swift */,
 				0F1E2D3C4B5A69788796A5B4 /* LambentNeuralScaler.swift */,
@@ -595,7 +595,7 @@
 				CAE8045C3AB63C66024FA6B7 /* AetherVideoChannel.swift in Sources */,
 				A3E7D10500000000000000C1 /* AetherVideoPlatformView.swift in Sources */,
 				76204B7FA09C5286ACA2FE6C /* AssRenderer.swift in Sources */,
-				AE6D89BBE542A843A359C534 /* LambentTrueHDRTables.swift in Sources */,
+				AE6D89BBE542A843A359C534 /* LambentAutoHDR.swift in Sources */,
 				8EF7595F88274A8643D6C9D7 /* LambentHDRLift.swift in Sources */,
 				78881C895CCFB1BC9086906F /* LambentPrescaler.swift in Sources */,
 				A1B2C3D4E5F60718293A4B5C /* LambentNeuralScaler.swift in Sources */,

@@ -67,7 +67,7 @@ final class LambentUpscalePictureTests: XCTestCase {
 
   private func upscale(with scaler: LambentLiftProcessor.Scaler) throws -> CVPixelBuffer? {
     let processor = try XCTUnwrap(LambentLiftProcessor())
-    processor.reset(deepen: false)
+    processor.reset()
     processor.hdr = false
     processor.frameRate = 24
     processor.outputSize = Self.dst
@@ -98,7 +98,7 @@ final class LambentUpscalePictureTests: XCTestCase {
   func testTheFreeLadderUpscalesWithRavuLite() throws {
     let processor = try XCTUnwrap(LambentLiftProcessor())
     let whole = processor.ladder
-    processor.reset(deepen: false)
+    processor.reset()
     processor.useLadder(free: true)
     XCTAssertEqual(processor.scaler, .prescaler("ravu-lite-ar-r3"))
     XCTAssertFalse(processor.ladder.contains { $0.isNeural })
@@ -139,7 +139,7 @@ final class LambentUpscalePictureTests: XCTestCase {
     XCTAssertNotNil(LambentNeuralScaler.loadNow("neural-low", device: device))
     let processor = try XCTUnwrap(LambentLiftProcessor())
     processor.force(ladder: [.neural(fast: false), .catmullRom, .none])
-    processor.reset(deepen: false)
+    processor.reset()
     processor.hdr = false
     processor.outputSize = (1194, 671)  // 1.24x: a 1080p title full screen on an 11-inch iPad Pro
     let source = try picture()
@@ -151,7 +151,7 @@ final class LambentUpscalePictureTests: XCTestCase {
 
     let twice = try XCTUnwrap(LambentLiftProcessor())
     twice.force(ladder: [.neural(fast: false), .catmullRom, .none])
-    twice.reset(deepen: false)
+    twice.reset()
     twice.hdr = false
     twice.outputSize = Self.dst
     XCTAssertNotNil(twice.pack(source))
@@ -162,10 +162,84 @@ final class LambentUpscalePictureTests: XCTestCase {
   /// Nothing to upscale (the picture already fills its place): the picture comes back as it is.
   func testAPictureAtItsSizeIsLeftAlone() throws {
     let processor = try XCTUnwrap(LambentLiftProcessor())
-    processor.reset(deepen: false)
+    processor.reset()
     processor.hdr = false
     processor.outputSize = Self.src
     let source = try picture()
     XCTAssertTrue(processor.process(source, deadline: .infinity) === source)
+  }
+
+  // MARK: Auto HDR (the bank of sixteen tables)
+
+  /// The picture Lambent's companion/shaders/lutg/reference.py has numbers for (the Vision Pro's HDRLiftTests use it too): a luma ramp
+  /// across, Cb down and Cr across on the left half, neutral on the right (8-bit, video range, 640 x 360).
+  private func referencePicture() throws -> CVPixelBuffer {
+    let (w, h) = (640, 360)
+    var made: CVPixelBuffer?
+    let attrs: [String: Any] = [
+      kCVPixelBufferMetalCompatibilityKey as String: true,
+      kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](),
+    ]
+    CVPixelBufferCreate(nil, w, h, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, attrs as CFDictionary, &made)
+    let buffer = try XCTUnwrap(made)
+    CVBufferSetAttachment(buffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_709_2, .shouldPropagate)
+    CVBufferSetAttachment(buffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_709_2, .shouldPropagate)
+    CVPixelBufferLockBaseAddress(buffer, [])
+    let y = CVPixelBufferGetBaseAddressOfPlane(buffer, 0)!.assumingMemoryBound(to: UInt8.self)
+    let yRow = CVPixelBufferGetBytesPerRowOfPlane(buffer, 0)
+    for r in 0..<h { for x in 0..<w { y[r * yRow + x] = UInt8(16 + (219 * Double(x) / Double(w - 1) + 0.5).rounded(.down)) } }
+    let c = CVPixelBufferGetBaseAddressOfPlane(buffer, 1)!.assumingMemoryBound(to: UInt8.self)
+    let cRow = CVPixelBufferGetBytesPerRowOfPlane(buffer, 1)
+    for r in 0..<(h / 2) {
+      for x in 0..<(w / 2) {
+        let cb: UInt8 = x >= w / 2 ? 128 : UInt8(128 + (96 * Double(r) / Double(h / 2 - 1) - 48 + 0.5).rounded(.down))
+        let cr: UInt8 = x >= w / 2 ? 128 : UInt8(128 + (96 * Double(x) / Double(w / 2 - 1) - 48 + 0.5).rounded(.down))
+        (c[r * cRow + 2 * x], c[r * cRow + 2 * x + 1]) = (cb, cr)
+      }
+    }
+    CVPixelBufferUnlockBaseAddress(buffer, [])
+    return buffer
+  }
+
+  private static let referencePoints = [(40, 30), (160, 90), (320, 180), (480, 270), (600, 330), (100, 300), (540, 40), (320, 20)]
+  /// reference.py's 10-bit luma codes at those points (its chroma filtered; the lift here reads each 2 x 2 block's chroma, so a code
+  /// may differ by a little more than the headset's).
+  private static let referenceCodes = [227.1, 328.18, 468.37, 577.18, 616.65, 264.79, 598.32, 470.36]
+
+  /// Auto HDR on this device is the bank of sixteen tables, as reference.py makes the picture: HDR10 out, and the codes within a few.
+  func testAutoHDRIsTheBankOfTables() throws {
+    let processor = try XCTUnwrap(LambentLiftProcessor())
+    guard processor.canLift else { throw XCTSkip("Auto HDR's tables are not in this bundle (tvos/scripts/copy_autohdr_weights.sh)") }
+    processor.reset()
+    processor.hdr = true
+    processor.frameRate = 24
+    processor.outputSize = nil
+    let out = try XCTUnwrap(processor.process(try referencePicture(), deadline: .infinity))
+    let transfer = CVBufferCopyAttachment(out, kCVImageBufferTransferFunctionKey, nil) as? String
+    XCTAssertEqual(transfer, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String)
+    CVPixelBufferLockBaseAddress(out, .readOnly)
+    defer { CVPixelBufferUnlockBaseAddress(out, .readOnly) }
+    let y = CVPixelBufferGetBaseAddressOfPlane(out, 0)!.assumingMemoryBound(to: UInt16.self)
+    let row = CVPixelBufferGetBytesPerRowOfPlane(out, 0) / 2
+    for ((px, py), expected) in zip(Self.referencePoints, Self.referenceCodes) {
+      let code = Double(y[py * row + px] >> 6)
+      print("[LambentUpscalePictureTests] Auto HDR at (\(px), \(py)): \(code), reference \(expected)")
+      XCTAssertEqual(code, expected, accuracy: 4, "the bank of tables' picture at (\(px), \(py))")
+    }
+  }
+
+  /// Upscaled and lifted in one: the 4K output is HDR10 through the same table.
+  func testAutoHDRUpscaled() throws {
+    let processor = try XCTUnwrap(LambentLiftProcessor())
+    guard processor.canLift else { throw XCTSkip("Auto HDR's tables are not in this bundle") }
+    processor.reset()
+    processor.hdr = true
+    processor.frameRate = 24
+    processor.outputSize = (1280, 720)
+    processor.force(.catmullRom)
+    let out = try XCTUnwrap(processor.process(try referencePicture(), deadline: .infinity))
+    XCTAssertEqual(CVPixelBufferGetWidth(out), 1280)
+    let transfer = CVBufferCopyAttachment(out, kCVImageBufferTransferFunctionKey, nil) as? String
+    XCTAssertEqual(transfer, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ as String)
   }
 }

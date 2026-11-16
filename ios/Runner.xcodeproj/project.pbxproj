@@ -10,7 +10,7 @@
 		DAFD6869191C19016BAE12B6 /* LambentUpscalePictureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A965B6700F17E8681F5562 /* LambentUpscalePictureTests.swift */; };
 		16ADD5B98E62EA26C8E943BA /* LambentClientUpscaleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CBC128D63E7E65D0E4CF908 /* LambentClientUpscaleTests.swift */; };
 		AF80370A063904BCD622990F /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 2E8E2FB79A7480D49F0CBBBF /* Shaders */; };
-		D238C7D5F7818BFC4CD1D7EB /* LambentTrueHDRTables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F12C3242AC9B360739D90E8 /* LambentTrueHDRTables.swift */; };
+		D238C7D5F7818BFC4CD1D7EB /* LambentAutoHDR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F12C3242AC9B360739D90E8 /* LambentAutoHDR.swift */; };
 		54A17C9F390E80C18E60C39F /* LambentPrescaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41EC419E213E931F7A7241A5 /* LambentPrescaler.swift */; };
 		27DDB3F45710FB36EABC4285 /* LambentNeuralScaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30E02B92855E372463D6036 /* LambentNeuralScaler.swift */; };
 		3B65BC65F7D5D80722EE24C5 /* LambentLiftProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2B46F0E6B5C2765F5FA3F2 /* LambentLiftProcessor.swift */; };
@@ -88,7 +88,7 @@
 		40A965B6700F17E8681F5562 /* LambentUpscalePictureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LambentUpscalePictureTests.swift; sourceTree = "<group>"; };
 		9CBC128D63E7E65D0E4CF908 /* LambentClientUpscaleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LambentClientUpscaleTests.swift; sourceTree = "<group>"; };
 		2E8E2FB79A7480D49F0CBBBF /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Shaders; path = ../../../tvos/Runner/Shaders; sourceTree = "<group>"; };
-		5F12C3242AC9B360739D90E8 /* LambentTrueHDRTables.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentTrueHDRTables.swift; path = ../../../tvos/Runner/Playback/Lambent/LambentTrueHDRTables.swift; sourceTree = "<group>"; };
+		5F12C3242AC9B360739D90E8 /* LambentAutoHDR.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentAutoHDR.swift; path = ../../../tvos/Runner/Playback/Lambent/LambentAutoHDR.swift; sourceTree = "<group>"; };
 		41EC419E213E931F7A7241A5 /* LambentPrescaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentPrescaler.swift; path = ../../../tvos/Runner/Playback/Lambent/LambentPrescaler.swift; sourceTree = "<group>"; };
 		D30E02B92855E372463D6036 /* LambentNeuralScaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentNeuralScaler.swift; path = ../../../tvos/Runner/Playback/Lambent/LambentNeuralScaler.swift; sourceTree = "<group>"; };
 		3E2B46F0E6B5C2765F5FA3F2 /* LambentLiftProcessor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LambentLiftProcessor.swift; path = ../../../tvos/Runner/Playback/Lambent/LambentLiftProcessor.swift; sourceTree = "<group>"; };
@@ -225,7 +225,7 @@
 				57A7C9A400000000000000C4 /* WatchPartyOverlay.swift */,
 				B43803CCF1D9787347AF7A13 /* MoonfinTvosStubs.swift */,
 				2E8E2FB79A7480D49F0CBBBF /* Shaders */,
-				5F12C3242AC9B360739D90E8 /* LambentTrueHDRTables.swift */,
+				5F12C3242AC9B360739D90E8 /* LambentAutoHDR.swift */,
 				41EC419E213E931F7A7241A5 /* LambentPrescaler.swift */,
 				D30E02B92855E372463D6036 /* LambentNeuralScaler.swift */,
 				3E2B46F0E6B5C2765F5FA3F2 /* LambentLiftProcessor.swift */,
@@ -577,7 +577,7 @@
 				38309433A5B9EC8501A2A40F /* EpisodeBrowser.swift in Sources */,
 				57A7C9A300000000000000C3 /* WatchPartyOverlay.swift in Sources */,
 				C4B055F383D161397353F3F9 /* MoonfinTvosStubs.swift in Sources */,
-				D238C7D5F7818BFC4CD1D7EB /* LambentTrueHDRTables.swift in Sources */,
+				D238C7D5F7818BFC4CD1D7EB /* LambentAutoHDR.swift in Sources */,
 				54A17C9F390E80C18E60C39F /* LambentPrescaler.swift in Sources */,
 				27DDB3F45710FB36EABC4285 /* LambentNeuralScaler.swift in Sources */,
 				3B65BC65F7D5D80722EE24C5 /* LambentLiftProcessor.swift in Sources */,

@@ -1,3 +1,3 @@
-PRODUCT_NAME = Moonfin
-PRODUCT_BUNDLE_IDENTIFIER = org.moonfin.app
-PRODUCT_COPYRIGHT = Copyright © 2026 Moonfin. All rights reserved.
+PRODUCT_NAME = Lambent
+PRODUCT_BUNDLE_IDENTIFIER = app.getlambent.viewer
+PRODUCT_COPYRIGHT = Copyright © 2026 Honver Lam. Based on Moonfin.

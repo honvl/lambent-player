@@ -144,7 +144,8 @@ enum LambentClientUpscale {
     }
 
     /// What this device can run by itself (docs/ENTITLEMENTS.md 8.4 in Lambent), for the purchase screen: `ai` the AI upscaler, `shader` a
-    /// shader upscaler (the fallbacks ship with the app), `hdr` the lift, on this screen. A TV's own HDR mode decides there.
+    /// shader upscaler (the fallbacks ship with the app), `hdr` Auto HDR (its tables in the bundle) on this
+    /// screen. A TV's own HDR mode decides there.
     @MainActor
     static func capabilities() -> [String: Bool] {
         guard let device = MTLCreateSystemDefaultDevice() else { return ["ai": false, "shader": false, "hdr": false] }
@@ -159,7 +160,7 @@ enum LambentClientUpscale {
         return [
             "ai": steps.contains { $0.isNeural },
             "shader": LambentPrescaler.bundleDirectory != nil,
-            "hdr": headroom >= liftHeadroom,
+            "hdr": headroom >= liftHeadroom && LambentAutoHDR.available,
         ]
     }
 

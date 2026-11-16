@@ -18,14 +18,15 @@ import os
 /// and without them the free RAVU-lite (LambentClientUpscale.swift). There is no setting.
 ///
 /// AetherEngine plays the title through AVPlayer as usual. Its frames are
-/// taken from an `AVPlayerItemVideoOutput`, lifted on the GPU (Lambent's
-/// TrueHDR-fitted tone curve, and optionally Deepen blacks), and presented as
-/// BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid over the hidden
-/// `AVPlayerLayer`. The panel is asked for HDR10 at the film's rate.
+/// taken from an `AVPlayerItemVideoOutput`, lifted on the GPU by Lambent Auto
+/// HDR's bank of sixteen tables (LambentAutoHDR.swift, each picture its own
+/// table), and presented as BT.2020 PQ in an `AVSampleBufferDisplayLayer` laid
+/// over the hidden `AVPlayerLayer`. The panel is asked for HDR10 at the film's
+/// rate.
 ///
 /// `cup` in the enhanced stream's URL upscales (the AI upscaler on the Neural Engine, else a shader; LambentLiftProcessor.swift; the
 /// picture keeps the PC's colours, SDR or HDR10, an HDR10 one through the shaders: the AI upscaler's network was trained on SDR),
-/// `chdr=1` lifts an SDR picture to HDR10. The Apple TV does what the plan asks (`LambentClientUpscale.appleTVWork`); the iPad only
+/// `chdr=1` lifts an SDR picture to HDR10 (only with Auto HDR's weights in the bundle). The Apple TV does what the plan asks (`LambentClientUpscale.appleTVWork`); the iPad only
 /// what is worth its power (`LambentClientUpscale.iPadWork`); else AVPlayer shows the picture itself. A Dolby Vision stream is left
 /// to AVPlayer, which keeps its metadata. In a compare (`cmp=1`, the PC's original on the left half) only the right half is done
 /// here, over AVPlayer's own picture. Logs `[LambentHDR]` lines every 2 s.
@@ -105,12 +106,13 @@ final class LambentHDRLift {
         hdr = false
         maxHeight = planHeight
         self.free = free
-        liftAsked = lift
+        // Without Auto HDR's tables in the bundle nothing is lifted here.
+        liftAsked = lift && processor.canLift
         self.compare = compare
         liftView.rightHalfOnly = compare
         started = false
         lead = 0
-        processor.reset(deepen: false)
+        processor.reset()
         processor.useLadder(free: free)
         processor.hdr = hdr
         processor.sourceBitrate = engine.sourceVideoBitrate
@@ -334,8 +336,9 @@ final class LambentHDRLift {
                     self.report(label: label)
                 }
                 NSLog(
-                    "[LambentHDR] frames %d late %d gpu_ms mean %.3f p95 %.3f ane_ms %.3f floor %.3f lift %.3f edr_headroom %.2f switching %@ %@ %@",
-                    r.frames, r.late, r.meanMs, r.p95Ms, r.engineMs, r.floor, r.lift, headroom, switching ? "yes" : "no", r.format, r.scaler)
+                    "[LambentHDR] frames %d late %d gpu_ms mean %.3f p95 %.3f ane_ms %.3f edr_headroom %.2f switching %@ %@ %@%@",
+                    r.frames, r.late, r.meanMs, r.p95Ms, r.engineMs, headroom, switching ? "yes" : "no", r.format, r.scaler,
+                    hdr ? " auto_hdr tables" : "")
             }
         }
     }
