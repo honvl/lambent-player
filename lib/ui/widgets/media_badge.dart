@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
+import '../../util/platform_detection.dart';
 import '../theme/app_theme_controller.dart';
 
 /// Common drop shadow applied to card-corner badges to guarantee contrast
@@ -22,6 +23,13 @@ void _watchTheme(BuildContext context) {
   context.dependOnInheritedWidgetOfExactType<AppThemeScope>();
 }
 
+/// On a TV the glass badges are dark and quiet, as Plex's TV app marks its
+/// posters: a white tick or count on a dark disc rather than bright green or
+/// blue, which pulled the eye off the art across a whole row.
+bool get _quietBadges => PlatformDetection.isTV && AppColorScheme.isGlass;
+const _quietBackground = Color(0xB3000000);
+const _quietRing = Color(0x40FFFFFF);
+
 /// The circular checkmark badge indicating an item has been watched/finished.
 class MediaWatchedBadge extends StatelessWidget {
   final double size;
@@ -38,7 +46,8 @@ class MediaWatchedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _watchTheme(context);
-    final bg = color ?? AppColorScheme.badgeWatched;
+    final quiet = _quietBadges && color == null;
+    final bg = color ?? (quiet ? _quietBackground : AppColorScheme.badgeWatched);
     final fg = iconColor ?? AppColorScheme.onBadge;
     final iconSize = (size * 0.62).clamp(12.0, 24.0);
 
@@ -49,8 +58,8 @@ class MediaWatchedBadge extends StatelessWidget {
         color: bg,
         shape: BoxShape.circle,
         border: Border.all(
-          color: fg,
-          width: 1.5,
+          color: quiet ? _quietRing : fg,
+          width: quiet ? 1 : 1.5,
         ),
         boxShadow: kMediaBadgeShadow,
       ),
@@ -82,7 +91,8 @@ class MediaUnplayedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _watchTheme(context);
-    final bg = color ?? AppColorScheme.badgeUnplayed;
+    final quiet = _quietBadges && color == null;
+    final bg = color ?? (quiet ? _quietBackground : AppColorScheme.badgeUnplayed);
     final fg = textColor ?? AppColorScheme.onBadge;
     final text = count > 99 ? '99+' : '$count';
 
@@ -95,8 +105,8 @@ class MediaUnplayedBadge extends StatelessWidget {
         // Through AppRadius so the pixel theme keeps its square corners.
         borderRadius: AppRadius.circular(height / 2),
         border: Border.all(
-          color: fg,
-          width: 1.5,
+          color: quiet ? _quietRing : fg,
+          width: quiet ? 1 : 1.5,
         ),
         boxShadow: kMediaBadgeShadow,
       ),

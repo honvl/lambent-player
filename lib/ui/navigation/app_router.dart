@@ -15,6 +15,7 @@ import '../../playback/apple_player_ui.dart';
 import '../../playback/external_player_policy.dart';
 import '../../preference/user_preferences.dart';
 import '../../preference/preference_constants.dart';
+import '../../util/lambent_brand.dart';
 import '../../util/game_cores.dart';
 import '../../util/platform_detection.dart';
 import '../screens/admin/admin_nav.dart';
@@ -74,6 +75,8 @@ import '../screens/playback/photo_player_screen.dart';
 import '../screens/playback/still_watching_screen.dart';
 import '../screens/playback/trailer_player_screen.dart';
 import '../screens/lambent_sample/lambent_sample_screen.dart';
+import '../screens/downloads/local_files_tab.dart';
+import '../../data/local_files/local_file_library.dart';
 import '../screens/playback/video_player_screen.dart';
 import '../screens/playback/appletv_player_host_screen.dart';
 import '../screens/playback/appletv_livetv_player_host_screen.dart';
@@ -96,6 +99,8 @@ const _authRoutes = {
   Destinations.login,
   // Plays a fixed clip; nobody needs to be signed in.
   Destinations.lambentSample,
+  // Video files on this device; nobody needs to be signed in either.
+  Destinations.localFiles,
 };
 
 /// Whether first-run setup still has something to ask about.
@@ -201,7 +206,7 @@ final appRouter = GoRouter(
   initialLocation: Destinations.startup,
   observers: [
     FocusRouteObserver(),
-    RetroArtworkRouteObserver.instance,
+    if (LambentBrand.gamesInBuild) RetroArtworkRouteObserver.instance,
     routeLifecycleObserver,
     pageRouteLifecycleObserver,
     PlayerRouteObserver.instance,
@@ -209,6 +214,11 @@ final appRouter = GoRouter(
   redirect: (context, state) {
     final path = state.uri.path;
     if (_authRoutes.contains(path)) return null;
+    // A file from this device plays in the full player with nobody signed in.
+    if (path == Destinations.videoPlayer &&
+        LocalFileLibrary.signedOutPlayback) {
+      return null;
+    }
     // The old Folders screen, for a bookmark or a link from an older app.
     if (path == '/folders') return Destinations.home;
 
@@ -535,84 +545,87 @@ final appRouter = GoRouter(
       ],
     ),
 
-    // Games
-    GoRoute(
-      path: Destinations.gameSystem,
-      builder: (context, state) {
-        final libraryId = state.pathParameters['libraryId']!;
-        final systemId = state.pathParameters['systemId']!;
-        return GameSystemScreen(
-          key: ValueKey('game-system-$libraryId-$systemId'),
-          libraryId: libraryId,
-          systemId: systemId,
-          systemName: state.uri.queryParameters['name'],
-        );
-      },
-    ),
-    GoRoute(
-      path: Destinations.gameLibrary,
-      builder: (context, state) {
-        final libraryId = state.pathParameters['libraryId']!;
-        return GameLibraryScreen(
-          key: ValueKey('game-lib-$libraryId'),
-          libraryId: libraryId,
-          title: state.uri.queryParameters['title'],
-        );
-      },
-    ),
-    GoRoute(
-      path: Destinations.gameDetail,
-      builder: (context, state) {
-        final libraryId = state.pathParameters['libraryId']!;
-        final gameId = state.pathParameters['gameId']!;
-        return GameDetailScreen(
-          key: ValueKey('game-$gameId'),
-          libraryId: libraryId,
-          gameId: gameId,
-        );
-      },
-    ),
-    GoRoute(
-      path: Destinations.rommAccount,
-      builder: (context, state) => const RommAccountScreen(),
-    ),
-    GoRoute(
-      path: Destinations.gamePlayer,
-      pageBuilder: (context, state) {
-        final libraryId = state.pathParameters['libraryId']!;
-        final gameId = state.pathParameters['gameId']!;
-        final core = state.uri.queryParameters['core'] ?? 'nes';
-        final startFresh = state.uri.queryParameters['fresh'] == '1';
-        final forceEmulatorJs =
-            state.uri.queryParameters['backend'] == 'emulatorjs';
-        final hardwareRenderingEnabled = state.uri.queryParameters['hw'] != '0';
-        return _opaqueFullScreenPage<void>(
-          state: state,
-          // Native libretro or the EmulatorJS WebView: forced where only one
-          // backend works (tvOS and Linux native), the user's choice elsewhere,
-          // and per game where native can't play the system but the WebView can
-          // (a PSP or N64 title on the bundled Apple targets).
-          child: !forceEmulatorJs && usesNativeGameBackendFor(core)
-              ? NativeGamePlayerScreen(
-                  libraryId: libraryId,
-                  gameId: gameId,
-                  core: core,
-                  gameName: state.uri.queryParameters['name'],
-                  startFresh: startFresh,
-                  hardwareRenderingEnabled: hardwareRenderingEnabled,
-                )
-              : GameEmulatorScreen(
-                  libraryId: libraryId,
-                  gameId: gameId,
-                  core: core,
-                  romFileName: state.uri.queryParameters['romFile'],
-                  biosId: state.uri.queryParameters['bios'],
-                  gameName: state.uri.queryParameters['name'],
-                  startFresh: startFresh,
-                ),
-        );
-      },
-    ),
+    // Games, left out of release builds (LambentBrand.gamesInBuild).
+    if (LambentBrand.gamesInBuild) ...[
+      GoRoute(
+        path: Destinations.gameSystem,
+        builder: (context, state) {
+          final libraryId = state.pathParameters['libraryId']!;
+          final systemId = state.pathParameters['systemId']!;
+          return GameSystemScreen(
+            key: ValueKey('game-system-$libraryId-$systemId'),
+            libraryId: libraryId,
+            systemId: systemId,
+            systemName: state.uri.queryParameters['name'],
+          );
+        },
+      ),
+      GoRoute(
+        path: Destinations.gameLibrary,
+        builder: (context, state) {
+          final libraryId = state.pathParameters['libraryId']!;
+          return GameLibraryScreen(
+            key: ValueKey('game-lib-$libraryId'),
+            libraryId: libraryId,
+            title: state.uri.queryParameters['title'],
+          );
+        },
+      ),
+      GoRoute(
+        path: Destinations.gameDetail,
+        builder: (context, state) {
+          final libraryId = state.pathParameters['libraryId']!;
+          final gameId = state.pathParameters['gameId']!;
+          return GameDetailScreen(
+            key: ValueKey('game-$gameId'),
+            libraryId: libraryId,
+            gameId: gameId,
+          );
+        },
+      ),
+      GoRoute(
+        path: Destinations.rommAccount,
+        builder: (context, state) => const RommAccountScreen(),
+      ),
+      GoRoute(
+        path: Destinations.gamePlayer,
+        pageBuilder: (context, state) {
+          final libraryId = state.pathParameters['libraryId']!;
+          final gameId = state.pathParameters['gameId']!;
+          final core = state.uri.queryParameters['core'] ?? 'nes';
+          final startFresh = state.uri.queryParameters['fresh'] == '1';
+          final forceEmulatorJs =
+              state.uri.queryParameters['backend'] == 'emulatorjs';
+          final hardwareRenderingEnabled =
+              state.uri.queryParameters['hw'] != '0';
+          return _opaqueFullScreenPage<void>(
+            state: state,
+            // Native libretro or the EmulatorJS WebView: forced where only one
+            // backend works (tvOS and Linux native), the user's choice elsewhere,
+            // and per game where native can't play the system but the WebView can
+            // (a PSP or N64 title on the bundled Apple targets).
+            child: !forceEmulatorJs && usesNativeGameBackendFor(core)
+                ? NativeGamePlayerScreen(
+                    libraryId: libraryId,
+                    gameId: gameId,
+                    core: core,
+                    gameName: state.uri.queryParameters['name'],
+                    startFresh: startFresh,
+                    hardwareRenderingEnabled: hardwareRenderingEnabled,
+                  )
+                : GameEmulatorScreen(
+                    libraryId: libraryId,
+                    gameId: gameId,
+                    core: core,
+                    romFileName: state.uri.queryParameters['romFile'],
+                    biosId: state.uri.queryParameters['bios'],
+                    gameName: state.uri.queryParameters['name'],
+                    startFresh: startFresh,
+                  ),
+          );
+        },
+      ),
+    ],
 
     // Live TV
     GoRoute(
@@ -688,6 +701,10 @@ final appRouter = GoRouter(
             ? const AppleTvPlayerHostScreen()
             : const VideoPlayerScreen(),
       ),
+    ),
+    GoRoute(
+      path: Destinations.localFiles,
+      builder: (context, state) => const LocalFilesScreen(),
     ),
     GoRoute(
       path: Destinations.lambentSample,

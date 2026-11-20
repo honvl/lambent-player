@@ -290,6 +290,31 @@ object Media3Bridge {
     }
 
     fun handleMethodCall(call: MethodCall, result: MethodChannel.Result, caller: Any) {
+        // What this device can run of Lambent Enhance by itself (lambent_device_capabilities.dart): no AI upscaler, RAVU-lite (free),
+        // and Auto HDR where the bench says the bank of tables keeps up. Before the bench has run it runs now (about a second), so
+        // Lambent's settings and purchase screen say what this device really does.
+        if (call.method == "getLambentCapabilities") {
+            val context = appContext
+            LambentAutoHdrBench.runIfNeeded(context) {
+                mainHandler.post {
+                    result.success(mapOf("ai" to false, "shader" to true, "hdr" to LambentAutoHdrPolicy.capable(context)))
+                }
+            }
+            return
+        }
+
+        // While Moonfin's own screensaver is up (the app in front, the GPU free): time Auto HDR once per device and app version.
+        if (call.method == "runLambentBenchmark") {
+            LambentAutoHdrBench.runIfNeeded(appContext) { r ->
+                mainHandler.post {
+                    result.success(
+                        r?.let { mapOf("table1080" to it.table1080, "lift1080" to it.lift1080, "table2160" to it.table2160, "lift2160" to it.lift2160) },
+                    )
+                }
+            }
+            return
+        }
+
         // Asked as playback is requested, before any player view exists. A
         // player already holding a mode, the next episode in an open player,
         // switches for its own source as it always has.

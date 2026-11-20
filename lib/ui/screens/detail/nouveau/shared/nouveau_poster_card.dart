@@ -332,25 +332,9 @@ class _NouveauPosterCardState extends State<NouveauPosterCard> {
                       );
                     },
                     child: widget.isPlayed
-                        ? Container(
-                            key: const ValueKey('watched'),
-                            width: 26,
-                            height: 26,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: theme.colorScheme.onPrimary,
-                                width: 1.5,
-                              ),
-                              boxShadow: kMediaBadgeShadow,
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.check_rounded,
-                              color: theme.colorScheme.onPrimary,
-                              size: 17,
-                            ),
+                        ? const MediaWatchedBadge(
+                            key: ValueKey('watched'),
+                            size: 26,
                           )
                         : const SizedBox(
                             key: ValueKey('watched-empty'),

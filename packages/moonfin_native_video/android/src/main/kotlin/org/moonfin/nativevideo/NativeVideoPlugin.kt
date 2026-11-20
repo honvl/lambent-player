@@ -21,6 +21,7 @@ class NativeVideoPlugin :
     private var media3EventsChannel: EventChannel? = null
     private var media3ActivityChannel: MethodChannel? = null
     private var transmuxChannel: MethodChannel? = null
+    private var probeChannel: MethodChannel? = null
     private var transmuxEventsChannel: EventChannel? = null
     private var applicationContext: Context? = null
 
@@ -67,6 +68,15 @@ class NativeVideoPlugin :
             }
         }
 
+        probeChannel = MethodChannel(
+            binding.binaryMessenger,
+            Media3TrackProbe.CHANNEL,
+        ).also {
+            it.setMethodCallHandler { call, result ->
+                Media3TrackProbe.handleMethodCall(call, result, applicationContext)
+            }
+        }
+
         transmuxChannel = MethodChannel(
             binding.binaryMessenger,
             "moonfin/media3_transmux",
@@ -106,6 +116,8 @@ class NativeVideoPlugin :
 
         transmuxChannel?.setMethodCallHandler(null)
         transmuxChannel = null
+        probeChannel?.setMethodCallHandler(null)
+        probeChannel = null
 
         transmuxEventsChannel?.setStreamHandler(null)
         transmuxEventsChannel = null

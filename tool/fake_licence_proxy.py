@@ -20,7 +20,7 @@ args = ap.parse_args()
 licence = {
     "enhance": {"state": args.state, "until_ms": None, "source": None},
     "pro_on_this_household": False,
-    "buy_url": "https://getlambent.vercel.app/buy?household=FAKE",
+    "buy_url": "https://getlambent.app/buy?household=FAKE",
 }
 if args.state in ("active", "trial"):
     licence["enhance"]["until_ms"] = int(time.time() * 1000) + 14 * 86400_000

@@ -32,6 +32,7 @@ import '../../widgets/adaptive/adaptive_dialog.dart';
 import '../../widgets/allow_self_signed_dialog.dart';
 import '../../widgets/lambent_server_setup_card.dart';
 import '../../widgets/lambent_sample_button.dart';
+import '../../widgets/local_files_button.dart';
 import '../../widgets/login_scaffold.dart';
 import '../../widgets/overlay_sheet.dart';
 import '../../widgets/server_type_icon.dart';
@@ -647,6 +648,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
             LambentServerSetupCard(foreground: _loginForeground(0.95)),
           if (!_isWebPluginMode)
             LambentSampleButton(foreground: _loginForeground(0.95)),
+          if (!_isWebPluginMode)
+            LocalFilesButton(foreground: _loginForeground(0.95)),
           if (_isDiscovering && discovered.isNotEmpty)
             const Padding(
               padding: EdgeInsets.only(top: 4, bottom: 8),
@@ -745,6 +748,8 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
               serverType: server.serverType,
               size: 24,
               color: _loginForeground(0.7),
+              // A joined Lambent PC is saved at its iroh tunnel's address.
+              lambent: RemoteAccess.instance.isTunnel(server.address),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -785,6 +790,7 @@ class _ServerSelectScreenState extends State<ServerSelectScreen> {
               serverType: server.serverType,
               size: 24,
               color: _loginForeground(0.7),
+              lambent: server.isLambent,
             ),
             const SizedBox(width: 12),
             Expanded(

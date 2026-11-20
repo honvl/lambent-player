@@ -12,11 +12,7 @@ PODS:
     - OrderedSet (~> 6.0.3)
   - google-cast-sdk-no-bluetooth-xcframework (4.8.0):
     - Protobuf (~> 3.13)
-  - libretro_host (0.1.0)
   - LzmaSDK-ObjC (2.1.1)
-  - moonfin_game_host (0.1.0):
-    - Flutter
-    - libretro_host
   - OrderedSet (6.0.3)
   - Protobuf (3.29.6)
   - rar (0.2.1):
@@ -31,8 +27,6 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
   - google-cast-sdk-no-bluetooth-xcframework (~> 4.8.0)
-  - libretro_host (from `../native/libretro_host`)
-  - moonfin_game_host (from `game_host`)
   - rar (from `.symlinks/plugins/rar/ios`)
 
 SPEC REPOS:
@@ -50,10 +44,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
-  libretro_host:
-    :path: "../native/libretro_host"
-  moonfin_game_host:
-    :path: game_host
   rar:
     :path: ".symlinks/plugins/rar/ios"
 
@@ -62,14 +52,12 @@ SPEC CHECKSUMS:
   Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
   flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
   google-cast-sdk-no-bluetooth-xcframework: 1783f52a1b2dc0293ac3ae995db5435989a87da7
-  libretro_host: becbc28b6e0d23dffeef32b0d432ab4990798f1a
   LzmaSDK-ObjC: 6c68c37743a658fc9a4c7b70f7d6045b587aa42b
-  moonfin_game_host: b1f6881f376ad16a22e33410409c314b89cf882c
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   Protobuf: 8d5596f7468be5400861a6bbfb2dfe9d0d1cde34
   rar: 00d3f5fc4c0fc99c36a86c59147fa0d66381adc0
   UnrarKit: 62f535c7a34ec52d2514b9b148f33dcfa9a9dc39
 
-PODFILE CHECKSUM: f332424600a990d23eed21672c388fb970089ace
+PODFILE CHECKSUM: 228638da36da65265a4868bf5ce0cf52a02237a6
 
 COCOAPODS: 1.17.0

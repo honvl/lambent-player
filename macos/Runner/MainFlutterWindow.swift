@@ -1,6 +1,5 @@
 import Cocoa
 import FlutterMacOS
-import moonfin_game_host
 
 /// Keeps Intel Macs on Skia. Impeller became the macOS default in Flutter 3.47
 /// and garbles text, flickers and lags on Intel GPUs (flutter/flutter#191538).
@@ -22,7 +21,6 @@ final class MoonfinDartProject: FlutterDartProject {
 class MainFlutterWindow: NSWindow {
   private var sfSymbolChannel: FlutterMethodChannel?
   private var downloadDirChannel: FlutterMethodChannel?
-  private var gameChannel: NativeGameChannel?
   private var aetherVideoChannel: AetherVideoChannel?
   private var themeMusicChannel: AppleTvThemeMusicChannel?
   private var arcadeSoundChannel: AppleArcadeSoundChannel?
@@ -187,9 +185,6 @@ class MainFlutterWindow: NSWindow {
         result(FlutterMethodNotImplemented)
       }
     }
-
-    let gameRegistrar = flutterViewController.registrar(forPlugin: "moonfin_game_host")
-    self.gameChannel = NativeGameChannel(registrar: gameRegistrar)
 
     // AetherEngine playback: control/event channels plus the AppKitView video
     // surface factory. Same channel names as iOS, so the Dart backend is

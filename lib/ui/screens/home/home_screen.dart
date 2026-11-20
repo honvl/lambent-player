@@ -696,7 +696,10 @@ class _HomeShellState extends State<_HomeShell>
                         );
                       },
                     ),
-                  const HomeGradientScrim(),
+                  // The corner art fades into the page's own colour, which
+                  // this scrim would only muddy.
+                  if (backdropStyle != UserPreferences.homeBackdropCorner)
+                    const HomeGradientScrim(),
                   Positioned.fill(
                     child: _ContentRows(
                       key: _contentRowsKey,
@@ -6988,8 +6991,21 @@ class _ContentRowsState extends State<_ContentRows>
     if (sectionType == null) {
       return ImageType.poster;
     }
-    return prefs.get(UserPreferences.homeRowImageType(sectionType));
+    final preference = UserPreferences.homeRowImageType(sectionType);
+    // Home videos are 16:9 frames with no poster art, so a poster card crops
+    // them to a strip; like Plex, their rows use wide cards unless the shape
+    // was picked for the row.
+    if (_isLatestVideoRow(row) && !prefs.containsPreference(preference)) {
+      return ImageType.thumb;
+    }
+    return prefs.get(preference);
   }
+
+  static bool _isLatestVideoRow(HomeRow row) =>
+      row.rowType == HomeRowType.latestMedia &&
+      (row.wideCards ||
+          (row.items.isNotEmpty &&
+              row.items.every((item) => item.type == 'Video')));
 
   static HomeSectionType? _sectionTypeForRow(HomeRow row, UserPreferences prefs) =>
       HomeViewModel.sectionConfigForRow(row, prefs.homeSectionsConfig)?.type;

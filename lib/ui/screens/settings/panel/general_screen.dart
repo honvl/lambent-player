@@ -42,10 +42,14 @@ class _GeneralScreenState extends State<_GeneralScreen> {
 
     final showSiriSensitivity =
         GamepadNavigationScope.isConfigurable && PlatformDetection.isAppleTV;
+    // Off, General keeps the everyday few: the language and the clock.
+    final advanced = GetIt.instance<UserPreferences>().get(
+      UserPreferences.showAdvancedSettings,
+    );
     final showInput =
-        PlatformDetection.isTV ||
+        (advanced && PlatformDetection.isTV) ||
         showSiriSensitivity ||
-        PlatformDetection.useDesktopUi;
+        (advanced && PlatformDetection.useDesktopUi);
 
     return Scaffold(
       appBar: buildSettingsAppBar(context, Text(l10n.general)),
@@ -85,6 +89,7 @@ class _GeneralScreenState extends State<_GeneralScreen> {
                   subtitle: l10n.settingsTwentyFourHourClockSubtitle,
                   icon: Icons.schedule,
                 ),
+                if (advanced)
                 EnumPreferenceTile<DateFormatSetting>(
                   preference: UserPreferences.dateFormat,
                   title: l10n.settingsDateFormat,
@@ -102,7 +107,7 @@ class _GeneralScreenState extends State<_GeneralScreen> {
               _SectionHeader(l10n.settingsInputSection),
               adaptiveListSection(
                 children: [
-                  if (PlatformDetection.isTV)
+                  if (advanced && PlatformDetection.isTV)
                     EnumPreferenceTile<KeyboardStyle>(
                       preference: UserPreferences.keyboardStyle,
                       title: l10n.keyboardStyle,
@@ -127,7 +132,7 @@ class _GeneralScreenState extends State<_GeneralScreen> {
                         SiriRemoteSwipeSensitivity.high => l10n.settingsHigh,
                       },
                     ),
-                  if (PlatformDetection.useDesktopUi)
+                  if (advanced && PlatformDetection.useDesktopUi)
                     SliderPreferenceTile(
                       preference: UserPreferences.desktopScrollSensitivity,
                       title: l10n.scrollSensitivity,
@@ -142,7 +147,7 @@ class _GeneralScreenState extends State<_GeneralScreen> {
                 ],
               ),
             ],
-            if (!PlatformDetection.isWeb) ...[
+            if (advanced && !PlatformDetection.isWeb) ...[
               _SectionHeader(l10n.behavior),
               adaptiveListSection(
                 children: [
@@ -155,7 +160,7 @@ class _GeneralScreenState extends State<_GeneralScreen> {
                 ],
               ),
             ],
-            if (PlatformDetection.isAndroid) ...[
+            if (advanced && PlatformDetection.isAndroid) ...[
               _SectionHeader(l10n.performanceMode),
               adaptiveListSection(
                 children: [

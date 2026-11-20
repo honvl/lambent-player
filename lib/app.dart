@@ -38,9 +38,11 @@ import 'l10n/lambent_localizations.dart';
 import 'preference/preference_constants.dart' show GlassSettledQuality;
 import 'preference/user_preferences.dart';
 import 'syncplay/syncplay_manager.dart';
+import 'data/local_files/local_file_library.dart';
 import 'ui/navigation/app_router.dart';
 import 'ui/navigation/deferred_route_pop.dart';
 import 'ui/navigation/deep_link_navigator.dart';
+import 'ui/screens/downloads/local_files_tab.dart';
 import 'ui/navigation/destinations.dart';
 import 'ui/navigation/home_refresh_bus.dart';
 import 'ui/theme/app_theme.dart';
@@ -80,6 +82,7 @@ import 'util/focus/key_event_utils.dart';
 import 'util/focus/gamepad/gamepad_navigation_scope.dart';
 import 'util/focus/gamepad/gamepad_key_synthesizer.dart';
 import 'util/focus/open_popup.dart';
+import 'util/lambent_brand.dart';
 import 'package:custom_tv_text_field/custom_tv_text_field.dart';
 
 class MoonfinApp extends StatefulWidget {
@@ -93,6 +96,7 @@ class _MoonfinAppState extends State<MoonfinApp> {
   late final UserPreferences _prefs;
   late final AppThemeController _themeController;
   final DeepLinkService _deepLinks = DeepLinkService();
+  StreamSubscription<List<LocalFile>>? _localFilesSubscription;
   Locale? _lastResolvedLocale;
 
   @override
@@ -146,6 +150,26 @@ class _MoonfinAppState extends State<MoonfinApp> {
     // OS-registered moonfin:// links. The service no-ops on platforms without
     // an app_links backend.
     _deepLinks.startListener(navigateWhenReady, onPairingLink: openPairingLink);
+    _listenForLocalFiles();
+  }
+
+  /// Video files handed over from Files or the share sheet ("Open in") play as
+  /// soon as the app is signed in.
+  void _listenForLocalFiles() {
+    if (!LocalFileLibrary.isSupported ||
+        !GetIt.instance.isRegistered<LocalFileLibrary>()) {
+      return;
+    }
+    final library = GetIt.instance<LocalFileLibrary>();
+    _localFilesSubscription = library.incoming.listen((files) {
+      if (files.isEmpty) return;
+      runWhenReady(() async {
+        final context = appRouter.routerDelegate.navigatorKey.currentContext;
+        if (context == null || !context.mounted) return;
+        await playLocalFile(context, files.first);
+      });
+    });
+    unawaited(library.checkPending());
   }
 
   void _syncThemeFromPrefs() {
@@ -237,6 +261,7 @@ class _MoonfinAppState extends State<MoonfinApp> {
     _prefs.removeListener(_syncGlassFromPrefs);
     _prefs.removeListener(_syncSiriRemoteFromPrefs);
     _deepLinks.dispose();
+    _localFilesSubscription?.cancel();
     _themeController.dispose();
     super.dispose();
   }
@@ -1039,6 +1064,16 @@ class _GlobalShortcutScopeState extends State<_GlobalShortcutScope>
   void _onScreensaverVisibleChanged() {
     if (_screensaverController.visible.value) {
       GetIt.instance<ThemeMusicService>().forceStop();
+      // Moonfin's own screensaver keeps the app in front with the GPU idle:
+      // the moment to time Lambent Auto HDR on an Android TV, once per device
+      // and app version (LambentAutoHdr.kt). Playback never waits for it.
+      if (PlatformDetection.isAndroid) {
+        unawaited(
+          const MethodChannel(
+            'moonfin/media3_video_control',
+          ).invokeMethod<void>('runLambentBenchmark').catchError((_) {}),
+        );
+      }
     }
   }
 
@@ -1237,7 +1272,9 @@ class _ConnectivityListenerState extends ConsumerState<_ConnectivityListener>
       _backgroundAwareSession?.onAppBackgrounded();
     } else if (state == AppLifecycleState.resumed) {
       coordinator.appDidBecomeActive();
-      RetroArtworkDataSourceFactory.notifyAppResumed();
+      if (LambentBrand.gamesInBuild) {
+        RetroArtworkDataSourceFactory.notifyAppResumed();
+      }
       _backgroundAwareSession?.onAppResumed();
       if (GetIt.instance.isRegistered<ConnectivityService>()) {
         GetIt.instance<ConnectivityService>().onAppResumed();

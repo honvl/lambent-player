@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:playback_core/playback_core.dart';
 
+import '../data/local_files/local_file_library.dart';
 import '../data/offline/connectivity_aware_media_server_client.dart';
 import 'offline_stream_resolver.dart';
 
@@ -22,16 +25,22 @@ class LocalFirstMediaStreamResolver extends MediaStreamResolver
   final OfflineStreamResolver _offline;
   final Future<void> Function(String itemId)? _restoreSubtitles;
   final bool Function()? _streamFromServer;
+  final LocalFileLibrary? _localFiles;
+
+  /// The local file whose access is held for the item playing now.
+  String? _heldLocalPath;
 
   LocalFirstMediaStreamResolver({
     required MediaStreamResolver inner,
     required OfflineStreamResolver offline,
     Future<void> Function(String itemId)? restoreSubtitles,
     bool Function()? streamFromServer,
+    LocalFileLibrary? localFiles,
   }) : _inner = inner,
        _offline = offline,
        _restoreSubtitles = restoreSubtitles,
-       _streamFromServer = streamFromServer;
+       _streamFromServer = streamFromServer,
+       _localFiles = localFiles;
 
   @override
   Future<StreamResolutionResult> resolve(
@@ -46,6 +55,14 @@ class LocalFirstMediaStreamResolver extends MediaStreamResolver
     bool enableDirectStream = true,
     bool enableTranscoding = true,
   }) async {
+    // A file opened from outside the app has no server copy at all.
+    final localFiles = _localFiles;
+    if (localFiles != null && LocalFileLibrary.isLocalFileItem(mediaItem)) {
+      return _resolveLocalFile(
+        localFiles,
+        MediaStreamResolver.extractItemId(mediaItem),
+      );
+    }
     // Only substitute the local copy on direct-play-eligible requests.
     // Force-transcode requests disable direct play and should keep streaming.
     if (enableDirectPlay) {
@@ -114,6 +131,35 @@ class LocalFirstMediaStreamResolver extends MediaStreamResolver
     return (inner as StreamCredentialRefresher).currentCredentials(
       current,
       refresh: refresh,
+    );
+  }
+
+  Future<StreamResolutionResult> _resolveLocalFile(
+    LocalFileLibrary library,
+    String itemId,
+  ) async {
+    final opened = await library.open(itemId);
+    if (opened == null) {
+      throw StateError('The file is no longer on this device');
+    }
+    final previous = _heldLocalPath;
+    if (previous != null && previous != opened.path) {
+      unawaited(library.release(previous));
+    }
+    _heldLocalPath = opened.path;
+    final streams = opened.file.mediaStreams ?? const <Map<String, dynamic>>[];
+    return StreamResolutionResult(
+      streamUrl: opened.path,
+      mediaSourceId: itemId,
+      playMethod: StreamPlayMethod.directPlay,
+      // An Android content:// address rarely ends in the file's extension.
+      container: _containerOf(opened.file.name),
+      mediaType: MediaStreamResolver.detectMediaType(
+        streams,
+        fallbackUrl: opened.path,
+      ),
+      mediaStreams: streams,
+      isLocalMedia: true,
     );
   }
 

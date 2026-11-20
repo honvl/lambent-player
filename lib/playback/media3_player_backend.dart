@@ -13,6 +13,7 @@ import '../util/platform_detection.dart';
 
 import 'device_profile_builder.dart';
 import 'known_defects.dart';
+import '../data/services/lambent_enhance_service.dart';
 import 'lambent_device_upscale.dart';
 import 'media3_letterbox_crop.dart';
 import 'media3_playback_status.dart';
@@ -1414,8 +1415,17 @@ class Media3PlayerBackend extends PlayerBackend
     _liveEdge = null;
     _sourceIsLive = payload['isLive'] == true;
     updateSubtitleDelaySession(payload['subtitleDelaySessionId'] as int?);
+    // Where no Lambent Server plans this player's steps, its own licence does
+    // (ENTITLEMENTS.md section 8.3, as on the Apple players): Auto HDR here,
+    // where the device keeps up (LambentAutoHdr.kt). A picture already
+    // enhanced elsewhere (Lambent's sample) gets nothing on top.
+    final noClientEnhancement = payload['noClientEnhancement'] == true;
+    final lambentSteps = noClientEnhancement || mediaType != 'video'
+        ? null
+        : LambentEnhanceService.instance.localSteps;
     await _invoke<void>('setSource', {
       'url': url,
+      'lambentLift': lambentSteps?.lift ?? false,
       'headers': headers,
       'autoPlay': autoPlay,
       'startPositionMs': startPosition.inMilliseconds,

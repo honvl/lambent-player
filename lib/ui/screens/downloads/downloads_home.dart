@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
 import '../../../data/database/offline_database.dart';
+import '../../../data/local_files/local_file_library.dart';
 import '../../../data/providers/offline_providers.dart';
 import '../../../di/providers.dart';
 import '../../../l10n/app_localizations.dart';
@@ -19,6 +20,7 @@ import '../../widgets/sliding_pill_tabs.dart';
 import '../../widgets/settings/settings_panel.dart';
 import '../../widgets/sync_indicator.dart';
 import '../settings/download_settings_screen.dart';
+import 'local_files_tab.dart';
 import 'saved_show_screen.dart';
 import 'widgets/active_downloads_tab.dart';
 import 'widgets/saved_media_actions.dart';
@@ -30,11 +32,19 @@ enum SavedMediaSort { size, name, dateAdded }
 
 /// One tab and the rows behind it, built only when the tab is the open one.
 class _SavedTab {
-  const _SavedTab(this.label, this.rows, {this.isActiveDownloads = false});
+  const _SavedTab(
+    this.label,
+    this.rows, {
+    this.isActiveDownloads = false,
+    this.isLocalFiles = false,
+  });
 
   final String label;
   final List<DownloadGroup> Function() rows;
   final bool isActiveDownloads;
+
+  /// Video files opened from the device's own storage, not downloads.
+  final bool isLocalFiles;
 }
 
 /// The saved media list: what is on the device, grouped, filtered and playable
@@ -48,6 +58,10 @@ class DownloadsHome extends ConsumerStatefulWidget {
 
 class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
   int _tab = 0;
+
+  /// Set once a tab is picked; until then a device with nothing downloaded
+  /// opens on its own video files, the one tab with something to offer.
+  bool _tabPicked = false;
   SavedMediaSort _sort = SavedMediaSort.size;
   bool _searchOpen = false;
   String _query = '';
@@ -139,6 +153,8 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
         _SavedTab(l10n.music, () => standalone(isMusic)),
       if (types.contains('Book'))
         _SavedTab(l10n.books, () => standalone((item) => item.type == 'Book')),
+      if (LocalFileLibrary.isSupported)
+        _SavedTab(l10n.onThisDevice, () => const [], isLocalFiles: true),
       _SavedTab(l10n.activeDownloads, () => const [], isActiveDownloads: true),
     ];
   }
@@ -189,9 +205,11 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final catalog = ref
-        .watch(downloadedCatalogProvider)
-        .maybeWhen(data: (value) => value, orElse: () => DownloadCatalog.empty);
+    final catalogState = ref.watch(downloadedCatalogProvider);
+    final catalog = catalogState.maybeWhen(
+      data: (value) => value,
+      orElse: () => DownloadCatalog.empty,
+    );
     final storage = ref
         .watch(storageUsedProvider)
         .maybeWhen(data: (value) => value, orElse: () => 0);
@@ -200,9 +218,15 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
         .get(UserPreferences.downloadStorageLimitMb);
 
     final tabs = _buildTabs(l10n, catalog.items);
-    final tabIndex = _tab.clamp(0, tabs.length - 1);
+    final localTab = tabs.indexWhere((tab) => tab.isLocalFiles);
+    final tabIndex = !_tabPicked &&
+            catalogState.hasValue &&
+            catalog.items.isEmpty &&
+            localTab >= 0
+        ? localTab
+        : _tab.clamp(0, tabs.length - 1);
     final current = tabs[tabIndex];
-    final groups = current.isActiveDownloads
+    final groups = current.isActiveDownloads || current.isLocalFiles
         ? const <DownloadGroup>[]
         : _filtered(current.rows());
 
@@ -246,6 +270,7 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
                   selectedIndex: tabIndex,
                   onChanged: (index) => setState(() {
                     _tab = index;
+                    _tabPicked = true;
                     _selected.clear();
                   }),
                   focusNode: _tabsFocusNode,
@@ -256,7 +281,11 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
                 ),
               ),
               Expanded(
-                child: current.isActiveDownloads
+                child: current.isLocalFiles
+                    ? LocalFilesTab(
+                        onNavigateUpFromFirst: _tabsFocusNode.requestFocus,
+                      )
+                    : current.isActiveDownloads
                     ? ActiveDownloadsTab(
                         firstItemFocusNode: PlatformDetection.isTV
                             ? _initialFocusNode
@@ -274,6 +303,12 @@ class _DownloadsHomeState extends ConsumerState<DownloadsHome> {
 
   Widget _header(AppLocalizations l10n, List<DownloadedItem> items, int bytes) {
     final actions = <Widget>[
+      if (LocalFileLibrary.isSupported)
+        FocusableToolbarButton(
+          icon: Icons.folder_open,
+          tooltip: l10n.openVideoFile,
+          onTap: () => pickAndPlayLocalFile(context),
+        ),
       FocusableToolbarButton(
         icon: _searchOpen ? Icons.search_off : Icons.search,
         tooltip: l10n.search,

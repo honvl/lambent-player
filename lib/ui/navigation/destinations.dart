@@ -121,6 +121,9 @@ class Destinations {
   static const trailerPlayer = '/player/trailer';
   /// Lambent's "See the difference" sample; plays without a server.
   static const lambentSample = '/lambent-sample';
+
+  /// Video files opened from this device's own storage; needs no server.
+  static const localFiles = '/local-files';
   static const nextUp = '/player/next-up/:itemId';
   static const stillWatching = '/player/still-watching/:itemId';
 

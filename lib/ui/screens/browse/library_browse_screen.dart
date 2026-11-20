@@ -1287,7 +1287,12 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
     return Scaffold(
       backgroundColor: _navyBackground,
       body: PlatformDetection.isTV
-          ? NavigationLayout(showBackButton: false, child: body)
+          ? NavigationLayout(
+              showBackButton: false,
+              // The search field sits where the clock would.
+              showTvClock: false,
+              child: body,
+            )
           : body,
     );
   }
@@ -2244,10 +2249,15 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
       return item.productionYear != null ? '${item.productionYear}' : null;
     }
 
+    // Two facts, so the line fits under a poster as Plex's "2 Seasons" does:
+    // the year, then a show's seasons or a film's runtime. The age rating,
+    // stars and resolution sit in the header above for the focused title.
     if (item.productionYear != null) parts.add('${item.productionYear}');
-    if (item.officialRating != null) parts.add(item.officialRating!);
+    final seasons = item.type == 'Series' ? item.childCount : null;
     final rt = item.runtime;
-    if (rt != null) {
+    if (seasons != null && seasons > 0) {
+      parts.add(AppLocalizations.of(context).seasonCount(seasons));
+    } else if (item.type != 'Series' && rt != null && rt.inMinutes > 0) {
       final h = rt.inHours;
       final m = rt.inMinutes % 60;
       if (h > 0) {
@@ -2255,11 +2265,6 @@ class _LibraryBrowseScreenState extends State<LibraryBrowseScreen>
       } else {
         parts.add('${m}m');
       }
-    }
-    final resolution = item.videoResolution;
-    if (resolution != null) parts.add('• $resolution');
-    if (item.communityRating != null) {
-      parts.add('★ ${item.communityRating!.toStringAsFixed(1)}');
     }
     return parts.isEmpty ? null : parts.join('  ');
   }

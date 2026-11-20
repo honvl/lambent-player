@@ -825,7 +825,7 @@ class _CardImage extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: isCircular
                         ? AppRadius.circular(radius + _focusRingInset)
-                        : borders.cardRadius +
+                        : _cardRadius(borders) +
                               AppRadius.circular(_focusRingInset),
                     boxShadow: borders.focusGlow,
                   ),
@@ -835,7 +835,7 @@ class _CardImage extends StatelessWidget {
           ClipRRect(
             borderRadius: isCircular
                 ? AppRadius.circular(radius)
-                : borders.cardRadius,
+                : _cardRadius(borders),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -1039,7 +1039,7 @@ class _CardImage extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: isCircular
                         ? AppRadius.circular(radius + _focusRingInset)
-                        : borders.cardRadius +
+                        : _cardRadius(borders) +
                               AppRadius.circular(_focusRingInset),
                     border: Border.fromBorderSide(
                       borders.focusBorder.copyWith(
@@ -1135,3 +1135,11 @@ class _PlaceholderIcon extends StatelessWidget {
     );
   }
 }
+
+/// The corner of a poster or thumb card. On a TV the glass cards round about
+/// as little as Plex's TV app does, so the art reads as a poster rather than a
+/// pill; elsewhere they keep the theme's corner.
+BorderRadius _cardRadius(ThemeBorderTokens borders) =>
+    PlatformDetection.isTV && AppColorScheme.isGlass
+    ? const BorderRadius.all(Radius.circular(10))
+    : borders.cardRadius;

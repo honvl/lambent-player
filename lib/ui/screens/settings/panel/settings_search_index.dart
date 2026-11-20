@@ -382,16 +382,26 @@ List<_SettingsSearchEntry> _buildSettingsSearchIndex({
     open: () => push(const _AutomationQueueScreen()),
   );
   final emulatorCores = _SearchSection(
-    slug: 'emulator-cores',
-    path: [l10n.playback, l10n.emulatorCores],
+    slug: LambentBrand.gamesInBuild ? 'emulator-cores' : '',
+    path: [
+      l10n.playback,
+      if (LambentBrand.gamesInBuild) l10n.emulatorCores,
+    ],
     icon: Icons.videogame_asset,
-    open: () => push(const EmulatorCoresScreen()),
+    open: () {
+      if (LambentBrand.gamesInBuild) push(const EmulatorCoresScreen());
+    },
   );
   final downloadedGames = _SearchSection(
     slug: 'downloaded-games',
-    path: [l10n.playback, l10n.downloadedGames],
+    path: [
+      l10n.playback,
+      if (LambentBrand.gamesInBuild) l10n.downloadedGames,
+    ],
     icon: Icons.videogame_asset,
-    open: () => push(const DownloadedGamesScreen()),
+    open: () {
+      if (LambentBrand.gamesInBuild) push(const DownloadedGamesScreen());
+    },
   );
   final syncplay = _SearchSection(
     slug: 'syncplay',
@@ -2117,23 +2127,26 @@ List<_SettingsSearchEntry> _buildSettingsSearchIndex({
       ),
     ],
 
-    if (canToggleGameBackend && gamesOnAnyServer)
+    if (LambentBrand.gamesInBuild && canToggleGameBackend && gamesOnAnyServer)
       playback.leaf(
         'pref_use_native_emulator',
         l10n.useNativeEmulator,
         subtitle: l10n.useNativeEmulatorSubtitle,
         keywords: ['games', 'retroarch'],
       ),
-    if (usesOnScreenControls)
+    if (LambentBrand.gamesInBuild && usesOnScreenControls)
       playback.leaf(
         'pref_game_playback_orientation',
         l10n.gameOrientation,
         subtitle: l10n.gameOrientationSubtitle,
         keywords: ['rotate', 'landscape', 'portrait', 'games'],
       ),
-    if (supportsCoreDownloads && usesNativeGameBackend && gamesOnAnyServer)
+    if (LambentBrand.gamesInBuild &&
+        supportsCoreDownloads &&
+        usesNativeGameBackend &&
+        gamesOnAnyServer)
       emulatorCores.screen(keywords: ['retroarch', 'games', 'systems']),
-    if (usesNativeGameBackend)
+    if (LambentBrand.gamesInBuild && usesNativeGameBackend)
       downloadedGames.screen(keywords: ['roms', 'storage']),
 
     if (syncPlayOffered()) ...[

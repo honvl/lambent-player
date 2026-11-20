@@ -52,6 +52,7 @@
 		A8884959C962AC28473F5A8F /* SubtitleOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1BFDAD54F78C69458FEFD17 /* SubtitleOverlay.swift */; };
 		B4017AACBF56D76ED5D22E59 /* NativeApplePlayerChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09F431BFFA0E6CF94CC0C9B1 /* NativeApplePlayerChannel.swift */; };
 		B6A0D1E2F3C4B5A69788A006 /* DownloadKeepAlive.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A0D1E2F3C4B5A69788A005 /* DownloadKeepAlive.swift */; };
+		B6A0D1E2F3C4B5A69788A106 /* LocalFileChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A0D1E2F3C4B5A69788A105 /* LocalFileChannel.swift */; };
 		B6A0D1E2F3C4B5A69788A002 /* BackgroundRefreshScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A0D1E2F3C4B5A69788A001 /* BackgroundRefreshScheduler.swift */; };
 		B6A0D1E2F3C4B5A69788A004 /* BackgroundRefreshSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A0D1E2F3C4B5A69788A003 /* BackgroundRefreshSchedulerTests.swift */; };
 		C4B055F383D161397353F3F9 /* MoonfinTvosStubs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B43803CCF1D9787347AF7A13 /* MoonfinTvosStubs.swift */; };
@@ -139,6 +140,7 @@
 		B1BFDAD54F78C69458FEFD17 /* SubtitleOverlay.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SubtitleOverlay.swift; path = ../../../tvos/Runner/Playback/Aether/SubtitleOverlay.swift; sourceTree = "<group>"; };
 		B43803CCF1D9787347AF7A13 /* MoonfinTvosStubs.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MoonfinTvosStubs.swift; path = ../../../tvos/Runner/Playback/MoonfinTvosStubs.swift; sourceTree = "<group>"; };
 		B6A0D1E2F3C4B5A69788A005 /* DownloadKeepAlive.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadKeepAlive.swift; sourceTree = "<group>"; };
+		B6A0D1E2F3C4B5A69788A105 /* LocalFileChannel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalFileChannel.swift; sourceTree = "<group>"; };
 		B6A0D1E2F3C4B5A69788A001 /* BackgroundRefreshScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshScheduler.swift; sourceTree = "<group>"; };
 		B6A0D1E2F3C4B5A69788A003 /* BackgroundRefreshSchedulerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundRefreshSchedulerTests.swift; sourceTree = "<group>"; };
 		BA90E277C62118D7E411055C /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				B6A0D1E2F3C4B5A69788A001 /* BackgroundRefreshScheduler.swift */,
 				B6A0D1E2F3C4B5A69788A005 /* DownloadKeepAlive.swift */,
+				B6A0D1E2F3C4B5A69788A105 /* LocalFileChannel.swift */,
 				1A2B3C4D5E6F708190A1B2D0 /* SceneDelegate.swift */,
 				1A2B3C4D5E6F708190A1B2D2 /* CarPlaySceneDelegate.swift */,
 				1A2B3C4D5E6F708190A1B2D4 /* CarPlayBridge.swift */,
@@ -550,6 +553,7 @@
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				B6A0D1E2F3C4B5A69788A002 /* BackgroundRefreshScheduler.swift in Sources */,
 				B6A0D1E2F3C4B5A69788A006 /* DownloadKeepAlive.swift in Sources */,
+				B6A0D1E2F3C4B5A69788A106 /* LocalFileChannel.swift in Sources */,
 				1A2B3C4D5E6F708190A1B2D1 /* SceneDelegate.swift in Sources */,
 				1A2B3C4D5E6F708190A1B2D3 /* CarPlaySceneDelegate.swift in Sources */,
 				1A2B3C4D5E6F708190A1B2D5 /* CarPlayBridge.swift in Sources */,

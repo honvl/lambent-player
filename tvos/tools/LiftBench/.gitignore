@@ -1,3 +1,5 @@
 Videos/
 *.xcodeproj/
 .build/
+Server/
+ServerShaders/

@@ -79,6 +79,39 @@ void navigateWhenReady(String route) {
   unawaited(_pinUserIfRequested(route, onPinned: () => finish(navigate: true)));
 }
 
+/// Runs [action] once the app is signed in and past startup, as
+/// [navigateWhenReady] does for a route: at once when it already is, otherwise
+/// the first time it settles on Home.
+void runWhenReady(Future<void> Function() action) {
+  Future<void> run() async {
+    await _startupSettled();
+    await action();
+  }
+
+  if (_isAuthenticated()) {
+    unawaited(run());
+    return;
+  }
+  var done = false;
+  late final VoidCallback listener;
+  void finish({required bool go}) {
+    if (done) return;
+    done = true;
+    appRouter.routerDelegate.removeListener(listener);
+    if (go) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(run()));
+    }
+  }
+
+  listener = () {
+    if (_isAuthenticated() && _currentPath() == Destinations.home) {
+      finish(go: true);
+    }
+  };
+  appRouter.routerDelegate.addListener(listener);
+  Timer(const Duration(minutes: 5), () => finish(go: false));
+}
+
 /// Cold-start user pin for a deep link that carried `userId`: establish that
 /// stored session directly so automation doesn't need the profile picker.
 /// Runs only while the app is still unauthenticated, and only after

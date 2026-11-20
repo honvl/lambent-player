@@ -1303,9 +1303,13 @@ class UserPreferences extends ChangeNotifier {
     values: PosterSize.values,
   );
 
+  /// A TV's library grid shows about six posters across, as large as Plex's
+  /// TV app draws them, rather than eight small ones.
   static final libraryPosterSize = EnumPreference(
     key: 'poster_size_library',
-    defaultValue: PosterSize.medium,
+    defaultValue: PlatformDetection.isTV
+        ? PosterSize.extraLarge
+        : PosterSize.medium,
     values: PosterSize.gridValues,
   );
 
@@ -1387,9 +1391,13 @@ class UserPreferences extends ChangeNotifier {
     defaultValue: true,
   );
 
+  /// A TV starts with the picture in the corner, as Plex's TV app draws it:
+  /// the art clear at the top right, fading into the page behind the text.
   static final homeBackdropStyle = Preference(
     key: 'pref_home_backdrop_style',
-    defaultValue: homeBackdropFullScreen,
+    defaultValue: PlatformDetection.isTV
+        ? homeBackdropCorner
+        : homeBackdropFullScreen,
   );
 
   /// How the home screen draws the backdrop, off when the switch is off.
@@ -2250,9 +2258,11 @@ class UserPreferences extends ChangeNotifier {
     values: MusicLibraryStyle.values,
   );
 
+  /// Off on a TV: as in Plex's TV app the grid starts right under the
+  /// toolbar, rather than under a band repeating the focused title's facts.
   static final showMediaDetailsOnLibraryPage = Preference(
     key: 'pref_show_media_details_on_library_page',
-    defaultValue: true,
+    defaultValue: !PlatformDetection.isTV,
   );
 
   static final libraryCardTitles = Preference(
@@ -3466,9 +3476,11 @@ class UserPreferences extends ChangeNotifier {
 
   static final tmdbApiKey = Preference(key: 'tmdbApiKey', defaultValue: '');
 
+  /// A TV shows each score as its icon and value on one line, as Plex's TV
+  /// app does ("IMDb 7.2"), without the source's name under it.
   static final showRatingLabels = Preference(
     key: 'showRatingLabels',
-    defaultValue: true,
+    defaultValue: !PlatformDetection.isTV,
   );
 
   static final showRatingBadges = Preference(

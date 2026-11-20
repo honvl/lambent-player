@@ -66,7 +66,34 @@ class SceneDelegate: FlutterSceneDelegate {
     window = newWindow
     newWindow.makeKeyAndVisible()
 
+    // A cold start from Files' "Open in" carries the file here rather than in
+    // openURLContexts.
+    receiveFiles(connectionOptions.urlContexts, appDelegate: appDelegate)
+
     super.scene(scene, willConnectTo: session, options: connectionOptions)
+  }
+
+  override func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    let appDelegate = UIApplication.shared.delegate as? AppDelegate
+    let links = receiveFiles(URLContexts, appDelegate: appDelegate)
+    if !links.isEmpty { super.scene(scene, openURLContexts: links) }
+  }
+
+  /// Hands video files to the local files channel and returns the other
+  /// contexts (app links), which go on to the plugins.
+  @discardableResult
+  private func receiveFiles(
+    _ contexts: Set<UIOpenURLContext>, appDelegate: AppDelegate?
+  ) -> Set<UIOpenURLContext> {
+    var links = Set<UIOpenURLContext>()
+    for context in contexts {
+      if context.url.isFileURL, let files = appDelegate?.localFileChannel {
+        files.receive(context.url, inPlace: context.options.openInPlace)
+      } else {
+        links.insert(context)
+      }
+    }
+    return links
   }
 
   override func sceneDidBecomeActive(_ scene: UIScene) {

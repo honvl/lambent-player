@@ -140,6 +140,8 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
         override fun onNavigate(axis: String, direction: String) = sendGamepadNavigate(axis, direction)
     })
     private var watchNextChannel: MethodChannel? = null
+    /** Video files on this device outside the app's downloads. */
+    private var localFileChannel: LocalFileChannel? = null
     private var watchNextPublisher: WatchNextPublisher? = null
     private var previewChannelPublisher: PreviewChannelPublisher? = null
     private var pendingDeepLink: String? = null
@@ -315,6 +317,8 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
             }
         }
         deepLinkFrom(intent)?.let { pendingDeepLink = it }
+        // A cold start from a file manager's "Open with".
+        localFileChannel?.receive(intent)
         gameInputManager?.registerInputDeviceListener(gameInputDeviceListener, null)
     }
 
@@ -322,6 +326,7 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
         super.onNewIntent(intent)
         setIntent(intent)
         deepLinkFrom(intent)?.let { watchNextChannel?.invokeMethod("onDeepLink", it) }
+        localFileChannel?.receive(intent)
     }
 
     private fun deepLinkFrom(intent: Intent?): String? {
@@ -384,6 +389,7 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
             },
         )
 
+        localFileChannel = LocalFileChannel(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             MediaStoreHelper.CHANNEL,
@@ -1923,6 +1929,7 @@ class MainActivity : AudioServiceActivity(), GamepadsCompatibleActivity {
             pendingResult?.success(buildExternalPlayerResultPayload(data, resultCode))
             return
         }
+        if (localFileChannel?.onActivityResult(requestCode, resultCode, data) == true) return
         super.onActivityResult(requestCode, resultCode, data)
     }
 

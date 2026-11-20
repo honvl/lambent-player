@@ -27,6 +27,7 @@ import '../../data/repositories/user_views_repository.dart';
 import '../../data/repositories/search_repository.dart';
 import '../../data/repositories/item_mutation_repository.dart';
 import '../../util/game_library.dart';
+import '../../util/lambent_brand.dart';
 import '../../data/services/background_service.dart';
 import '../../data/services/access_schedule_service.dart';
 import '../../data/services/app_update_service.dart';
@@ -156,11 +157,13 @@ Future<void> _stopPlaybackForAccessSchedule() async {
 }
 
 void registerAppModule() {
-  _getIt.registerLazySingleton(() => RetroArtworkActivityGate());
-  _getIt.registerLazySingletonAsync<RetroArtworkByteCache>(
-    () => openDefaultRetroArtworkDiskCache(),
-    dispose: (cache) => cache.dispose(),
-  );
+  if (LambentBrand.gamesInBuild) {
+    _getIt.registerLazySingleton(() => RetroArtworkActivityGate());
+    _getIt.registerLazySingletonAsync<RetroArtworkByteCache>(
+      () => openDefaultRetroArtworkDiskCache(),
+      dispose: (cache) => cache.dispose(),
+    );
+  }
   _getIt.registerLazySingleton(() => SocketHandler());
   _getIt.registerLazySingleton(() => CustomExternalListsService());
   _getIt.registerLazySingleton(

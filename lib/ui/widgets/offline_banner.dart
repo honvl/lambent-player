@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_it/get_it.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
+import '../../auth/repositories/session_repository.dart';
 import '../../di/providers.dart';
 import '../../l10n/app_localizations.dart';
 import '../../util/platform_detection.dart';
@@ -63,6 +65,10 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner>
     super.dispose();
   }
 
+  static bool _signedIn() =>
+      GetIt.instance.isRegistered<SessionRepository>() &&
+      GetIt.instance<SessionRepository>().activeUserId != null;
+
   Future<void> _dismiss() async {
     _autoDismissTimer?.cancel();
     _autoDismissTimer = null;
@@ -90,6 +96,9 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner>
     if ((isOnline && serverReachable) || _dismissed) {
       return const SizedBox.shrink();
     }
+    // Nobody signed in (a file from this device playing): there is no server
+    // to have lost.
+    if (isOnline && !_signedIn()) return const SizedBox.shrink();
 
     if (_entrance.status == AnimationStatus.dismissed) {
       _entrance.forward();

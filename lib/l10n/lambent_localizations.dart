@@ -3362,6 +3362,34 @@ class LambentLocalizations extends AppLocalizations {
       lambentBranded(_inner.savedMediaNoDownloadsDetail);
 
   @override
+  String get onThisDevice =>
+      lambentBranded(_inner.onThisDevice);
+
+  @override
+  String get openVideoFile =>
+      lambentBranded(_inner.openVideoFile);
+
+  @override
+  String get localFilesEmpty =>
+      lambentBranded(_inner.localFilesEmpty);
+
+  @override
+  String localFileResumeAt(String position) =>
+      lambentBranded(_inner.localFileResumeAt(position));
+
+  @override
+  String get removeFromList =>
+      lambentBranded(_inner.removeFromList);
+
+  @override
+  String get localFilesServerScreenTitle =>
+      lambentBranded(_inner.localFilesServerScreenTitle);
+
+  @override
+  String get localFilesServerScreenDetail =>
+      lambentBranded(_inner.localFilesServerScreenDetail);
+
+  @override
   String get savedMediaNoActiveDownloads =>
       lambentBranded(_inner.savedMediaNoActiveDownloads);
 

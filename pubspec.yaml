@@ -303,7 +303,7 @@ flutter:
     - assets/icons/social/
     - assets/fonts/
     - assets/subtitle_fonts/
-    - assets/licenses/cores/
+    # assets/licenses/cores/ stays out: Lambent ships no emulator cores.
     - assets/reader/
     - assets/after_hours/
 

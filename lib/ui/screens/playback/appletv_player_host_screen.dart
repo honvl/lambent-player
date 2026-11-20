@@ -13,6 +13,7 @@ import 'package:playback_core/playback_core.dart';
 import 'package:server_core/server_core.dart';
 import 'package:server_silo/server_silo.dart';
 
+import '../../../data/local_files/local_file_library.dart';
 import '../../../playback/subtitle_style.dart';
 import '../../../data/models/aggregated_item.dart';
 import '../../../data/utils/chapter_markers.dart';
@@ -728,6 +729,8 @@ class _AppleTvPlayerHostScreenState extends State<AppleTvPlayerHostScreen> {
 
   bool _canFavorite(dynamic item) {
     if (item is! AggregatedItem) return false;
+    // A file from this device has no server to keep a favourite on.
+    if (LocalFileLibrary.isLocalFileItem(item)) return false;
     final id = _itemIdForQueueItem(item);
     return id != null && id.isNotEmpty;
   }

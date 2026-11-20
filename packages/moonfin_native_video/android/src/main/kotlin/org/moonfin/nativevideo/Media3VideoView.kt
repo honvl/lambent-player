@@ -1116,6 +1116,13 @@ class Media3VideoView(
     private var sessionTunnelingDisabled = Media3Bridge.sessionTunnelingDisabledEnabled()
     // RAVU-lite on this title (LambentUpscale.kt). Off for this view once the graph has failed.
     private var deviceUpscaleActive = false
+    // Lambent Auto HDR on this title (LambentAutoHdr.kt): ExoPlayer decodes into the renderer, which draws the SurfaceView's HDR10.
+    private var autoHdrActive = false
+    // ... with RAVU-lite's luma in the same GPU step (else bilinear), as the bench allows.
+    private var autoHdrRavu = false
+    private var autoHdr: LambentAutoHdrRenderer? = null
+    // The player decodes somewhere other than the SurfaceView (the renderer, now or before): a title without Auto HDR binds it again.
+    private var surfaceViewUnbound = false
     private var deviceUpscaleFailed = false
     private var currentAudioIsBitstream = false
     // True while the active audio track is TrueHD/MLP, which must never run
@@ -1531,6 +1538,12 @@ class Media3VideoView(
             videoPixelRatio = videoSize.pixelWidthHeightRatio
             // Through the graph this is the effect's output, when it comes at all.
             if (deviceUpscaleActive) setDeviceUpscaleSurfaceSize(videoSize.width to videoSize.height)
+            autoHdr?.let {
+                if (videoSize.width > 0 && videoSize.height > 0) {
+                    it.sourceWidth = videoSize.width
+                    it.sourceHeight = videoSize.height
+                }
+            }
             applyVideoLayout()
             layoutPaddingRowMask()
             reportPlaybackFrameRate(resolveSelectedVideoFrameRate(), "size")
@@ -1927,6 +1940,7 @@ class Media3VideoView(
         player.stop()
         player.clearMediaItems()
         player.release()
+        releaseAutoHdr()
 
         videoView.visibility = View.GONE
         if (videoView is SurfaceView) {
@@ -2914,6 +2928,7 @@ class Media3VideoView(
                 if (currentMediaType != "audio") {
                     if (useSurfaceView) {
                         it.setVideoSurfaceView(videoView as SurfaceView)
+                        surfaceViewUnbound = false
                     } else {
                         it.setVideoTextureView(videoView as TextureView)
                     }
@@ -3035,6 +3050,7 @@ class Media3VideoView(
         player.clearVideoSurface()
         Media3SessionController.releaseForPlayer(player)
         player.release()
+        releaseAutoHdr()
         recreateVideoView()
         player = createPlayer()
         httpDataSourceFactory.setDefaultRequestProperties(currentHeaders)
@@ -3097,6 +3113,7 @@ class Media3VideoView(
         Media3SessionController.releaseForPlayer(player)
         player.stop()
         player.clearMediaItems()
+        releaseAutoHdr()
         disableCapabilityReselection()
         firstFrameCover.visibility = View.VISIBLE
         emitState()
@@ -3664,7 +3681,10 @@ class Media3VideoView(
         currentIsLive = args["isLive"] as? Boolean ?: false
         stripDolbyVision = args["stripDolbyVision"] as? Boolean ?: false
         currentIsPreview = isPreview
+        releaseAutoHdr()
+        autoHdrActive = decideAutoHdr(url, args["videoRangeType"]?.toString(), args["lambentLift"] as? Boolean ?: false)
         applyDeviceUpscale(url, args["videoRangeType"]?.toString())
+        startAutoHdr()
         audioOffloadRetryAttemptedForCurrentSource = false
         stereoDownmixRetryAttemptedForCurrentSource = false
         tunnelingRetryAttemptedForCurrentSource = false
@@ -4242,6 +4262,7 @@ class Media3VideoView(
                 !sessionTunnelingDisabled &&
                 // Effects need the picture in the app's hands.
                 !deviceUpscaleActive &&
+                !autoHdrActive &&
                 // Tunneled TrueHD/MLP passthrough can be silent with no sink
                 // exception on some AVR chains. Tunneling is only a latency
                 // optimization, so drop it whenever a lossless track is active.
@@ -5868,6 +5889,81 @@ class Media3VideoView(
      * stereo downmix.
      */
     /**
+     * Lambent Auto HDR here (LambentAutoHdr.kt): an SDR video, the device's step asks for it (`chdr=1` from Lambent Server, or the
+     * player's own licence), the television takes HDR10, and the screensaver-time bench says this device keeps up at the title's rate
+     * and size. Titles that are already HDR or Dolby Vision keep the direct path.
+     */
+    private fun decideAutoHdr(url: String, videoRangeType: String?, lambentLift: Boolean): Boolean {
+        if (currentMediaType != "video" || currentIsPreview || !useSurfaceView || Build.VERSION.SDK_INT < 29) return false
+        if (!videoRangeType.equals("SDR", ignoreCase = true)) return false
+        if (!LambentAutoHdrPolicy.asked(url, lambentLift)) return false
+        val fps = sourceRealFps ?: sourceFrameRateHint ?: sourceAverageFps
+        val mode = context.getSystemService(DisplayManager::class.java)?.getDisplay(Display.DEFAULT_DISPLAY)?.mode
+        val wantsRavu = !deviceUpscaleFailed && LambentUpscalePolicy.outputSize(
+            sourceVideoWidthHint, sourceVideoHeightHint, mode?.physicalWidth ?: 0, mode?.physicalHeight ?: 0,
+        ) != null
+        val runs = LambentAutoHdrPolicy.mode(context, fps, sourceVideoWidthHint, sourceVideoHeightHint, wantsRavu)
+        autoHdrRavu = runs == LambentAutoHdrPolicy.Mode.RAVU
+        val why = when {
+            !LambentAutoHdrBank.available(context) -> "no weights in this build"
+            !LambentAutoHdrPolicy.displayTakesHdr10(context) -> "the television doesn't take HDR10"
+            LambentAutoHdrBench.cached(context) == null -> "this device hasn't been timed yet (the screensaver does it)"
+            runs == LambentAutoHdrPolicy.Mode.OFF ->
+                "too slow here for ${sourceVideoWidthHint}x$sourceVideoHeightHint at $fps fps (${LambentAutoHdrBench.cached(context)})"
+            else -> null
+        }
+        AndroidLog.i(
+            LambentAutoHdrRenderer.TAG,
+            "asked for ${sourceVideoWidthHint}x$sourceVideoHeightHint at $fps fps: ${why ?: if (autoHdrRavu) "on, with RAVU-lite" else "on, bilinear"}",
+        )
+        // Never timed here while a title starts: the GPU is the film's then (the screensaver and Lambent's settings run the bench).
+        return why == null
+    }
+
+    /** The picture through the renderer into the SurfaceView, as fp16 BT.2020 PQ at the screen's size; else the SurfaceView as always. */
+    private fun startAutoHdr() {
+        val surfaceView = videoView as? SurfaceView
+        if (!autoHdrActive || surfaceView == null) {
+            autoHdrActive = false
+            if (surfaceViewUnbound && surfaceView != null && !isPlayerReleased) {
+                // The last title drew through the renderer: a fresh surface for the decoder, as any new source gets one.
+                recreateVideoView()
+                player.setVideoSurfaceView(videoView as SurfaceView)
+                surfaceViewUnbound = false
+            }
+            return
+        }
+        val renderer = LambentAutoHdrRenderer.create(context, sourceVideoWidthHint, sourceVideoHeightHint, autoHdrRavu)
+        if (renderer == null) {
+            AndroidLog.w(LambentAutoHdrRenderer.TAG, "renderer could not start; playing directly")
+            autoHdrActive = false
+            return
+        }
+        val mode = context.getSystemService(DisplayManager::class.java)?.getDisplay(Display.DEFAULT_DISPLAY)?.mode
+        val screenW = mode?.physicalWidth ?: 3840
+        val screenH = mode?.physicalHeight ?: 2160
+        val w = sourceVideoWidthHint.takeIf { it > 0 } ?: 16
+        val h = sourceVideoHeightHint.takeIf { it > 0 } ?: 9
+        val scale = minOf(screenW.toFloat() / w, screenH.toFloat() / h)
+        val outW = (w * scale / 2).toInt() * 2
+        val outH = (h * scale / 2).toInt() * 2
+        surfaceView.holder.setFormat(android.graphics.PixelFormat.RGBA_F16)
+        surfaceView.holder.setFixedSize(outW, outH)
+        player.setVideoSurface(renderer.inputSurface)
+        surfaceViewUnbound = true
+        renderer.bind(surfaceView.holder)
+        autoHdr = renderer
+        AndroidLog.i(LambentAutoHdrRenderer.TAG, "on: ${w}x$h to ${outW}x$outH")
+    }
+
+    private fun releaseAutoHdr() {
+        val renderer = autoHdr ?: return
+        autoHdr = null
+        autoHdrActive = false
+        renderer.release()
+    }
+
+    /**
      * RAVU-lite for an SDR title worth scaling (LambentUpscale.kt). The player is new for each video, so
      * the effect is on it before its first prepare, which is when Media3 takes the picture into its graph.
      */
@@ -5877,7 +5973,7 @@ class Media3VideoView(
         val screenWidth = mode?.physicalWidth ?: 0
         val screenHeight = mode?.physicalHeight ?: 0
         val output = LambentUpscalePolicy.outputSize(sourceVideoWidthHint, sourceVideoHeightHint, screenWidth, screenHeight)
-        deviceUpscaleActive = !deviceUpscaleFailed && output != null &&
+        deviceUpscaleActive = !autoHdrActive && !deviceUpscaleFailed && output != null &&
             LambentUpscalePolicy.applies(currentMediaType, currentIsPreview, videoRangeType, url)
         AndroidLog.i(
             "LambentUpscale",
@@ -5887,7 +5983,15 @@ class Media3VideoView(
         // The player's panel says what runs here, in the words of the Apple players' `lambentUpscale` event.
         if (!currentIsPreview) {
             Media3Bridge.emitEvent(
-                mapOf("event" to "lambentUpscale", "label" to if (deviceUpscaleActive) "Shader upscale" else "Not needed"),
+                mapOf(
+                    "event" to "lambentUpscale",
+                    "label" to when {
+                        autoHdrActive && autoHdrRavu -> "Auto HDR · Shader upscale"
+                        autoHdrActive -> "Auto HDR"
+                        deviceUpscaleActive -> "Shader upscale"
+                        else -> "Not needed"
+                    },
+                ),
             )
         }
         if (deviceUpscaleActive) player.setVideoEffects(listOf(LambentUpscaleEffect(screenWidth, screenHeight)))

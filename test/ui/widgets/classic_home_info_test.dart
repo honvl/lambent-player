@@ -35,10 +35,13 @@ void main() {
         ),
       );
 
-      final order = ['S2:E5 - Low Tide', '2023', 'TV-14', '52m', 'Drama, Mystery, Crime'];
+      // Plex's order: the number and name, the year, the runtime, and the
+      // age rating last; an episode's genres are the show's, so left out.
+      final order = ['S2 \u2022 E5  Low Tide', '2023', '52m', 'TV-14'];
       final xs = [for (final t in order) tester.getTopLeft(find.text(t)).dx];
       expect(xs, orderedEquals([...xs]..sort()));
-      expect(find.text('S2:E5'), findsNothing);
+      expect(find.text('Drama, Mystery'), findsNothing);
+      expect(find.text('\u2022'), findsNothing);
     });
 
     testWidgets('a series shows no runtime', (tester) async {
@@ -95,7 +98,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(
         tester.getTopLeft(find.text('2024')).dy,
-        tester.getTopLeft(find.text('Science Fiction, Drama, Adventure')).dy,
+        tester.getTopLeft(find.text('Science Fiction, Drama')).dy,
       );
     });
   });

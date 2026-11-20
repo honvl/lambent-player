@@ -611,7 +611,9 @@ class _InfoAreaContentState extends State<_InfoAreaContent> {
             SizedBox(height: box(16)),
             Flexible(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: box(1200)),
+                // About half the screen, as Plex keeps its overview clear of
+                // the art at the right.
+                constraints: BoxConstraints(maxWidth: box(960)),
                 child: Text(
                   cleanOverview(item.overview),
                   style: overviewStyle,

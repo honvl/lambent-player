@@ -30,8 +30,9 @@ target 'Runner' do
 
   flutter_install_all_macos_pods File.dirname(File.realpath(__FILE__))
 
-  pod 'libretro_host', :path => '../native/libretro_host'
-  pod 'moonfin_game_host', :path => 'game_host'
+  # Lambent ships no games, and App Review rejects dormant emulation code (2.5.19), so the libretro hosts stay out of the app.
+  # Upstream: pod 'libretro_host' (../native/libretro_host) and
+  # pod 'moonfin_game_host' (game_host).
 
   target 'RunnerTests' do
     inherit! :search_paths

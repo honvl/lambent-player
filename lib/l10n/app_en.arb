@@ -4088,6 +4088,39 @@
   "@savedMediaNoDownloadsDetail": {
     "description": "Empty state body when no downloads are on the device"
   },
+  "onThisDevice": "On this device",
+  "@onThisDevice": {
+    "description": "Saved media tab listing video files the viewer opened from the device's own storage (Files app), outside the app's downloads"
+  },
+  "openVideoFile": "Open a video file",
+  "@openVideoFile": {
+    "description": "Button that opens the system file browser to pick a video stored on the device and play it"
+  },
+  "localFilesEmpty": "Videos you open from this device, its cloud storage or a USB drive appear here. They play where they are, without being copied.",
+  "@localFilesEmpty": {
+    "description": "Empty state under the On this device tab"
+  },
+  "localFileResumeAt": "Resume at {position}",
+  "@localFileResumeAt": {
+    "description": "Subtitle of a local video file row showing where playback was left",
+    "placeholders": {
+      "position": {
+        "type": "String"
+      }
+    }
+  },
+  "removeFromList": "Remove from list",
+  "@removeFromList": {
+    "description": "Menu action that takes a local video file off the On this device list; the file itself stays on the device"
+  },
+  "localFilesServerScreenTitle": "Videos on this device",
+  "@localFilesServerScreenTitle": {
+    "description": "Heading on the server screen above the button that opens video files stored on the phone or tablet, playable with no server"
+  },
+  "localFilesServerScreenDetail": "Play a film saved on this device, its cloud storage or a USB drive, no server needed.",
+  "@localFilesServerScreenDetail": {
+    "description": "Line under Videos on this device on the server screen"
+  },
   "savedMediaNoActiveDownloads": "Nothing downloading right now",
   "@savedMediaNoActiveDownloads": {
     "description": "Empty state for the active downloads tab"

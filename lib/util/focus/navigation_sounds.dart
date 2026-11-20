@@ -12,6 +12,14 @@ class NavigationSounds {
 
   static NavigationSounds? _instance;
 
+  /// The started instance, which [movedWithin] ticks through.
+  static NavigationSounds? _active;
+
+  /// Ticks for a move focus itself never makes: a title row keeps one focus
+  /// node and moves its highlight within it, so the arrow key that moved the
+  /// highlight is heard here. Silent unless an arrow key is being handled.
+  static void movedWithin() => _active?._tickPending();
+
   /// Starts the ticks for the whole app. Android TV only; call once.
   static void install() {
     if (_instance != null) return;
@@ -38,11 +46,13 @@ class NavigationSounds {
     _focused = FocusManager.instance.primaryFocus;
     HardwareKeyboard.instance.addHandler(_onKey);
     FocusManager.instance.addListener(_onFocusChange);
+    _active = this;
   }
 
   void stop() {
     HardwareKeyboard.instance.removeHandler(_onKey);
     FocusManager.instance.removeListener(_onFocusChange);
+    if (identical(_active, this)) _active = null;
   }
 
   bool _onKey(KeyEvent event) {
@@ -77,14 +87,22 @@ class NavigationSounds {
     final focused = FocusManager.instance.primaryFocus;
     if (identical(focused, _focused)) return;
     _focused = focused;
-    final direction = _pending;
-    final at = _pendingAt;
-    _pending = null;
     // Focus moves while the key is handled, or a frame later where a row
     // scrolls first. A key that moved nothing (the end of a row, a seek in
     // the player) stays silent, as on Android, and a move long after it is
     // the app's own.
-    if (direction == null || focused == null || at == null) return;
+    if (focused == null) {
+      _pending = null;
+      return;
+    }
+    _tickPending();
+  }
+
+  void _tickPending() {
+    final direction = _pending;
+    final at = _pendingAt;
+    _pending = null;
+    if (direction == null || at == null) return;
     if (DateTime.now().difference(at) < _keyWindow) _play(direction);
   }
 }

@@ -10,6 +10,7 @@ import 'bottom_nav/bottom_navbar.dart';
 import 'download_progress_bar.dart';
 import 'left_sidebar.dart';
 import 'top_toolbar.dart';
+import 'tv_clock_pill.dart';
 
 import 'dart:async';
 import 'package:moonfin_design/moonfin_design.dart';
@@ -26,6 +27,10 @@ class NavigationLayout extends StatefulWidget {
   /// Keep the top toolbar fixed instead of letting it translate away as the
   /// content scrolls. No effect off-TV, where the toolbar is already fixed.
   final bool pinTopToolbar;
+
+  /// Whether a TV page shows the clock pill at its top right. A page with its
+  /// own control there (the library's search) turns it off.
+  final bool showTvClock;
 
   static bool get allowBottomNavbar =>
       PlatformDetection.useMobileUi && !PlatformDetection.isWeb;
@@ -133,6 +138,7 @@ class NavigationLayout extends StatefulWidget {
     this.showBackButton = false,
     this.showNavigationChrome = true,
     this.pinTopToolbar = false,
+    this.showTvClock = true,
   });
 
   @override
@@ -535,6 +541,13 @@ class _NavigationLayoutState extends State<NavigationLayout>
                       ),
                     ),
                   ),
+                // Plex's TV app keeps the time in a small pill at the top
+                // right of every page; the glass sidebar has no room for it.
+                if (PlatformDetection.isTV &&
+                    AppColorScheme.isGlass &&
+                    widget.showNavigationChrome &&
+                    widget.showTvClock)
+                  const Positioned(top: 0, right: 0, child: TvClockPill()),
                 Positioned(
                   top: 0,
                   left: 0,

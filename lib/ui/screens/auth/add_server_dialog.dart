@@ -94,6 +94,9 @@ const _warningText = Color(0xFFFFD27A);
   ),
 };
 
+/// Lambent's sunset orange, for a joined Lambent PC.
+const _lambentTint = (tile: Color(0x29FF964A), glyph: Color(0xFFFFB46A));
+
 String _brand(ServerType type) => switch (type) {
   ServerType.jellyfin => 'Jellyfin',
   ServerType.emby => 'Emby',
@@ -987,7 +990,9 @@ class _AddServerDialogState extends State<AddServerDialog> {
 
   Widget _foundStep(AppLocalizations l10n) {
     final server = _found!;
-    final tint = _serverTint(server.serverType);
+    // A joined Lambent PC is saved at its iroh tunnel's address.
+    final lambent = RemoteAccess.instance.isTunnel(server.address);
+    final tint = lambent ? _lambentTint : _serverTint(server.serverType);
     final continueButton = FilledButton(
       focusNode: _continueFocus,
       onPressed: () => _close(AddServerSaved(server.id)),
@@ -1055,6 +1060,7 @@ class _AddServerDialogState extends State<AddServerDialog> {
                   serverType: server.serverType,
                   size: 30,
                   color: tint.glyph,
+                  lambent: lambent,
                 ),
               ),
               const SizedBox(width: 14),

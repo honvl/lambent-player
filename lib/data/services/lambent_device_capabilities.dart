@@ -43,13 +43,18 @@ class LambentDeviceCapabilities {
 
   static const _control = MethodChannel('moonfin/ios_aether_control');
 
+  /// Android's player (Media3Bridge.kt): RAVU-lite, and Lambent Auto HDR
+  /// where this device's own benchmark says the bank of tables keeps up.
+  static const _media3 = MethodChannel('moonfin/media3_video_control');
+
   /// Nothing on a platform whose player has no such steps yet.
   static Future<LambentDeviceCapabilities> detect() async {
     try {
       return LambentDeviceCapabilities.fromMap(
-        await _control.invokeMethod<Map<dynamic, dynamic>>(
-          'getLambentCapabilities',
-        ),
+        await (defaultTargetPlatform == TargetPlatform.android && !kIsWeb
+                ? _media3
+                : _control)
+            .invokeMethod<Map<dynamic, dynamic>>('getLambentCapabilities'),
       );
     } on MissingPluginException {
       return none;

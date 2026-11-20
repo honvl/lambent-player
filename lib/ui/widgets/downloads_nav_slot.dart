@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import '../../data/local_files/local_file_library.dart';
 import '../../data/services/saved_media_presence.dart';
 import '../../preference/user_preferences.dart';
 import '../../util/download_utils.dart';
@@ -30,15 +31,20 @@ class DownloadsNavSlot extends StatelessWidget {
   /// Whether this device and the signed in user can download at all.
   static bool isAvailable() => !PlatformDetection.isWeb && userCanDownload();
 
-  /// Whether there is anything saved to show right now.
+  /// Whether there is anything saved to show right now. Where video files on
+  /// the device can be opened, the screen always has that to offer, so the
+  /// way to it stays put even with nothing downloaded.
   static bool hasSavedMedia() {
+    if (LocalFileLibrary.isSupported) return true;
     if (!GetIt.instance.isRegistered<SavedMediaPresence>()) return false;
     return GetIt.instance<SavedMediaPresence>().hasSavedMedia;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!isOffered() || !GetIt.instance.isRegistered<SavedMediaPresence>()) {
+    if (!isOffered()) return const SizedBox.shrink();
+    if (LocalFileLibrary.isSupported) return builder(context);
+    if (!GetIt.instance.isRegistered<SavedMediaPresence>()) {
       return const SizedBox.shrink();
     }
     final presence = GetIt.instance<SavedMediaPresence>();

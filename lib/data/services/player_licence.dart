@@ -131,7 +131,7 @@ class PlayerLicence extends ChangeNotifier {
   PlayerLicence({
     required PlayerLicenceStore store,
     http.Client? client,
-    this.serviceUrl = 'https://getlambent.vercel.app',
+    this.serviceUrl = 'https://getlambent.app',
     List<String>? serviceKeys,
     int Function()? nowMs,
     Duration timeout = const Duration(seconds: 15),

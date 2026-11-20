@@ -1,5 +1,6 @@
 import 'package:playback_core/playback_core.dart';
 
+import '../data/local_files/local_file_library.dart';
 import '../data/repositories/offline_repository.dart';
 
 /// Decorates the server play-session service so local-file playback keeps the
@@ -13,6 +14,7 @@ class LocalAwarePlayerService implements PlayerService {
   final PlayerService _inner;
   final OfflineRepository _offlineRepo;
   final bool Function() _canReachServer;
+  final LocalFileLibrary? _localFiles;
 
   /// Told which item stopped, how it played and where, once its stop has been
   /// reported, so whatever reacts to a finished episode reads the server's
@@ -28,6 +30,7 @@ class LocalAwarePlayerService implements PlayerService {
     this._inner,
     this._offlineRepo, {
     required bool Function() canReachServer,
+    LocalFileLibrary? localFiles,
     void Function(
       dynamic mediaItem,
       StreamResolutionResult resolution,
@@ -35,17 +38,28 @@ class LocalAwarePlayerService implements PlayerService {
     )?
     onStopped,
   }) : _canReachServer = canReachServer,
+       _localFiles = localFiles,
        _onStopped = onStopped;
+
+  /// A file opened from outside the app: its position is the library's to
+  /// keep, and no server has ever heard of it.
+  bool _isLocalFile(dynamic mediaItem) =>
+      _localFiles != null && LocalFileLibrary.isLocalFileItem(mediaItem);
 
   Future<void> _recordLocal(dynamic mediaItem, int positionTicks) async {
     try {
       final itemId = MediaStreamResolver.extractItemId(mediaItem);
+      if (_isLocalFile(mediaItem)) {
+        await _localFiles!.updatePosition(itemId, positionTicks);
+        return;
+      }
       await _offlineRepo.updatePlaybackPosition(itemId, positionTicks);
     } catch (_) {}
   }
 
   Future<void> _forward(Future<void> Function() report) async {
     if (!_canReachServer()) return;
+
     try {
       await report();
     } catch (_) {}
@@ -59,6 +73,7 @@ class LocalAwarePlayerService implements PlayerService {
     int? audioStreamIndex,
     int? subtitleStreamIndex,
   }) async {
+    if (_isLocalFile(mediaItem)) return;
     if (!resolution.isLocalMedia) {
       return _inner.onPlaybackStart(
         mediaItem,
@@ -103,6 +118,7 @@ class LocalAwarePlayerService implements PlayerService {
       );
     }
     await _recordLocal(mediaItem, position.inMicroseconds * 10);
+    if (_isLocalFile(mediaItem)) return;
     await _forward(
       () => _inner.onPlaybackProgress(
         mediaItem,
@@ -134,6 +150,7 @@ class LocalAwarePlayerService implements PlayerService {
         );
       }
       await _recordLocal(mediaItem, position.inMicroseconds * 10);
+      if (_isLocalFile(mediaItem)) return;
       await _forward(
         () => _inner.onPlaybackStop(
           mediaItem,

@@ -1875,8 +1875,19 @@ class HomeViewModel extends ChangeNotifier {
 
   Future<List<HomeRow>> _loadLatestMediaRows() {
     return _loadRecentRows(
-      load: (lib, type) =>
-          _dataSource.loadLatestMedia(lib.id, lib.name, _serverId, type),
+      load: (lib, type) async {
+        final row = await _dataSource.loadLatestMedia(
+          lib.id,
+          lib.name,
+          _serverId,
+          type,
+        );
+        // Lambent Server's personal media libraries browse as movies, so only
+        // their own kind says they hold frames rather than posters.
+        return lib.lambentKind == 'homevideos'
+            ? row.copyWith(wideCards: true)
+            : row;
+      },
       sortKey: (item) => _parseDate(item.rawData['DateCreated']),
       idPrefix: 'latest',
       rowType: HomeRowType.latestMedia,

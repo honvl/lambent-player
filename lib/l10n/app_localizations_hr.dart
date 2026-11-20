@@ -3096,6 +3096,31 @@ class AppLocalizationsHr extends AppLocalizations {
       'Downloads you start appear here and play without a connection.';
 
   @override
+  String get onThisDevice => 'On this device';
+
+  @override
+  String get openVideoFile => 'Open a video file';
+
+  @override
+  String get localFilesEmpty =>
+      'Videos you open from this device, its cloud storage or a USB drive appear here. They play where they are, without being copied.';
+
+  @override
+  String localFileResumeAt(String position) {
+    return 'Resume at $position';
+  }
+
+  @override
+  String get removeFromList => 'Remove from list';
+
+  @override
+  String get localFilesServerScreenTitle => 'Videos on this device';
+
+  @override
+  String get localFilesServerScreenDetail =>
+      'Play a film saved on this device, its cloud storage or a USB drive, no server needed.';
+
+  @override
   String get savedMediaNoActiveDownloads => 'Nothing downloading right now';
 
   @override

@@ -6287,9 +6287,10 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
     VoidCallback? onArrowRight,
     double? progress,
     String? trailingLabel,
+    String? label,
   }) {
     return NouveauAction(
-      label: button.label,
+      label: label ?? button.label,
       icon: button.icon,
       iconBuilder: button.iconBuilder,
       onPressed: button.onPressed,
@@ -7739,17 +7740,28 @@ class DetailActionButtonsState extends State<DetailActionButtons> {
               ? '${hours}h ${minutes}m'
               : '${hours}h';
 
-          remainingLabel = l10n.timeRemaining(formatted);
+          remainingLabel = l10n.bookTimeLeft(formatted);
         } else if (remainingMinutes > 0) {
-          remainingLabel =
-              l10n.timeRemaining('${remainingMinutes}m');
+          remainingLabel = l10n.bookTimeLeft('${remainingMinutes}m');
         }
       }
+
+      // As Plex's "Resume • 44m left": the time left beside the button says
+      // where it resumes, so "Resume from 2h 33m" would only repeat it, and
+      // at its length it never fit the pill without scrolling.
+      final resumeFromLabel = playbackPosition > Duration.zero
+          ? l10n.resumeFrom(_formatResumePosition(playbackPosition))
+          : null;
+      final primaryLabel =
+          remainingLabel != null && primaryButton?.label == resumeFromLabel
+          ? l10n.resume
+          : null;
 
       final nouveauPrimaryAction = primaryButton == null
           ? null
           : _toNouveauAction(
               primaryButton,
+              label: primaryLabel,
               focusNode: primaryFocusNode,
               progress: playbackProgress,
               trailingLabel: remainingLabel,

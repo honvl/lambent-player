@@ -38,4 +38,45 @@ void main() {
     await tester.pump();
     expect(heard, ['right', 'select'], reason: 'the app moved focus, not the remote');
   });
+
+  testWidgets('a row that moves its highlight within one focus node ticks too', (tester) async {
+    final heard = <String>[];
+    final sounds = NavigationSounds.forTest(heard.add);
+    final row = FocusNode();
+    var index = 0;
+    addTearDown(() {
+      sounds.stop();
+      row.dispose();
+    });
+    await tester.pumpWidget(MaterialApp(
+      home: Focus(
+        focusNode: row,
+        onKeyEvent: (node, event) {
+          if (event is! KeyDownEvent || event.logicalKey != LogicalKeyboardKey.arrowRight) {
+            return KeyEventResult.ignored;
+          }
+          if (index < 2) {
+            index++;
+            NavigationSounds.movedWithin();
+          }
+          return KeyEventResult.handled;
+        },
+        child: const SizedBox(width: 50, height: 50),
+      ),
+    ));
+    row.requestFocus();
+    await tester.pump();
+    sounds.start();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(heard, ['right', 'right']);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    expect(heard, ['right', 'right'], reason: 'the end of the row');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    NavigationSounds.movedWithin();
+    expect(heard, ['right', 'right', 'select'], reason: 'no arrow key is being handled');
+  });
 }

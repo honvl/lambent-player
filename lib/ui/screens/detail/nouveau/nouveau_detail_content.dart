@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import '../../../../preference/detail_section_layout.dart';
 import '../../../../preference/user_preferences.dart';
 import '../../../../util/platform_detection.dart';
 import '../../../../util/seerr_credits.dart';
+import '../../../widgets/art_tint.dart';
 import '../../../widgets/fullscreen_backdrop_switcher.dart';
 import '../../../widgets/navigation_layout.dart';
 import '../detail_layout_metrics.dart';
@@ -1446,7 +1448,26 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
     String? backdropUrl,
     AggregatedItem item,
   ) {
-    final base = Theme.of(context).scaffoldBackgroundColor;
+    // As Plex's TV app: the page under the text takes the art's own colour
+    // rather than black. A person's page keeps the plain background.
+    final plain = Theme.of(context).scaffoldBackgroundColor;
+    if (item.type == 'Person' || _usePortraitLayout(context)) {
+      return _backdropLayers(context, backdropUrl, item, plain);
+    }
+    return ArtTintBuilder(
+      url: backdropUrl,
+      fallback: plain,
+      builder: (context, tint) =>
+          _backdropLayers(context, backdropUrl, item, tint),
+    );
+  }
+
+  Widget _backdropLayers(
+    BuildContext context,
+    String? backdropUrl,
+    AggregatedItem item,
+    Color base,
+  ) {
 
     final portrait = _usePortraitLayout(context);
 
@@ -1467,6 +1488,9 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
     double scaledAlpha(double alpha) {
       return (alpha * gradientScale).clamp(0.0, 1.0).toDouble();
     }
+
+    double textSideAlpha(double alpha) =>
+        math.max(scaledAlpha(alpha), alpha * 0.85);
 
     return Stack(
       fit: StackFit.expand,
@@ -1493,11 +1517,15 @@ class NouveauDetailContentState extends State<NouveauDetailContent> {
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
+                // The title, facts and overview sit on this side, so it keeps
+                // most of its shade at any background amount (as Plex washes
+                // the art behind its text): bright, busy art made them hard to
+                // read with the setting low.
                 colors: [
-                  base.withValues(alpha: scaledAlpha(0.96)),
-                  base.withValues(alpha: scaledAlpha(0.86)),
-                  base.withValues(alpha: scaledAlpha(0.58)),
-                  base.withValues(alpha: scaledAlpha(0.22)),
+                  base.withValues(alpha: textSideAlpha(0.96)),
+                  base.withValues(alpha: textSideAlpha(0.86)),
+                  base.withValues(alpha: textSideAlpha(0.58)),
+                  base.withValues(alpha: textSideAlpha(0.22)),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.18, 0.38, 0.60, 0.82],

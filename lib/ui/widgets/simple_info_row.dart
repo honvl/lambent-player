@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 
 import '../../data/models/aggregated_item.dart';
@@ -18,6 +19,9 @@ class SimpleInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = <Widget>[];
+    final locale = Localizations.maybeLocaleOf(context)?.toLanguageTag();
+    // Plex spaces its facts apart; a library's own summary keeps its dots.
+    var spaced = false;
 
     final summary = metadataSummary;
     if (summary != null && summary.isNotEmpty) {
@@ -29,19 +33,20 @@ class SimpleInfoRow extends StatelessWidget {
         children.add(_text(part));
       }
     } else {
-      // The season and episode lead the line, since the title band shows the
-      // series rather than the episode.
+      // Plex's order: the season and episode lead an episode's line, since
+      // the title band shows the series; then the year (an episode's air
+      // date), the runtime, two genres, and the age rating last.
       if (item.type == 'Episode') {
         final lead = episodeLead(item);
         if (lead.isNotEmpty) children.add(_text(lead, lead: true));
       }
 
-      if (item.productionYear != null) {
+      final aired = item.type == 'Episode' ? item.premiereDate : null;
+      if (aired != null) {
+        // An air date is a day, sent as its UTC midnight: read it as that day.
+        children.add(_text(DateFormat.yMMMd(locale).format(aired.toUtc())));
+      } else if (item.productionYear != null) {
         children.add(_text(item.productionYear.toString()));
-      }
-
-      if (item.officialRating != null) {
-        children.add(_pill(item.officialRating!));
       }
 
       final runtime = item.runtime;
@@ -51,22 +56,27 @@ class SimpleInfoRow extends StatelessWidget {
         children.add(_text(hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m'));
       }
 
+      final genres = item.genres;
+      if (genres.isNotEmpty && item.type != 'Episode') {
+        children.add(_text(genres.take(2).join(', ')));
+      }
+
+      if (item.officialRating case final rating? when rating.isNotEmpty) {
+        children.add(_pill(rating));
+      }
+
       final resolution = item.videoResolution;
       if (resolution != null) {
         children.add(_pill(resolution));
       }
-
-      final genres = item.genres;
-      if (genres.isNotEmpty) {
-        children.add(_text(genres.take(3).join(', ')));
-      }
+      spaced = true;
     }
 
     if (children.isEmpty) return const SizedBox.shrink();
 
     final separated = <Widget>[];
     for (var i = 0; i < children.length; i++) {
-      if (i > 0) separated.add(_dot());
+      if (i > 0) separated.add(spaced ? SizedBox(width: tvPx(22)) : _dot());
       separated.add(children[i]);
     }
 
@@ -82,13 +92,14 @@ class SimpleInfoRow extends StatelessWidget {
     );
   }
 
-  /// "S2:E5 - Episode Name", or whichever half the item has.
+  /// "S2 • E5  Episode Name", or whichever half the item has, as Plex
+  /// writes it.
   static String episodeLead(AggregatedItem item) {
     final s = item.parentIndexNumber;
     final e = item.indexNumber;
-    final number = (s != null && e != null) ? 'S$s:E$e' : null;
+    final number = (s != null && e != null) ? 'S$s \u2022 E$e' : null;
     final name = item.name.trim();
-    return [?number, if (name.isNotEmpty) name].join(' - ');
+    return [?number, if (name.isNotEmpty) name].join('  ');
   }
 
   Widget _text(String value, {bool lead = false}) {
@@ -128,20 +139,22 @@ class SimpleInfoRow extends StatelessWidget {
     return Container(
       height: tvPx(28),
       padding: EdgeInsets.symmetric(horizontal: tvPx(10)),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: borders.chipBackground,
         border: Border.fromBorderSide(borders.chipBorder),
         borderRadius: borders.chipRadius,
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: tvPx(20),
-          height: 1.2,
-          fontWeight: FontWeight.w500,
-          color: AppColorScheme.onSurface.withValues(alpha: 0.85),
-          shadows: _textShadows,
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: tvPx(20),
+            height: 1.2,
+            fontWeight: FontWeight.w500,
+            color: AppColorScheme.onSurface.withValues(alpha: 0.85),
+            shadows: _textShadows,
+          ),
         ),
       ),
     );

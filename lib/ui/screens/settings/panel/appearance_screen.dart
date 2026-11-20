@@ -81,14 +81,6 @@ class _AppearanceScreenState extends State<_AppearanceScreen> {
                     ),
                   ),
                   _TvSettingsListTile(
-                    leading: const Icon(Icons.video_library),
-                    title: Text(l10n.libraries),
-                    subtitle: Text(l10n.settingsLibrariesEntrySubtitle),
-                    onTap: () => context.pushSettingsScreen(
-                      const _LibrariesCategoryScreen(),
-                    ),
-                  ),
-                  _TvSettingsListTile(
                     leading: const Icon(Icons.article_outlined),
                     title: Text(l10n.detailsPage),
                     subtitle: Text(l10n.settingsDetailsPageSubtitle),

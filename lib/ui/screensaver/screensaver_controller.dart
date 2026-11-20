@@ -22,6 +22,7 @@ class ScreensaverController {
         _onPlayingChanged,
       );
       _prefs.addListener(_onPrefsChanged);
+      _markRecentlyUsed();
       _restartIdleTimer();
       _restartSleepTimer();
     }
@@ -85,6 +86,8 @@ class ScreensaverController {
   bool _playbackActive = false;
   bool _streamPlaying = false;
   bool _trailerActive = false;
+  bool _trailerHolds = false;
+  Timer? _recentUseTimer;
   bool _homePreviewActive = false;
   bool _nativePlayerPresented = false;
   bool _wakeLockEnabled = false;
@@ -116,11 +119,30 @@ class ScreensaverController {
     _onStateChanged();
   }
 
+  /// The media bar moves on to the next film's trailer when one ends, so on
+  /// an idle home screen trailers play one after another for as long as the
+  /// TV stays on. Only a trailer that started while someone was using the
+  /// remote keeps the screensaver away; the ones that follow after the
+  /// screensaver's timeout with no key press leave it free to come up.
   void setMediaBarTrailerActive(bool value) {
     if (_trailerActive == value) return;
+    final wasArmed = _armed;
     _trailerActive = value;
+    if (value) _trailerHolds = _recentlyUsed;
     _refreshWakeLock();
-    _onStateChanged();
+    // A trailer that does not hold must not restart the idle wait either, or
+    // each new trailer would push the screensaver back by a whole timeout.
+    if (_armed != wasArmed) _onStateChanged();
+  }
+
+  /// Whether the remote was used within the screensaver's timeout.
+  bool get _recentlyUsed => _recentUseTimer?.isActive ?? false;
+
+  void _markRecentlyUsed() {
+    _recentUseTimer?.cancel();
+    _recentUseTimer = Timer(Duration(minutes: _timeoutCache.minutes), () {});
+    // Someone pressing a key while a trailer plays is watching it.
+    if (_trailerActive) _trailerHolds = true;
   }
 
   /// A home card's preview, which can be a full trailer.
@@ -137,7 +159,7 @@ class ScreensaverController {
       !_activityPaused &&
       !_playbackActive &&
       (!_streamPlaying || (_duringAudioCache && _playingAudio)) &&
-      !_trailerActive &&
+      !(_trailerActive && _trailerHolds) &&
       !_homePreviewActive &&
       !_nativePlayerPresented;
 
@@ -148,6 +170,7 @@ class ScreensaverController {
 
   void notifyInteraction() {
     if (!PlatformDetection.isTV || visible.value) return;
+    _markRecentlyUsed();
     _restartSleepTimer();
     if (_armed) {
       _restartIdleTimer();
@@ -160,6 +183,7 @@ class ScreensaverController {
     if (visible.value) {
       visible.value = false;
     }
+    _markRecentlyUsed();
     _restartIdleTimer();
     _restartSleepTimer();
   }
@@ -347,6 +371,7 @@ class ScreensaverController {
     _playingSub?.cancel();
     _idleTimer?.cancel();
     _sleepTimer?.cancel();
+    _recentUseTimer?.cancel();
     _prefs.removeListener(_onPrefsChanged);
     _wakeLockEnabled = false;
     unawaited(_setWakeLockEnabled(false));

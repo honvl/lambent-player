@@ -2946,6 +2946,31 @@ class AppLocalizationsKo extends AppLocalizations {
       '다운로드한 항목이 여기에 표시되며 인터넷 연결 없이 재생할 수 있습니다.';
 
   @override
+  String get onThisDevice => 'On this device';
+
+  @override
+  String get openVideoFile => 'Open a video file';
+
+  @override
+  String get localFilesEmpty =>
+      'Videos you open from this device, its cloud storage or a USB drive appear here. They play where they are, without being copied.';
+
+  @override
+  String localFileResumeAt(String position) {
+    return 'Resume at $position';
+  }
+
+  @override
+  String get removeFromList => 'Remove from list';
+
+  @override
+  String get localFilesServerScreenTitle => 'Videos on this device';
+
+  @override
+  String get localFilesServerScreenDetail =>
+      'Play a film saved on this device, its cloud storage or a USB drive, no server needed.';
+
+  @override
   String get savedMediaNoActiveDownloads => '다운로드 중인 항목이 없습니다';
 
   @override

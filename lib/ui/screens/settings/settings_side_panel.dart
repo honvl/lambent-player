@@ -97,7 +97,6 @@ import '../../widgets/settings/preference_tiles.dart';
 import '../../widgets/settings/settings_panel.dart';
 import '../../widgets/settings/settings_preview_scope.dart';
 import '../../widgets/sliding_pill_tabs.dart';
-import 'live_preview/settings_live_preview.dart';
 import '../../widgets/settings/settings_section_header.dart';
 import '../../widgets/bottom_nav/bottom_nav_destinations.dart';
 import '../../widgets/navigation_layout.dart';
@@ -228,13 +227,8 @@ Future<void> _openThemeEditor(BuildContext context) async {
 /// at. Past Large their descenders get cut off.
 final _pillMaxTextScale = DesktopUiScale.large.scaleFactor;
 
-/// The inspector's height at the default scale, split into the share its text
-/// takes, which grows with the user's scale, and its padding and gaps.
-const _inspectorTextHeight = 90.0;
-const _inspectorFixedHeight = 90.0;
-
-/// The settings list's width on a TV, which shows it alone.
-const _tvListWidth = 820.0;
+/// The settings list's width on a wide screen, which shows it alone.
+const _listWidth = 820.0;
 
 /// One pill segment of Settings and the page it opens in the list column.
 class _SettingsCategory {
@@ -597,6 +591,13 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
         l10n.settingsPlaybackSubtitle,
         () => const _PlaybackCategoryScreen(),
       ),
+      // Which libraries show and in what order is everyday, not a tweak, so
+      // it has its own entry rather than sitting under Appearance.
+      _SettingsCategory(
+        l10n.libraries,
+        l10n.settingsLibrariesEntrySubtitle,
+        () => const _LibrariesCategoryScreen(),
+      ),
       // The image cache lives here, so the entry stays on every native
       // platform. The download sections inside gate themselves.
       if (advanced && !PlatformDetection.isWeb)
@@ -840,74 +841,23 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
             children: [
               topBar,
               const SizedBox(height: 18),
-              // A TV has no live preview: it took more than half the screen
-              // and its description box repeated the focused tile, so the
-              // list gets the room instead.
-              if (_tv)
-                Expanded(
-                  child: Center(
-                    child: SizedBox(
-                      width: _tvListWidth,
-                      child: ClipRRect(
-                        borderRadius: AppRadius.circular(20),
-                        child: ColoredBox(
-                          color: AppColorScheme.surface,
-                          child: list,
-                        ),
+              // No live preview: it took about half the screen and its
+              // description box repeated the focused tile, so the list gets
+              // the room instead.
+              Expanded(
+                child: Center(
+                  child: SizedBox(
+                    width: _listWidth,
+                    child: ClipRRect(
+                      borderRadius: AppRadius.circular(20),
+                      child: ColoredBox(
+                        color: AppColorScheme.surface,
+                        child: list,
                       ),
                     ),
                   ),
-                )
-              else
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        width: 440,
-                        child: ClipRRect(
-                          borderRadius: AppRadius.circular(20),
-                          child: ColoredBox(
-                            color: AppColorScheme.surface,
-                            child: list,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 24),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(child: SettingsLivePreview()),
-                            const SizedBox(height: 16),
-                            // A fixed height, so the preview above doesn't
-                            // resize as descriptions get longer or shorter.
-                            Container(
-                              height:
-                                  _inspectorFixedHeight +
-                                  MediaQuery.textScalerOf(context)
-                                      .scale(_inspectorTextHeight),
-                              padding: const EdgeInsets.fromLTRB(
-                                20,
-                                16,
-                                20,
-                                16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColorScheme.surface,
-                                borderRadius: AppRadius.circular(18),
-                              ),
-                              child: const SingleChildScrollView(
-                                physics: NeverScrollableScrollPhysics(),
-                                child: SettingsPreviewInspector(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
+              ),
             ],
           ),
         ),
@@ -923,9 +873,6 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
     Widget list,
     bool searching,
   ) {
-    final prefs = GetIt.instance<UserPreferences>();
-    final previewHidden = prefs.get(UserPreferences.settingsPreviewHidden);
-    final category = _searchedCategory ?? _categories[_categoryIndex];
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -946,20 +893,6 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: pill,
-            ),
-          if (!searching && category.preview)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: _PhoneLivePreview(
-                hidden: previewHidden,
-                onToggle: () async {
-                  await prefs.set(
-                    UserPreferences.settingsPreviewHidden,
-                    !previewHidden,
-                  );
-                  if (mounted) setState(() {});
-                },
-              ),
             ),
           Expanded(child: list),
         ],
@@ -1039,69 +972,6 @@ class _SettingsSidePanelState extends ConsumerState<SettingsSidePanel> {
                 },
               ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-/// The phone's preview strip: the show/hide toggle ahead of the scenes, the
-/// mock screen at the phone's own proportions, and the touched setting spelled
-/// out beside it. Hidden leaves only the scenes row, so the toggle stays put.
-class _PhoneLivePreview extends StatelessWidget {
-  final bool hidden;
-  final VoidCallback onToggle;
-
-  const _PhoneLivePreview({required this.hidden, required this.onToggle});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = context
-        .dependOnInheritedWidgetOfExactType<SettingsPreviewScope>()
-        ?.notifier;
-    if (controller == null) return const SizedBox.shrink();
-    final scenes = SettingsPreviewScenes(
-      controller: controller,
-      onSceneTap: hidden ? onToggle : null,
-      leading: IconButton(
-        tooltip: AppLocalizations.of(context).settingsLivePreview,
-        isSelected: !hidden,
-        visualDensity: VisualDensity.compact,
-        iconSize: 20,
-        icon: const Icon(Icons.visibility_off_outlined),
-        selectedIcon: const Icon(Icons.visibility_outlined),
-        onPressed: onToggle,
-      ),
-    );
-    if (hidden) return scenes;
-    final landscape = controller.scene == SettingsPreviewScene.player;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        scenes,
-        const SizedBox(height: 10),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 200),
-          child: landscape
-              ? const SizedBox(
-                  height: 168,
-                  child: Center(child: SettingsLivePreview(showHeader: false)),
-                )
-              : SizedBox(
-                  height: 250,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      SettingsLivePreview(showHeader: false),
-                      SizedBox(width: 14),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: SettingsPreviewInspector(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
         ),
       ],
     );

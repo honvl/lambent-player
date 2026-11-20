@@ -3,6 +3,7 @@ import 'package:moonfin_design/moonfin_design.dart';
 
 import '../../../data/services/background_service.dart';
 import '../../../preference/user_preferences.dart';
+import '../../widgets/art_tint.dart';
 import '../../widgets/bounded_network_image.dart';
 import '../../widgets/fullscreen_backdrop_switcher.dart';
 
@@ -59,7 +60,12 @@ class HomeBackdrop extends StatelessWidget {
       imageUrl: url,
       duration: BackgroundService.transitionDuration,
       imageBuilder: (imageUrl) {
-        final image = _blurredImage(context, imageUrl, blurAmount);
+        // The corner picture is the art itself, kept sharp: it fades into the
+        // page on its own, and the background blur is for one behind the text.
+        final blur = style == UserPreferences.homeBackdropCorner
+            ? 0.0
+            : blurAmount;
+        final image = _blurredImage(context, imageUrl, blur);
         if (!useMakdBackdropFx) {
           return image;
         }
@@ -93,9 +99,18 @@ class HomeBackdrop extends StatelessWidget {
         );
       },
     );
+    if (style == UserPreferences.homeBackdropCorner) {
+      // As Plex's TV app: the page takes the art's own colour, and the art
+      // melts into it, rather than into black.
+      return ArtTintBuilder(
+        url: url,
+        fallback: AppColorScheme.background,
+        builder: (context, tint) =>
+            RepaintBoundary(child: _corner(switcher, tint)),
+      );
+    }
     return RepaintBoundary(
       child: switch (style) {
-        UserPreferences.homeBackdropCorner => _corner(switcher),
         UserPreferences.homeBackdropTop => _top(switcher),
         _ => switcher,
       },
@@ -104,8 +119,8 @@ class HomeBackdrop extends StatelessWidget {
 
   // Eased stops, so the image melts into the background rather than ending
   // on a visible line.
-  LinearGradient _fade(Alignment start, Alignment end) {
-    final fade = AppColorScheme.background;
+  LinearGradient _fade(Alignment start, Alignment end, [Color? color]) {
+    final fade = color ?? AppColorScheme.background;
     return LinearGradient(
       begin: start,
       end: end,
@@ -120,29 +135,43 @@ class HomeBackdrop extends StatelessWidget {
     );
   }
 
-  Widget _corner(Widget backdrop) {
-    return Align(
-      alignment: Alignment.topRight,
-      child: FractionallySizedBox(
-        widthFactor: 0.7,
-        heightFactor: 0.75,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            backdrop,
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: _fade(Alignment.centerLeft, Alignment.centerRight),
-              ),
+  Widget _corner(Widget backdrop, Color tint) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: tint),
+        Align(
+          alignment: Alignment.topRight,
+          child: FractionallySizedBox(
+            widthFactor: 0.7,
+            heightFactor: 0.75,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                backdrop,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: _fade(
+                      Alignment.centerLeft,
+                      Alignment.centerRight,
+                      tint,
+                    ),
+                  ),
+                ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: _fade(
+                      Alignment.bottomCenter,
+                      Alignment.topCenter,
+                      tint,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: _fade(Alignment.bottomCenter, Alignment.topCenter),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

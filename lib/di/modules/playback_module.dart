@@ -8,6 +8,7 @@ import 'package:playback_emby/playback_emby.dart';
 import 'package:playback_plex/playback_plex.dart';
 import 'package:server_core/server_core.dart';
 
+import '../../data/local_files/local_file_library.dart';
 import '../../data/models/aggregated_item.dart';
 import '../../data/models/series_track_preference.dart';
 import '../../data/repositories/offline_repository.dart';
@@ -26,6 +27,7 @@ import '../../data/services/remove_watched_service.dart';
 import '../../data/services/user_data_sync.dart';
 import '../../playback/local_aware_player_service.dart';
 import '../../playback/local_first_media_stream_resolver.dart';
+import '../../playback/no_server_playback.dart';
 
 import '../../playback/hdr_stream_capability.dart';
 import '../../playback/headless_session_bootstrap.dart';
@@ -659,13 +661,17 @@ void registerPlaybackModule() {
     );
   });
   manager.setContentRefusal(
+    // A file from this device isn't library content, and with nobody signed
+    // in the gate (a per-user service) can't even be built.
     queueFilter: (item) {
       if (item is! AggregatedItem) return false;
+      if (LocalFileLibrary.isLocalFileItem(item)) return false;
       if (!_getIt.isRegistered<BlockedContentGate>()) return false;
       return _getIt<BlockedContentGate>().isBlockedNow(item);
     },
     playRefusal: (item) async {
       if (item is! AggregatedItem) return false;
+      if (LocalFileLibrary.isLocalFileItem(item)) return false;
       if (!_getIt.isRegistered<BlockedContentGate>()) return false;
       return _getIt<BlockedContentGate>().isBlocked(item);
     },
@@ -809,6 +815,7 @@ void registerPlaybackModule() {
   _getIt.registerLazySingleton<OfflineStreamResolver>(
     () => OfflineStreamResolver(_getIt<OfflineRepository>()),
   );
+  _getIt.registerLazySingleton<LocalFileLibrary>(() => LocalFileLibrary());
   _getIt.registerLazySingleton<OfflinePlaybackTracker>(
     () => OfflinePlaybackTracker(_getIt<OfflineRepository>()),
   );
@@ -859,6 +866,45 @@ void registerPlaybackModule() {
 }
 
 MediaServerClient? _currentActiveResolverClient;
+
+/// Lets a file opened from this device play while no server is signed in:
+/// installs a resolver and play-session service with no server behind them,
+/// unless a server already installed its own. Signing in to a server replaces
+/// them through [setActiveStreamResolver].
+void ensureLocalFilePlayback() {
+  if (_getIt.isRegistered<MediaStreamResolver>() &&
+      _getIt.isRegistered<PlayerService>()) {
+    return;
+  }
+  if (_getIt.isRegistered<MediaStreamResolver>()) {
+    _getIt.unregister<MediaStreamResolver>();
+  }
+  if (_getIt.isRegistered<PlayerService>()) {
+    _getIt.unregister<PlayerService>();
+  }
+  final resolver = LocalFirstMediaStreamResolver(
+    inner: NoServerStreamResolver(),
+    offline: _getIt<OfflineStreamResolver>(),
+    localFiles: _localFileLibrary(),
+  );
+  final service = LocalAwarePlayerService(
+    NoServerPlayerService(),
+    _getIt<OfflineRepository>(),
+    canReachServer: () => false,
+    localFiles: _localFileLibrary(),
+  );
+  _getIt.registerSingleton<MediaStreamResolver>(resolver);
+  _getIt.registerSingleton<PlayerService>(service);
+  final manager = _getIt<PlaybackManager>();
+  manager.setResolver(resolver);
+  manager.setPlayerService(service);
+  _currentActiveResolverClient = null;
+}
+
+LocalFileLibrary? _localFileLibrary() =>
+    LocalFileLibrary.isSupported && _getIt.isRegistered<LocalFileLibrary>()
+    ? _getIt<LocalFileLibrary>()
+    : null;
 
 void resetActiveStreamResolver() {
   _currentActiveResolverClient = null;
@@ -912,6 +958,7 @@ void setActiveStreamResolver(MediaServerClient client) {
         await _getIt<DownloadService>().restoreMissingSubtitles(itemId);
       }
     },
+    localFiles: _localFileLibrary(),
   );
   final service = LocalAwarePlayerService(
     serverService,
@@ -919,6 +966,7 @@ void setActiveStreamResolver(MediaServerClient client) {
     canReachServer: () =>
         !_getIt.isRegistered<ConnectivityService>() ||
         _getIt<ConnectivityService>().canReachServer,
+    localFiles: _localFileLibrary(),
     onStopped: _onItemStopped,
   );
 
@@ -941,6 +989,7 @@ void _onItemStopped(
   Duration position,
 ) {
   if (item is! AggregatedItem) return;
+  if (LocalFileLibrary.isLocalFileItem(item)) return;
   if (item.type == 'Episode' && _getIt.isRegistered<AutoDownloadService>()) {
     _getIt<AutoDownloadService>().onEpisodeStopped(item.serverId);
   }

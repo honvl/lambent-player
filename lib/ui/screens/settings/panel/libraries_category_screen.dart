@@ -6,6 +6,11 @@ class _LibrariesCategoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    // Off, the page keeps which libraries show, their order and their look;
+    // the rest (books, music, several servers, card details) is advanced.
+    final advanced = GetIt.instance<UserPreferences>().get(
+      UserPreferences.showAdvancedSettings,
+    );
     return Scaffold(
       appBar: buildSettingsAppBar(context, Text(l10n.libraries)),
       body: ListView(
@@ -27,6 +32,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 onTap: () =>
                     context.pushSettingsScreen(const LibraryOrderScreen()),
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.enableMultiServerLibraries,
                 title: l10n.multiServerLibraries,
@@ -34,6 +40,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 icon: Icons.dns,
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.showBookDiscoverTab,
                 title: l10n.showBookDiscoverTab,
@@ -41,6 +48,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 icon: Icons.explore,
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.bookFoldersAsSeries,
                 title: l10n.bookFoldersAsSeries,
@@ -68,6 +76,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 },
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               EnumPreferenceTile<BookLibraryStyle>(
                 key: const ValueKey('pref_book_library_style'),
                 preference: UserPreferences.bookLibraryStyle,
@@ -82,6 +91,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 },
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               EnumPreferenceTile<MusicLibraryStyle>(
                 key: const ValueKey('pref_music_library_style'),
                 preference: UserPreferences.musicLibraryStyle,
@@ -96,6 +106,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 },
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.groupItemsIntoCollections,
                 title: l10n.groupItemsIntoCollections,
@@ -141,6 +152,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                   }
                 },
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.showMediaDetailsOnLibraryPage,
                 title: l10n.showMediaDetailsOnLibraryPage,
@@ -148,6 +160,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 icon: Icons.info_outline,
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.libraryCardTitles,
                 title: l10n.libraryCardTitles,
@@ -155,6 +168,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 icon: Icons.title,
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.hideBackdropsInLibraries,
                 title: l10n.libraryBackdrops,
@@ -162,6 +176,7 @@ class _LibrariesCategoryScreen extends StatelessWidget {
                 inverted: true,
                 onChanged: _pushPersonalizationSync,
               ),
+              if (advanced)
               SwitchPreferenceTile(
                 preference: UserPreferences.useDetailedSubHeadings,
                 title: l10n.useDetailedSubHeadings,

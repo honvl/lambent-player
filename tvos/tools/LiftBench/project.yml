@@ -1,9 +1,19 @@
 # Lambent's Auto HDR on the Apple TV, timed on a device: the app's own processor (Playback/Lambent: the lift, Deepen blacks and the
 # upscalers) fed by AVPlayer through an AVPlayerItemVideoOutput and shown in an AVSampleBufferDisplayLayer, as the player does it.
-# `make_videos.sh` first (the clips are git-ignored), then `xcodegen`, build with xcodebuild and run with
+# `make_videos.sh` first (the clips are git-ignored) and `copy_server_networks.sh <Lambent checkout>` (the Apple TV run's server models), then `xcodegen`, build with xcodebuild and run with
 # `xcrun devicectl device process launch --console`; it prints BENCH lines. The iOS target runs on an iPhone (an A-series GPU like the
 # Apple TV's); the tvOS one on an Apple TV. LIFT_IPAD in the environment: the iPad's upscale (SDR out, at the player's size on the
 # screen, as LambentHDRLift runs it on iOS).
+#
+# On an Apple TV (2026-11-17): pair it with the Mac first (on the Apple TV, Settings > Remotes and Devices > Remote App and Devices, with
+# Xcode's Devices window open on the Mac, then enter the code it shows), so automatic signing can register it. Then
+#   xcodebuild -project LiftBench.xcodeproj -scheme LiftBench-tvOS -destination 'generic/platform=tvOS' -derivedDataPath .build \
+#     -allowProvisioningUpdates build
+#   xcrun devicectl device install app --device <id> .build/Build/Products/Debug-appletvos/LiftBench-tvOS.app
+#   xcrun devicectl device process launch --console --device <id> app.getlambent.liftbench
+# With no LIFT_* variable it runs the Apple TV run (about 6 minutes; also from the Apple TV's home screen), its summary on the TV and in
+# Documents/bench.txt: `xcrun devicectl device copy from --device <id> --domain-type appDataContainer --domain-identifier
+# app.getlambent.liftbench --source Documents/bench.txt --destination bench.txt`.
 name: LiftBench
 options:
   bundleIdPrefix: app.getlambent
@@ -11,7 +21,7 @@ targets:
   LiftBench-iOS:
     type: application
     platform: iOS
-    deploymentTarget: "18.0"
+    deploymentTarget: "26.0"
     sources:
       - Sources
       - ../../Runner/Playback/Lambent/LambentLiftProcessor.swift
@@ -25,6 +35,12 @@ targets:
       - path: Videos
         type: folder
         buildPhase: resources
+      - path: Server
+        optional: true
+      - path: ServerShaders
+        type: folder
+        buildPhase: resources
+        optional: true
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: app.getlambent.liftbench
       GENERATE_INFOPLIST_FILE: YES
@@ -35,7 +51,7 @@ targets:
   LiftBench-tvOS:
     type: application
     platform: tvOS
-    deploymentTarget: "18.0"
+    deploymentTarget: "26.0"
     sources:
       - Sources
       - ../../Runner/Playback/Lambent/LambentLiftProcessor.swift
@@ -49,6 +65,12 @@ targets:
       - path: Videos
         type: folder
         buildPhase: resources
+      - path: Server
+        optional: true
+      - path: ServerShaders
+        type: folder
+        buildPhase: resources
+        optional: true
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: app.getlambent.liftbench
       GENERATE_INFOPLIST_FILE: YES

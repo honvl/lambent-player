@@ -54,7 +54,7 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
         return Program(context)
     }
 
-    private class Target(width: Int, height: Int, internal: Int, format: Int, type: Int, filter: Int) {
+    internal class Target(width: Int, height: Int, internal: Int, format: Int, type: Int, filter: Int) {
         val texture = newTexture(filter).also {
             GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, internal, width, height, 0, format, type, null)
         }
@@ -71,26 +71,15 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
     }
 
     private inner class Program(context: Context) : BaseGlShaderProgram(/* useHighPrecisionColorComponents= */ false, /* texturePoolCapacity= */ 1) {
-        private val luma = compile(LUMA)
-        private val step1 = compile(context.assets.open("lambent_ravu/ravu_step1.frag").use { String(it.readBytes()) })
-        private val step2 = compile(context.assets.open("lambent_ravu/ravu_step2.frag").use { String(it.readBytes()) })
+        private val ravu = RavuLite(context)
         private val merge = compile(MERGE)
         private val plain = compile(PLAIN)
         private val vertexArray = IntArray(1).also { GLES30.glGenVertexArrays(1, it, 0) }[0]
         private val query = IntArray(1).also { GLES30.glGenQueries(1, it, 0) }[0]
         private var queryPending = false
-        private val lut = newTexture(GLES30.GL_NEAREST).also {
-            val bytes = context.assets.open("lambent_ravu/ravu_lut3.bin").use { input -> input.readBytes() }
-            val data = ByteBuffer.allocateDirect(bytes.size).order(ByteOrder.nativeOrder()).put(bytes)
-            data.position(0)
-            // On disk the shader's 32-bit floats, as mpv's hook has them.
-            GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA16F, 13, 288, 0, GLES30.GL_RGBA, GLES30.GL_FLOAT, data)
-        }
         private var width = 0
         private var height = 0
-        private var lumaTarget: Target? = null
-        private var workTarget: Target? = null
-        private var doubledTarget: Target? = null
+        private var scaling = false
         private var outputWidth = 0
         private var outputHeight = 0
 
@@ -107,17 +96,13 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
         private var lastLog = 0L
 
         override fun configure(inputWidth: Int, inputHeight: Int): Size {
-            releaseTargets()
             width = inputWidth
             height = inputHeight
             val output = LambentUpscalePolicy.outputSize(inputWidth, inputHeight, screenWidth, screenHeight)
             outputWidth = output?.first ?: inputWidth
             outputHeight = output?.second ?: inputHeight
-            if (output != null) {
-                lumaTarget = Target(width, height, GLES30.GL_R16F, GLES30.GL_RED, GLES30.GL_HALF_FLOAT, GLES30.GL_NEAREST)
-                workTarget = Target(width, height, GLES30.GL_RGBA16F, GLES30.GL_RGBA, GLES30.GL_HALF_FLOAT, GLES30.GL_NEAREST)
-                doubledTarget = Target(width * 2, height * 2, GLES30.GL_R16F, GLES30.GL_RED, GLES30.GL_HALF_FLOAT, GLES30.GL_LINEAR)
-            }
+            scaling = output != null
+            if (scaling) ravu.configure(width, height) else ravu.releaseTargets()
             Log.i(TAG, "${inputWidth}x$inputHeight to ${outputWidth}x$outputHeight, RAVU-lite ${if (output != null) "on" else "not needed"}")
             return Size(outputWidth, outputHeight)
         }
@@ -128,20 +113,14 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
             val output = bound[0]
             GLES30.glBindVertexArray(vertexArray)
             readTiming(presentationTimeUs)
-            val lumaPass = lumaTarget
-            val work = workTarget
-            val doubled = doubledTarget
-            if (lumaPass == null || work == null || doubled == null || fellBack) {
-                draw(output, outputWidth, outputHeight, plain, "src" to inputTexId)
+            if (!scaling || fellBack) {
+                RavuLite.draw(output, outputWidth, outputHeight, plain, "src" to inputTexId)
             } else {
                 if (!queryPending) GLES30.glBeginQuery(TIME_ELAPSED, query)
                 val timing = !queryPending
-                draw(lumaPass.framebuffer, width, height, luma, "src" to inputTexId)
-                sizes(step1)
-                draw(work.framebuffer, width, height, step1, "HOOKED" to lumaPass.texture, "ravu_lite_lut3" to lut)
-                sizes(step2)
-                draw(doubled.framebuffer, width * 2, height * 2, step2, "HOOKED" to lumaPass.texture, "ravu_lite_int" to work.texture)
-                draw(output, outputWidth, outputHeight, merge, "src" to inputTexId, "luma" to doubled.texture)
+                val doubled = ravu.doubledLuma(inputTexId)
+                GLES30.glBindVertexArray(vertexArray)
+                RavuLite.draw(output, outputWidth, outputHeight, merge, "src" to inputTexId, "luma" to doubled)
                 if (timing) {
                     GLES30.glEndQuery(TIME_ELAPSED)
                     queryPending = true
@@ -151,24 +130,6 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
             GlUtil.checkGlError()
         }
 
-        private fun sizes(program: Int) {
-            GLES30.glUseProgram(program)
-            GLES30.glUniform2f(GLES30.glGetUniformLocation(program, "HOOKED_size"), width.toFloat(), height.toFloat())
-            GLES30.glUniform2f(GLES30.glGetUniformLocation(program, "HOOKED_pt"), 1f / width, 1f / height)
-        }
-
-        private fun draw(framebuffer: Int, w: Int, h: Int, program: Int, vararg textures: Pair<String, Int>) {
-            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, framebuffer)
-            GLES30.glViewport(0, 0, w, h)
-            GLES30.glUseProgram(program)
-            textures.forEachIndexed { unit, (name, texture) ->
-                GLES30.glActiveTexture(GLES30.GL_TEXTURE0 + unit)
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture)
-                GLES30.glUniform1i(GLES30.glGetUniformLocation(program, name), unit)
-            }
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3)
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-        }
 
         private fun readTiming(presentationTimeUs: Long) {
             val delta = (presentationTimeUs - lastPresentationUs) / 1000f
@@ -204,26 +165,16 @@ internal class LambentUpscaleEffect(private val screenWidth: Int, private val sc
             }
         }
 
-        private fun releaseTargets() {
-            lumaTarget?.release()
-            workTarget?.release()
-            doubledTarget?.release()
-            lumaTarget = null
-            workTarget = null
-            doubledTarget = null
-        }
-
         override fun release() {
             super.release()
-            releaseTargets()
-            GLES30.glDeleteTextures(1, intArrayOf(lut), 0)
-            listOf(luma, step1, step2, merge, plain).forEach(GLES30::glDeleteProgram)
+            ravu.release()
+            listOf(merge, plain).forEach(GLES30::glDeleteProgram)
             GLES30.glDeleteVertexArrays(1, intArrayOf(vertexArray), 0)
             GLES30.glDeleteQueries(1, intArrayOf(query), 0)
         }
     }
 
-    private companion object {
+    internal companion object {
         const val TAG = "LambentUpscale"
         const val TIME_ELAPSED = 0x88BF
         const val BUDGET = 0.8f
@@ -287,6 +238,97 @@ void main() {
             GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, ok, 0)
             check(ok[0] != 0) { GLES30.glGetProgramInfoLog(program) }
             return program
+        }
+    }
+}
+
+/**
+ * RAVU-lite's luma passes (mpv's hook: the picture's luma, then step 1 and step 2, twice the size): shared by the free upscale above and
+ * Lambent Auto HDR's renderer (LambentAutoHdr.kt), which merges the doubled luma under the picture's own chroma in its lift. Needs a
+ * current GLES 3 context; [doubledLuma] draws with its own vertex array (the full-screen triangle) and leaves none bound.
+ */
+@OptIn(UnstableApi::class)
+internal class RavuLite(context: Context) {
+    private val luma = LambentUpscaleEffect.compile(LambentUpscaleEffect.LUMA)
+    private val step1 = LambentUpscaleEffect.compile(context.assets.open("lambent_ravu/ravu_step1.frag").use { String(it.readBytes()) })
+    private val step2 = LambentUpscaleEffect.compile(context.assets.open("lambent_ravu/ravu_step2.frag").use { String(it.readBytes()) })
+    private val vertexArray = IntArray(1).also { GLES30.glGenVertexArrays(1, it, 0) }[0]
+    private val lut = LambentUpscaleEffect.newTexture(GLES30.GL_NEAREST).also {
+        val bytes = context.assets.open("lambent_ravu/ravu_lut3.bin").use { input -> input.readBytes() }
+        val data = ByteBuffer.allocateDirect(bytes.size).order(ByteOrder.nativeOrder()).put(bytes)
+        data.position(0)
+        // On disk the shader's 32-bit floats, as mpv's hook has them.
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA16F, 13, 288, 0, GLES30.GL_RGBA, GLES30.GL_FLOAT, data)
+    }
+    private var width = 0
+    private var height = 0
+    private var lumaTarget: LambentUpscaleEffect.Target? = null
+    private var workTarget: LambentUpscaleEffect.Target? = null
+    private var doubledTarget: LambentUpscaleEffect.Target? = null
+
+    /** For a `w` x `h` picture (its targets made again only when the size changes). */
+    fun configure(w: Int, h: Int) {
+        if (w == width && h == height && doubledTarget != null) return
+        releaseTargets()
+        width = w
+        height = h
+        lumaTarget = LambentUpscaleEffect.Target(w, h, GLES30.GL_R16F, GLES30.GL_RED, GLES30.GL_HALF_FLOAT, GLES30.GL_NEAREST)
+        workTarget = LambentUpscaleEffect.Target(w, h, GLES30.GL_RGBA16F, GLES30.GL_RGBA, GLES30.GL_HALF_FLOAT, GLES30.GL_NEAREST)
+        doubledTarget = LambentUpscaleEffect.Target(w * 2, h * 2, GLES30.GL_R16F, GLES30.GL_RED, GLES30.GL_HALF_FLOAT, GLES30.GL_LINEAR)
+    }
+
+    /** `src` (an RGB 2D texture of the configured size, rows bottom-up as GL keeps them) to its luma at twice the size: that texture. */
+    fun doubledLuma(src: Int): Int {
+        val lumaPass = checkNotNull(lumaTarget)
+        val work = checkNotNull(workTarget)
+        val doubled = checkNotNull(doubledTarget)
+        GLES30.glBindVertexArray(vertexArray)
+        draw(lumaPass.framebuffer, width, height, luma, "src" to src)
+        sizes(step1)
+        draw(work.framebuffer, width, height, step1, "HOOKED" to lumaPass.texture, "ravu_lite_lut3" to lut)
+        sizes(step2)
+        draw(doubled.framebuffer, width * 2, height * 2, step2, "HOOKED" to lumaPass.texture, "ravu_lite_int" to work.texture)
+        GLES30.glBindVertexArray(0)
+        return doubled.texture
+    }
+
+    private fun sizes(program: Int) {
+        GLES30.glUseProgram(program)
+        GLES30.glUniform2f(GLES30.glGetUniformLocation(program, "HOOKED_size"), width.toFloat(), height.toFloat())
+        GLES30.glUniform2f(GLES30.glGetUniformLocation(program, "HOOKED_pt"), 1f / width, 1f / height)
+    }
+
+    fun releaseTargets() {
+        lumaTarget?.release()
+        workTarget?.release()
+        doubledTarget?.release()
+        lumaTarget = null
+        workTarget = null
+        doubledTarget = null
+        width = 0
+        height = 0
+    }
+
+    fun release() {
+        releaseTargets()
+        GLES30.glDeleteTextures(1, intArrayOf(lut), 0)
+        listOf(luma, step1, step2).forEach(GLES30::glDeleteProgram)
+        GLES30.glDeleteVertexArrays(1, intArrayOf(vertexArray), 0)
+    }
+
+    companion object {
+        /** A pass of the full-screen triangle into `framebuffer`, `textures` on units 0, 1 ... by their uniform names. */
+        fun draw(framebuffer: Int, w: Int, h: Int, program: Int, vararg textures: Pair<String, Int>) {
+            GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, framebuffer)
+            GLES30.glViewport(0, 0, w, h)
+            GLES30.glUseProgram(program)
+            textures.forEachIndexed { unit, (name, texture) ->
+                GLES30.glActiveTexture(GLES30.GL_TEXTURE0 + unit)
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture)
+                GLES30.glUniform1i(GLES30.glGetUniformLocation(program, name), unit)
+            }
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3)
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         }
     }
 }

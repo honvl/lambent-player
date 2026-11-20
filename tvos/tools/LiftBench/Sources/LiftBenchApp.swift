@@ -4,6 +4,10 @@ import SwiftUI
 import UIKit
 import VideoToolbox
 
+// With no LIFT_* variable (an Apple TV started from its home screen): the Apple TV run (`appleTV`): Lambent Server's own models timed
+// on this chip (ServerBench.swift), then the player's floor, the AI upscaler with Auto HDR's sixteen tables at 24, 30 and 60 fps, its summary
+// on the screen. LIFT_SCALERS: the older run below, every scaler.
+//
 // First the capacity of each scaler: 240 pictures back to back through the processor, as the player runs it (one at a time, waited
 // for), wall-clock ms a picture: what it can keep up with once the GPU's clock has risen. Then each clip played through the processor
 // with one scaler at a time (and with the player's own ladder, which steps down when pictures keep missing their vsync), 12 s each,
@@ -55,6 +59,16 @@ final class PlayerHost: UIView {
         shown.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         (shown.layer as! AVSampleBufferDisplayLayer).videoGravity = .resizeAspect
         addSubview(shown)
+        summaryLabel.frame = bounds.insetBy(dx: 60, dy: 40)
+        summaryLabel.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        summaryLabel.numberOfLines = 0
+        summaryLabel.textColor = .white
+        summaryLabel.shadowColor = .black
+        summaryLabel.font = .monospacedSystemFont(ofSize: 21, weight: .regular)
+        summaryLabel.textAlignment = .left
+        summaryLabel.contentMode = .top
+        addSubview(summaryLabel)
+        BenchLog.onSummary = { [weak self] text in self?.show(text) }
         let ravu = LambentLiftProcessor.Scaler.prescaler("ravu-lite-ar-r3"), fsr = LambentLiftProcessor.Scaler.prescaler("FSRCNNX_x2_8-0-4-1")
         // The screen must not lock mid-run: a backgrounded app's GPU work is throttled.
         UIApplication.shared.isIdleTimerDisabled = true
@@ -91,16 +105,6 @@ final class PlayerHost: UIView {
         }
         if ProcessInfo.processInfo.environment["LIFT_COMPARE"] != nil { return compare() }
         if ProcessInfo.processInfo.environment["LIFT_IPAD"] != nil { return iPad(ravu: ravu, fsr: fsr) }
-        if ProcessInfo.processInfo.environment["LIFT_IO"] != nil {
-            IOBench.run()
-            print("BENCH done")
-            return
-        }
-        if ProcessInfo.processInfo.environment["LIFT_VARIANTS"] != nil {
-            VariantBench.run()
-            print("BENCH done")
-            return
-        }
         if ProcessInfo.processInfo.environment["LIFT_PLAN"] != nil {
             Task {
                 await ComputePlanBench.run("neural-low")
@@ -141,6 +145,7 @@ final class PlayerHost: UIView {
                     ("sdr1080p60", "player's own ladder hidden", nil), ("sdr1080p30", "AI upscaler long", [ai])]
             return next()
         }
+        if ProcessInfo.processInfo.environment["LIFT_SCALERS"] == nil { return appleTV() }
         capacity([.none, .catmullRom, ravu, fsr, ai])
         for clip in ["sdr1080p24", "sdr1080p60"] {
             for sc in [LambentLiftProcessor.Scaler.none, .catmullRom, ravu, fsr, ai] { runs.append((clip, "\(sc)", [sc])) }
@@ -158,6 +163,44 @@ final class PlayerHost: UIView {
         }
         next()
     }
+
+    private let summaryLabel = UILabel()
+    private var summaryLines: [String] = []
+
+    private func show(_ text: String) {
+        summaryLines.append(text)
+        if summaryLines.count > 34 { summaryLines.removeFirst(summaryLines.count - 34) }
+        summaryLabel.text = summaryLines.joined(separator: "\n")
+        summaryLabel.sizeToFit()
+        summaryLabel.frame.origin = CGPoint(x: 60, y: 40)
+    }
+
+    /// The Apple TV run: Lambent Server's models on this chip (off the main thread, so the screen keeps showing lines), then the player's
+    /// own processor: the AI upscaler and its student with Auto HDR one picture after another, then each clip played with the player's own
+    /// ladder and with each forced, Auto HDR on, to 4K. The floor the owner set (2026-11-17): the low AI upscaler and the sixteen tables
+    /// together.
+    private func appleTV() {
+        BenchLog.summary("Lambent Apple TV benchmark: about 6 minutes. Keep this app open.")
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            ServerBench.run()
+            DispatchQueue.main.async {
+                guard let self else { return }
+                BenchLog.summary("The player's own processor, 1080p to 4K with Auto HDR (16 tables):")
+                self.summarizeRuns = true
+                self.capacity([.neural(fast: false), .neural(fast: true)])
+                for clip in ["sdr1080p24", "sdr1080p30", "sdr1080p60"] {
+                    self.runs.append((clip, "player's own ladder", nil))
+                    self.runs.append((clip, "AI upscaler", [.neural(fast: false)]))
+                    self.runs.append((clip, "AI upscaler (fast)", [.neural(fast: true)]))
+                }
+                self.next()
+            }
+        }
+    }
+
+    /// Played runs' totals for the summary (on `queue`): the first report (the GPU's clock settling) left out.
+    private var summarizeRuns = false
+    private var runReports = 0, runShown = 0, runSecs = 0.0, runScaler = ""
 
     /// The iPad's upscale: a 1080p title fit to the screen (the player full screen, capped at the plan's `cup=2160`), the picture's own
     /// SDR colours out. Each scaler's capacity, then each clip played with the player's own ladder and with each scaler alone.
@@ -328,6 +371,11 @@ final class PlayerHost: UIView {
         }
     }
 
+    /// A capacity line: in the summary during the Apple TV run.
+    private func capacityLine(_ text: String) {
+        if summarizeRuns { BenchLog.summary(text) } else { print("BENCH \(text)") }
+    }
+
     private func capacity(_ scalers: [LambentLiftProcessor.Scaler]) {
         guard let url = Bundle.main.url(forResource: "Videos/sdr1080p24", withExtension: "mp4") else { return }
         let asset = AVURLAsset(url: url)
@@ -365,7 +413,7 @@ final class PlayerHost: UIView {
             let wall = (CACurrentMediaTime() - start) * 1000 / 240
             var r = p.takeReport()
             if sc.isNeural {
-                print(String(format: "BENCH capacity %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms",
+                capacityLine(String(format: "capacity %@ one after the other: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms",
                              r.scaler, wall, 1000 / wall, r.meanMs, r.engineMs))
                 // Pipelined, as the player runs it: pack N + 2, network N + 1 and finish N at once.
                 p.pipelined = true
@@ -388,7 +436,7 @@ final class PlayerHost: UIView {
                 group.wait()
                 let piped = (CACurrentMediaTime() - t0) * 1000 / 240
                 r = p.takeReport()
-                print(String(format: "BENCH capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, pack wall %.2f ms, thermal %d",
+                capacityLine(String(format: "capacity %@ pipelined: %.2f ms a picture (%.0f fps), GPU %.2f ms, Neural Engine %.2f ms, pack wall %.2f ms, thermal %d",
                              r.scaler, piped, 1000 / piped, r.meanMs, r.engineMs, r.packWallMs, ProcessInfo.processInfo.thermalState.rawValue))
                 // Experiments (LIFT_EXP): the network's stage with no GPU stage beside it, and the GPU stage with SDR output.
                 if ProcessInfo.processInfo.environment["LIFT_EXP"] != nil {
@@ -484,7 +532,23 @@ final class PlayerHost: UIView {
     private func next() {
         link?.invalidate()
         player?.pause()
-        guard !runs.isEmpty else { print("BENCH done"); return }
+        if summarizeRuns, !label.isEmpty {
+            let finished = label
+            queue.async { [weak self] in
+                guard let self else { return }
+                // Pictures shown a second against the clip's rate: the measure that counts (`late` compares each picture with the vsync at
+                // the head of a three-deep pipeline, so it counts nearly all of them however smoothly they play).
+                let fps = self.runSecs > 0 ? Double(self.runShown) / self.runSecs : 0
+                let rate = finished.contains("p60") ? 59.94 : finished.contains("p30") ? 29.97 : 23.976
+                BenchLog.summary(String(format: "%@: %@, %.1f of %.1f fps shown%@", finished, self.runScaler, fps, rate,
+                                        fps >= rate * 0.98 ? "" : "  <- drops pictures"))
+                self.runReports = 0; self.runShown = 0; self.runSecs = 0; self.runScaler = ""
+            }
+        }
+        guard !runs.isEmpty else {
+            if summarizeRuns { queue.async { BenchLog.summary("Done."); print("BENCH done") } } else { print("BENCH done") }
+            return
+        }
         let (clip, name, ladder) = runs.removeFirst()
         label = "\(clip) \(name)"
         hideOutput = name.hasSuffix("hidden")
@@ -493,7 +557,7 @@ final class PlayerHost: UIView {
         guard let url = Bundle.main.url(forResource: "Videos/\(clip)", withExtension: "mp4"), let processor = LambentLiftProcessor() else {
             print("BENCH \(label): missing clip or processor"); return next()
         }
-        processor.reset())
+        processor.reset()
         processor.hdr = runHDR && !name.contains("SDR out")
         processor.pipelined = true
         if let ladder { processor.force(ladder: ladder) }
@@ -578,8 +642,13 @@ final class PlayerHost: UIView {
             enqueued = 0
             let label = label
             let edr = window?.windowScene?.screen.currentEDRHeadroom ?? 0
-            queue.async {
+            queue.async { [weak self] in
                 let r = processor.takeReport()
+                if let self, self.summarizeRuns {
+                    self.runReports += 1
+                    if self.runReports > 1 { self.runShown += shownCount; self.runSecs += secs }
+                    self.runScaler = r.scaler
+                }
                 if label.contains("HDR lift") { print(String(format: "BENCH %@: current EDR headroom %.2f", label, edr)) }
                 print(String(format: "BENCH %@: %@ gpu_ms mean %.2f p95 %.2f ane_ms %.2f late %d shown %.1f fps (%@) thermal %d", label, r.format,
                              r.meanMs, r.p95Ms, r.engineMs, r.late, Double(shownCount) / secs, r.scaler, ProcessInfo.processInfo.thermalState.rawValue))

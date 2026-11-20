@@ -35,6 +35,13 @@ class LambentBrand {
   /// can run: `test/flutter_test_config.dart` turns it on.
   static bool enableGames = false;
 
+  /// Whether the game code is compiled in at all. Switched off isn't enough
+  /// for App Review: it rejected iOS 3.0.0 under guideline 2.5.19 (hidden
+  /// features) for the dormant emulation code in the binary. Every way into
+  /// the games sits behind this constant, so a release build leaves them all
+  /// out; debug and test builds keep them for the game code's tests.
+  static const bool gamesInBuild = !bool.fromEnvironment('dart.vm.product');
+
   /// Upstream's "Save to Downloads folder" on Android, which puts downloads in
   /// the shared Downloads folder through MediaStore. Finding them again after a
   /// reinstall takes READ_MEDIA_VIDEO and READ_MEDIA_AUDIO, which Google Play

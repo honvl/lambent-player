@@ -37,6 +37,10 @@ class HomeRow {
   final int totalCount;
   final bool isAudio;
 
+  /// A row of frames with no poster art (a home videos library), which draws
+  /// wide cards unless a card shape was picked for it.
+  final bool wideCards;
+
   const HomeRow({
     required this.id,
     required this.title,
@@ -46,6 +50,7 @@ class HomeRow {
     this.isLoading = false,
     this.totalCount = 0,
     this.isAudio = false,
+    this.wideCards = false,
   });
 
   HomeRow copyWith({
@@ -57,6 +62,7 @@ class HomeRow {
     bool? isLoading,
     int? totalCount,
     bool? isAudio,
+    bool? wideCards,
   }) =>
       HomeRow(
         id: id ?? this.id,
@@ -67,6 +73,7 @@ class HomeRow {
         isLoading: isLoading ?? this.isLoading,
         totalCount: totalCount ?? this.totalCount,
         isAudio: isAudio ?? this.isAudio,
+        wideCards: wideCards ?? this.wideCards,
       );
 
   bool get isEmpty => items.isEmpty && !isLoading;

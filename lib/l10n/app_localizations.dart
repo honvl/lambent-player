@@ -5182,6 +5182,48 @@ abstract class AppLocalizations {
   /// **'Downloads you start appear here and play without a connection.'**
   String get savedMediaNoDownloadsDetail;
 
+  /// Saved media tab listing video files the viewer opened from the device's own storage (Files app), outside the app's downloads
+  ///
+  /// In en, this message translates to:
+  /// **'On this device'**
+  String get onThisDevice;
+
+  /// Button that opens the system file browser to pick a video stored on the device and play it
+  ///
+  /// In en, this message translates to:
+  /// **'Open a video file'**
+  String get openVideoFile;
+
+  /// Empty state under the On this device tab
+  ///
+  /// In en, this message translates to:
+  /// **'Videos you open from this device, its cloud storage or a USB drive appear here. They play where they are, without being copied.'**
+  String get localFilesEmpty;
+
+  /// Subtitle of a local video file row showing where playback was left
+  ///
+  /// In en, this message translates to:
+  /// **'Resume at {position}'**
+  String localFileResumeAt(String position);
+
+  /// Menu action that takes a local video file off the On this device list; the file itself stays on the device
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from list'**
+  String get removeFromList;
+
+  /// Heading on the server screen above the button that opens video files stored on the phone or tablet, playable with no server
+  ///
+  /// In en, this message translates to:
+  /// **'Videos on this device'**
+  String get localFilesServerScreenTitle;
+
+  /// Line under Videos on this device on the server screen
+  ///
+  /// In en, this message translates to:
+  /// **'Play a film saved on this device, its cloud storage or a USB drive, no server needed.'**
+  String get localFilesServerScreenDetail;
+
   /// Empty state for the active downloads tab
   ///
   /// In en, this message translates to:

@@ -9,6 +9,7 @@ import 'package:playback_core/playback_core.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:server_core/server_core.dart';
 
+import '../data/local_files/local_file_library.dart';
 import '../data/models/aggregated_item.dart';
 import '../data/services/audiobook_resume_service.dart';
 import '../data/services/media_server_client_factory.dart';
@@ -431,6 +432,16 @@ class MoonfinAudioHandler extends BaseAudioHandler
   }
 
   MediaItem _mediaItemFor(AggregatedItem item) {
+    // A file from this device has no server to hold its artwork, and may play
+    // with nobody signed in.
+    if (LocalFileLibrary.isLocalFileItem(item)) {
+      return MediaItem(
+        id: item.id,
+        title: item.name,
+        duration: item.runtime,
+        extras: const {'serverId': ''},
+      );
+    }
     final client = _clientFor(item);
     final artUri = audioArtUrl(
       item,

@@ -881,7 +881,7 @@ void main() async {
   // past the first frame internally.
   await LiquidGlassWidgets.initialize();
 
-  registerGameCoreLicenses();
+  if (LambentBrand.gamesInBuild) registerGameCoreLicenses();
   registerEpubJsLicenses();
 
   if (!PlatformDetection.isWeb && PlatformDetection.isWindows) {

@@ -51,7 +51,6 @@ class AppDelegate: FlutterAppDelegate {
     private var themeMusicChannel: AppleTvThemeMusicChannel?
     private var arcadeSoundChannel: AppleArcadeSoundChannel?
     private var sfSymbolChannel: AppleTvSfSymbolChannel?
-    private var gameChannel: AppleTvGameChannel?
     private var bonjourChannel: AppleTvBonjourChannel?
 
     override func application(
@@ -100,10 +99,6 @@ class AppDelegate: FlutterAppDelegate {
             messenger: flutterViewController.binaryMessenger)
         sfSymbolChannel = AppleTvSfSymbolChannel(
             messenger: flutterViewController.binaryMessenger)
-        gameChannel = AppleTvGameChannel(
-            messenger: flutterViewController.binaryMessenger,
-            textures: flutterViewController,
-            rootViewController: flutterViewController)
 
         bonjourChannel = AppleTvBonjourChannel(
             messenger: flutterViewController.binaryMessenger)

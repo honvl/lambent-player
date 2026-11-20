@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:jellyfin_preference/jellyfin_preference.dart';
+import 'package:moonfin/data/local_files/local_file_library.dart';
 import 'package:moonfin/data/database/offline_database.dart';
 import 'package:moonfin/data/providers/offline_providers.dart';
 import 'package:moonfin/data/services/sync_service.dart';
@@ -55,6 +56,7 @@ void main() {
     final store = PreferenceStore();
     await store.init();
     GetIt.instance.registerSingleton<UserPreferences>(UserPreferences(store));
+    GetIt.instance.registerSingleton<LocalFileLibrary>(LocalFileLibrary());
   });
 
   tearDown(() async {
@@ -207,9 +209,29 @@ void main() {
   ) async {
     final l10n = await AppLocalizations.delegate.load(const Locale('en'));
     await pumpHome(tester, items: const []);
+    await tester.tap(find.text(l10n.all));
+    await tester.pumpAndSettle();
 
     expect(find.text(l10n.savedMediaNoDownloads), findsOneWidget);
     expect(find.byType(SavedMediaRow), findsNothing);
+  });
+
+  testWidgets('with nothing downloaded a phone opens on its own videos', (
+    tester,
+  ) async {
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+    await pumpHome(tester, items: const []);
+
+    expect(find.text(l10n.openVideoFile), findsOneWidget);
+    expect(find.text(l10n.localFilesEmpty), findsOneWidget);
+  });
+
+  testWidgets('with downloads it still opens on All', (tester) async {
+    final l10n = await AppLocalizations.delegate.load(const Locale('en'));
+    await pumpHome(tester, items: [_saved('m1')]);
+
+    expect(find.text(l10n.openVideoFile), findsNothing);
+    expect(find.byType(SavedMediaRow), findsOneWidget);
   });
 
   testWidgets('Active Downloads stays available with nothing downloading', (

@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../util/focus/dpad_keys.dart';
 import '../../../util/focus/key_event_utils.dart';
+import '../../../util/focus/navigation_sounds.dart';
 import '../../../util/focus/scroll_utils.dart';
 import 'hub_focus_memory.dart';
 import 'row_glide.dart';
@@ -414,6 +415,7 @@ class LockedFocusRowState<T> extends State<LockedFocusRow<T>>
         if (_focusedIndex < widget.items.length - 1) {
           widget.glide?.held = event is KeyRepeatEvent;
           _setFocusedIndex(_focusedIndex + 1);
+          NavigationSounds.movedWithin();
           _scrollToIndex(_focusedIndex);
           return KeyEventResult.handled;
         }
@@ -427,6 +429,7 @@ class LockedFocusRowState<T> extends State<LockedFocusRow<T>>
         if (_focusedIndex > 0) {
           widget.glide?.held = event is KeyRepeatEvent;
           _setFocusedIndex(_focusedIndex - 1);
+          NavigationSounds.movedWithin();
           _scrollToIndex(_focusedIndex);
           return KeyEventResult.handled;
         }

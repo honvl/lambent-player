@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:moonfin_design/moonfin_design.dart';
 import 'package:server_core/server_core.dart';
@@ -7,11 +9,16 @@ class ServerTypeIcon extends StatelessWidget {
   final double size;
   final Color? color;
 
+  /// Draws Lambent's mark instead of [serverType]'s: Lambent Server answers
+  /// as Jellyfin.
+  final bool lambent;
+
   const ServerTypeIcon({
     super.key,
     required this.serverType,
     this.size = 24,
     this.color,
+    this.lambent = false,
   });
 
   @override
@@ -19,14 +26,61 @@ class ServerTypeIcon extends StatelessWidget {
     final effectiveColor = color ?? AppColorScheme.onSurface;
     return CustomPaint(
       size: Size.square(size),
-      painter: switch (serverType) {
-        ServerType.jellyfin => _JellyfinLogoPainter(effectiveColor),
-        ServerType.emby => _EmbyLogoPainter(effectiveColor),
-        ServerType.plex => _PlexLogoPainter(effectiveColor),
-        ServerType.silo => _SiloGlyphPainter(effectiveColor),
-      },
+      painter: lambent
+          ? _LambentMarkPainter(effectiveColor)
+          : switch (serverType) {
+              ServerType.jellyfin => _JellyfinLogoPainter(effectiveColor),
+              ServerType.emby => _EmbyLogoPainter(effectiveColor),
+              ServerType.plex => _PlexLogoPainter(effectiveColor),
+              ServerType.silo => _SiloGlyphPainter(effectiveColor),
+            },
     );
   }
+}
+
+/// Lambent's sunset (the sun on the horizon under its halo) in one color,
+/// drawn on a 256 grid like the other marks here.
+class _LambentMarkPainter extends CustomPainter {
+  final Color color;
+  _LambentMarkPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.scale(size.width / 256);
+    const horizon = 165.0;
+    final fill = Paint()..color = color;
+    canvas.drawPath(
+      Path()
+        ..addArc(
+          Rect.fromCircle(center: const Offset(128, horizon), radius: 70),
+          math.pi,
+          math.pi,
+        )
+        ..close(),
+      fill,
+    );
+    canvas.drawArc(
+      Rect.fromCircle(center: const Offset(128, horizon), radius: 90),
+      math.pi,
+      math.pi,
+      false,
+      Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTRB(20, horizon + 10, 236, horizon + 22),
+        const Radius.circular(6),
+      ),
+      fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_LambentMarkPainter old) => old.color != color;
 }
 
 class _PlexLogoPainter extends CustomPainter {

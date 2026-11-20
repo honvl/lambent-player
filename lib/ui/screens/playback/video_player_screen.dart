@@ -23,6 +23,8 @@ import 'package:screen_brightness_platform_interface/screen_brightness_platform_
 import 'package:volume_controller/volume_controller.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../../data/local_files/local_file_library.dart';
+import '../../../playback/no_server_playback.dart';
 import '../../../data/utils/chapter_markers.dart';
 import '../../../playback/lambent_device_upscale.dart';
 import '../../../data/utils/episode_cast_utils.dart';
@@ -207,7 +209,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   final _nativeAirPlay = GetIt.instance<NativeAirPlayChannel>();
   final _pipService = GetIt.instance<PipService>();
   final _lifecycleHandler = GetIt.instance<PlaybackLifecycleHandler>();
-  final _themeMusicService = GetIt.instance<ThemeMusicService>();
+  /// A per-user service: with nobody signed in (a file from this device
+  /// playing) there is no theme music to make way for.
+  ThemeMusicService? get _themeMusicService =>
+      GetIt.instance.isRegistered<MediaServerClient>()
+      ? GetIt.instance<ThemeMusicService>()
+      : null;
   final _screensaverController = GetIt.instance<ScreensaverController>();
   final SiloWatchPartyManager? _watchParty =
       GetIt.instance.isRegistered<SiloWatchPartyManager>()
@@ -532,8 +539,15 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   MediaServerClient _clientForItem(AggregatedItem item) {
     return _clientFactory.getClientIfExists(item.serverId) ??
-        GetIt.instance<MediaServerClient>();
+        _activeClient();
   }
+
+  /// The signed-in server's client, or a stand-in that asks nothing of a
+  /// server while a file from this device plays with nobody signed in.
+  static MediaServerClient _activeClient() =>
+      GetIt.instance.isRegistered<MediaServerClient>()
+      ? GetIt.instance<MediaServerClient>()
+      : const NoServerClient();
 
   MediaServerClient _clientForQueueItem(dynamic item) {
     if (item is AggregatedItem) {
@@ -544,10 +558,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           (item['ServerId']?.toString()) ?? (item['serverId']?.toString());
       if (serverId != null && serverId.isNotEmpty) {
         return _clientFactory.getClientIfExists(serverId) ??
-            GetIt.instance<MediaServerClient>();
+            _activeClient();
       }
     }
-    return GetIt.instance<MediaServerClient>();
+    return _activeClient();
   }
 
   Map<String, dynamic>? _rawDataForQueueItem(dynamic item) {
@@ -681,9 +695,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   MediaSegmentService _createSegmentService([AggregatedItem? item]) {
-    final client = item != null
-        ? _clientForItem(item)
-        : GetIt.instance<MediaServerClient>();
+    final client = item != null ? _clientForItem(item) : _activeClient();
     return MediaSegmentService(
       client,
       FeatureDetector(serverType: client.serverType, serverVersion: ''),
@@ -885,7 +897,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     if (PlatformDetection.useNativeVideoSurface) {
       _subtitleActive = (_manager.subtitleStreamIndex ?? -1) >= 0;
     }
-    _themeMusicService.setExternalAudioActive(true);
+    _themeMusicService?.setExternalAudioActive(true);
     _segmentService = _createSegmentService();
     _zoomMode = _prefs.get(UserPreferences.playerZoomMode);
     unawaited(syncSecondarySubtitleStyle(_manager, _prefs));
@@ -1238,7 +1250,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     _tvGlassMoreFocus.dispose();
     if (!_isMinimizing) unawaited(_autoHdrSwitcher.restore());
     if (!_isMinimizing) TrackPicker.resetDelays();
-    _themeMusicService.setExternalAudioActive(false);
+    _themeMusicService?.setExternalAudioActive(false);
     if (!PlatformDetection.isTV) _pipService.enableAutoPiP(false);
     if (_wasAlwaysOnTopOnEntry == false && _isAlwaysOnTop) {
       unawaited(_setAlwaysOnTop(false));
@@ -5527,6 +5539,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   String? _logoUrlForQueueItem(dynamic item) {
+    if (LocalFileLibrary.isLocalFileItem(item)) return null;
     final raw = _rawDataForQueueItem(item);
     if (raw == null) return null;
 
@@ -5562,6 +5575,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   }
 
   String? _artworkUrlForQueueItem(dynamic item) {
+    if (LocalFileLibrary.isLocalFileItem(item)) return null;
     final raw = _rawDataForQueueItem(item);
     final itemId = _itemIdForQueueItem(item);
     if (raw == null || itemId == null || itemId.isEmpty) {
@@ -6753,8 +6767,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       builder: (context, _, _) {
         final l10n = AppLocalizations.of(context);
         final item = _queue.currentItem;
+        // A file from this device has no server to keep a favourite on.
         final canFavorite =
             !_isPrerollQueueItem(item) &&
+            !LocalFileLibrary.isLocalFileItem(item) &&
             ((_itemIdForQueueItem(item)?.isNotEmpty) ?? false);
         final isFavorite = canFavorite && _queueItemIsFavorite(item);
         final hasChapters =

@@ -4,7 +4,6 @@ import UIKit
 import AVKit
 import GoogleCast
 import UserNotifications
-import moonfin_game_host
 
 private final class NativeCastEventStreamHandler: NSObject, FlutterStreamHandler {
   weak var appDelegate: AppDelegate?
@@ -84,6 +83,8 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   private var arcadeSoundChannel: AppleArcadeSoundChannel?
   private var previewChannel: AppleTvPreviewChannel?
   private var sfSymbolChannel: FlutterMethodChannel?
+  /// Video files on this device outside the app's downloads (Files, "Open in").
+  private(set) var localFileChannel: LocalFileChannel?
 
   private struct PendingCastRequest {
     let targetId: String
@@ -151,7 +152,6 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
   // so a storyboard-created implicit engine would never exist).
   let sharedEngine = FlutterEngine(name: "moonfin")
   private var engineStarted = false
-  private var gameChannel: NativeGameChannel?
 
   /// Auto-download subscription checks while the app is in the background.
   /// Registered before launch finishes (a BGTaskScheduler rule) and driven
@@ -168,9 +168,6 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
     engineStarted = true
     sharedEngine.run()
     GeneratedPluginRegistrant.register(with: sharedEngine)
-    if let registrar = sharedEngine.registrar(forPlugin: "moonfin_game_host") {
-      gameChannel = NativeGameChannel(registrar: registrar)
-    }
     setUpPlatformChannels(messenger: sharedEngine.binaryMessenger)
   }
 
@@ -353,6 +350,9 @@ private final class NativeAirPlayEventStreamHandler: NSObject, FlutterStreamHand
     setUpDownloadKeepAliveChannel(messenger: messenger)
     setUpDeviceStorageChannel(messenger: messenger)
     bonjourChannel = BonjourChannel(messenger: messenger)
+    localFileChannel = LocalFileChannel(
+      messenger: messenger,
+      rootProvider: { [weak self] in self?.flutterViewController })
 
     let storageChannel = FlutterMethodChannel(
       name: "com.moonfin/ios_storage",

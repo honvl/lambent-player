@@ -3625,7 +3625,6 @@ class _GlassChip extends StatelessWidget {
     return Container(
       height: tvPx(40),
       padding: EdgeInsets.symmetric(horizontal: tvPx(18)),
-      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(999),
@@ -3634,13 +3633,18 @@ class _GlassChip extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColorScheme.onSurface,
-          fontSize: tvPx(20),
-          fontWeight: FontWeight.w600,
-          height: 1.0,
+      // As wide as its label: a Container with an alignment would fill the
+      // whole width the row offers and take a line of its own.
+      child: Center(
+        widthFactor: 1,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: AppColorScheme.onSurface,
+            fontSize: tvPx(20),
+            fontWeight: FontWeight.w600,
+            height: 1.0,
+          ),
         ),
       ),
     );

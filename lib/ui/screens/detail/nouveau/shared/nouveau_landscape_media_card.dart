@@ -507,27 +507,9 @@ class NouveauLandscapeMediaCardState
                         );
                       },
                       child: _showWatchedIndicator
-                          ? Container(
-                              key: const ValueKey('watched'),
-                              width: 26,
-                              height: 26,
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.28),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.check_rounded,
-                                color: theme.colorScheme.onPrimary,
-                                size: 17,
-                              ),
+                          ? const MediaWatchedBadge(
+                              key: ValueKey('watched'),
+                              size: 26,
                             )
                           : _showNextUpIndicator
                           ? Container(

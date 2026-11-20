@@ -102,7 +102,8 @@ class _PlaybackCategoryScreen extends StatelessWidget {
                 ],
               ),
               ],
-              if (advanced &&
+              if (LambentBrand.gamesInBuild &&
+                  advanced &&
                   ((canToggleGameBackend && _gamesOnAnyServer) ||
                       usesNativeGameBackend)) ...[
                 _SectionHeader(l10n.games),

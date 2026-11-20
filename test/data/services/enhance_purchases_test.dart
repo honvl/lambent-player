@@ -12,7 +12,7 @@ class FakeLambentServer {
   Map<String, dynamic> licence = {
     'enhance': {'state': 'none', 'until_ms': null, 'source': null},
     'pro_on_this_household': false,
-    'buy_url': 'https://getlambent.vercel.app/buy?household=abc',
+    'buy_url': 'https://getlambent.app/buy?household=abc',
   };
 
   /// What `POST /v1/licence/store` answers next: 200 with the new licence, or
@@ -168,13 +168,13 @@ void main() {
           'source': null,
         },
         'pro_on_this_household': true,
-        'buy_url': 'https://getlambent.vercel.app/buy?household=abc',
+        'buy_url': 'https://getlambent.app/buy?household=abc',
       });
       expect(licence.enhance, EnhanceState.trial);
       expect(licence.enhanced, isTrue);
       expect(licence.until, DateTime.fromMillisecondsSinceEpoch(1762100000000));
       expect(licence.proOnHousehold, isTrue);
-      expect(licence.buyUrl?.host, 'getlambent.vercel.app');
+      expect(licence.buyUrl?.host, 'getlambent.app');
       expect(
         LambentLicence.fromJson({
           'enhance': {'state': 'preview'},
