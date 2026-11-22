@@ -29,7 +29,20 @@ class _NightLandscapeBackdropState extends State<NightLandscapeBackdrop>
   late final Ticker _ticker;
   late final ValueNotifier<double> _seconds;
   late final double _offset;
-  Duration _lastFrame = Duration.zero;
+  final List<double> _deltas = [];
+  Duration? _lastTick;
+  int _tick = 0;
+
+  /// Draw on every n-th display refresh: the largest n that still gives at
+  /// least [NightLandscapeBackdrop.fps] (every 2nd at 60 Hz, 5th at 120 Hz),
+  /// so frames are evenly spaced. A plain 24 fps gap on 60 Hz alternates
+  /// 2 and 3 refreshes and judders.
+  int _every() {
+    if (_deltas.length < 8) return math.max(1, (60 / widget.fps).floor());
+    final sorted = [..._deltas]..sort();
+    final refresh = 1 / sorted[sorted.length ~/ 2];
+    return math.max(1, (refresh / widget.fps + 0.05).floor());
+  }
 
   @override
   void initState() {
@@ -39,10 +52,19 @@ class _NightLandscapeBackdropState extends State<NightLandscapeBackdrop>
     _offset = (DateTime.now().millisecondsSinceEpoch / 1000) % 86400;
     _seconds = ValueNotifier<double>(_offset);
     _ticker = createTicker((elapsed) {
-      final gap = Duration(milliseconds: (1000 / widget.fps).round());
-      if (elapsed - _lastFrame < gap) return;
-      _lastFrame = elapsed;
-      _seconds.value = _offset + elapsed.inMicroseconds / 1e6;
+      final last = _lastTick;
+      if (last != null) {
+        _deltas.add((elapsed - last).inMicroseconds / 1e6);
+        if (_deltas.length > 60) _deltas.removeAt(0);
+      }
+      _lastTick = elapsed;
+      final t = _offset + elapsed.inMicroseconds / 1e6;
+      // The shooting star crosses a third of the screen in a second: draw it
+      // on every refresh, not at the slow pace of the rest.
+      if (!NightLandscapePainter.shootingStarActive(t) && _tick++ % _every() != 0) {
+        return;
+      }
+      _seconds.value = t;
     })..start();
   }
 
@@ -371,6 +393,16 @@ class NightLandscapePainter extends CustomPainter {
         );
       }
     }
+  }
+
+  /// Whether a shooting star is crossing at [t] (with a frame of margin), so
+  /// the backdrop draws every refresh then.
+  static bool shootingStarActive(double t) {
+    const period = 55.0;
+    final cycle = (t / period).floor();
+    final local = t - cycle * period;
+    final start = 8 + 30 * _hash(cycle * 3 + 1);
+    return local > start - 0.1 && local < start + 1.2;
   }
 
   void _paintShootingStar(Canvas canvas, Size size, double t) {

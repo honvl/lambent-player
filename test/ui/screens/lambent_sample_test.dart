@@ -47,7 +47,7 @@ void main() {
       );
     });
 
-    test('every variant is HTTPS on the sample store, HDR ones marked', () {
+    test('every variant is HTTPS through getlambent.app, HDR ones marked', () {
       final all = LambentSample.order(
         hdrScreen: true,
         hevcHdr10: true,
@@ -55,7 +55,10 @@ void main() {
       );
       for (final v in all) {
         expect(Uri.parse(v.url).scheme, 'https');
-        expect(v.url, contains('/samples/lambent-sample-v2-'));
+        expect(
+          v.url,
+          startsWith('https://getlambent.app/samples/lambent-sample-v2-'),
+        );
         expect(v.url.contains('hdr10'), v.hdr);
         expect(v.aspectRatio, closeTo(2.56, 0.02));
       }

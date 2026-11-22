@@ -48,8 +48,10 @@ class LambentSampleScene {
 /// enhanced half's midtones; the compare's own labels were cropped off and the
 /// screen draws plain ones.
 abstract final class LambentSample {
-  static const _base =
-      'https://qgvcfga2gzxqngvw.public.blob.vercel-storage.com/samples';
+  /// getlambent.app redirects /samples/ to where the clips are stored
+  /// (Cloudflare R2 since 2026-11-20), so the store can move without an app
+  /// update. The screen fetches a clip once and loops the kept copy.
+  static const _base = 'https://getlambent.app/samples';
 
   static const phoneHdr10 = LambentSampleVariant(
     url: '$_base/lambent-sample-v2-phone-hdr10.mp4',
@@ -85,6 +87,15 @@ abstract final class LambentSample {
     width: 3840,
     height: 1496,
   );
+
+  /// Every encode this version can play; the cache keeps no other file.
+  static const all = <LambentSampleVariant>[
+    tvHdr10,
+    tvSdr,
+    phoneHdr10,
+    phoneSdr2560,
+    phoneSdr1920,
+  ];
 
   static const length = Duration(seconds: 64);
 

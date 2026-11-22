@@ -20,10 +20,12 @@ import '../../widgets/lambent_server_setup_card.dart'
     show lambentServerSetupAddress, lambentServerSetupUrl;
 import '../../widgets/sign_in_qr_code.dart';
 import 'lambent_sample.dart';
+import 'lambent_sample_cache.dart';
 
 /// Plays [LambentSample] full screen, looping, with plain labels over each
 /// half, the playing film's credit and where to get Lambent Server. Needs no
-/// server. Android plays it through the app's Media3 player (a SurfaceView in
+/// server. The clip is fetched once into the app's cache and looped from
+/// there ([LambentSampleCache]). Android plays it through the app's Media3 player (a SurfaceView in
 /// the HDR window; a TV switches to 24 Hz from the frame rate given), Apple
 /// devices through AetherEngine (HDR on an EDR layer; an Apple TV matches the
 /// TV's dynamic range and rate when Match Content is on), each with no
@@ -55,7 +57,9 @@ abstract class _SamplePlayer {
   Stream<Map<String, dynamic>> get errors;
   Stream<Duration> get position;
   Future<bool> screenShowsHdr();
-  Future<void> play(LambentSampleVariant variant);
+
+  /// Plays [variant] from [path], its local copy.
+  Future<void> play(LambentSampleVariant variant, String path);
   Future<void> stop();
 
   /// Anything the player keeps listening to, cancelled with the screen.
@@ -100,11 +104,11 @@ class _Media3SamplePlayer extends _SamplePlayer {
   }
 
   @override
-  Future<void> play(LambentSampleVariant variant) async {
+  Future<void> play(LambentSampleVariant variant, String path) async {
     // An inline preview may have left the shared player quiet.
     await backend.setVolume(100);
     await backend.play(<String, dynamic>{
-      'url': variant.url,
+      'url': path,
       'mediaType': 'video',
       'container': 'mp4',
       // HDR10 says so; the SDR picture is already upscaled, so it isn't
@@ -155,10 +159,10 @@ class _AetherSamplePlayer extends _SamplePlayer {
   Future<bool> screenShowsHdr() => AetherBackend.screenShowsHdr();
 
   @override
-  Future<void> play(LambentSampleVariant variant) async {
+  Future<void> play(LambentSampleVariant variant, String path) async {
     await backend.setVolume(100);
     await backend.play(<String, dynamic>{
-      'url': variant.url,
+      'url': path,
       'mediaType': 'video',
       'noClientEnhancement': true,
     });
@@ -179,12 +183,19 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   static const _openTimeout = Duration(seconds: 20);
 
   final _SamplePlayer? _player = _SamplePlayer.create();
+  final _cache = LambentSampleCache();
   final _subscriptions = <StreamSubscription<Object?>>[];
   final _focus = FocusNode(debugLabel: 'lambent-sample');
   List<LambentSampleVariant> _order = const [];
   int _index = -1;
   bool _playing = false;
   bool _failed = false;
+
+  /// How much of the clip has arrived, while it is fetched.
+  double? _fetched;
+
+  /// The last variant could not be fetched (as opposed to played).
+  bool _fetchFailed = false;
   bool _phoneLocked = false;
   bool _disposed = false;
   LambentSampleScene _scene = LambentSample.scenes.first;
@@ -242,6 +253,7 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   Future<void> _start() async {
     final player = _player;
     if (player == null) return;
+    unawaited(_cache.prune().catchError((Object _) {}));
     final hdrScreen = await player.screenShowsHdr();
     if (_disposed) return;
     // Every Apple device this runs on decodes HEVC Main 10; whether its
@@ -286,8 +298,26 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
     }
     if (mounted) setState(() => _playing = false);
     final opened = _index;
+    final String path;
     try {
-      await player.play(variant).timeout(_openTimeout);
+      path = await _cache.fetch(
+        variant,
+        onProgress: (fraction) {
+          if (mounted && opened == _index) setState(() => _fetched = fraction);
+        },
+      );
+    } catch (error) {
+      if (_disposed) return;
+      _fetchFailed = true;
+      if (mounted) setState(() => _fetched = null);
+      _fail(opened, 'fetch: $error');
+      return;
+    }
+    if (_disposed || opened != _index) return;
+    _fetchFailed = false;
+    if (mounted) setState(() => _fetched = null);
+    try {
+      await player.play(variant, path).timeout(_openTimeout);
       debugPrint('[LambentSample] playing ${variant.label}');
     } catch (error) {
       _fail(opened, '$error');
@@ -297,6 +327,7 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
   @override
   void dispose() {
     _disposed = true;
+    _cache.cancel();
     _chromeTimer?.cancel();
     _focus.dispose();
     for (final s in _subscriptions) {
@@ -383,15 +414,21 @@ class _LambentSampleScreenState extends State<LambentSampleScreen>
                   ),
                 ],
                 if (!_playing && !_failed)
-                  const Center(child: CircularProgressIndicator()),
+                  Center(child: CircularProgressIndicator(value: _fetched)),
                 if (_failed)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
-                        "This device couldn't play the sample.",
+                        _fetchFailed
+                            ? "The sample couldn't be downloaded. Check the "
+                                  'connection and try again.'
+                            : "This device couldn't play the sample.",
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
