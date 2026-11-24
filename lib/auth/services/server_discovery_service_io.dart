@@ -51,6 +51,14 @@ class ServerDiscoveryService {
   static const _lambentMulticastLock = MethodChannel('org.moonfin/multicast_lock');
   static const _bonjour = MethodChannel('org.moonfin/bonjour');
 
+  /// The Mac app runs in the App Sandbox without
+  /// `com.apple.security.network.server` (App Review flagged it, guideline
+  /// 2.4.5), and without it the sandbox refuses to bind a UDP socket or receive
+  /// on one. So the Mac skips the Jellyfin, Emby and Plex broadcasts and Silo's
+  /// mDNS browse, and finds Lambent Server through the system's Bonjour, as
+  /// iOS and Apple TV do. Servers found nowhere else are added by address.
+  static bool get _noAppSockets => PlatformDetection.isMacOS;
+
   Stream<DiscoveredServer> discoverLocalServers() async* {
     final controller = StreamController<DiscoveredServer>();
     final seen = <String>{};
@@ -82,8 +90,17 @@ class ServerDiscoveryService {
       if (--running == 0 && !controller.isClosed) controller.close();
     }
 
-    unawaited(_discoverSilo(emit).whenComplete(finishOne));
+    // Silo's browse binds UDP 5353 itself, which the Mac's sandbox refuses.
+    unawaited(
+      (_noAppSockets ? Future<void>.value() : _discoverSilo(emit))
+          .whenComplete(finishOne),
+    );
 
+    if (_noAppSockets) {
+      unawaited(_discoverLambent(emit).whenComplete(finishOne));
+      yield* controller.stream;
+      return;
+    }
     if (!_udpBroadcast) {
       finishOne();
       yield* controller.stream;
@@ -200,8 +217,11 @@ class ServerDiscoveryService {
 
   Future<void> _browseLambent() async {
     // Apple TV and iOS only let the system's Bonjour browse (the app holds no
-    // multicast entitlement), so the native side does it there.
-    if (PlatformDetection.isAppleTV || PlatformDetection.isIOS) {
+    // multicast entitlement), and the Mac's sandbox no socket of its own
+    // ([_noAppSockets]), so the native side does it there.
+    if (PlatformDetection.isAppleTV ||
+        PlatformDetection.isIOS ||
+        _noAppSockets) {
       return _discoverLambentNative(_announceLambent);
     }
     final client = MDnsClient();
