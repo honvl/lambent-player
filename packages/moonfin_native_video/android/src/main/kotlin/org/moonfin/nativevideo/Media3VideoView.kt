@@ -1606,10 +1606,18 @@ class Media3VideoView(
 
         override fun onRenderedFirstFrame() {
             rateSession.sourceToken?.let(videoDecoderStartupFailure::onRenderedFirstFrame)
+            // A Shield switches its Dolby Vision pipeline some 0.6 s after
+            // this and drops frames for it, so the app covers for longer.
+            val dolbyVision = player.videoFormat?.let { format ->
+                format.sampleMimeType == MimeTypes.VIDEO_DOLBY_VISION ||
+                    format.codecs?.startsWith("dv") == true
+            } ?: false
+            AndroidLog.i("MoonfinDisplayMode", "first frame rendered, dolby vision $dolbyVision")
             Media3Bridge.emitEvent(
                 mapOf(
                     "event" to "firstFrameRendered",
                     "positionMs" to player.currentPosition,
+                    "dolbyVision" to dolbyVision,
                 ),
             )
             reportPlaybackFrameRate(resolveSelectedVideoFrameRate(), "firstFrame")
@@ -3039,7 +3047,14 @@ class Media3VideoView(
 
     // setSource, the only caller, has already settled the display mode for the
     // next source, so the rebuild leaves the window alone.
-    private fun rebuildPlayerForDecoderPreference() {
+    //
+    // [keepVideoView] is a reopen of the same title: the new player draws into
+    // the SurfaceView the old one left, so its last frame stays on screen until
+    // the new stream's first. Taking the view away is what ends Dolby Vision on
+    // a Shield (hwcomposer "Turning DVS OFF"), and the new stream brings it
+    // back two seconds later: two HDMI changes back to back, which can leave a
+    // soundbar on eARC silent for every app until the audio output restarts.
+    private fun rebuildPlayerForDecoderPreference(keepVideoView: Boolean = false) {
         cancelPendingRetime()
         closeExternalAudioEffectSessionIfOpen()
         currentAudioSessionId = C.AUDIO_SESSION_ID_UNSET
@@ -3051,7 +3066,7 @@ class Media3VideoView(
         Media3SessionController.releaseForPlayer(player)
         player.release()
         releaseAutoHdr()
-        recreateVideoView()
+        if (!keepVideoView) recreateVideoView()
         player = createPlayer()
         httpDataSourceFactory.setDefaultRequestProperties(currentHeaders)
         Media3Bridge.emitEvent(
@@ -3640,7 +3655,14 @@ class Media3VideoView(
                 nextIsAudio = isAudio,
             )
         ) {
-            rebuildPlayerForDecoderPreference()
+            rebuildPlayerForDecoderPreference(
+                keepVideoView = SourceRebuildPolicy.keepVideoView(
+                    reopen = keepFrameForReopen,
+                    nextIsAudio = isAudio,
+                    mediaTypeChanged = mediaTypeChanged,
+                    decoderDrawsIntoView = videoView is SurfaceView && !surfaceViewUnbound,
+                ),
+            )
             decoderPreferenceDirty = false
         }
 

@@ -18,6 +18,7 @@ import 'lambent_device_upscale.dart';
 import 'media3_letterbox_crop.dart';
 import 'media3_playback_status.dart';
 import 'server_transcode_capabilities.dart';
+import 'start_cover.dart';
 import 'subtitle_fonts.dart';
 
 class Media3PlayerBackend extends PlayerBackend
@@ -25,11 +26,21 @@ class Media3PlayerBackend extends PlayerBackend
     implements
         SubtitleLoadingBackend,
         SecondarySubtitleBackend,
-        EarlyDisplayModeBackend {
-  /// Set just before stopping to reopen the same title with other Lambent
-  /// enhancement settings. The next stop then keeps the television's display
-  /// mode and the last frame on screen until the new stream's first frame.
+        EarlyDisplayModeBackend,
+        SameTitleReopenBackend {
+  /// Set just before stopping to reopen the same title as a new stream (other
+  /// Lambent enhancement settings, another track, a bitrate cap). The next
+  /// stop then keeps the television's display mode and the last frame on
+  /// screen until the new stream's first frame.
   static bool nextStopIsReopen = false;
+
+  /// Black over the player from an early display switch to the first frame.
+  /// Shared, since the backend that asks for the switch can be replaced
+  /// before the screen that draws the cover exists.
+  static final StartCover startCover = StartCover();
+
+  @override
+  void expectSameTitleReopen() => nextStopIsReopen = true;
 
   @override
   bool get supportsSecondarySubtitleDelay => true;
@@ -264,18 +275,26 @@ class Media3PlayerBackend extends PlayerBackend
     int? width,
     int? height,
   }) async {
-    await _invoke<bool>('prepareDisplayMode', {
+    final reply = await _invoke<Object?>('prepareDisplayMode', {
       'frameRate': frameRate,
       'width': width,
       'height': height,
       // The decoder preferences that carry this only travel with the source.
       'behavior': _prefs.get(UserPreferences.refreshRateSwitchingBehavior).name,
     });
+    if (reply is Map && reply['changesDisplay'] == true) {
+      startCover.begin();
+    } else {
+      // Nothing renegotiates, so the loading animation may show.
+      startCover.end();
+    }
   }
 
   @override
-  Future<void> releasePreparedDisplayMode() =>
-      _invoke<void>('releasePreparedDisplayMode');
+  Future<void> releasePreparedDisplayMode() {
+    startCover.end();
+    return _invoke<void>('releasePreparedDisplayMode');
+  }
 
   /// Re-activates a persistent (still-mounted) platform view for control
   /// routing. Returns false when the native side does not know the view;
@@ -435,6 +454,7 @@ class Media3PlayerBackend extends PlayerBackend
       case 'activityAction':
         _activityActionController.add(map.cast<String, dynamic>());
       case 'playerError':
+        startCover.end();
         _setSubtitleLoading(false);
         final cause = map['cause']?.toString();
         _diag(
@@ -444,6 +464,7 @@ class Media3PlayerBackend extends PlayerBackend
         );
         _errorStream.add(map.cast<String, dynamic>());
       case 'error':
+        startCover.end();
         _setSubtitleLoading(false);
         final cause = map['cause']?.toString();
         _diag(
@@ -461,8 +482,9 @@ class Media3PlayerBackend extends PlayerBackend
         _completedStream.add(false);
       case 'lambentUpscale':
         final label = map['label'];
-        lambentDeviceUpscale.value =
-            label is String && label.isNotEmpty ? label : null;
+        lambentDeviceUpscale.value = label is String && label.isNotEmpty
+            ? label
+            : null;
       case 'syncDelays':
         _audioDelaySeconds = _toInt(map['audioDelayMs']) / 1000.0;
         subtitleDelaySeconds = _toInt(map['subtitleDelayMs']) / 1000.0;
@@ -478,6 +500,7 @@ class Media3PlayerBackend extends PlayerBackend
         _onTunnelingDiscontinuity();
       case 'firstFrameRendered':
         _sawFirstFrame = true;
+        startCover.firstFrame(dolbyVision: map['dolbyVision'] == true);
         _diag('Media3: first frame rendered @ ${_toInt(map['positionMs'])}ms');
       case 'droppedFrames':
         _diag(
@@ -533,8 +556,10 @@ class Media3PlayerBackend extends PlayerBackend
               : LogLevel.debug,
         );
       case 'secondarySubtitleSelection':
-        _diag('Media3: secondary subtitle ${map['mode']} '
-            '(track=${map['trackId'] ?? 'none'})');
+        _diag(
+          'Media3: secondary subtitle ${map['mode']} '
+          '(track=${map['trackId'] ?? 'none'})',
+        );
       case 'secondarySubtitleError':
         _diag(
           'Media3: secondary subtitle failed: ${map['message'] ?? 'unknown error'}',
@@ -681,10 +706,7 @@ class Media3PlayerBackend extends PlayerBackend
     }
   }
 
-  void _applyRateDecision(
-    Map<String, dynamic> map, {
-    bool correction = false,
-  }) {
+  void _applyRateDecision(Map<String, dynamic> map, {bool correction = false}) {
     playbackStatus.applyRateDecision(
       frameRate: _finitePositiveDouble(map['frameRate']),
       source: map['source']?.toString(),
@@ -732,8 +754,9 @@ class Media3PlayerBackend extends PlayerBackend
           '@${applied.toStringAsFixed(3)} for $content '
           '($behavior, mode ${_toInt(map['appliedDisplayModeId'])})';
     } else {
-      final modes = (map['supportedModes'] as List<dynamic>? ?? const [])
-          .join(', ');
+      final modes = (map['supportedModes'] as List<dynamic>? ?? const []).join(
+        ', ',
+      );
       line =
           'Media3: no display mode fits $content ($behavior'
           '${modes.isEmpty ? '' : ', display offers $modes'})';
@@ -1228,7 +1251,9 @@ class Media3PlayerBackend extends PlayerBackend
       return 'Media3: rate decision unavailable (source $source; $scanType; '
           '$reason; $elapsed)';
     }
-    final rateKind = map['fieldRateApplied'] == true ? 'field rate' : 'picture rate';
+    final rateKind = map['fieldRateApplied'] == true
+        ? 'field rate'
+        : 'picture rate';
     return 'Media3: rate decision ${rate.toStringAsFixed(3)}fps from $source '
         '($rateKind; $scanType; $reason; $elapsed)';
   }
@@ -1556,7 +1581,10 @@ class Media3PlayerBackend extends PlayerBackend
     await _invoke<void>('appResumed');
   }
 
-  Future<void> _teardown(String command, [Map<String, Object?>? arguments]) async {
+  Future<void> _teardown(
+    String command, [
+    Map<String, Object?>? arguments,
+  ]) async {
     _setSubtitleLoading(false);
     // The watchdogs guard a single item's bring-up, so stopping has to stop
     // the timer too or it keeps warning about a player that was told to stop.
@@ -1797,7 +1825,9 @@ class Media3PlayerBackend extends PlayerBackend
     int? embeddedTrackId,
   }) async {
     await _invoke<void>('setSecondarySubtitle', {
-      'url': url, 'codec': codec, 'embeddedTrackId': embeddedTrackId,
+      'url': url,
+      'codec': codec,
+      'embeddedTrackId': embeddedTrackId,
     });
   }
 

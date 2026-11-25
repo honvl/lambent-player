@@ -114,6 +114,12 @@ internal object EarlyDisplayMode {
         return true
     }
 
+    /**
+     * Whether the mode asked for and not yet claimed differs from the one the
+     * display was in, so the television is renegotiating for it.
+     */
+    fun pendingChangesPhysicalMode(): Boolean = pending?.changedPhysicalMode == true
+
     /** The player taking the requested mode over, or null when nothing is pending. */
     fun claim(): Request? {
         val request = pending ?: return null

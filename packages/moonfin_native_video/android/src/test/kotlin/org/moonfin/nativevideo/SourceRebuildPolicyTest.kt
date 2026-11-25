@@ -36,4 +36,37 @@ class SourceRebuildPolicyTest {
             nextIsAudio = true,
         ))
     }
+
+    @Test
+    fun `a reopen of the same title keeps the view its decoder drew into`() {
+        assertTrue(SourceRebuildPolicy.keepVideoView(
+            reopen = true,
+            nextIsAudio = false,
+            mediaTypeChanged = false,
+            decoderDrawsIntoView = true,
+        ))
+    }
+
+    @Test
+    fun `any other source gets a fresh view`() {
+        assertFalse(SourceRebuildPolicy.keepVideoView(
+            reopen = false,
+            nextIsAudio = false,
+            mediaTypeChanged = false,
+            decoderDrawsIntoView = true,
+        ))
+        assertFalse(SourceRebuildPolicy.keepVideoView(
+            reopen = true,
+            nextIsAudio = true,
+            mediaTypeChanged = true,
+            decoderDrawsIntoView = true,
+        ))
+        // The Auto HDR renderer's surface has its own format and size.
+        assertFalse(SourceRebuildPolicy.keepVideoView(
+            reopen = true,
+            nextIsAudio = false,
+            mediaTypeChanged = false,
+            decoderDrawsIntoView = false,
+        ))
+    }
 }

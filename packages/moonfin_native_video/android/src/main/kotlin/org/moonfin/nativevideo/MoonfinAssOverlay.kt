@@ -304,6 +304,24 @@ class MoonfinAssOverlayView(
         redrawCurrentAssFrame()
     }
 
+    // Each frame's flattened bitmap is cut to that frame's ink, so nearly
+    // every one has a size of its own. Drawn on the hardware canvas, each
+    // becomes a GPU texture that stays in the app's texture cache after the
+    // frame is gone: nothing asks for that exact size again, and the cache is
+    // only emptied at its limit, which follows the display's pixels (about
+    // 400 MB at 4K), or when the app leaves the screen. A 3 GB television box
+    // runs out first. A software layer draws into one bitmap the size of
+    // this view, so the cache holds one texture that every frame reuses. It
+    // starts with the first frame, so a title with no ASS track never pays
+    // for the bitmap. Render thread only.
+    private var softwareLayer = false
+
+    private fun drawThroughSoftwareLayer() {
+        if (softwareLayer) return
+        softwareLayer = true
+        post { setLayerType(LAYER_TYPE_SOFTWARE, null) }
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (released) return
@@ -424,6 +442,7 @@ class MoonfinAssOverlayView(
             if (retained == null || !retained.visible) return
             cachedFrame = retained.copy(visible = false)
         } else {
+            drawThroughSoftwareLayer()
             cachedFrame = CachedFrame(requireNotNull(primaryNativeTrack), frame, flattened.composite)
         }
         postInvalidate()
@@ -510,12 +529,23 @@ class MoonfinAssOverlayView(
         // One lock for both, so acquire() can't hand this buffer out in between.
         val composite = synchronized(buffers) {
             visibleCachedFrame()?.composite.also {
-                // A software canvas is done with the pixels when onDraw returns.
-                if (canvas.isHardwareAccelerated) buffers.markDrawn(it?.bitmap)
+                if (canvas.isHardwareAccelerated) {
+                    buffers.markDrawn(it?.bitmap)
+                } else if (it != null) {
+                    // A software canvas reads the pixels here and is done with
+                    // them, so the buffer is never marked drawn and is free
+                    // at once. Drawing under the lock keeps acquire() from
+                    // handing it out halfway through.
+                    drawComposite(canvas, it)
+                }
             }
         }
         reportInk(composite?.ink.orEmpty())
-        if (composite == null) return
+        if (composite == null || !canvas.isHardwareAccelerated) return
+        drawComposite(canvas, composite)
+    }
+
+    private fun drawComposite(canvas: Canvas, composite: Composite) {
         canvas.drawBitmap(composite.bitmap, composite.left.toFloat(), composite.top.toFloat(), drawPaint)
     }
 

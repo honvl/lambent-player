@@ -338,7 +338,14 @@ object Media3Bridge {
                     behavior = args?.get("behavior")?.toString()?.trim()?.lowercase()
                         ?: frameRateSwitchingBehavior,
                 )
-            result.success(asked)
+            // changesDisplay: the television is renegotiating, so the app
+            // keeps the screen black until the picture is up.
+            result.success(
+                mapOf(
+                    "asked" to asked,
+                    "changesDisplay" to (asked && EarlyDisplayMode.pendingChangesPhysicalMode()),
+                ),
+            )
             return
         }
 

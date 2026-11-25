@@ -4,7 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playback_core/playback_core.dart';
 
 /// A backend whose position and duration the test drives.
-class _TestBackend extends Fake implements PlayerBackend {
+class _TestBackend extends Fake
+    implements PlayerBackend, SameTitleReopenBackend {
+  /// Stops and the reopens announced before them, in order.
+  final List<String> teardown = <String>[];
+
+  @override
+  void expectSameTitleReopen() => teardown.add('same title');
+
   final positions = StreamController<Duration>.broadcast(sync: true);
   final durations = StreamController<Duration>.broadcast(sync: true);
   final List<Duration> playStarts = <Duration>[];
@@ -103,7 +110,10 @@ class _TestBackend extends Fake implements PlayerBackend {
   Future<void> resume() async => playing = true;
 
   @override
-  Future<void> stop() async => playing = false;
+  Future<void> stop() async {
+    teardown.add('stop');
+    playing = false;
+  }
 
   @override
   Future<void> setSubtitleRendererMode(SubtitleRendererMode mode) async {}
@@ -256,6 +266,19 @@ void main() {
       'https://example.test/replan-1',
     );
     expect(service.stops, isEmpty);
+  });
+
+  test('a reopen of the same title tells the player before it stops', () async {
+    await start();
+    backend.teardown.clear();
+    await manager.seekTo(const Duration(minutes: 30));
+    // The player keeps the picture (and the television its Dolby Vision)
+    // only if it knows before the stop that the same title follows.
+    expect(backend.teardown, <String>['same title', 'stop']);
+
+    backend.teardown.clear();
+    await manager.changeBitrate(8);
+    expect(backend.teardown, <String>['same title', 'stop']);
   });
 
   test('a scrub is one replan per settled target', () async {

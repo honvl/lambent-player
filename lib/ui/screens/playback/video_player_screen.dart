@@ -103,6 +103,7 @@ import '../../screensaver/screensaver_controller.dart';
 import '../../widgets/remote_play_to_session_dialog.dart';
 import '../../widgets/track_selector_dialog.dart';
 import '../../widgets/playback/player_loading_overlay.dart';
+import '../../widgets/playback/stall_meter.dart';
 import '../../widgets/playback/loading_animation_widget.dart';
 import '../../widgets/playback/chapter_marker_track.dart';
 import '../../widgets/playback/enhancement_chip.dart';
@@ -209,6 +210,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   final _nativeAirPlay = GetIt.instance<NativeAirPlayChannel>();
   final _pipService = GetIt.instance<PipService>();
   final _lifecycleHandler = GetIt.instance<PlaybackLifecycleHandler>();
+
   /// A per-user service: with nobody signed in (a file from this device
   /// playing) there is no theme music to make way for.
   ThemeMusicService? get _themeMusicService =>
@@ -538,8 +540,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
   QueueService get _queue => _manager.queueService;
 
   MediaServerClient _clientForItem(AggregatedItem item) {
-    return _clientFactory.getClientIfExists(item.serverId) ??
-        _activeClient();
+    return _clientFactory.getClientIfExists(item.serverId) ?? _activeClient();
   }
 
   /// The signed-in server's client, or a stand-in that asks nothing of a
@@ -557,8 +558,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       final serverId =
           (item['ServerId']?.toString()) ?? (item['serverId']?.toString());
       if (serverId != null && serverId.isNotEmpty) {
-        return _clientFactory.getClientIfExists(serverId) ??
-            _activeClient();
+        return _clientFactory.getClientIfExists(serverId) ?? _activeClient();
       }
     }
     return _activeClient();
@@ -910,6 +910,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       setState(() => _reconnecting = reconnecting);
     });
     _bringupState = _manager.bringupState;
+    // The display switch is only asked for once the start has been allowed,
+    // which can take a server round trip. Until it is known whether the
+    // television will renegotiate, the controls stay off a screen that is
+    // about to go dark.
+    if (_startCoverApplies &&
+        _bringupState.phase != PlaybackBringupPhase.ready &&
+        _prefs.get(UserPreferences.refreshRateSwitchingBehavior) !=
+            RefreshRateSwitchingBehavior.disabled) {
+      Media3PlayerBackend.startCover.arm();
+    }
     _bringupSub = _manager.bringupStateStream.listen((state) {
       if (!mounted) return;
       setState(() {
@@ -1138,6 +1148,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
 
   @override
   void dispose() {
+    // Backing out mid-start must not leave the next screen black.
+    if (_startCoverApplies) Media3PlayerBackend.startCover.end();
     PlaybackMemory.leave();
     lambentDeviceUpscale.removeListener(_onDeviceUpscaleChanged);
     _quietReopenTimeout?.cancel();
@@ -4570,6 +4582,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                           focusNode: _tvNextUpPlayFocus,
                           dismissFocusNode: _tvNextUpDismissFocus,
                         ),
+                      // Over everything, the controls included.
+                      if (_startCoverApplies) _buildStartCover(),
                     ],
                   ),
                 ),
@@ -4856,6 +4870,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
     );
   }
 
+  /// Only the Android TV player switches the display and reports the first
+  /// frame, so only it lifts the cover early. Elsewhere (Apple TV) the cover
+  /// would sit black for its full two seconds on every start, over the
+  /// picture when that comes sooner.
+  static bool get _startCoverApplies =>
+      PlatformDetection.isAndroid && PlatformDetection.isTV;
+
+  /// Plain black from an early display switch to the first frame, so the
+  /// television's blink and the picture's arrival read as one. See
+  /// [StartCover].
+  Widget _buildStartCover() => ValueListenableBuilder<bool>(
+    valueListenable: Media3PlayerBackend.startCover,
+    builder: (context, covering, _) => covering
+        ? const Positioned.fill(
+            child: IgnorePointer(child: ColoredBox(color: Colors.black)),
+          )
+        : const SizedBox.shrink(),
+  );
+
   Widget _buildBringupOverlay(BuildContext context) {
     final bringingUp = _isBringupInProgress(_bringupState.phase);
     if (_quietReopen) {
@@ -4921,7 +4954,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
         // buffering, and the wait still needs saying.
         if ((snap.data != true && !_reconnecting) ||
             _isBringupInProgress(_bringupState.phase)) {
-          return const SizedBox.shrink();
+          return _stallPillLayer(stalled: false);
         }
         final label = _reconnecting
             ? AppLocalizations.of(context).watchPartyReconnecting
@@ -4932,11 +4965,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
             DateTime.now().difference(_lastSeekTime!) <
                 const Duration(seconds: 3);
         if (hasTrickplay && (_isSeeking || recentlySought)) {
-          return const SizedBox.shrink();
+          return _stallPillLayer(stalled: false);
         }
         final pos = _prefs.get(UserPreferences.loadingAnimationPosition);
         return Positioned.fill(
           child: _withDisplayMatchFps((fps) {
+            if (fps == null && _stallUsesMeter) return _buildStallPill(true);
             // While the TV switches to the video's rate, say so instead.
             final shown = fps == null
                 ? label
@@ -4961,6 +4995,82 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
           }),
         );
       },
+    );
+  }
+
+  /// The TV glass bar shows a stall in the middle of a play on its seek bar,
+  /// not as a caption: light crosses the stretch ahead of the playhead, and a
+  /// short meter past the playhead fills toward the moment playback resumes.
+  bool get _tvGlassBar => PlatformDetection.isTV && AppColorScheme.isGlass;
+
+  /// A reconnect is a failure, not a stall, and keeps its words.
+  bool get _stallUsesMeter => _tvGlassBar && !_reconnecting;
+
+  /// Whether the seek bar's own track is showing a stall right now.
+  bool _seekbarShowsStall(bool buffering) =>
+      buffering &&
+      _stallUsesMeter &&
+      !_isBringupInProgress(_bringupState.phase) &&
+      _activeMedia3Backend?.displayMatchFps.value == null;
+
+  /// How far the stalled player is toward resuming, as its buffer comes back.
+  /// Full once it has resumed, while the drawing fades.
+  Widget _withStallFill(Widget Function(double fill) builder) =>
+      StreamBuilder<Duration>(
+        stream: _state.bufferStream,
+        initialData: _state.buffer,
+        builder: (context, snap) => builder(
+          _state.isBuffering
+              ? stallFillFraction(
+                  position: _state.position,
+                  buffered: snap.data ?? Duration.zero,
+                )
+              : 1,
+        ),
+      );
+
+  /// Keeps the pill's fade alive while the indicator around it changes shape.
+  final _stallPillKey = GlobalKey();
+
+  /// The pill as a layer of the player's stack. It stays in the tree between
+  /// stalls on the TV glass bar, so it can fade out after one ends.
+  Widget _stallPillLayer({required bool stalled}) => _tvGlassBar
+      ? Positioned.fill(child: _buildStallPill(stalled))
+      : const SizedBox.shrink();
+
+  /// A slim timeline with the stall on it, where the glass bar sits, for a
+  /// stall while the controls are hidden. With them up, the bar's own seek
+  /// track carries it.
+  Widget _buildStallPill(bool stalled) {
+    final screen = MediaQuery.sizeOf(context);
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + screen.height * 0.18,
+          left: AppSpacing.spaceXl,
+          right: AppSpacing.spaceXl,
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: math.min(screen.width * 0.5, 600),
+          ),
+          child: StallFade(
+            key: _stallPillKey,
+            stalled: stalled,
+            suppressed: _controlsVisible,
+            builder: (context) => _withStallFill((fill) {
+              final duration = _state.duration.inMilliseconds;
+              return StallPill(
+                position: duration > 0
+                    ? _state.position.inMilliseconds / duration
+                    : 0,
+                fill: fill,
+              );
+            }),
+          ),
+        ),
+      ),
     );
   }
 
@@ -5996,26 +6106,30 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
                               },
                               child: ExcludeFocus(
                                 excluding: PlatformDetection.isTV,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    _buildSeekSlider(
-                                      positionMs: positionMs,
-                                      durationMs: durationMs,
-                                      bufferMs: bufferMs,
-                                    ),
-                                    // Over the slider, so a mark stays visible
-                                    // where it crosses the played part.
-                                    ChapterMarkerTrack(
-                                      positionsMs: showChapterMarks
-                                          ? chapterMarkerPositions(
-                                              _chapters,
-                                              duration.inMilliseconds,
-                                            )
-                                          : const [],
-                                      durationMs: duration.inMilliseconds,
-                                    ),
-                                  ],
+                                child: _withStallMeter(
+                                  position: positionMs / durationMs,
+                                  timeline: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      _buildSeekSlider(
+                                        positionMs: positionMs,
+                                        durationMs: durationMs,
+                                        bufferMs: bufferMs,
+                                      ),
+                                      // Over the slider, so a mark stays
+                                      // visible where it crosses the played
+                                      // part.
+                                      ChapterMarkerTrack(
+                                        positionsMs: showChapterMarks
+                                            ? chapterMarkerPositions(
+                                                _chapters,
+                                                duration.inMilliseconds,
+                                              )
+                                            : const [],
+                                        durationMs: duration.inMilliseconds,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -6053,6 +6167,36 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen>
       },
     );
   }
+
+  /// The seek bar's [timeline] with a stall drawn over it. The slider keeps
+  /// its played part and thumb, so the position stays readable.
+  Widget _withStallMeter({
+    required double position,
+    required Widget timeline,
+  }) => StreamBuilder<bool>(
+    stream: _state.bufferingStream,
+    initialData: _state.isBuffering,
+    builder: (context, snap) => Stack(
+      alignment: Alignment.center,
+      children: [
+        timeline,
+        Padding(
+          // The slider's track sits in by its overlay's radius.
+          padding: const EdgeInsets.symmetric(horizontal: 22),
+          child: StallFade(
+            stalled: _seekbarShowsStall(snap.data == true),
+            builder: (context) => _withStallFill(
+              (fill) => StallTrack(
+                position: position,
+                fill: fill,
+                thumbRadius: TrickplayPreviewLayout.seekThumbRadius + 1,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 
   /// The seek bar slider itself, lifted out so the marker layer can stack
   /// over it without pushing the whole tree past the line limit.

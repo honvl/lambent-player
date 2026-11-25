@@ -5342,6 +5342,15 @@ class PlaybackManager implements AudioOwnable {
     final teardownEpoch = _itemEpoch;
     _teardownEpoch = teardownEpoch;
     _reResolveStoppingOldPlayer = true;
+    // The same title comes back, so the player keeps the picture up for it.
+    // Not after a failure, where a fresh surface is part of the recovery, and
+    // not on a live channel, whose reopens are recoveries too.
+    final stopping = _backend;
+    if (stopping is SameTitleReopenBackend &&
+        !isErrorRecovery &&
+        !_currentItemIsLive) {
+      (stopping as SameTitleReopenBackend).expectSameTitleReopen();
+    }
     try {
       await _backend?.stop();
     } catch (_) {}

@@ -86,6 +86,18 @@ abstract interface class SecondarySubtitleAppearanceBackend {
   bool get supportsSecondarySubtitleColor;
 }
 
+/// Told when its next stop is a reopen of the title it is playing: the same
+/// film is coming back as a new stream (another audio track, a bitrate cap, a
+/// seek the server serves, changed enhancement settings). The player can then
+/// keep the television's display mode and the picture on screen until the new
+/// stream's first frame, so a television in Dolby Vision or HDR stays in it
+/// instead of dropping out and coming back. Backends opt in by implementing
+/// this interface.
+abstract interface class SameTitleReopenBackend {
+  /// The next [PlayerBackend.stop] is followed by the same title.
+  void expectSameTitleReopen();
+}
+
 /// Switches the display to a title's frame rate as playback is requested,
 /// before the stream is resolved, so a television that renegotiates HDMI does
 /// it as the player opens rather than once it has started loading. The player
