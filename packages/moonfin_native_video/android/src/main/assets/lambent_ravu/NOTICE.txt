@@ -1,3 +1,5 @@
-RAVU (ravu-lite-ar-r3) Copyright (C) bjin. https://github.com/bjin/mpv-prescalers, commit b3f0a59 (2024-01-11).
+RAVU (ravu-lite-ar-r3, ravu-lite-ar-r2) Copyright (C) bjin. https://github.com/bjin/mpv-prescalers, commit b3f0a59 (2024-01-11).
 GNU Lesser General Public License, version 3 or later: tvos/Runner/Shaders/LGPL-3.0.txt and GPL-3.0.txt.
-ravu_step1.frag, ravu_step2.frag and ravu_lut3.bin are mechanical translations of tvos/Runner/Shaders/source/ravu-lite-ar-r3.hook.
+ravu_step1.frag, ravu_step2.frag and ravu_lut3.bin are mechanical translations of tvos/Runner/Shaders/source/ravu-lite-ar-r3.hook;
+ravu2_step1.frag, ravu2_step2.frag and ravu_lut2.bin of source/ravu-lite-ar-r2.hook (Lambent's companion/spikes/android-shader-bench
+gen_shaders.py, which reproduces the r3 files byte for byte).

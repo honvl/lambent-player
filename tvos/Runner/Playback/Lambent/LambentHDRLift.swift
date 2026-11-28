@@ -116,6 +116,7 @@ final class LambentHDRLift {
         processor.useLadder(free: free)
         processor.hdr = hdr
         processor.sourceBitrate = engine.sourceVideoBitrate
+        processor.sourceCodec = engine.sourceVideoCodecName ?? ""
         processor.outputSize = nil
         processor.pipelined = true
         latency.withLock { $0 = 0 }

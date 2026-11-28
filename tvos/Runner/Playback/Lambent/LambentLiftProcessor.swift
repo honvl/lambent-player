@@ -4,15 +4,15 @@ import Metal
 import QuartzCore
 import os
 
-/// The GPU work, off the main thread: 8- or 10-bit 4:2:0 BT.709 in, P010 BT.2020 PQ out (or, with `hdr` off, P010 with the picture's own
-/// SDR colours: upscaling only).
+/// The GPU work, off the main thread: 8- or 10-bit 4:2:0 in (BT.709, or the matrix the picture names: `LambentYCbCr`), P010 BT.2020 PQ
+/// out (or, with `hdr` off, P010 with the picture's own SDR colours: upscaling only).
 ///
 /// The lift is Lambent Auto HDR's bank of sixteen tables (LambentAutoHDR.swift): each picture's own 65^3 table, made from the picture
 /// ahead of the pass that reads it, in the same command buffer. A picture as big as its place on the screen gets one Metal kernel, the
 /// lift. A smaller one (a 1080p title on a 4K screen) is upscaled here rather than by tvOS's own scaler (bilinear in the simulator,
 /// docs/SHADER_UPSCALE.md in Lambent): a pass at the picture's size writes Y' and chroma, a luma prescaler doubles Y' (FSRCNNX 8-0-4-1 on
 /// an Apple GPU of family 10 or later, an A19; RAVU-lite before it), and a last pass at the screen's size scales (Catmull-Rom), lifts
-/// and writes PQ.
+/// and writes PQ. Catmull-Rom alone needs no picture pass: the last pass reads the decoder's planes.
 /// Above them all, on an A15 or later with the models in the bundle, the AI upscaler (LambentNeuralScaler.swift: NVIDIA's VSR low
 /// network on the Neural Engine) doubles the whole picture in place of the picture pass and the prescaler; at most 30 fps before an A19.
 /// When a scaler cannot keep up with the film (pictures taking longer than a frame, start to finish), the next one down takes over:
@@ -80,8 +80,9 @@ final class LambentLiftProcessor: @unchecked Sendable {
     var frameRate: Double = 24
     /// Off: upscaling only, the picture's own SDR colours out (HDR on this TV is off).
     var hdr = true
-    /// The title's video bitrate (bits a second, 0: unknown), for the AI upscaler's network.
+    /// The title's video bitrate (bits a second, 0: unknown) and codec (libavcodec's name, "": unknown), for the AI upscaler's network.
     var sourceBitrate: Int64 = 0
+    var sourceCodec = ""
     /// `prepare` runs on its own queue for every picture (the player): `process` never runs the network itself.
     var pipelined = false
     /// The ladder was set by `force` (a bench): the AI upscaler runs at any frame rate.
@@ -91,6 +92,7 @@ final class LambentLiftProcessor: @unchecked Sendable {
     private var engineMs: [Double] = []
     private var neuralInt8 = false
     private var packWallMs: [Double] = []
+    /// The picture pass's Y' and chroma, for a prescaler.
     private var lumaTex: MTLTexture?
     private var chromaTex: MTLTexture?
     private var outPool: CVPixelBufferPool?
@@ -221,6 +223,10 @@ final class LambentLiftProcessor: @unchecked Sendable {
         stepLate = 0
     }
 
+    private func neuralNetwork(_ w: Int, _ h: Int) -> String {
+        LambentNeuralScaler.network(bitrate: sourceBitrate, width: w, height: h, frameRate: frameRate, codec: sourceCodec)
+    }
+
     /// A picture through the AI upscaler's network, ready for its finish: `prepare`'s result.
     struct NeuralPrepared: @unchecked Sendable {
         let scaler: LambentNeuralScaler
@@ -248,16 +254,19 @@ final class LambentLiftProcessor: @unchecked Sendable {
             neuralAnyScale || LambentClientUpscale.neuralPays(picture: (w, h), output: outputSize ?? (w, h))
         else { return nil }
         if network == nil {
-            let net = LambentNeuralScaler.network(bitrate: sourceBitrate, width: w, height: h, frameRate: frameRate)
+            let net = neuralNetwork(w, h)
             network = net
-            NSLog("[LambentHDR] AI upscaler network %@ (%lld bit/s, %dx%d at %.3f fps)", net, sourceBitrate, w, h, frameRate)
+            NSLog("[LambentHDR] AI upscaler network %@ (%@ %lld bit/s, %dx%d at %.3f fps)", net, sourceCodec, sourceBitrate, w, h, frameRate)
         }
-        guard let net = network, let neural = LambentNeuralScaler.scaler(net, student: fast, device: device) else { return nil }
+        guard let net = network, let size = LambentNeuralScaler.size(for: w, h, network: net, student: fast),
+            let neural = LambentNeuralScaler.scaler(net, student: fast, size: size, device: device)
+        else { return nil }
         let tenBit = CVPixelBufferGetPixelFormatType(picture) == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange
         let formats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
         guard let a = texture(picture, 0, formats.0, prepareCache), let b = texture(picture, 1, formats.1, prepareCache),
             let inY = CVMetalTextureGetTexture(a), let inC = CVMetalTextureGetTexture(b),
-            let slot = try? neural.pack(inY: inY, inC: inC, codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
+            let slot = try? neural.pack(
+                inY: inY, inC: inC, codeScale: tenBit ? 65535.0 / 64.0 : 1020.0, colour: LambentYCbCr(picture: picture))
         else { return nil }
         withExtendedLifetime((a, b)) {}
         return NeuralPrepared(scaler: neural, slot: slot)
@@ -290,11 +299,8 @@ final class LambentLiftProcessor: @unchecked Sendable {
         var made: CVPixelBuffer?
         guard let pool, CVPixelBufferPoolCreatePixelBuffer(nil, pool, &made) == kCVReturnSuccess, let out = made
         else { return nil }
-        CVBufferSetAttachment(out, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_2020, .shouldPropagate)
-        CVBufferSetAttachment(out, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ, .shouldPropagate)
-        CVBufferSetAttachment(out, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_2020, .shouldPropagate)
-        CVBufferSetAttachment(out, kCVImageBufferMasteringDisplayColorVolumeKey, Self.masteringDisplay as CFData, .shouldPropagate)
-        CVBufferSetAttachment(out, kCVImageBufferContentLightLevelInfoKey, Self.contentLightLevel as CFData, .shouldPropagate)
+        attachHDR10(out, from: picture)
+        let colour = LambentYCbCr(picture: picture)
 
         let inFormats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
         guard let a = texture(picture, 0, inFormats.0), let b = texture(picture, 1, inFormats.1),
@@ -302,11 +308,11 @@ final class LambentLiftProcessor: @unchecked Sendable {
             let inY = CVMetalTextureGetTexture(a), let inC = CVMetalTextureGetTexture(b),
             let outY = CVMetalTextureGetTexture(c), let outC = CVMetalTextureGetTexture(d),
             let buffer = queue.makeCommandBuffer(),
-            let table = autoHDR.encodeTable(buffer, luma: inY, chroma: inC, tenBit: tenBit, bt601: Self.isBT601(picture)),
+            let table = autoHDR.encodeTable(buffer, luma: inY, chroma: inC, tenBit: tenBit, matrix: colour),
             let encoder = buffer.makeComputeCommandEncoder()
         else { return nil }
         // Normalised sample to a 10-bit code: P010 keeps the code in the top 10 of 16 bits; 8-bit codes are a quarter of 10-bit ones.
-        var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
+        var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0, colour: colour)
         encoder.setComputePipelineState(pipeline)
         encoder.setTextures([inY, inC, outY, outC, table], range: 0..<5)
         encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
@@ -323,17 +329,25 @@ final class LambentLiftProcessor: @unchecked Sendable {
         return out
     }
 
-    /// The picture pass, the prescaler and the scale-and-lift pass, in one command buffer.
+    /// The picture pass and the prescaler (or the AI upscaler's finish) and the scale-and-lift pass, in one command buffer.
     private func scale(
         _ picture: CVPixelBuffer, tenBit: Bool, from src: (Int, Int), to dst: (Int, Int), deadline: CFTimeInterval,
         prepared: NeuralPrepared?
     ) -> CVPixelBuffer? {
         let started = CACurrentMediaTime()
         format = "\(src.0)x\(src.1) \(tenBit ? "10" : "8")-bit -> \(dst.0)x\(dst.1)"
-        if scaler == .neural(fast: false), !forced, frameRate > 30.5, !device.supportsFamily(.apple10), step < ladder.count - 1 {
-            NSLog("[LambentHDR] AI upscaler: %.3f fps is over 30 on this chip: %@", frameRate, "\(ladder[step + 1])")
-            step += 1
-            stepPictures = 0
+        // Before an A19 the network itself keeps up with 30 pictures a second at 1920 x 1088; its time follows its model's area, so a
+        // smaller picture's model takes more of them (720p at 60).
+        if scaler == .neural(fast: false), !forced, !device.supportsFamily(.apple10), step < ladder.count - 1 {
+            let net = network ?? neuralNetwork(src.0, src.1)
+            let area = LambentNeuralScaler.area(src.0, src.1, network: net, student: false)
+            if frameRate * area > 30.5 {
+                NSLog(
+                    "[LambentHDR] AI upscaler: %.3f fps at %.2f of 1080p's work is over 30 on this chip: %@", frameRate, area,
+                    "\(ladder[step + 1])")
+                step += 1
+                stepPictures = 0
+            }
         }
         if scaler.isNeural, !neuralAnyScale, !LambentClientUpscale.neuralPays(picture: src, output: dst) {
             NSLog("[LambentHDR] AI upscaler: %dx%d -> %dx%d is under %.1fx: the shaders", src.0, src.1, dst.0, dst.1, LambentClientUpscale.neuralMinimumScale)
@@ -351,22 +365,19 @@ final class LambentLiftProcessor: @unchecked Sendable {
                 nil, [kCVPixelBufferPoolMinimumBufferCountKey as String: 6] as CFDictionary, attrs as CFDictionary, &outPool)
             outPoolSize = dst
         }
-        if lumaTex?.width != src.0 || lumaTex?.height != src.1 {
-            let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r16Float, width: src.0, height: src.1, mipmapped: false)
-            d.usage = [.shaderRead, .shaderWrite]
-            d.storageMode = .private
-            lumaTex = device.makeTexture(descriptor: d)
-            let c = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rg16Float, width: (src.0 + 1) / 2, height: (src.1 + 1) / 2, mipmapped: false)
-            c.usage = [.shaderRead, .shaderWrite]
-            c.storageMode = .private
-            chromaTex = device.makeTexture(descriptor: c)
-        }
         var made: CVPixelBuffer?
-        guard let outPool, CVPixelBufferPoolCreatePixelBuffer(nil, outPool, &made) == kCVReturnSuccess, let out = made,
-            let lumaTex, let chromaTex
-        else { return nil }
+        guard let outPool, CVPixelBufferPoolCreatePixelBuffer(nil, outPool, &made) == kCVReturnSuccess, let out = made else { return nil }
         let hdr = hdr && autoHDR != nil
-        if hdr { attachHDR10(out) } else { CVBufferPropagateAttachments(picture, out) }
+        let colour = LambentYCbCr(picture: picture)
+        if hdr {
+            attachHDR10(out, from: picture)
+        } else {
+            CVBufferPropagateAttachments(picture, out)
+            // A picture that names no matrix was read by its size's convention; at the output's size the system would guess again.
+            if CVBufferCopyAttachment(picture, kCVImageBufferYCbCrMatrixKey, nil) == nil {
+                CVBufferSetAttachment(out, kCVImageBufferYCbCrMatrixKey, colour.matrix as CFString, .shouldPropagate)
+            }
+        }
         let inFormats: (MTLPixelFormat, MTLPixelFormat) = tenBit ? (.r16Unorm, .rg16Unorm) : (.r8Unorm, .rg8Unorm)
         guard let a = texture(picture, 0, inFormats.0), let b = texture(picture, 1, inFormats.1),
             let c = texture(out, 0, .r16Unorm), let d = texture(out, 1, .rg16Unorm),
@@ -376,45 +387,65 @@ final class LambentLiftProcessor: @unchecked Sendable {
         else { return nil }
         // This picture's Auto HDR table, made from the picture before anything reads it; without one the picture keeps its SDR.
         var table: MTLTexture?
-        if hdr { table = autoHDR?.encodeTable(buffer, luma: inY, chroma: inC, tenBit: tenBit, bt601: Self.isBT601(picture)) }
+        if hdr { table = autoHDR?.encodeTable(buffer, luma: inY, chroma: inC, tenBit: tenBit, matrix: colour) }
         guard !hdr || table != nil else { return nil }
         let lut = table ?? noTable
-        var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0)
-        var luma: MTLTexture = lumaTex
-        var chroma: MTLTexture = chromaTex
+        var params = LiftParams(codeScale: tenBit ? 65535.0 / 64.0 : 1020.0, colour: colour)
+        // What the last pass reads: the decoder's planes, unless a scaler's own replace them below.
+        var luma: MTLTexture = inY
+        var chroma: MTLTexture = inC
+        // The chroma the last pass reads sits where the picture's does (the AI upscaler's finish puts its own mid-block).
+        var chromaSiting = (colour.sitingX, colour.sitingY)
+        var chromaLumaSize = src
         var packMs = 0.0
         var fused = false
         var used = scaler
         if case .neural = used {
-            let net = network ?? LambentNeuralScaler.network(bitrate: sourceBitrate, width: src.0, height: src.1, frameRate: frameRate)
+            let net = network ?? neuralNetwork(src.0, src.1)
             if let ready = prepared ?? (pipelined ? nil : prepare(picture)), ready.scaler.network == net, used == .neural(fast: ready.scaler.f == 4) {
                 // Exactly twice the picture (1080p -> 2160p): the finish and the last pass in one kernel, straight to the output.
                 if dst == (2 * src.0, 2 * src.1) {
                     fused = ready.scaler.encodeFinishOut(ready.slot, buffer, outY: outY, outC: outC, lut: lut, hdr: hdr)
                 }
-                if !fused, let (l, c) = ready.scaler.encodeFinish(ready.slot, buffer) { (luma, chroma) = (l, c) }
+                if !fused {
+                    guard let (l, c) = ready.scaler.encodeFinish(ready.slot, buffer) else { return nil }
+                    (luma, chroma) = (l, c)
+                    chromaSiting = (0, 0)
+                    chromaLumaSize = (2 * src.0, 2 * src.1)
+                }
                 packMs = ready.slot.packMs
                 neuralInt8 = ready.scaler.int8
                 engineMs.append(ready.slot.engineMs)
                 packWallMs.append(ready.slot.packWallMs)
             } else {
-                // Still loading (or it cannot take this picture): the next scaler down, uncounted.
-                used = ladder.count > step + 1 ? ladder[step + 1] : .catmullRom
+                // Still loading (or it cannot take this picture): the next scaler down that is not the network's other model (nothing
+                // was packed for it either), uncounted.
+                used = ladder[(step + 1)...].first { !$0.isNeural } ?? .catmullRom
             }
         }
-        if !used.isNeural {
-            guard let encoder = buffer.makeComputeCommandEncoder() else { return nil }
+        if case .prescaler(let name) = used, let prescaler = prescalers[name] {
+            // The picture pass (Y' full range and centred chroma, as the prescaler's shader reads them), then the prescaler.
+            guard let (lumaTex, chromaTex) = pictureTextures(src), let encoder = buffer.makeComputeCommandEncoder() else { return nil }
             encoder.setComputePipelineState(prepPipeline)
             encoder.setTextures([inY, inC, lumaTex, chromaTex], range: 0..<4)
             encoder.setBytes(&params, length: MemoryLayout<LiftParams>.size, index: 0)
             encoder.dispatchThreads(
                 MTLSize(width: chromaTex.width, height: chromaTex.height, depth: 1), threadsPerThreadgroup: MTLSize(width: 16, height: 16, depth: 1))
             encoder.endEncoding()
-        }
-        if case .prescaler(let name) = used, let prescaler = prescalers[name] {
             luma = prescaler.encode(buffer, luma: lumaTex, output: dst)
+            chroma = chromaTex
+        } else if !used.isNeural {
+            // Catmull-Rom alone: the last pass reads the decoder's planes themselves (video-range codes), with no picture pass between.
+            params.lumaScale = params.codeScale / 876
+            params.lumaBias = -64 / 876
+            params.chromaScale = params.codeScale / 896
+            params.chromaBias = -512 / 896
         }
         if !fused {
+            // From the middle of an output block to where its chroma sample is read in `chroma`: the output's samples sit as the
+            // picture's do, and `chroma`'s where `chromaSiting` says.
+            params.chromaX = colour.sitingX / Float(dst.0) - chromaSiting.0 / Float(chromaLumaSize.0)
+            params.chromaY = colour.sitingY / Float(dst.1) - chromaSiting.1 / Float(chromaLumaSize.1)
             guard let final = buffer.makeComputeCommandEncoder() else { return nil }
             final.setComputePipelineState(hdr ? scalePipeline : scaleSDRPipeline)
             final.setTextures(hdr ? [luma, chroma, outY, outC, lut] : [luma, chroma, outY, outC], range: hdr ? 0..<5 : 0..<4)
@@ -438,13 +469,27 @@ final class LambentLiftProcessor: @unchecked Sendable {
         return out
     }
 
-    /// The picture's Y'CbCr is BT.601 (SD video); everything else is read as BT.709.
-    private static func isBT601(_ picture: CVPixelBuffer) -> Bool {
-        let matrix = CVBufferCopyAttachment(picture, kCVImageBufferYCbCrMatrixKey, nil) as? String
-        return matrix == (kCVImageBufferYCbCrMatrix_ITU_R_601_4 as String) || matrix == (kCVImageBufferYCbCrMatrix_SMPTE_240M_1995 as String)
+    /// The picture pass's textures for a `src`-sized picture: Y' at its size, chroma at half.
+    private func pictureTextures(_ src: (Int, Int)) -> (MTLTexture, MTLTexture)? {
+        if lumaTex?.width != src.0 || lumaTex?.height != src.1 {
+            let d = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .r16Float, width: src.0, height: src.1, mipmapped: false)
+            d.usage = [.shaderRead, .shaderWrite]
+            d.storageMode = .private
+            lumaTex = device.makeTexture(descriptor: d)
+            let c = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rg16Float, width: (src.0 + 1) / 2, height: (src.1 + 1) / 2, mipmapped: false)
+            c.usage = [.shaderRead, .shaderWrite]
+            c.storageMode = .private
+            chromaTex = device.makeTexture(descriptor: c)
+        }
+        guard let lumaTex, let chromaTex else { return nil }
+        return (lumaTex, chromaTex)
     }
 
-    private func attachHDR10(_ out: CVPixelBuffer) {
+    /// HDR10's attachments on a lifted picture; its chroma samples sit where `picture`'s do.
+    private func attachHDR10(_ out: CVPixelBuffer, from picture: CVPixelBuffer) {
+        for key in [kCVImageBufferChromaLocationTopFieldKey, kCVImageBufferChromaLocationBottomFieldKey] {
+            if let location = CVBufferCopyAttachment(picture, key, nil) { CVBufferSetAttachment(out, key, location, .shouldPropagate) }
+        }
         CVBufferSetAttachment(out, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_2020, .shouldPropagate)
         CVBufferSetAttachment(out, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ, .shouldPropagate)
         CVBufferSetAttachment(out, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_2020, .shouldPropagate)
@@ -495,18 +540,88 @@ final class LambentLiftProcessor: @unchecked Sendable {
     static let contentLightLevel = Data([0x03, 0xE8, 0x01, 0x90])
 }
 
+/// A picture's Y'CbCr: its matrix and where its chroma samples sit.
+struct LambentYCbCr: Equatable {
+    /// The matrix's luma weights of red and blue.
+    var kr: Float, kb: Float
+    /// CoreVideo's name for the matrix (`kCVImageBufferYCbCrMatrix_...`).
+    var matrix: String
+    /// A chroma sample's place against the middle of its 2 x 2 luma block, in luma pixels (x right, y down). MPEG-2's, H.264's and
+    /// HEVC's usual siting is (-0.5, 0): the sample beside the block's left pixels, half way down.
+    var sitingX: Float = -0.5, sitingY: Float = 0
+
+    static let bt709 = LambentYCbCr(kr: 0.2126, kb: 0.0722, matrix: kCVImageBufferYCbCrMatrix_ITU_R_709_2 as String)
+    static let bt601 = LambentYCbCr(kr: 0.299, kb: 0.114, matrix: kCVImageBufferYCbCrMatrix_ITU_R_601_4 as String)
+    static let smpte240M = LambentYCbCr(kr: 0.212, kb: 0.087, matrix: kCVImageBufferYCbCrMatrix_SMPTE_240M_1995 as String)
+    static let bt2020 = LambentYCbCr(kr: 0.2627, kb: 0.0593, matrix: kCVImageBufferYCbCrMatrix_ITU_R_2020 as String)
+
+    init(kr: Float, kb: Float, matrix: String) { (self.kr, self.kb, self.matrix) = (kr, kb, matrix) }
+
+    /// The picture's own, by its attachments. One that names no matrix is read by the convention for its size (as mpv and ffmpeg guess):
+    /// BT.601 for SD, BT.709 from 720p.
+    init(picture: CVPixelBuffer) {
+        func named(_ key: CFString) -> String? { CVBufferCopyAttachment(picture, key, nil) as? String }
+        func isName(_ value: String?, _ name: CFString) -> Bool { value == (name as String) }
+        let matrix = named(kCVImageBufferYCbCrMatrixKey)
+        if isName(matrix, kCVImageBufferYCbCrMatrix_ITU_R_709_2) {
+            self = .bt709
+        } else if isName(matrix, kCVImageBufferYCbCrMatrix_ITU_R_601_4) {
+            self = .bt601
+        } else if isName(matrix, kCVImageBufferYCbCrMatrix_SMPTE_240M_1995) {
+            self = .smpte240M
+        } else if isName(matrix, kCVImageBufferYCbCrMatrix_ITU_R_2020) {
+            self = .bt2020
+        } else {
+            self = CVPixelBufferGetWidth(picture) < 1280 && CVPixelBufferGetHeight(picture) <= 576 ? .bt601 : .bt709
+        }
+        let location = named(kCVImageBufferChromaLocationTopFieldKey)
+        if isName(location, kCVImageBufferChromaLocation_Center) {
+            (sitingX, sitingY) = (0, 0)
+        } else if isName(location, kCVImageBufferChromaLocation_TopLeft) {
+            (sitingX, sitingY) = (-0.5, -0.5)
+        } else if isName(location, kCVImageBufferChromaLocation_Top) {
+            (sitingX, sitingY) = (0, -0.5)
+        } else if isName(location, kCVImageBufferChromaLocation_BottomLeft) {
+            (sitingX, sitingY) = (-0.5, 0.5)
+        } else if isName(location, kCVImageBufferChromaLocation_Bottom) {
+            (sitingX, sitingY) = (0, 0.5)
+        }
+    }
+}
+
 struct LiftParams {
     /// A normalised sample to a 10-bit code: 65535 / 64 for P010 (the code in the top 10 of 16 bits), 1020 for 8-bit planes.
     var codeScale: Float
+    /// Centred chroma to R'G'B' about Y', by the picture's matrix: R' = Y' + crR Cr, B' = Y' + cbB Cb, G' = Y' - cbG Cb - crG Cr.
+    var crR: Float, cbB: Float, cbG: Float, crG: Float
+    /// The scale passes: from the middle of an output block to where its chroma is read in the chroma texture, normalised.
+    var chromaX: Float = 0, chromaY: Float = 0
+    /// The scale passes: a luma sample to Y' (0-1) and a chroma sample to centred chroma. The picture pass's textures hold those already;
+    /// the decoder's planes hold video-range codes.
+    var lumaScale: Float = 1, lumaBias: Float = 0, chromaScale: Float = 1, chromaBias: Float = 0
+
+    init(codeScale: Float, colour: LambentYCbCr) {
+        self.codeScale = codeScale
+        let kg = 1 - colour.kr - colour.kb
+        crR = 2 * (1 - colour.kr)
+        cbB = 2 * (1 - colour.kb)
+        cbG = colour.kb * cbB / kg
+        crG = colour.kr * crR / kg
+    }
 }
 
-// Lambent Auto HDR's lift: R'G'B' (BT.709) through the picture's table (LambentAutoHDR.swift: BT.2020 PQ over R'G'B', 65 points a
-// side, read with the hardware's trilinear filter), then Y'CbCr BT.2020 video range.
+// Lambent Auto HDR's lift: R'G'B' (from the picture's Y'CbCr by its matrix) through the picture's table (LambentAutoHDR.swift: BT.2020
+// PQ over R'G'B', 65 points a side, read with the hardware's trilinear filter), then Y'CbCr BT.2020 video range.
 private let liftSource = """
     #include <metal_stdlib>
     using namespace metal;
 
-    struct Params { float codeScale; };
+    struct Params { float codeScale, crR, cbB, cbG, crG, chromaX, chromaY, lumaScale, lumaBias, chromaScale, chromaBias; };
+
+    // Y' (0-1) and centred chroma to R'G'B', by the picture's matrix.
+    inline float3 to_rgb(float yy, float2 c, constant Params& p) {
+        return clamp(float3(yy + p.crR * c.y, yy - p.cbG * c.x - p.crG * c.y, yy + p.cbB * c.x), 0.0, 1.0);
+    }
 
     constexpr sampler lutSampler(coord::normalized, filter::linear, address::clamp_to_edge);
 
@@ -523,8 +638,7 @@ private let liftSource = """
         for (uint n = 0; n < 4; n++) {
             uint2 at = min(gid * 2 + uint2(n & 1, n >> 1), uint2(inY.get_width() - 1, inY.get_height() - 1));
             float yy = saturate((inY.read(at).r * p.codeScale - 64.0) / 876.0);
-            float3 rgb = clamp(float3(yy + 1.5748 * c.y, yy - 0.187324 * c.x - 0.468124 * c.y, yy + 1.8556 * c.x), 0.0, 1.0);
-            float3 e = lifted(rgb, lut);
+            float3 e = lifted(to_rgb(yy, c, p), lut);
             float yp = dot(e, float3(0.2627, 0.6780, 0.0593));
             sum += float2((e.b - yp) / 1.8814, (e.r - yp) / 1.4746);
             outY.write(float4((yp * 876.0 + 64.0) * 64.0 / 65535.0), gid * 2 + uint2(n & 1, n >> 1));
@@ -563,7 +677,8 @@ private let liftSource = """
     }
 
     // The last pass, at the screen's size, one thread a 2 x 2 block: Y' from the prescaler's (or the picture's) luma by Catmull-Rom,
-    // chroma bilinear, then the lift as in `lift`.
+    // chroma bilinear where the output's chroma sample sits, then the lift as in `lift`. `luma` and `chroma` are the picture pass's or a
+    // scaler's textures, or the decoder's own planes (lumaScale and the rest turn their codes into Y' and centred chroma).
     kernel void scale_lift(texture2d<float> luma [[texture(0)]], texture2d<float> chroma [[texture(1)]],
                            texture2d<float, access::write> outY [[texture(2)]], texture2d<float, access::write> outC [[texture(3)]],
                            texture3d<float> lut [[texture(4)]], constant Params& p [[buffer(0)]], uint2 gid [[thread_position_in_grid]]) {
@@ -571,13 +686,12 @@ private let liftSource = """
         float2 size = float2(outY.get_width(), outY.get_height());
         // The doubled luma already at the screen's size (1080p -> 2160p): Catmull-Rom at its own pixel centres is the pixel itself.
         bool same = luma.get_width() == outY.get_width() && luma.get_height() == outY.get_height();
-        float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size).rg;
+        float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size + float2(p.chromaX, p.chromaY)).rg * p.chromaScale + p.chromaBias;
         float2 sum = 0;
         for (uint n = 0; n < 4; n++) {
             uint2 at = gid * 2 + uint2(n & 1, n >> 1);
-            float yy = saturate(same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size));
-            float3 rgb = clamp(float3(yy + 1.5748 * c.y, yy - 0.187324 * c.x - 0.468124 * c.y, yy + 1.8556 * c.x), 0.0, 1.0);
-            float3 e = lifted(rgb, lut);
+            float yy = saturate((same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size)) * p.lumaScale + p.lumaBias);
+            float3 e = lifted(to_rgb(yy, c, p), lut);
             float yp = dot(e, float3(0.2627, 0.6780, 0.0593));
             sum += float2((e.b - yp) / 1.8814, (e.r - yp) / 1.4746);
             outY.write(float4((yp * 876.0 + 64.0) * 64.0 / 65535.0), at);
@@ -594,10 +708,10 @@ private let liftSource = """
         float2 size = float2(outY.get_width(), outY.get_height());
         // The doubled luma already at the screen's size (1080p -> 2160p): Catmull-Rom at its own pixel centres is the pixel itself.
         bool same = luma.get_width() == outY.get_width() && luma.get_height() == outY.get_height();
-        float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size).rg;
+        float2 c = chroma.sample(lin, (float2(gid * 2) + 1.0) / size + float2(p.chromaX, p.chromaY)).rg * p.chromaScale + p.chromaBias;
         for (uint n = 0; n < 4; n++) {
             uint2 at = gid * 2 + uint2(n & 1, n >> 1);
-            float yy = saturate(same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size));
+            float yy = saturate((same ? luma.read(at).r : catrom(luma, (float2(at) + 0.5) / size)) * p.lumaScale + p.lumaBias);
             outY.write(float4((yy * 876.0 + 64.0) * 64.0 / 65535.0), at);
         }
         outC.write(float4((clamp(c, -0.5, 0.5) * 896.0 + 512.0) * 64.0 / 65535.0, 0, 0), gid);

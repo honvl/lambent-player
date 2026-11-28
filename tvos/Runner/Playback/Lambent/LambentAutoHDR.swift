@@ -122,9 +122,9 @@ final class LambentAutoHDR: @unchecked Sendable {
     }
 
     /// This picture's table (BT.2020 PQ over its R'G'B', 65 points a side), encoded into `buffer` ahead of the lift that reads it. `luma`
-    /// and `chroma`: the picture's video-range planes (8-bit r8/rg8, or P010 r16/rg16, `tenBit`); `bt601`: its matrix is BT.601. Nil when
-    /// nothing could be encoded.
-    func encodeTable(_ buffer: MTLCommandBuffer, luma: MTLTexture, chroma: MTLTexture, tenBit: Bool, bt601: Bool) -> MTLTexture? {
+    /// and `chroma`: the picture's video-range planes (8-bit r8/rg8, or P010 r16/rg16, `tenBit`), in `matrix`. Nil when nothing could be
+    /// encoded.
+    func encodeTable(_ buffer: MTLCommandBuffer, luma: MTLTexture, chroma: MTLTexture, tenBit: Bool, matrix: LambentYCbCr) -> MTLTexture? {
         let w = luma.width & ~1, h = luma.height & ~1
         guard w >= 2, h >= 2, let encoder = buffer.makeComputeCommandEncoder() else { return nil }
         encoder.label = "Auto HDR table"
@@ -132,7 +132,7 @@ final class LambentAutoHDR: @unchecked Sendable {
         nextTable = (nextTable + 1) % tables.count
         let (tw, th) = (Self.thumbW, Self.thumbH)
         var p = BankParams(
-            w: UInt32(w), h: UInt32(h), tw: UInt32(tw), th: UInt32(th), kr: bt601 ? 0.299 : 0.2126, kb: bt601 ? 0.114 : 0.0722,
+            w: UInt32(w), h: UInt32(h), tw: UInt32(tw), th: UInt32(th), kr: matrix.kr, kb: matrix.kb,
             codeScale: tenBit ? 65535.0 / 64.0 : 1020)
         p.iw = UInt32((w + 7) / 8)
         p.ih = UInt32((h + 7) / 8)
